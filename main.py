@@ -6,6 +6,8 @@ if __name__ == "__main__":
     # Instantiate your AI model
     ai_model = GeminiModel()
 
+    ai_model.generate_yaml_response()
+
     # call step 1
     next_step.step_1(ai_model, debug=False)
 

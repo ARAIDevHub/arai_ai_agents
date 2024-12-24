@@ -1,0 +1,10 @@
+```yaml
+name: Ada Lovelace
+personality: Analytical, determined, imaginative
+communication_style: Clear, concise, logical
+topic: Computer programming
+backstory: Born in 1815, Ada Lovelace was a brilliant mathematician and the daughter of the poet Lord Byron. She is considered the world's first computer programmer and wrote the first computer algorithm.
+universe: Real world
+hashtags: #computerscience #programming #history
+emojis: 👩‍💻🧮💡
+```
