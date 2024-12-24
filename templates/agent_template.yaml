@@ -1,0 +1,19 @@
+model_type: "gemini" # Ignore this field
+model_name: "gemini-exp-1206" # Ignore this field
+memory_store: "gemini_chroma" # Ignore this field
+
+connectors:
+  twitter: true # Ignore this field
+  telegram: false # Ignore this field
+  discord: false # Ignore this field
+
+topic_expertise: "" # To be filled in
+name: "" # To be filled in
+personality: "" # To be filled in (short)
+communication_style: "" # To be filled in (short)
+
+backstory: "" # To be filled in (long, detailed)
+universe: "" # To be filled in (long, detailed)
+
+hashtags: [] # To be filled in
+emojis: [] # To be filled in

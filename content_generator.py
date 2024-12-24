@@ -9,8 +9,8 @@ class ContentGenerator:
 
     def create_new_agent_yaml(self, agent_name: str = None, topic: str = None, personality: str = None, communication_style: str = None) -> dict:
         # Load the template configuration file
-        agent_template_path = os.path.join("configs", "agent_template.yaml")
-        with open(agent_template_path, "r") as f:
+        agent_template_path = os.path.join("templates", "agent_template.yaml")
+        with open(agent_template_path, "r", encoding="utf-8") as f:
             agent_template = yaml.safe_load(f)
         
         # Create a new configuration based on the template
@@ -26,6 +26,11 @@ class ContentGenerator:
         if communication_style:
             new_config['communication_style'] = communication_style
 
+        # save file
+        save_path = os.path.join("configs", "new_config.yaml")
+        with open(save_path, "w", encoding="utf-8") as f:
+            yaml.dump(new_config, f)
+
         # Return new configuration to be processed by the agent_creator
         return new_config
 
@@ -33,24 +38,26 @@ class ContentGenerator:
     # Helper to safely parse YAML from the LLM's response
     # -------------------------------------------------------------------
     @staticmethod
-    def parse_yaml_from_response(response):
+    def parse_yaml_from_response(response, debug=False):
         """
         Attempts to parse YAML from LLM text. 
         You may need error-handling if the LLM returns invalid YAML.
         """
         
         # create a file to save the response
-        save_path = os.path.join("tests", "response.yaml")
+        save_path = os.path.join("responses", "raw_response.yaml")
         
         # Ensure directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         
         # Save the YAML file
-        print("--------------------------------")
-        print(f"saving response to file:")
-        print(save_path)
-        print("--------------------------------")
-        with open(save_path, "w") as f:
+        if debug:
+            print("--------------------------------")
+            print(f"saving response to file:")
+            print(save_path)
+            print("--------------------------------")
+
+        with open(save_path, "w", encoding="utf-8") as f:
             try:
                 f.write(response)
             except Exception as e:
@@ -58,17 +65,55 @@ class ContentGenerator:
 
         # strip out '''yaml and '''
         response = response.replace("```yaml", "").replace("```", "")
-        print("--------------------------------")
-        print(f"response stripped is:")
-        print(response)
-        print("--------------------------------")
+        
+        save_path = os.path.join("responses", "processed_response.yaml")
 
-        try:
-            parsed = yaml.safe_load(response)
-            return parsed
-        except yaml.YAMLError:
-            # You might prompt the LLM again to fix the format or handle errors here
-            return None
+        if debug:
+            print("--------------------------------")
+            print(f"response stripped is:")
+            print(response)
+            print("--------------------------------")
+            print(f"saving response stripped to file:")
+            print(save_path)
+            print("--------------------------------")
+
+        with open(save_path, "w", encoding="utf-8") as f:
+            try:
+                f.write(response)
+                print(f"response saved to file: {save_path}")
+            except Exception as e:
+                print(f"Error saving response to file: {str(e)}")
+
+
+        # load the yaml file into a dict
+        print(f"loading yaml file from:")
+        print(save_path)
+        with open(save_path, "r", encoding="utf-8") as f:
+            try:
+                parsed = yaml.safe_load(f)
+
+                debug = True
+                if debug:
+                    print("--------------------------------")
+                    print(f"response dict is:")
+                    print(parsed)
+                    print("--------------------------------")
+                    print(f"response['hashtags'] is:")
+                    print(parsed["hashtags"])
+                    print("--------------------------------")
+                    print(f"response['emojis'] is:")
+                    print(parsed["emojis"])
+                    print("--------------------------------")
+
+                    # parsed = yaml.safe_load(response)
+                    # should do a check to make sure nothing is missing in the yaml file
+                    # sometimes its the hashtags or emojis that are missing
+                    # if they are missing, prompt the LLM again to fix the format or handle errors here
+                    return parsed
+            except yaml.YAMLError as e:
+                # You might prompt the LLM again to fix the format or handle errors here
+                print(f"Error loading yaml file: {str(e)}")
+                return None
 
     # -------------------------------------------------------------------
     # Helper to add new agent data to the current agent data
@@ -93,7 +138,7 @@ class ContentGenerator:
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file
     # -------------------------------------------------------------------
-    def save_agent_yaml(self, agent_data, config_path="tests/test.yaml", debug=False):
+    def save_agent_yaml(self, agent_data, config_path: str = "configs/new_agent.yaml", debug=False):
         """
         Save agent data to a YAML file at the specified path or default location.
         
@@ -104,7 +149,7 @@ class ContentGenerator:
         # Use provided config_path if available, otherwise use default path
         # save_path = config_path if config_path else os.path.join(self.agents_config_dir, f"{agent_data['name']}.yaml")
 
-        save_path = config_path if config_path else os.path.join("tests", f"{agent_data['name']}.yaml")
+        save_path = config_path if config_path else os.path.join("configs", f"{agent_data['name']}.yaml")
 
         # Ensure directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -117,10 +162,28 @@ class ContentGenerator:
             print(f"name in agent data is:")
             print(agent_data["name"])
             print("--------------------------------")
+            print(f"agent data is:")
+            print(agent_data)
+            print("--------------------------------")
+
+
 
         # Save the YAML file
-        with open(save_path, "w") as f:
+        with open(save_path, "w", encoding="utf-8") as f:
             yaml.dump(agent_data, f)
+
+    # -------------------------------------------------------------------
+    # Helper to debug output
+    # -------------------------------------------------------------------
+    @staticmethod
+    def debug_output(message):        
+        print("--------------------------------")
+        print(f"type of {message.name} is:")
+        print(type(message))
+        print("--------------------------------")
+        print(f"{message.name} contains:")
+        print(message)
+        print("--------------------------------")
 
     # -------------------------------------------------------------------
     # Generic prompt runner that works with any prompt template
@@ -135,7 +198,7 @@ class ContentGenerator:
             ai_model: The AI model to use for generating responses
         """
         # 1. Load the chain prompts from the YAML file
-        with open("prompts/chain_prompts.yaml", "r", encoding="utf-8") as f:
+        with open("prompts/chain_prompts_v2.yaml", "r", encoding="utf-8") as f:
             chain_prompts = yaml.safe_load(f)
 
         # 2. Grab the raw prompt template text
@@ -166,6 +229,7 @@ class ContentGenerator:
         # # 5. Parse the YAML from the LLM's response
         yaml_response = ContentGenerator.parse_yaml_from_response(response)
 
+        debug = True
         if debug:
             print("--------------------------------")
             print(f"yaml_response is:")
