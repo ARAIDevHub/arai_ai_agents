@@ -22,12 +22,14 @@ def step_1(ai_model, debug=False):
 
     # step 1.2: Run the prompt
     agent_data = manager.run_prompt(
-        prompt_key="prompt_1 (Character Creation)",
+        # prompt_key="prompt_1 (Character Creation)",
+        prompt_key="promot_1 (Character Sheet Creation)",
         template_vars=prompt_1_vars, 
         ai_model=ai_model,
         debug=debug
     )
 
+    debug = True
     if debug:
         print("--------------------------------")
         print(f"agent_data is:")

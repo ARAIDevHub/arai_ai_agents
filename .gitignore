@@ -38,5 +38,3 @@ dont_share/
 
 #agent configs and memory
 configs/
-memory/
-prompts/
