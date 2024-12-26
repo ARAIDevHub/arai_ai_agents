@@ -1,17 +1,17 @@
 import os
-import google.generativeai as genai
-from .base_model import ModelInterface
-from dotenv import load_dotenv
-import yaml
-
-load_dotenv()
+import google.generativeai as genai # import the gemini model
+from .base_model import ModelInterface 
+from dotenv import load_dotenv # import the dotenv library
+import yaml 
+ 
+load_dotenv() # load the environment variables from the .env file
 
 class GeminiModel(ModelInterface):
     '''
     Gemini model implementation.
     '''
 
-    def __init__(self, api_key=None, model_name="gemini-pro"):
+    def __init__(self, api_key=None, model_name="gemini-1.5-pro-latest"):
         '''
         Initialize the Gemini model.
         '''

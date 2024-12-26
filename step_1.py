@@ -17,6 +17,7 @@ def step_1(ai_model, debug=False):
         # "personality": "",
         # "communication_style": "",
         # "topic": "",
+        "concept": "alien drone pilot who is a sarcastic asshole visiting earth to report back his findings to his home planet",
         "agent_yaml": yaml.dump(agent)
     }
 
@@ -40,8 +41,8 @@ def step_1(ai_model, debug=False):
 
     # step 1.3: Add the agent data to the agent template
     agent = manager.add_agent_data_to_template(
-        new_agent_data=agent_data, 
         current_agent_data=agent,
+        new_agent_data=agent_data, 
     )
 
     if debug:
@@ -55,7 +56,6 @@ def step_1(ai_model, debug=False):
 
     manager.save_agent_yaml(
         agent_data=agent,
-        debug=True
     )
 
     # Move onto the next step
