@@ -2,143 +2,287 @@ import yaml
 from jinja2 import Template
 from models.base_model import ModelInterface
 import os
+import shutil
+
 
 class ContentGenerator:
-    def __init__(self):
-        self.ai_model = None
-        pass  # You can add any initialization logic here if needed
+    """
+    Description:
+        This class is responsible for generating content for the agents.
 
-    def create_new_agent_yaml(self, agent_name: str = None, topic: str = None, personality: str = None, communication_style: str = None) -> dict:
-        # Load the template configuration file
-        agent_template_path = os.path.join("templates", "agent_template.yaml")
-        with open(agent_template_path, "r") as f:
+    Attributes:
+        agents_config_dir (str): the directory to save the agent configurations
+        templates_dir (str): the directory to save the agent templates
+        agent_template_path (str): the path to the agent template
+    """
+
+    def __init__(self):
+        """
+        Description:
+            Initialize the ContentGenerator class.
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Example:
+            content_generator = ContentGenerator()            
+        """
+        # 1. Set the directories
+        # use relative path to the current file to get the directories
+        self.agents_config_dir = os.path.join(os.path.dirname(__file__), "configs")
+        self.templates_dir = os.path.join(os.path.dirname(__file__), "templates")
+        self.prompts_dir = os.path.join(os.path.dirname(__file__), "prompts")
+
+        # 2. Set the paths
+        self.agent_template_path = os.path.join(self.templates_dir, "agent_template.yaml")
+        self.chain_prompts_path = os.path.join(self.prompts_dir, "chain_prompts_v2.yaml")
+
+
+    def create_new_agent_yaml(self) -> dict:
+        """
+        Description:
+            Create a new agent configuration based on the template configuration file.
+
+        Args:
+            None
+
+        Returns:
+            dict: the new agent configuration
+
+        Example:
+            agent_config = create_new_agent_yaml()
+            print(agent_config)
+        """
+        # 1. Ensure directory exist
+        os.makedirs(self.templates_dir, exist_ok=True)
+
+        # 2. Load the template configuration file
+        with open(self.agent_template_path, "r") as f:
             agent_template = yaml.safe_load(f)
         
-        # Create a new configuration based on the template
+        # 3. Create a new configuration based on the template
         new_config = agent_template.copy()
-        
-        # Update the configuration with provided parameters only if they are not None
-        if agent_name:
-            new_config['name'] = agent_name
-        if topic:
-            new_config['topic_expertise'] = topic
-        if personality:
-            new_config['personality'] = personality
-        if communication_style:
-            new_config['communication_style'] = communication_style
 
-        # Return new configuration to be processed by the agent_creator
+        # 4. Return new configuration to be processed by the agent_creator
         return new_config
 
     # -------------------------------------------------------------------
     # Helper to safely parse YAML from the LLM's response
     # -------------------------------------------------------------------
-    def parse_yaml_from_response(self, response, debug=False):
+    def process_and_save_agent_response(self, response) -> dict:
         """
-        Attempts to parse YAML from LLM text. 
-        You may need error-handling if the LLM returns invalid YAML.
+        Description:
+            Attempts to parse YAML from LLM text. 
+        
+        Future work: 
+            May need error-handling if the LLM returns invalid YAML.
+
+        Args:
+            response (str): the response from the LLM
+            debug (bool, optional): whether to print debug information. Defaults to False.
+
+        Returns:
+            dict: the parsed YAML
+
+        Example:
+            response = "```yaml\nname: John Doe\nage: 30\n```"
+            parsed = parse_yaml_from_response(response)
+            print(parsed)
         """
         
-        # response = self.fix_yaml_from_response(response, debug)
-        response = self.save_raw_parse_yaml_from_response(response, debug)
-        response = self.save_processed_response(response, debug)
+        # 1. response = self.fix_yaml_from_response(response, debug)
+        raw_save_path = self.save_raw_response(response)
 
-        try:
-            parsed = yaml.safe_load(response)
-            return parsed
-        except yaml.YAMLError:
-            # You might prompt the LLM again to fix the format or handle errors here
-            return None
+        # 2. response = self.save_processed_response(response, debug)
+        save_path = self.create_yaml_from_response(response)       
 
-    def fix_yaml_from_response(self, response, debug=False):
-        # 4. Call the LLM
-        prompt_text = "Fix the following YAML. It is not valid YAML."
-        response = self.ai_model.generate_response(prompt_text, response)
+        # 3. load the yaml file into a dict
+        with open(save_path, "r", encoding="utf-8") as f:
+            try:
+                # 3.1 load the yaml file into a dict
+                response = yaml.safe_load(f)                               
+            except Exception as e:
+                print(f"Error loading yaml file: {str(e)}")                
+                return None        
+    
+        # 4. Agent directory
+        agent_dir = os.path.join(self.agents_config_dir, response["name"])
+        
+        # 5. Make sure the agent directory exists
+        os.makedirs(agent_dir, exist_ok=True)
 
-        if debug:
-            print("--------------------------------")
-            print(f"Fixed response is:")
-            print(response)
-            print("--------------------------------")
+        # 6. Move files to agent directory                
+        saved_raw_path = self.move_file(raw_save_path, agent_dir)
+        saved_processed_path = self.move_file(save_path, agent_dir)
 
+        # 7. Rename the files                
+        self.rename_file(saved_raw_path, response["name"] + "_raw.yaml")
+        self.rename_file(saved_processed_path, response["name"] + "_processed.yaml")
+
+        # 8. return the response
         return response
 
-    def save_raw_parse_yaml_from_response(self, response, debug=False):
-        # create a file to save the response
-        save_path = os.path.join("tests", "response.yaml")
-        
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        
-        # Save the YAML file
-        if debug:
-            print("--------------------------------")
-            print(f"saving response to file:")
-            print(save_path)
-            print("--------------------------------")
+    # -------------------------------------------------------------------
+    # Helper to save the raw response to a file
+    # -------------------------------------------------------------------
+    def save_raw_response(self, response) -> str:
+        """
+        Description:
+            Saves the raw response to a file.
 
+        Args:
+            response (str): the response from the LLM
+            debug (bool, optional): whether to print debug information. Defaults to False.
+
+        Returns:
+            str: the path to the saved yaml file
+
+        Example:
+            response = "```yaml\nname: John Doe\nage: 30\n```"
+            save_path = save_raw_response(response)
+            print(save_path)
+        """
+        # 1. create a file to save the response
+        save_path = os.path.join(self.agents_config_dir, "raw_response.yaml")
+        
+        # 2. Ensure directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        # 3. Save the response to the file
         with open(save_path, "w", encoding="utf-8") as f:
             try:
-                f.write(response)
+                f.write(response)                
+                return save_path
             except Exception as e:
                 print(f"Error saving response to file: {str(e)}")
+                return None
 
-        return response
+    # -------------------------------------------------------------------
+    # Helper to create a yaml file from LLM text
+    # -------------------------------------------------------------------
+    def create_yaml_from_response(self, response) -> str:
+        """
+        Description:
+            Attempts to create a yaml file from LLM text. 
+        
+        Future work: 
+            May need error-handling if the LLM returns invalid YAML.
 
-    def save_processed_response(self, response, debug=False):
-                # strip out '''yaml and '''
-        response = response.replace("```yaml", "").replace("```", "")
+        Args:
+            response (str): the response from the LLM
+            debug (bool, optional): whether to print debug information. Defaults to False.
 
-        save_path = os.path.join("tests", "response_stripped.yaml")
-        if debug:
-            print("--------------------------------")
-            print(f"response stripped is:")
-            print(response)
-            print("--------------------------------")
-            print(f"saving response stripped to file:")
+        Returns:
+            str: the path to the saved yaml file
+
+        Example:
+            response = "```yaml\nname: John Doe\nage: 30\n```"
+            save_path = create_yaml_from_response(response)
             print(save_path)
-            print("--------------------------------")
+        """
+        # 1. strip out '''yaml and ''' 
+        # remove new lines and leading and trailing whitespace
+        response = response.replace("```yaml", "").replace("```", "").strip()
+        
+        # 2. create a file to save the response
+        save_path = os.path.join(self.agents_config_dir, "processed_response.yaml")
 
+        # 3. Save the response to the file
         with open(save_path, "w", encoding="utf-8") as f:
             try:
                 f.write(response)
+                # yaml.dump(response, f)
             except Exception as e:
                 print(f"Error saving response to file: {str(e)}")      
 
-        # load the yaml file into a dict
-        print(f"loading yaml file from:")
-        print(save_path)
-        with open(save_path, "r", encoding="utf-8") as f:
-            try:
-                response = yaml.safe_load(f)
-                debug = True
+        return save_path
 
-                if debug:
-                    print("--------------------------------")
-                    print(f"response is type:")
-                    print(type(response))
-                    print("--------------------------------")
-                    print(f"response is:")
-                    print(response)
-                    print("--------------------------------")
-                    print(f"response['hashtags'] is:")
-                    print(response["hashtags"])
-                    print("--------------------------------")
-                    print(f"response['emojis'] is:")
-                    print(response["emojis"])
-                    print("--------------------------------")
+    # -------------------------------------------------------------------
+    # Helper to rename file
+    # -------------------------------------------------------------------
+    def rename_file(self, old_path, new_name) -> str:
+        """
+        Description:
+            Renames a file.
 
+        Args:
+            old_path (str): the old path to the file
+            new_name (str): the new name of the file
 
-            except Exception as e:
-                print(f"Error loading yaml file: {str(e)}")
+        Returns:
+            str: the new path to the file
 
-        return response
+        Example:
+            rename_file("tests/test.yaml", "test_new.yaml")
+        """
+        # 1. Ensure directory exists
+        os.makedirs(os.path.dirname(old_path), exist_ok=True)
+
+        # 2. Rename the file
+        try:
+            new_path = os.path.join(os.path.dirname(old_path), new_name)
+            os.rename(old_path, new_path)
+            return new_path 
+        except Exception as e:
+            print(f"Error renaming file: {str(e)}")
+            return None
+
+    # -------------------------------------------------------------------
+    # Helper to move file
+    # -------------------------------------------------------------------
+    def move_file(self, old_path, new_dir) -> str:
+        """
+        Description:
+            Moves a file.
+
+        Args:
+            old_path (str): the old path to the file
+            new_dir (str): the new directory to move the file to
+
+        Returns:
+            str: the new path to the file after moving
+
+        Example:
+            move_file("tests/test.yaml", "agents/test")
+        """
+        # 1. Ensure directory exists
+        os.makedirs(new_dir, exist_ok=True)
+
+        # 2. Move the file
+        try:
+            new_path = os.path.join(new_dir, os.path.basename(old_path))
+            new_path = shutil.move(old_path, new_path)
+            return new_path
+        except Exception as e:
+            print(f"Error moving file: {str(e)}")
+            return None
+
 
     # -------------------------------------------------------------------
     # Helper to add new agent data to the current agent data
     # -------------------------------------------------------------------
-    def add_agent_data_to_template(self, new_agent_data, current_agent_data) -> dict:
-        # First, ensure we have a dictionary to work with
+    def add_agent_data_to_template(self, current_agent_data, new_agent_data) -> dict:
+        """
+        Description:
+            Adds new agent data to the current agent data.
+
+        Args:
+            new_agent_data (dict): the new agent data
+            current_agent_data (dict): the current agent data
+
+        Returns:
+            dict: the updated agent data
+
+        Example:
+            new_agent_data = {"name": "John Doe", "age": 30}
+            current_agent_data = {"name": "Jane Doe", "age": 25}
+            updated_agent_data = add_agent_data_to_template(new_agent_data, current_agent_data)
+            print(updated_agent_data)
+        """
+        # 1. ensure we have a dictionary to work with
         if isinstance(current_agent_data, str):
             existing_data = yaml.safe_load(current_agent_data)
         elif isinstance(current_agent_data, dict):
@@ -146,12 +290,12 @@ class ContentGenerator:
         else:
             existing_data = {}
 
-        # Only update fields that already exist in existing_data
+        # 2. Only update fields that already exist in existing_data
         for key in new_agent_data:
             if key in existing_data:
                 existing_data[key] = new_agent_data[key]
         
-        # Convert back to YAML string
+        # 3. Convert back to YAML string
         return existing_data
 
 
@@ -159,56 +303,66 @@ class ContentGenerator:
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file
     # -------------------------------------------------------------------
-    def save_agent_yaml(self, agent_data, config_path="tests/test.yaml", debug=False):
+    def save_agent_yaml(self, agent_data: dict):
         """
-        Save agent data to a YAML file at the specified path or default location.
+        Description:
+            Save agent data to a YAML file at the specified path or default location.
         
         Args:
             agent_data: Dictionary containing agent configuration
             config_path: Optional custom path to save the YAML file
-        """
-        # Use provided config_path if available, otherwise use default path
-        # save_path = config_path if config_path else os.path.join(self.agents_config_dir, f"{agent_data['name']}.yaml")
+            debug (bool, optional): whether to print debug information. Defaults to False.
 
-        save_path = config_path if config_path else os.path.join("tests", f"{agent_data['name']}.yaml")
+        Returns:
+            None
 
-        # Ensure directory exists
+        Example:
+            agent_data = {"name": "John Doe", "age": 30}
+            save_agent_yaml(agent_data, config_path="tests/test.yaml", debug=True)
+        """      
+        # 1. create a file to save the response
+        agent_dir = os.path.join(self.agents_config_dir, agent_data["name"])
+        save_path = os.path.join(agent_dir, f"{agent_data['name']}.yaml")
+        
+        # 2. Ensure directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-        if debug:
-            print("--------------------------------")
-            print(f"saving agent data to file:")
-            print(save_path)
-            print("--------------------------------")
-            print(f"name in agent data is:")
-            print(agent_data["name"])
-            print("--------------------------------")
-            print(f"agent data is:")
-            print(agent_data)
-            print("--------------------------------")
-
-
-
-        # Save the YAML file
+        # 3. Save the response to the file
         with open(save_path, "w", encoding="utf-8") as f:
-            yaml.dump(agent_data, f)
+            try:
+                # Convert dictionary to YAML string, then write directly
+                yaml_string = yaml.dump(agent_data, allow_unicode=True, default_flow_style=False)
+                f.write(yaml_string)
+            except Exception as e:
+                print(f"Error saving response to file: {str(e)}")
+                return None
 
     # -------------------------------------------------------------------
     # Generic prompt runner that works with any prompt template
     # -------------------------------------------------------------------
     def run_prompt(self, prompt_key, template_vars, ai_model, debug=False):
         """
-        Generic prompt runner that works with any prompt template
+        Description:
+            Generic prompt runner that works with any prompt template
         
         Args:
             prompt_key: The key for the prompt template (e.g., "prompt_1", "prompt_2")
             template_vars: dict of variables to pass to the template
             ai_model: The AI model to use for generating responses
-        """
-        self.ai_model = ai_model
+            debug (bool, optional): whether to print debug information. Defaults to False.
 
+        Returns:
+            dict: the parsed YAML
+
+        Example:
+            prompt_key = "prompt_1"
+            template_vars = {"name": "John Doe", "age": 30}
+            ai_model = OpenAI(api_key="your_api_key")
+            parsed = run_prompt(prompt_key, template_vars, ai_model, debug=True)
+            print(parsed)
+        """
         # 1. Load the chain prompts from the YAML file
-        with open("prompts/chain_prompts_v2.yaml", "r", encoding="utf-8") as f:
+        with open(self.chain_prompts_path, "r", encoding="utf-8") as f:
             chain_prompts = yaml.safe_load(f)
 
         # 2. Grab the raw prompt template text
@@ -237,7 +391,7 @@ class ContentGenerator:
             print("--------------------------------")
 
         # # 5. Parse the YAML from the LLM's response
-        yaml_response = self.parse_yaml_from_response(response)
+        yaml_response = self.process_and_save_agent_response(response)
 
         if debug:
             print("--------------------------------")
@@ -252,5 +406,5 @@ class ContentGenerator:
              print(f"Error: LLM returned invalid YAML for {prompt_key}.")
              return None
 
-        # return yaml_response
+        # 6. return yaml_response
         return yaml_response

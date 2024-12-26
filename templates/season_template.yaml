@@ -3,10 +3,12 @@ season:
   season_number:
   season_overview: |
   season_summary: |
+  season_posted: 
   episodes:
     episode_name:
     episode_number:
     episode_overview: |
     episode_summary: |
     episode_highlights: |
+    episode_posted: 
 
