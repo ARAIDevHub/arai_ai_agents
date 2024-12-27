@@ -10,11 +10,12 @@ if __name__ == "__main__":
     # ai_model.generate_yaml_response()
 
     # call step 1
-    # next_step.step_1(ai_model, debug=False)
+    next_step.step_1(ai_model, debug=False)
 
     # model test
     #print(ai_model.generate_response("What is the capital of France?"))
     
+    '''
     with open("configs/Xylar/processed_response.yaml", "r", encoding="utf-8") as file:
         data = yaml.safe_load(file)
 
@@ -25,3 +26,4 @@ if __name__ == "__main__":
     print(data["season"]["episodes"][0]["episode_description"])
     print(data["season"]["episodes"][0]["episode_highlights"])
     print(data["season"]["episodes"][0]["episode_summary"])
+    '''

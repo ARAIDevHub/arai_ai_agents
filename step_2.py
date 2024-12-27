@@ -58,7 +58,8 @@ def step_2(ai_model, agent_file_path, debug=False):
     # step 2.6: create the file path
     season_file_path = manager.create_filepath(
         agent_name=agent_yaml["name"],
-        number=season_template["season"]["season_number"],
+        season_number=season_template["season"]["season_number"],
+        episode_number="0",
         template_type=TemplateType.SEASON
     )
 
@@ -69,4 +70,4 @@ def step_2(ai_model, agent_file_path, debug=False):
     )
 
     # step 2.8: Move onto the next step of creating a new season
-    next_step.step_3(ai_model, season_file_path)
+    next_step.step_3(ai_model, agent_file_path, season_file_path)
