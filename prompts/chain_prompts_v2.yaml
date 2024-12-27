@@ -94,6 +94,10 @@ promot_2 (Season Creation): |
 
   {{ agent_yaml }}
 
+  Previous season:
+  - This provides the previous season details, including description and highlights for the season. Ignore if none is provided as this means we are creating season 1, so there is no previous season.
+  {{ previous_season }}
+
   ---
   ## Task: Season Creation
 
@@ -145,7 +149,7 @@ promot_3 (Episode Posts Creation): |
   *   Agent YAML: {{ agent_yaml }} (This provides the agent's personality, backstory, etc.)
   *   Season YAML: {{ season_yaml }} (This provides the season details, including description and highlights for the season)
   *   Episode YAML: {{ episode_yaml }} (This provides the episode details, including description and highlights for the episode)
-
+  *   Previous Episode YAML: {{ previous_episode }} (This provides the previous episode details, including description and highlights for the episode. Ignore if none is provided as this means we are creating episode 1, so there is no previous episode)
   **Post Requirements:**
 
   Each post should:

@@ -22,22 +22,26 @@ def step_2(ai_model, agent_file_path, debug=False):
     '''
     print("Step 2: Create a new season") 
 
-    # 2.1 load the season template yaml file
+    # step 2.1: load the season template yaml file
     manager = ContentGenerator()
     season_template = manager.create_new_template_yaml(TemplateType.SEASON)
 
-    # 2.2: load the agent yaml file
+    # step 2.2: load the agent yaml file
     agent_yaml = None    
     with open(agent_file_path, 'r', encoding='utf-8') as file:
         agent_yaml = yaml.safe_load(file)
     
+    # step 2.3: find the previous season
+    previous_season = None
+
     # step 2.3: Generate a new season name, topic, and communication style with the prompt_2 template
     # prompt 2 Season Creation:
     # note that emojis will be output as unicode characters due to the yaml dump
     prompt_2_vars = {
         "agent_name": agent_yaml["name"],
         "agent_yaml": yaml.dump(agent_yaml),
-        "season_yaml": yaml.dump(season_template)
+        "season_yaml": yaml.dump(season_template),
+        "previous_season": yaml.dump(previous_season)
     }
 
     # step 2.4: Run the prompt 
@@ -59,7 +63,7 @@ def step_2(ai_model, agent_file_path, debug=False):
     season_file_path = manager.create_filepath(
         agent_name=agent_yaml["name"],
         season_number=season_template["season"]["season_number"],
-        episode_number="0",
+        episode_number=0,
         template_type=TemplateType.SEASON
     )
 
