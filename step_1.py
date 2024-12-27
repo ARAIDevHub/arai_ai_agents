@@ -58,8 +58,8 @@ def step_1(ai_model, debug=False):
     # step 1.6: create the file path
     agent_file_path = manager.create_filepath(
         agent_name=agent_template["name"], 
-        season_number="0",
-        episode_number="0",
+        season_number=0,
+        episode_number=0,
         template_type=TemplateType.AGENT
     )
 
