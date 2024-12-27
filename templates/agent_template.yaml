@@ -1,12 +1,11 @@
-concept:
 name:
 personality:
 communication_style:
 backstory:
 universe:
 topic_expertise:
-hashtags: []
-emojis: []
+hashtags: 
+emojis: 
 model_type: "gemini"
 model_name: "gemini-exp-1206"
 memory_store: "gemini_chroma"
