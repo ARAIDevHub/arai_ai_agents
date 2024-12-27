@@ -138,21 +138,36 @@ promot_2 (Season Creation): |
   {{ season_yaml }}
 
 promot_3 (Episode Posts Creation): |
-  Using the relevant backstory from the YAML “universe bible” and focusing on season: {{season_number}}, episode: {{episode_number}}, generate {{ number_of_posts }} short “updates” (tweets/posts) 
-  under {{ post_length }} characters each. 
+  You are an expert in creative writing, social media engagement, and character voice development. Your task is to generate {{ number_of_posts }} short "updates" (tweets/posts) for the agent {{ agent_name }} in the style of Twitter posts. These posts are for season {{ season_number }}, episode {{ episode_number }}.
+
+  Agent and Context:
+
+  *   Agent YAML: {{ agent_yaml }} (This provides the agent's personality, backstory, etc.)
+  *   Season YAML: {{ season_yaml }} (This provides the season details, including description and highlights for the season)
+  *   Episode YAML: {{ episode_yaml }} (This provides the episode details, including description and highlights for the episode)
+
+  **Post Requirements:**
 
   Each post should:
-  - Showcase {{ agent_name }}’s personality and tone
-  - Reference the key setting/technology/magic (depending on your world)
-  - Highlight misunderstandings or comedic/serious observations
-  - Potentially use emojis (optional) {{ emojis }}
-  - Potentially use hashtags (optional) {{ hashtags }}
-  - End with a sign-off "#{{ agent_name }}"
-  - Needs to be >{{ post_length }} characters
- 
-  Take into account the following:
-  - season overview: {{season_overview}}
-  - episode overview: {{episode_overview}}
+
+  *   Reflect Agent's Personality: Be consistent with {{ agent_name }}'s personality, tone, and communication style as defined in the agent YAML.
+  *   Relate to Setting/Technology:  Reference elements of the setting, technology, or other relevant details from the agent's universe as defined in the agent YAML.
+  *   Incorporate Episode Context: Align with the season overview and specific episode overview provided in the season YAML.
+  *   Highlight Observations: Center around misunderstandings, comedic observations, or serious reflections relevant to the episode's theme.
+  *   Consider Emojis: Optionally use emojis from this set: {{ agent_yaml }} or use any emojis that are relevant to the episode's theme.
+  *   Consider Hashtags: Optionally use hashtags from this set: {{ agent_yaml }} or use any hashtags that are relevant to the episode's theme.
+  *   Length Constraint: Each post must be under {{ post_length }} characters.
+  *   Sign-Off: End each post with the sign-off: "#{{ agent_name }}"
+
+  **YAML Output Format:**
+
+  Output a valid YAML file containing a list of posts under the `posts` key. Each post should be a separate entry in the list and include the following:
+
+  *   `post_id`: A unique identifier for the post (e.g., s1\_e1\_post1, s1\_e1\_post2).
+  *   `post_number`: The ordinal number of the post within the episode (e.g., 1, 2, 3).
+  *   `post_content`: The actual text of the post, formatted using the YAML block scalar style (`|`) to preserve newlines.
+  *   `post_highlights`: A brief, one-sentence description of the key takeaway or event in the post (using `|` for multi-line).
+  *   `post_posted`:  Set to `False` by default.
 
   **Output Requirements:**
   - **Only output valid YAML.** Do not include any text outside of the YAML structure.
