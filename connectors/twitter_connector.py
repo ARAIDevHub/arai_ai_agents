@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class TwitterConnector:
-    def __init__(self, agent_manager, agent_name: str, poll_interval = 30):
+    def __init__(self):
         '''
         Description: Initialize the Twitter connector.
 
@@ -31,10 +31,6 @@ class TwitterConnector:
         Example:
             twitter_connector = TwitterConnector(agent_manager, "agent_name")
         '''
-        self.agent_manager = agent_manager
-        self.agent_name = agent_name
-        self.poll_interval = poll_interval
-
         self.api_key = os.getenv("TWITTER_API_KEY") 
         # Part of the OAuth 1.0a credentials identifying the application (required for user-based authentication).
 
@@ -75,17 +71,16 @@ class TwitterConnector:
             print(f"Twitter authentication failed: {str(e)}")
             raise
 
-    def post_tweet(self, message: str):
+    def post_tweet(self, message: str) -> str:
         try:
-            if not message:
-                print("Error: Tweet message is empty")
-                return
+            if not message:                
+                return "Error: Tweet message is empty"
             
             # Truncate if too long
             if len(message) > 280:
                 message = message[:277] + "..."
             
-            self.client.create_tweet(text=message)
-            print(f"Tweeted: {message}")
-        except Exception as e:
-            print(f"Error posting tweet: {str(e)}")
+            self.client.create_tweet(text=message)            
+            return "Tweeted: " + message
+        except Exception as e:            
+            return "Error posting tweet: " + str(e)
