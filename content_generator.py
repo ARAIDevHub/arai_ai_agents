@@ -324,7 +324,7 @@ class ContentGenerator:
     # -------------------------------------------------------------------
     # Helper to create filepath
     # -------------------------------------------------------------------
-    def create_filepath(self, agent_name: str, season_number: str, episode_number: str, template_type: TemplateType):
+    def create_filepath(self, agent_name: str, season_number: int, episode_number: int, template_type: TemplateType):
         """
         Description:
             Creates a filepath for the agent data.
@@ -345,9 +345,9 @@ class ContentGenerator:
         if template_type == TemplateType.AGENT:            
             return os.path.join(self.agents_config_dir, agent_name, agent_name + ".yaml")
         elif template_type == TemplateType.SEASON:
-            return os.path.join(self.agents_config_dir, agent_name, "season_" + season_number, "season_" + season_number + ".yaml")
+            return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "season_" + str(season_number) + ".yaml")
         elif template_type == TemplateType.EPISODE:
-            return os.path.join(self.agents_config_dir, agent_name, "season_" + season_number, "s" + season_number + "_episode_" + episode_number + ".yaml")
+            return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "s" + str(season_number) + "_episode_" + str(episode_number) + ".yaml")
 
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file

@@ -1,29 +1,41 @@
 from models.gemini_model import GeminiModel
 import step_1 as next_step
 import yaml
+import schedule
+import time
+import threading
+import keyboard
+import post_manager as twitter_manager
+
+# Schedule the post_to_twitter function to run every minute, for example:
+post_manager = twitter_manager.PostManager()
+schedule.every(1).minutes.do(post_manager.post_to_twitter)
+
+def run_scheduler():
+    """ Continuously run the scheduler in a loop """
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == "__main__":
 
     # Instantiate your AI model
     ai_model = GeminiModel()
 
-    # ai_model.generate_yaml_response()
-
-    # call step 1
-    next_step.step_1(ai_model, debug=False)
-
-    # model test
-    #print(ai_model.generate_response("What is the capital of France?"))
-    
     '''
-    with open("configs/Xylar/processed_response.yaml", "r", encoding="utf-8") as file:
-        data = yaml.safe_load(file)
+    # Menu system
+    print("Welcome to AVA Agent.")
+    print("Press Enter to continue...")
+    while True:
+        if keyboard.is_pressed('enter'):
+            print("Enter key pressed")
+            break                               
 
-    print(data["season"]["season_number"])
-    print(data["season"]["season_name"])
-    print(data["season"]["episodes"][0]["episode_number"])
-    print(data["season"]["episodes"][0]["episode_name"])
-    print(data["season"]["episodes"][0]["episode_description"])
-    print(data["season"]["episodes"][0]["episode_highlights"])
-    print(data["season"]["episodes"][0]["episode_summary"])
+    print("Exiting...")
     '''
+
+    # Start the scheduler in a separate thread
+    scheduler_thread = threading.Thread(target=run_scheduler)
+    scheduler_thread.start()
+
+

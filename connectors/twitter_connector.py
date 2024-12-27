@@ -18,12 +18,18 @@ load_dotenv()
 class TwitterConnector:
     def __init__(self, agent_manager, agent_name: str, poll_interval = 30):
         '''
-        Initialize the Twitter connector.
+        Description: Initialize the Twitter connector.
 
         Args:
             agent_manager: The agent manager instance
             agent_name (str): Name of the agent to handle responses
             poll_interval (int): Time in seconds between checking for new mentions (default: 30)
+
+        Returns:
+            None
+
+        Example:
+            twitter_connector = TwitterConnector(agent_manager, "agent_name")
         '''
         self.agent_manager = agent_manager
         self.agent_name = agent_name
@@ -69,59 +75,6 @@ class TwitterConnector:
             print(f"Twitter authentication failed: {str(e)}")
             raise
 
-    def fetch_mentions(self):
-        try:
-            # Use v2 API to fetch mentions
-            mentions = self.client.get_users_mentions(
-                id=self.bot_id,
-                since_id=self.last_mention_id,
-                tweet_fields=['author_id', 'text', 'referenced_tweets'],
-                expansions=['author_id']
-            )
-            if mentions.data:
-                return mentions.data
-            return []
-        except Exception as e:
-            print(f"Error fetching mentions: {str(e)}")
-            print(f"Error details: {type(e).__name__}")
-            return []
-
-    def respond_to_mentions(self, mention):
-        try:
-            user_msg = mention.text
-            author_id = mention.author_id
-
-            # Get username from author_id
-            author = self.client.get_user(id=author_id)
-            user_name = author.data.username
-
-            # Remove the mention text
-            usr_msg = user_msg.replace(f"@{self.bot_username}", "").strip()
-
-            # Get response from agent
-            response = self.agent_manager.send_message(self.agent_name, usr_msg)
-            reply_text = f"@{user_name} {response}"
-
-            # Create reply tweet
-            self.client.create_tweet(
-                text=reply_text,
-                in_reply_to_tweet_id=mention.id
-            )
-
-            print(f"Replied to @{user_name}: {reply_text}")
-        except Exception as e:
-            print(f"Error responding to mention: {str(e)}")
-            print(f"Mention data: {mention}")
-
-    def create_tweet(self, topic: str) -> str:
-        try:
-            # Generate response from agent
-            response = self.agent_manager.send_message(self.agent_name, f"Craft a tweet about: {topic}")
-            return response
-        except Exception as e:
-            print(f"Error creating tweet: {str(e)}")
-            return None
-
     def post_tweet(self, message: str):
         try:
             if not message:
@@ -136,27 +89,3 @@ class TwitterConnector:
             print(f"Tweeted: {message}")
         except Exception as e:
             print(f"Error posting tweet: {str(e)}")
-
-    def start(self):
-        print("Starting Twitter Bot polling...")
-        while True:
-            try:
-                # handle mentions
-                '''
-                mentions = self.fetch_mentions()
-                for mention in mentions:
-                    self.respond_to_mentions(mention)
-                    self.last_mention_id = mention.id
-                '''
-
-                # handle tweets
-                topic = self.agent_manager.agents[self.agent_name].example_prompt
-                
-                tweet_text = self.create_tweet(topic)
-                if tweet_text:
-                    self.post_tweet(tweet_text)
-
-                time.sleep(self.poll_interval)
-            except Exception as e:
-                print(f"Error in polling loop: {str(e)}")
-                time.sleep(self.poll_interval)  # Keep trying even if there's an error
