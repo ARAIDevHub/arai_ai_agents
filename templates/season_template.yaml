@@ -1,14 +1,14 @@
 season:
   season_name:
   season_number:
-  season_overview: |
+  season_description: |
+  season_highlights: |
   season_summary: |
-  season_posted: 
+  season_posted: False
   episodes:
     episode_name:
     episode_number:
-    episode_overview: |
-    episode_summary: |
+    episode_description: |
     episode_highlights: |
-    episode_posted: 
-
+    episode_summary: |
+    episode_posted: False

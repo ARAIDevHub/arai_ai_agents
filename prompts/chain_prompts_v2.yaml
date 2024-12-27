@@ -7,36 +7,76 @@ promot_1 (Character Sheet Creation): |
   - concept: {{ concept }}
 
   Specific Instructions:
-  1.  Invent a Creative Name:
-      - If no specific name is provided, create a unique and fitting name for the agent based on the concept of the agent. The name should be suitable for a Twitter handle.
-      - Agent Name: {{ agent_name }}
 
-  2.  Define the Topic: 
-      - If no specific topic is provided, default to "Crypto" or invent a creative topic that lends itself to episodic storytelling.
-      - Topic: {{ topic }}
+    1.  Invent a Creative Name:
+        - If no specific name is provided, create a unique and fitting name for the agent based on the concept of the agent. The name should be suitable for a Twitter handle.
+        - Agent Name: {{ agent_name }}
 
-  3.  Develop Personality and Style:
-      - Create a detailed personality for the agent.
-      - Define a clear communication style for the agent.
-      - Personality: {{ personality }}
-      - Communication Style: {{ style }}
+    2.  Define the Topic:
+        - If no specific topic is provided, default to "Crypto" or invent a creative topic that lends itself to episodic storytelling.
+        - Topic: {{ topic }}
 
-  4.  Craft a Backstory:
-      - Invent a compelling and original backstory for the agent that explains their motivations, skills, and current situation. This backstory should be suitable for unfolding gradually over multiple story arcs.
-      - Backstory: {{ backstory }}
+    3.  Develop Personality and Style:
+        - Create a detailed personality for the agent.
+        - Define a clear communication style for the agent.
+        - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+        - Example:
+          ```yaml
+          personality: |
+            This is a multi-line
+            description of the agent's
+            personality.
+          ```
+        - Personality: {{ personality }}
+        - Communication Style: {{ style }}
 
-  5.  Describe the Universe:
-      - Detail the world(s) or setting where the agent operates. Consider the current state of technology, the social and political landscape, major organizations or factions, and any unique elements relevant to the chosen topic.
-      - Use a narrative or bullet-point format within the YAML.
-      - Universe: {{ universe }}
+    4.  Craft a Backstory:
+        - Invent a compelling and original backstory for the agent that explains their motivations, skills, and current situation. This backstory should be suitable for unfolding gradually over multiple story arcs.
+        - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+        - Example:
+          ```yaml
+          backstory: |
+            This is a longer, multi-line
+            backstory for the agent.
+            It can span several lines.
+          ```
+        - Backstory: {{ backstory }}
 
-  6.  Generate Marketing Elements:
-      - Create a list of relevant hashtags that will be used for social media promotion. Include hashtags related to the agent's name, topic, and genre.
-      - Important: Output the hashtags as a YAML array. Enclose the hashtags in square brackets, separate them with commas, make sure they have double quotes around each hashtag, and put each hashtag on a new line within the brackets. (e.g., `hashtags: [\\n- "#example1",\\n- "#example2"\\n]` )**
-      - Create a list of relevant emojis that can be used in tweets to add visual interest and convey meaning.
-      - Important: Output the emojis as a YAML array. Enclose the emojis in square brackets, separate them with commas, and put each emoji on a new line within the brackets. (e.g., `emojis: [\\n- 🐳,\\n- 🌊\\n]` )**
-      - Hashtags: {{ hashtags }}
-      - Emojis: {{ emojis }}
+    5.  Describe the Universe:
+        - Detail the world(s) or setting where the agent operates. Consider the current state of technology, the social and political landscape, major organizations or factions, and any unique elements relevant to the chosen topic.
+        - Use a narrative or bullet-point format within the YAML.
+        - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+        - Example:
+          ```yaml
+          universe: |
+            This is a description
+            of the agent's universe.
+            It can have multiple lines
+            and paragraphs.
+          ```
+        - Universe: {{ universe }}
+
+    6.  Generate Marketing Elements:
+        - Create a list of relevant hashtags that will be used for social media promotion. Include hashtags related to the agent's name, topic, and genre.
+        - Important: Output the hashtags as a YAML array using block style. This means each hashtag should be on a new line, preceded by a hyphen and a space and placed inside double quotes.
+        - Example:
+          ```yaml
+          hashtags:
+            - "#example1"
+            - "#example2"
+            - "#longerExampleHashtag"
+          ```
+        - Create a list of relevant emojis that can be used in tweets to add visual interest and convey meaning.
+        - Important: Output the emojis as a YAML array using block style. Each emoji should be on a new line, preceded by a hyphen and a space and placed inside double quotes.
+        - Example:
+          ```yaml
+          emojis:
+            - "🐳"
+            - "🌊"
+            - "🚀"
+          ```
+        - Hashtags: {{ hashtags }}
+        - Emojis: {{ emojis }}
 
   Output Requirements:
   - Only output valid YAML. Do not include any text outside of the YAML structure.
@@ -49,33 +89,53 @@ promot_1 (Character Sheet Creation): |
   ```
 
 promot_2 (Season Creation): |
-  We have the existing YAML file with {{ agent_name }}’s character and universe details.  
-  Update it (or create a new one) with the following:
-  
-  Create a new season with the following fields:
-  - **season_name** 
-  - **season_number** 
-  - **season_overview** 
-  - **season_summary** 
+  You are an expert in creative writing, season/episode design, and structured storytelling.
+  Your goal is to create a new season for {{ agent_name }}, who was previously defined in the following agent YAML:
 
-  Create {{ number_of_episodes }} episodes with the following fields:
-  - **episode_name** 
-  - **episode_number** 
-  - **episode_overview** 
-  - **episode_summary** 
-  - **episode_highlights** 
-    
-  Keep it short yet descriptive, maintaining {{ agent_name }}’s established tone.  
-  Output in valid YAML format suitable for storing storyline details.
+  {{ agent_yaml }}
 
-  {{ episode_overview }} is the initial concept, while {{ episode_summary }} will be filled in later after the tweets are generated.
+  ---
+  ## Task: Season Creation
 
-  **Output Requirements:**
-  - **Only output valid YAML.** Do not include any text outside of the YAML structure.
-  - **Output the yaml file:**  
+  Generate a single valid YAML file that defines a new season for this agent. The season should include:
+
+  - Season Name: If none is provided, create a unique and fitting name based on {{ agent_name }} and the agent’s YAML.
+      - Use something that can also work as a Twitter hashtag.
+      - Season Name: {{ season_name }}
+
+  - Season Number: If none is provided, default to 1.
+      - Season Number: {{ season_number }}
+
+  - Season Description: If none is provided, create a unique description based on {{ agent_name }}’s YAML.
+      - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+      - Season Description: {{ season_description }}
+
+  - Season Highlights: If none is provided, invent highlights relevant to the agent’s concept or storyline.
+      - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+      - Season Highlights: {{ season_highlights }}
+
+  - Season Summary: If none is provided, create a concise summary that captures the essence of this season.
+      - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+      - Season Summary: {{ season_summary }}
+
+  - Episodes: We want **28 episodes** total (one for each day over 4 weeks).
+      - If none are provided, create 28 unique episodes.
+      - Each episode entry should have:
+          - `episode_id`
+          - `episode_name`
+          - `episode_number`
+          - `episode_description`  (Use `|` for multi-line)
+          - `episode_highlights` (Use `|` for multi-line)
+          - `episode_posted` (default `False`)
+          - `episode_summary` (Use `|` for multi-line)
+
+  Output Requirements:
+  - Only output valid YAML. Do not include any text outside of the YAML structure.
+  - Output a single, complete YAML file that includes all the fields mentioned above (season_name, season_number, season_description, season_highlights, season_summary, episodes).
+
+  Output exactly as the yaml file:
   ```yaml
   {{ season_yaml }}
-  ``` 
 
 promot_3 (Episode Posts Creation): |
   Using the relevant backstory from the YAML “universe bible” and focusing on season: {{season_number}}, episode: {{episode_number}}, generate {{ number_of_posts }} short “updates” (tweets/posts) 
@@ -88,6 +148,7 @@ promot_3 (Episode Posts Creation): |
   - Potentially use emojis (optional) {{ emojis }}
   - Potentially use hashtags (optional) {{ hashtags }}
   - End with a sign-off "#{{ agent_name }}"
+  - Needs to be >{{ post_length }} characters
  
   Take into account the following:
   - season overview: {{season_overview}}

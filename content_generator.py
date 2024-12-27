@@ -3,7 +3,7 @@ from jinja2 import Template
 from models.base_model import ModelInterface
 import os
 import shutil
-
+from template_types import TemplateType
 
 class ContentGenerator:
     """
@@ -38,10 +38,14 @@ class ContentGenerator:
 
         # 2. Set the paths
         self.agent_template_path = os.path.join(self.templates_dir, "agent_template.yaml")
+        self.season_template_path = os.path.join(self.templates_dir, "season_template.yaml")
+        self.episode_template_path = os.path.join(self.templates_dir, "episode_template.yaml")
         self.chain_prompts_path = os.path.join(self.prompts_dir, "chain_prompts_v2.yaml")
 
-
-    def create_new_agent_yaml(self) -> dict:
+    # -------------------------------------------------------------------
+    # Helper to create a new agent yaml file
+    # -------------------------------------------------------------------
+    def create_new_template_yaml(self, template_type: TemplateType) -> dict:
         """
         Description:
             Create a new agent configuration based on the template configuration file.
@@ -60,14 +64,24 @@ class ContentGenerator:
         os.makedirs(self.templates_dir, exist_ok=True)
 
         # 2. Load the template configuration file
-        with open(self.agent_template_path, "r") as f:
-            agent_template = yaml.safe_load(f)
+        if template_type == TemplateType.AGENT:
+            template_path = self.agent_template_path
+        elif template_type == TemplateType.SEASON:
+            template_path = self.season_template_path
+        elif template_type == TemplateType.EPISODE:
+            template_path = self.episode_template_path
+        else:
+            raise ValueError(f"Invalid template type: {template_type}")
+
+        # 3. Load the template configuration file
+        with open(template_path, "r") as f:
+            template = yaml.safe_load(f)
         
         # 3. Create a new configuration based on the template
-        new_config = agent_template.copy()
+        new_config_file = template.copy()
 
         # 4. Return new configuration to be processed by the agent_creator
-        return new_config
+        return new_config_file
 
     # -------------------------------------------------------------------
     # Helper to safely parse YAML from the LLM's response
@@ -95,9 +109,11 @@ class ContentGenerator:
         
         # 1. response = self.fix_yaml_from_response(response, debug)
         raw_save_path = self.save_raw_response(response)
+        print(f"raw_save_path is: {raw_save_path}")
 
         # 2. response = self.save_processed_response(response, debug)
         save_path = self.create_yaml_from_response(response)       
+        print(f"save_path is: {save_path}")
 
         # 3. load the yaml file into a dict
         with open(save_path, "r", encoding="utf-8") as f:
@@ -105,23 +121,26 @@ class ContentGenerator:
                 # 3.1 load the yaml file into a dict
                 response = yaml.safe_load(f)                               
             except Exception as e:
-                print(f"Error loading yaml file: {str(e)}")                
+                print(f"process_and_save_agent_response. Error loading yaml file: {str(e)}")                
                 return None        
     
         # 4. Agent directory
-        agent_dir = os.path.join(self.agents_config_dir, response["name"])
-        
+        file_dir = os.path.join(self.agents_config_dir, "temporary")
+        print(f"file_dir is: {file_dir}")
+
         # 5. Make sure the agent directory exists
-        os.makedirs(agent_dir, exist_ok=True)
+        os.makedirs(file_dir, exist_ok=True)
 
         # 6. Move files to agent directory                
-        saved_raw_path = self.move_file(raw_save_path, agent_dir)
-        saved_processed_path = self.move_file(save_path, agent_dir)
+        saved_raw_path = self.move_file(raw_save_path, file_dir)
+        saved_processed_path = self.move_file(save_path, file_dir)
 
         # 7. Rename the files                
-        self.rename_file(saved_raw_path, response["name"] + "_raw.yaml")
-        self.rename_file(saved_processed_path, response["name"] + "_processed.yaml")
-
+        # self.rename_file(saved_raw_path, response["name"] + "_raw.yaml")
+        # self.rename_file(saved_processed_path, response["name"] + "_processed.yaml")
+        # self.rename_file(saved_raw_path, "raw.yaml")
+        # self.rename_file(saved_processed_path, "processed.yaml")
+        
         # 8. return the response
         return response
 
@@ -190,11 +209,15 @@ class ContentGenerator:
         # 2. create a file to save the response
         save_path = os.path.join(self.agents_config_dir, "processed_response.yaml")
 
-        # 3. Save the response to the file
+        # 3. Ensure directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        # 4. Save the response to the file
         with open(save_path, "w", encoding="utf-8") as f:
-            try:
+            try:                
+                # yaml_string = yaml.dump(response, allow_unicode=True, default_flow_style=False)
+                # f.write(yaml_string)
                 f.write(response)
-                # yaml.dump(response, f)
             except Exception as e:
                 print(f"Error saving response to file: {str(e)}")      
 
@@ -264,75 +287,98 @@ class ContentGenerator:
     # -------------------------------------------------------------------
     # Helper to add new agent data to the current agent data
     # -------------------------------------------------------------------
-    def add_agent_data_to_template(self, current_agent_data, new_agent_data) -> dict:
+    def add_data_to_template(self, current_data, new_data) -> dict:
         """
         Description:
             Adds new agent data to the current agent data.
 
         Args:
-            new_agent_data (dict): the new agent data
-            current_agent_data (dict): the current agent data
+            new_data (dict): the new data
+            current_data (dict): the current data
 
         Returns:
             dict: the updated agent data
 
         Example:
-            new_agent_data = {"name": "John Doe", "age": 30}
-            current_agent_data = {"name": "Jane Doe", "age": 25}
-            updated_agent_data = add_agent_data_to_template(new_agent_data, current_agent_data)
-            print(updated_agent_data)
+            new_data = {"name": "John Doe", "age": 30}
+            current_data = {"name": "Jane Doe", "age": 25}
+            updated_data = add_data_to_template(new_data, current_data)
+            print(updated_data)
         """
         # 1. ensure we have a dictionary to work with
-        if isinstance(current_agent_data, str):
-            existing_data = yaml.safe_load(current_agent_data)
-        elif isinstance(current_agent_data, dict):
-            existing_data = current_agent_data.copy()
+        if isinstance(current_data, str):
+            existing_data = yaml.safe_load(current_data)
+        elif isinstance(current_data, dict):
+            existing_data = current_data.copy()
         else:
             existing_data = {}
 
         # 2. Only update fields that already exist in existing_data
-        for key in new_agent_data:
+        for key in new_data:
             if key in existing_data:
-                existing_data[key] = new_agent_data[key]
+                existing_data[key] = new_data[key]
         
-        # 3. Convert back to YAML string
+        # 3. return the updated data
         return existing_data
 
+    # -------------------------------------------------------------------
+    # Helper to create filepath
+    # -------------------------------------------------------------------
+    def create_filepath(self, agent_name: str, number: str, template_type: TemplateType):
+        """
+        Description:
+            Creates a filepath for the agent data.
 
+        Args:
+            agent_name (str): the name of the agent
+            number (str): the number of the template
+            template_type (TemplateType): the type of template
+
+        Returns:
+            str: the filepath
+
+        Example:
+            create_filepath("John Doe", "0", TemplateType.AGENT)
+        """
+        # 1. create the filepath based on the template type
+        if template_type == TemplateType.AGENT:            
+            return os.path.join(self.agents_config_dir, agent_name, agent_name + ".yaml")
+        elif template_type == TemplateType.SEASON:
+            return os.path.join(self.agents_config_dir, agent_name, "season_" + number, "season_" + number + ".yaml")
+        elif template_type == TemplateType.EPISODE:
+            return os.path.join(self.agents_config_dir, agent_name, "season_" + number, "s" + number+ "_episode_" + number + ".yaml")
 
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file
     # -------------------------------------------------------------------
-    def save_agent_yaml(self, agent_data: dict):
+    def save_yaml_file(self, save_path: str, yaml_data: dict):
         """
         Description:
             Save agent data to a YAML file at the specified path or default location.
         
         Args:
-            agent_data: Dictionary containing agent configuration
-            config_path: Optional custom path to save the YAML file
-            debug (bool, optional): whether to print debug information. Defaults to False.
+            filepath: The path to save the YAML file
+            yaml_data: The data to save to the YAML file
 
         Returns:
             None
 
         Example:
             agent_data = {"name": "John Doe", "age": 30}
-            save_agent_yaml(agent_data, config_path="tests/test.yaml", debug=True)
-        """      
-        # 1. create a file to save the response
-        agent_dir = os.path.join(self.agents_config_dir, agent_data["name"])
-        save_path = os.path.join(agent_dir, f"{agent_data['name']}.yaml")
-        
-        # 2. Ensure directory exists
+            save_yaml_file(filepath="tests/test.yaml", yaml_data=agent_data)
+        """              
+        # 1. Ensure directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-        # 3. Save the response to the file
+        # 2. Save the response to the file
         with open(save_path, "w", encoding="utf-8") as f:
             try:
-                # Convert dictionary to YAML string, then write directly
-                yaml_string = yaml.dump(agent_data, allow_unicode=True, default_flow_style=False)
+                # Convert dictionary to YAML string, then write directly to persver emoji images
+                # Others will get unicodes instead of the emojis
+                yaml_string = yaml.dump(yaml_data, allow_unicode=True, default_flow_style=False)
                 f.write(yaml_string)
+                print(f"save_path is: {save_path}")
+                return save_path
             except Exception as e:
                 print(f"Error saving response to file: {str(e)}")
                 return None
