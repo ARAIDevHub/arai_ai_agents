@@ -1,5 +1,4 @@
 current_season_number: 0
 current_episode_number: 0
 current_post_number: 0
-all_episodes_finished: false
-all_posts_finished: false
+post_every_x_minutes: 1
