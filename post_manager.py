@@ -29,8 +29,6 @@ class PostManager:
         # step 4: get the season file
         self.agent_file = os.path.join(self.agent_folder, "ZorpTheAlien.yaml")
         self.tracker_file = os.path.join(self.agent_folder, "tracker.yaml")
-        self.season_file = os.path.join(self.season_folder, "season_1.yaml")
-        self.episode_file = os.path.join(self.episode_folder, "s1_episode_1.yaml")
 
         # load agent yaml file
         with open(self.agent_file, 'r', encoding='utf-8') as f:
@@ -39,6 +37,9 @@ class PostManager:
         # Load the YAML file into a dictionary
         with open(self.tracker_file, 'r', encoding='utf-8') as f:
             self.tracker_data = yaml.safe_load(f)
+
+        self.season_file = os.path.join(self.season_folder, "season_" + str(self.tracker_data['current_season_number']) + ".yaml")
+        self.episode_file = os.path.join(self.episode_folder, "s" + str(self.tracker_data['current_season_number']) + "_episode_" + str(self.tracker_data['current_episode_number']) + ".yaml")
 
         # load season yaml file
         with open(self.season_file, 'r', encoding='utf-8') as f:
@@ -54,6 +55,11 @@ class PostManager:
         self.season_number = self.tracker_data['current_season_number']
         self.episode_number = self.tracker_data['current_episode_number']
         self.post_number = self.tracker_data['current_post_number']
+
+        print ("post_number: ", self.post_number)
+        print ("episode_number: ", self.episode_number)
+        print ("season_number: ", self.season_number)
+
 
     def change_season(self, season_number: int):
         '''
@@ -96,7 +102,7 @@ class PostManager:
             post_manager.change_episode(1)
         '''
 
-        if episode_number > 28-1:
+        if episode_number >= 28-1:
             self.change_season(self.season_number + 1)            
             self.episode_number = 0
 
@@ -126,7 +132,7 @@ class PostManager:
             post_content = post_manager.change_post_number(1)
         '''
 
-        if post_number > 12-1:
+        if post_number >= 12-1:
             self.change_episode(self.episode_number + 1)
             self.post_number = 0
         
@@ -158,14 +164,19 @@ class PostManager:
             post_manager.post_to_twitter()
         '''
         print ("Preparing to post to twitter")
+
         tweet_content = self.change_post_number(self.post_number)
+        print (tweet_content)
+
+        '''
         tweet_result = self.twitter_connector.post_tweet(tweet_content)
 
-        print (tweet_result)
+        print (tweet_result)        
 
         # reset the post number if the tweet failed so the post can be attempted again
         if tweet_result.startswith("Error"):
-            self.post_number -= 1    
+            self.post_number -= 1                
+        '''
         
         '''
         zeros can bring down their whole economy. Fascinating. /s #CryptoChaos #EarthIsWeird #ZorpTheAlien

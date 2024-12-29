@@ -34,8 +34,9 @@ def step_1(ai_model, debug=False):
         # "personality": "",
         # "communication_style": "",
         # "topic": "",
-        "concept": "alien drone pilot who is a sarcastic asshole visiting earth to report back his findings to his home planet",
-        "agent_yaml": yaml.dump(agent_template)
+        # "concept": "alien drone pilot who is a sarcastic asshole visiting earth to report back his findings to his home planet",
+        "concept": "A dad who posts dad jokes on twitter",
+        "agent_yaml": yaml.dump(agent_template)        
     }
 
     # step 1.3: Run the prompt

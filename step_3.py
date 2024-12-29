@@ -46,7 +46,7 @@ def step_3(ai_model, agent_file_path, season_file_path):
 
     # step 3.6: Access the 'episodes' key under 'season'
     episodes = season_data["season"]["episodes"]
-    preivous_episode = None
+    previous_episode = None
     # step 3.7: Loop through each episode in the list
     for episode in episodes:
         # step 3.8: create a new episode template
