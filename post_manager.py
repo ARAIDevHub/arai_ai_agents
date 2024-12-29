@@ -1,61 +1,68 @@
 import yaml
 import os
 import connectors.twitter_connector as twitter
+import datetime
 
 class PostManager:
-    def __init__(self):
+    def __init__(self, agent_name: str):
         '''
         Description: Initialize the post manager
 
         Args:
-            None
+            agent_name (str): The name of the agent
 
         Returns:
             None
 
         Example:
-            post_manager = PostManager()
+            post_manager = PostManager("ZorpTheAlien")
         '''
 
         # step 1: get the twitter connector
         self.twitter_connector = twitter.TwitterConnector()
 
-        # step 2: get the folders
+        # step 2: get the agent name
+        self.agent_name = agent_name
+
+        # step 3: get the folders
         self.root_folder = os.path.join(os.path.dirname(__file__), "configs")
-        self.agent_folder = os.path.join(self.root_folder, "ZorpTheAlien")
+        #self.agent_folder = os.path.join(self.root_folder, "ZorpTheAlien")
+        self.agent_folder = os.path.join(self.root_folder, self.agent_name)
         self.season_folder = os.path.join(self.agent_folder, "season_1")
         self.episode_folder = self.season_folder
 
-        # step 4: get the season file
-        self.agent_file = os.path.join(self.agent_folder, "ZorpTheAlien.yaml")
-        self.tracker_file = os.path.join(self.agent_folder, "tracker.yaml")
+        print (f"Agent folder: {self.agent_folder}")
 
-        # load agent yaml file
-        with open(self.agent_file, 'r', encoding='utf-8') as f:
-            self.agent_data = yaml.safe_load(f)
+        # step 4: get the tracker file
+        self.tracker_file = os.path.join(self.agent_folder, "tracker.yaml")
 
         # Load the YAML file into a dictionary
         with open(self.tracker_file, 'r', encoding='utf-8') as f:
             self.tracker_data = yaml.safe_load(f)
 
+        # step 5: get the season file
         self.season_file = os.path.join(self.season_folder, "season_" + str(self.tracker_data['current_season_number']) + ".yaml")
+
+        # step 6: get the episode file
         self.episode_file = os.path.join(self.episode_folder, "s" + str(self.tracker_data['current_season_number']) + "_episode_" + str(self.tracker_data['current_episode_number']) + ".yaml")
 
-        # load season yaml file
+        # step 7: load season yaml file
         with open(self.season_file, 'r', encoding='utf-8') as f:
             self.season_data = yaml.safe_load(f)
 
+        # step 8: load episode yaml file
         # load episode yaml file
         with open(self.episode_file, 'r', encoding='utf-8') as f:
             self.episode_data = yaml.safe_load(f)
 
-        # step 5: setup counters
+        # step 9: setup counters
         # remember that code uses indexes starting at 0
         # even if we have the number for the season, episode, and post starting at 1
         self.season_number = self.tracker_data['current_season_number']
         self.episode_number = self.tracker_data['current_episode_number']
         self.post_number = self.tracker_data['current_post_number']
 
+        # step 10: print the counters
         print ("post_number: ", self.post_number)
         print ("episode_number: ", self.episode_number)
         print ("season_number: ", self.season_number)
@@ -76,7 +83,7 @@ class PostManager:
         '''
 
         print(f"Changing season to ({season_number} + 1)")
-        self.season_file = f'configs/ZorpTheAlien/season_{season_number}/season_{season_number}.yaml'
+        self.season_file = f"configs/{self.agent_name}/season_{season_number}/season_{season_number}.yaml"
 
         with open(self.season_file, 'r', encoding='utf-8') as f:
             self.season_data = yaml.safe_load(f)
@@ -106,7 +113,7 @@ class PostManager:
             self.change_season(self.season_number + 1)            
             self.episode_number = 0
 
-        self.episode_file = f'configs/ZorpTheAlien/season_1/s1_episode_{episode_number}.yaml'
+        self.episode_file = f"configs/{self.agent_name}/season_1/s1_episode_{episode_number}.yaml"
 
         with open(self.episode_file, 'r', encoding='utf-8') as f:
             self.episode_data = yaml.safe_load(f)
@@ -118,7 +125,7 @@ class PostManager:
 
         print(f"Changed episode to {self.episode_file}")
 
-    def change_post_number(self, post_number: int):
+    def next_post_number(self, post_number: int):
         '''
         Description: Change the post number
 
@@ -163,10 +170,33 @@ class PostManager:
         Example:
             post_manager.post_to_twitter()
         '''
-        print ("Preparing to post to twitter")
+        # print ("Preparing to post to twitter" + "\n")
 
-        tweet_content = self.change_post_number(self.post_number)
-        print (tweet_content)
+        tweet_content = self.next_post_number(self.post_number)
+        # print (tweet_content)
+        # save to log file
+        try:
+            # First, read existing log if it exists
+            log_file = os.path.join(self.agent_folder, f"{self.agent_name}_post_log.yaml")
+            try:
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    log_data = yaml.safe_load(f) or {'posts': []}
+            except FileNotFoundError:
+                log_data = {'posts': []}
+
+            # Add new post to the array
+            log_data['posts'].append({
+                'post_id': f"s_{self.season_number}_e_{self.episode_number}_p_{self.post_number}",
+                'content': tweet_content,
+                'timestamp': str(datetime.datetime.now())
+            })
+
+            # Write back the updated log
+            with open(log_file, 'w', encoding='utf-8') as f:
+                yaml.dump(log_data, f, allow_unicode=True)
+
+        except Exception as e:
+            print(f"Error writing to log file: {e}")
 
         '''
         tweet_result = self.twitter_connector.post_tweet(tweet_content)
@@ -176,20 +206,4 @@ class PostManager:
         # reset the post number if the tweet failed so the post can be attempted again
         if tweet_result.startswith("Error"):
             self.post_number -= 1                
-        '''
-        
-        '''
-        zeros can bring down their whole economy. Fascinating. /s #CryptoChaos #EarthIsWeird #ZorpTheAlien
-
-        Error posting tweet: ('Connection aborted.', RemoteDisconnected('Remote end zeros can bring down their whole economy. Fascinating. /s #CryptoChaos #EarthIsWeird #ZorpTheAlien
-
-        Error posting tweet: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
-        Posted tweet: Seven suggests I should "notify" the humans about the glitch. As if I'd waste
-        my time saving them from their own incompetence. 🙄 #SarcasmBot #XylosianFiles #ZorpTheAlien
-
-        Tweeted: Tempted to just... let it happen. It's like watching a "train wreck" as the humans say,
-        except the train is made of digital currency and the wreck is global economic collapse. #AgentZorp #DroneDiaries #ZorpTheAlien
-
-        Posted tweet: Tempted to just... let it happen. It's like watching a "train wreck" as the humans say,
-        except the train is made of digital currency and the wreck is global economic collapse. #AgentZorp #DroneDiaries #ZorpTheAlien
         '''
