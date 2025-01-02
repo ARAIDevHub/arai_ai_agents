@@ -67,7 +67,15 @@ plugins:
         - scripts/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
-  - mkdocstrings
+  - include-markdown
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_source: true
+            show_root_heading: true
 
 nav:
   - Home: index.md
