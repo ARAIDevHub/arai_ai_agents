@@ -1,0 +1,42 @@
+# Docs workflow
+# Deploy documentation to GitHub Pages
+# What It Does
+# - Triggers on push and pull requests to main.
+# - Installs mkdocs-material (which pulls in mkdocs).
+# - Runs mkdocs gh-deploy --force, pushing the built docs to the gh-pages branch.
+# - Make sure GitHub Pages is enabled and set to use the gh-pages branch.
+
+name: Docs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Allows pushing to gh-pages
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the code
+      - uses: actions/checkout@v3
+
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3. Install MkDocs (with the Material theme)
+      - name: Install MkDocs
+        run: |
+          pip install --upgrade pip
+          pip install mkdocs-material
+
+      # 4. Deploy documentation to GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force

@@ -1,0 +1,40 @@
+
+Google Style Python Docstrings
+https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
+Authors
+If you create a new module, add this to the top of the file:
+
+
+    """
+    Module: twitter_connector
+    =========================
+
+    This module implements the TwitterConnector class for interacting with Twitter APIs.
+
+    Title: Twitter Connector
+    Summary: Twitter connector implementation.
+    Authors:
+        - @TheBlockRhino
+    Date: 2024-12-31
+    Last Updated: 2024-12-31
+    URLs:
+        - https://ava-ai.io
+        - https://github.com/AVADevHub/ava-ai-agents
+        - https://x.com/TheBlockRhino
+    """
+
+If you modify an existing module, add your name to the list of authors, and edit the last updated date:
+
+    Authors:
+        - @TheBlockRhino
+        - @YourName
+    Date: xxxx-xx-xx
+    Last Updated: New-Date
+
+Update the rest of the comments in the file to match your changes.
+Make sure your git commit message is descriptive on the changes you made.
+Use Tags for many commits and major changes or additions.
+
+Git Commit Message Format:
+https://www.gitkraken.com/gitkon/semantic-versioning-git-tags

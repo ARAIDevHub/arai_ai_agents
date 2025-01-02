@@ -38,3 +38,6 @@ dont_share/
 
 #agent configs and memory
 configs/
+
+#working files
+to_delete/
