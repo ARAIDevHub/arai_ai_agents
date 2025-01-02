@@ -1,0 +1,83 @@
+site_name: AVA AI Agents
+site_description: Documentation for AVA AI Agents
+site_author: TheBlockRhino
+
+# The docs directory (where your .md files live)
+docs_dir: docs
+
+# Build directory (where MkDocs will output the static site)
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline 
+        name: Switch to dark mode
+      primary: teal
+      accent: purple 
+    - scheme: slate 
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode    
+      primary: teal
+      accent: lime
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/AVADevHub/ava_agent_prompt_chaining
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/AVA_AI_AGENTS
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings
+
+nav:
+  - Home: index.md
+  - Tutorials: tutorials.md
+  - How-to Guides: how-to-guides.md
+  - Reference: reference.md
+  - Explanation: explanation.md
+  - Code Examples: code.md
+  - Code Reference: reference/
+
+
+copyright: |
+  &copy; 2024 <a href="https://github.com/AVADevHub"  target="_blank" rel="noopener">AVADevHub</a>
