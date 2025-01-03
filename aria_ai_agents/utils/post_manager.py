@@ -1,7 +1,10 @@
+# standard imports
 import yaml
 import os
-import connectors.twitter_connector as twitter
 import datetime
+
+# custom ARIA code imports
+import connectors.twitter_connector as twitter
 
 class PostManager:
     def __init__(self, agent_name: str):
@@ -45,7 +48,7 @@ class PostManager:
 
         # step 6: get the episode file
         self.episode_file = os.path.join(self.episode_folder, "s" + str(self.tracker_data['current_season_number']) + "_episode_" + str(self.tracker_data['current_episode_number']) + ".yaml")
-
+        
         # step 7: load season yaml file
         with open(self.season_file, 'r', encoding='utf-8') as f:
             self.season_data = yaml.safe_load(f)
@@ -111,7 +114,7 @@ class PostManager:
 
         if episode_number >= 28-1:
             self.change_season(self.season_number + 1)            
-            self.episode_number = 0
+            self.episode_number = 1
 
         self.episode_file = f"configs/{self.agent_name}/season_1/s1_episode_{episode_number}.yaml"
 
@@ -141,10 +144,10 @@ class PostManager:
 
         if post_number >= 12-1:
             self.change_episode(self.episode_number + 1)
-            self.post_number = 0
+            self.post_number = 1
         
-        # Get the post content and clean it up
-        post_content = self.episode_data['episode']['posts'][post_number]['post_content']
+        # Get the post content and clean it up, remember post numbers vs index starting at 0
+        post_content = self.episode_data['episode']['posts'][post_number-1]['post_content']
         post_content = ' '.join(post_content.split()).strip()
         # Convert Unicode escape sequences to emojis
         post_content = post_content.encode().decode('unicode-escape')

@@ -1,12 +1,15 @@
+# standard imports
 import yaml
-from content_generator import ContentGenerator
-import step_2 as next_step
-from template_types import TemplateType
+
+# custom ARIA imports
+from utils.content_generator import ContentGenerator
+import prompt_chaining.step_2 as next_step
+from utils.template_types import TemplateType
 
 # -------------------------------------------------------------------
 # Step 1: Create a new agent
 # -------------------------------------------------------------------
-def step_1(ai_model, concept: str):
+def step_1(ai_model, concept: str, chain_step: bool = False):
     '''
     Description:
         Create a new agent
@@ -42,7 +45,7 @@ def step_1(ai_model, concept: str):
     # step 1.3: Run the prompt
     agent_data = manager.run_prompt(
         # prompt_key="prompt_1 (Character Creation)",
-        prompt_key="promot_1 (Character Sheet Creation)",
+        prompt_key="prompt_1 (Character Sheet Creation)",
         template_vars=prompt_1_vars, 
         ai_model=ai_model
     )
@@ -71,4 +74,5 @@ def step_1(ai_model, concept: str):
     )
 
     # step 1.8: Move onto the next step of creating a new season
-    next_step.step_2(ai_model, agent_file_path)
+    if chain_step:
+        next_step.step_2(ai_model, agent_file_path)

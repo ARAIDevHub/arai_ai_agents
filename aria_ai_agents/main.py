@@ -2,14 +2,34 @@
 import os
 import yaml
 import schedule
+import shutil
 import time
 import threading
 import argparse
 
-# custom ARIA code imports
+# custom ARIA imports
 from models.gemini_model import GeminiModel
 import utils.post_manager as twitter_manager
+import prompt_chaining.step_1 as step_1
+import prompt_chaining.step_2 as step_2
+import prompt_chaining.step_3 as step_3
 
+def list_available_seasons(agent_name):
+    """List all available seasons for an agent
+    
+    Args:
+        agent_name (str): The name of the agent to list seasons for
+
+    Returns:
+        list: List of available season names
+    """
+    seasons = []
+    config_path = os.path.join("configs", agent_name)
+    if os.path.exists(config_path):
+        for item in os.listdir(config_path):
+            if os.path.isdir(os.path.join(config_path, item)):
+                seasons.append(item)
+    return seasons
 
 def list_available_agents():
     """List all available agent configs in the configs folder
@@ -60,7 +80,6 @@ if __name__ == "__main__":
         post_manager (PostManager): The post manager for the current agent
         current_agent (str): The name of the current agent
         post_every_x_minutes (int): The frequency of posts in minutes
-        chain_prompt_file (str): The file containing the chain prompt
         ai_model (GeminiModel): The AI model to use for generating posts
     """
     parser = argparse.ArgumentParser()
@@ -73,8 +92,8 @@ if __name__ == "__main__":
     scheduler_thread = None
     post_manager = None
     current_agent = None
+    agent_file_path = None
     post_every_x_minutes = None
-    chain_prompt_file = "chain_prompts_v2.yaml"
 
     # Instantiate your AI model
     ai_model = GeminiModel()
@@ -82,22 +101,28 @@ if __name__ == "__main__":
     while True:
         print("\n=== Main Menu ===")
         print("Welcome to ARIA Agents.")
-        print("Please select an option:")
-        
+        print("Please select an option:\n")
+
+        print("Current Agent: ", current_agent)
+
         print("\n= Agent Management =")
         print("1. Select an existing Agent")
+        print("2. Create a new Agent")                 
+
+        print("\n= Media Management =")
+        print("3. Create a new Season")
+        print("4. Create Season posts")
         
         print("\n= Scheduler Management =")
-        print("2. Start Scheduler")
-        print("3. Check posting status")
-        print("4. Force post now")
-        print("5. Pause/Resume posting")
+        print("5. Start Scheduler")
+        print("6. Check posting status")
+        print("7. Force post now")
+        print("8. Pause/Resume posting")
         
         print("\n= Miscellaneous =")
-        print("6. Show ASCII Logo")
-        print("7. Exit")
+        print("9. Exit")
 
-        choice = input("\nEnter your choice (1-7): ")
+        choice = input("\nEnter your choice (1-9): ")
         
         if choice == '1':
             agents = list_available_agents()
@@ -114,6 +139,7 @@ if __name__ == "__main__":
                 if 0 <= agent_idx < len(agents):
                     current_agent = agents[agent_idx]
                     config = load_agent_config(current_agent)
+                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}.yaml")
                     post_every_x_minutes = config['post_every_x_minutes']
                     post_manager = twitter_manager.PostManager(current_agent)
                     print(f"\nSelected agent: {current_agent}")
@@ -123,6 +149,65 @@ if __name__ == "__main__":
                 print("Please enter a valid number!")
 
         elif choice == '2':
+            print("Creating a new agent...")
+
+            try:                
+                agent_concept = input("\nProvide a concept for the new agent: ")                
+                if agent_concept:
+                    # Create the new agent using the prompt chaining
+                    step_1.step_1(ai_model, agent_concept)
+                    # Refresh the list of agents after creation
+                    agents = list_available_agents()
+                    # Get the newly created agent (assuming it's the last one added)
+                    current_agent = agents[-1]
+                    config = load_agent_config(current_agent)
+                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}.yaml")
+                    # copy over tracker.yaml from the template folder to the new agent
+                    shutil.copy(os.path.join("template", "tracker_template.yaml"), os.path.join("configs", current_agent, "tracker.yaml"))
+                    print(f"\nCreated new agent: {current_agent}")
+                else:
+                    print("Please provide a concept for the new agent!")
+            except Exception as e:
+                print(f"Error creating agent: {str(e)}")
+
+        elif choice == '3':
+            if not current_agent:
+                print("Please select an agent first!")
+                continue
+            else:
+                try:
+                    print("Creating a new season...")
+                    step_2.step_2(ai_model, current_agent)
+                except Exception as e:
+                    print(f"Error creating season: {str(e)}")
+
+        elif choice == '4':
+            if not current_agent:
+                print("Please select an agent first!")
+                continue
+            else:
+                seasons = list_available_seasons(current_agent)
+                if not seasons:
+                    print("No seasons found for this agent!")
+                    continue
+                    
+                print("\nAvailable Seasons:")
+                for idx, season in enumerate(seasons, 1):
+                    print(f"{idx}. {season}")
+                
+                try:
+                    season_idx = int(input("\nSelect season number: ")) - 1
+                    if 0 <= season_idx < len(seasons):
+                        current_season = seasons[season_idx]
+                        season_file_path = os.path.join("configs", current_agent, current_season, f"{current_season}.yaml")
+                        step_3.step_3(ai_model, agent_file_path, season_file_path)
+                        print(f"\nSelected season: {current_season}")
+                    else:
+                        print("Invalid selection!")
+                except ValueError:
+                    print("Please enter a valid number!")
+
+        elif choice == '5':
             if not current_agent:
                 print("Please select an agent first!")
                 continue
@@ -140,7 +225,7 @@ if __name__ == "__main__":
             scheduler_thread.start()
             print(f"Scheduler started for {current_agent}")
 
-        elif choice == '3':
+        elif choice == '6':
             if not current_agent:
                 print("No agent selected!")
             else:
@@ -148,30 +233,21 @@ if __name__ == "__main__":
                 print(f"Posting schedule: Every {post_every_x_minutes} minutes")
                 print(f"Scheduler is {'running' if scheduler_running else 'paused'}")
 
-        elif choice == '4':
+        elif choice == '7':
             if not post_manager:
                 print("Please select an agent first!")
             else:
                 print("Forcing a post now...")
                 post_manager.post_to_twitter()
 
-        elif choice == '5':
+        elif choice == '8':
             if not scheduler_thread:
                 print("Scheduler hasn't been started yet!")
             else:
                 scheduler_running = not scheduler_running
                 print(f"Posting has been {'paused' if not scheduler_running else 'resumed'}")
 
-        elif choice == '6':
-            if not current_agent:
-                print("Please select an agent first!")
-            else:
-                try:
-                    print(f"Displaying ASCII logo.")
-                except Exception as e:
-                    print(f"Error displaying image: {e}")
-
-        elif choice == '7':
+        elif choice == '9':
             print("Shutting down...")
             scheduler_running = False
             if scheduler_thread:
