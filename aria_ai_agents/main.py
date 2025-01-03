@@ -1,15 +1,22 @@
-from models.gemini_model import GeminiModel
+# standard imports
+import os
 import yaml
 import schedule
 import time
 import threading
 import argparse
+
+# custom ARIA code imports
+from models.gemini_model import GeminiModel
 import utils.post_manager as twitter_manager
-import os
 
 
 def list_available_agents():
-    """List all available agent configs in the configs folder"""
+    """List all available agent configs in the configs folder
+
+    Returns:
+        list: List of available agent names
+    """
     agents = []
     configs_dir = "configs"
     if os.path.exists(configs_dir):
@@ -19,14 +26,25 @@ def list_available_agents():
     return agents
 
 def load_agent_config(agent_name):
-    """Load configuration for the selected agent"""
+    """Load configuration for the selected agent
+    
+    Args:
+        agent_name (str): The name of the agent to load configuration for
+
+    Returns:
+        dict: The configuration for the selected agent
+    """
     config_path = os.path.join("configs", agent_name, "tracker.yaml")
     with open(config_path, 'r', encoding='utf-8') as f:
         return yaml.safe_load(f)
 
 # run the scheduler
 def run_scheduler():
-    """ Continuously run the scheduler in a loop """
+    """ Continuously run the scheduler in a loop 
+    
+    Global:
+        scheduler_running (bool): Whether the scheduler is running
+    """
     global scheduler_running
     scheduler_running = True
     while scheduler_running:
@@ -34,6 +52,17 @@ def run_scheduler():
         time.sleep(1)
 
 if __name__ == "__main__":
+    """ Main entry point for the ARIA Agents application 
+
+    Global:
+        scheduler_running (bool): Whether the scheduler is running
+        scheduler_thread (threading.Thread): The thread running the scheduler
+        post_manager (PostManager): The post manager for the current agent
+        current_agent (str): The name of the current agent
+        post_every_x_minutes (int): The frequency of posts in minutes
+        chain_prompt_file (str): The file containing the chain prompt
+        ai_model (GeminiModel): The AI model to use for generating posts
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--run-time', type=int, default=0, 
                        help='How many minutes to run (0 for indefinite)')
