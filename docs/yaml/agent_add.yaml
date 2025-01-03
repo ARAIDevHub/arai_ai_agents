@@ -1,0 +1,8 @@
+concept:
+model_type: "gemini"
+model_name: "gemini-exp-1206"
+memory_store: "gemini_chroma"
+connectors:
+  twitter: true
+  telegram: false
+  discord: false
