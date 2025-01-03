@@ -1,6 +1,10 @@
+# standard imports
+import os
 import yaml
-from content_generator import ContentGenerator
-from template_types import TemplateType
+
+# custom ARIA imports
+from utils.content_generator import ContentGenerator
+from utils.template_types import TemplateType
 
 def step_3(ai_model, agent_file_path, season_file_path):
     '''
@@ -49,6 +53,32 @@ def step_3(ai_model, agent_file_path, season_file_path):
     previous_episode = None
     # step 3.7: Loop through each episode in the list
     for episode in episodes:
+
+        # check to see if we already have created posts for this episode
+        # if we do, skip to the next episode
+        # check by file name
+        try:
+            # use relative path to get to project root (two levels up from utils)
+            project_root = os.path.dirname(os.path.dirname(__file__))
+        
+            # Set the directories relative to project root
+            agents_config_dir = os.path.join(project_root, "configs")      
+        
+            # create file name
+            episode_file_path = os.path.join(
+                agents_config_dir,
+                f"{agent_yaml['name']}",
+                f"season_{season_template['season']['season_number']}",
+                f"s_{season_template['season']['season_number']}_episode_{episode['episode_number']}.yaml"
+            )
+            # Check if file exists
+            if os.path.exists(episode_file_path):
+                print(f"Episode {episode['episode_number']} already exists, skipping...")
+                continue
+            
+        except FileNotFoundError:
+            pass
+
         # step 3.8: create a new episode template
         episode_template = manager.create_new_template_yaml(TemplateType.EPISODE)
     
@@ -77,7 +107,7 @@ def step_3(ai_model, agent_file_path, season_file_path):
         # step 3.11: Run the prompt 
         episode_data = manager.run_prompt(
             # prompt_key="prompt_1 (Character Creation)",
-            prompt_key="promot_3 (Episode Posts Creation)",
+            prompt_key="prompt_3 (Episode Posts Creation)",
             template_vars=prompt_3_vars, 
             ai_model=ai_model,
         )
