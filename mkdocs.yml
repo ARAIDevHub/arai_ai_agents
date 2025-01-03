@@ -64,7 +64,8 @@ plugins:
   - search
   - gen-files:
       scripts:
-        - scripts/gen_ref_pages.py
+        - scripts/gen_ref_py_pages.py
+        - scripts/gen_ref_yaml_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
   - include-markdown
@@ -85,6 +86,7 @@ nav:
   - Explanation: explanation.md
   - Code Examples: code.md
   - Code Reference: reference/
+  - Yaml Reference: yaml/
 
 
 copyright: |

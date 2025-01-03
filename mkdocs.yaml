@@ -1,0 +1,18 @@
+nav:
+  - Home: index.md
+  - API Reference:
+    - Models: api/models.md
+    - Connectors: api/connectors.md
+  - YAML Reference:
+    - Templates:
+      - Chain Prompts V2:
+        - Agent Template: yaml/templates/chain_prompts_v2_templates/agent_template.md
+        - Episode Template: yaml/templates/chain_prompts_v2_templates/episode_template.md
+        # Add other template files as needed
+      - Chain Prompts V3:
+        - Agent Template: yaml/templates/chain_prompts_v3/agent_template.md
+        - Episode Template: yaml/templates/chain_prompts_v3/episode_template.md
+        # Add other template files as needed
+    - Responses:
+      - Processed Response: yaml/responses/processed_response.md
+      - Raw Response: yaml/responses/raw_response.md 
