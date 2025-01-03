@@ -1,9 +1,12 @@
-import yaml
-from jinja2 import Template
-from models.base_model import ModelInterface
+# standard imports
 import os
 import shutil
-from template_types import TemplateType
+import yaml
+from jinja2 import Template
+
+# custom ARIA code imports
+from models.base_model import ModelInterface
+from utils.template_types import TemplateType
 
 class ContentGenerator:
     """
@@ -16,7 +19,7 @@ class ContentGenerator:
         agent_template_path (str): the path to the agent template
     """
 
-    def __init__(self, chain_prompt_file: str):
+    def __init__(self):
         """
         Description:
             Initialize the ContentGenerator class.
@@ -30,16 +33,18 @@ class ContentGenerator:
         Example:
             content_generator = ContentGenerator()            
         """
-        # 1. Set the directories
-        # use relative path to the current file to get the directories
-        self.agents_config_dir = os.path.join(os.path.dirname(__file__), "configs")        
-        self.prompts_dir = os.path.join(os.path.dirname(__file__), "prompts")        
-
-        # 2. Set the path for the chain prompt we will be using
-        self.chain_prompts_path = os.path.join(self.prompts_dir, chain_prompt_file)       
+        # use relative path to get to project root (two levels up from utils)
+        project_root = os.path.dirname(os.path.dirname(__file__))
         
-        # 2. Set the paths for the templates
-        self.templates_dir = os.path.join(os.path.dirname(__file__), "templates", chain_prompt_file)
+        # Set the directories relative to project root
+        self.agents_config_dir = os.path.join(project_root, "configs")        
+        self.prompts_dir = os.path.join(project_root, "prompts")        
+
+        # Set the path for the chain prompt
+        self.chain_prompts_path = os.path.join(self.prompts_dir, "prompt_chaining.yaml")       
+        
+        # Set the paths for the templates
+        self.templates_dir = os.path.join(project_root, "templates")
         self.agent_template_path = os.path.join(self.templates_dir, "agent_template.yaml")
         self.season_template_path = os.path.join(self.templates_dir, "season_template.yaml")
         self.episode_template_path = os.path.join(self.templates_dir, "episode_template.yaml")
