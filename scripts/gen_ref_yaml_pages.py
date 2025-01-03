@@ -32,9 +32,9 @@ def process_yaml_files():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for yaml_file in yaml_source.rglob("*.yaml"):
-        # Skip the 'configs' directory and its subfolders
-        if "configs" in yaml_file.parts:
-            print(f"Skipping file in configs folder: {yaml_file}")
+        # Skip the 'configs' and 'responses' directories and their subfolders
+        if any(skip_dir in yaml_file.parts for skip_dir in ["configs", "responses"]):
+            print(f"Skipping file in excluded folder: {yaml_file}")
             continue
 
         print(f"Found YAML file: {yaml_file}")
