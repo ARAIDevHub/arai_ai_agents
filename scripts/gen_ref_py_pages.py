@@ -13,7 +13,7 @@ print(f"Looking for Python files in: {src}")
 for path in sorted(src.rglob("__init__.py")):
     module_path = path.relative_to(src).parent
     doc_path = path.relative_to(src).parent / "index.md"
-    full_doc_path = Path("reference", doc_path)
+    full_doc_path = Path("api", doc_path)
 
     parts = tuple(module_path.parts)
     
@@ -33,7 +33,7 @@ for path in sorted(src.rglob("__init__.py")):
 for path in sorted(src.rglob("*.py")):
     module_path = path.relative_to(src).with_suffix("")
     doc_path = path.relative_to(src).with_suffix(".md")
-    full_doc_path = Path("reference", doc_path)
+    full_doc_path = Path("api", doc_path)
 
     parts = tuple(module_path.parts)
 
@@ -44,7 +44,7 @@ for path in sorted(src.rglob("*.py")):
     elif "_pycache_" in str(path):
         continue
 
-    # If file is in a subdirectory, make it a child of that directory
+    # Use nested navigation to ensure collapsible sections
     if len(parts) > 1:
         nav[parts[:-1] + (parts[-1],)] = doc_path.as_posix()
     else:
@@ -61,5 +61,8 @@ for path in sorted(src.rglob("*.py")):
     mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
 
 # Write the navigation file
-with mkdocs_gen_files.open("reference/SUMMARY.md", "w") as nav_file:
-    nav_file.writelines(nav.build_literate_nav())
+summary_file = Path("api/SUMMARY.md")
+with mkdocs_gen_files.open(summary_file, "w") as nav_file:
+    for line in nav.build_literate_nav():
+        # Convert *-based bullet points to `-` for MkDocs
+        nav_file.write(line.replace("*", "-"))

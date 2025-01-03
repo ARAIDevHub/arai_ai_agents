@@ -1,5 +1,5 @@
-site_name: AVA AI Agents
-site_description: Documentation for AVA AI Agents
+site_name: ARIA AI Agents
+site_description: Documentation for ARIA AI Agents
 site_author: TheBlockRhino
 
 # The docs directory (where your .md files live)
@@ -85,7 +85,7 @@ nav:
   - Reference: reference.md
   - Explanation: explanation.md
   - Code Examples: code.md
-  - Code Reference: reference/
+  - Code Reference: api/
   - Yaml Reference: yaml/
 
 
