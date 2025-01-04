@@ -4,6 +4,18 @@
 
 ---
 
+## Table of Contents
+
+1. [A Brief History of AI](#1-a-brief-history-of-ai)
+2. [How LLMs Differ from Other AI Approaches](#2-how-llms-differ-from-other-ai-approaches)
+3. [Tokens, Prompts & Generation](#3-tokens-prompts-generation)
+4. [Two Paths to Take: Prompt Chaining vs. Chain-of-Thought Prompting](#4-two-paths-to-take-prompt-chaining-vs-chain-of-thought-prompting)
+5. [Limitations of LLMs](#5-limitations-of-llms)
+6. [How ARIA AI Agents Leverage LLMs](#6-how-aria-ai-agents-leverage-llms)
+7. [Conclusion](#7-conclusion)
+
+---
+
 ## 1. A Brief History of AI
 
 1. **Symbolic AI (1950s–1980s)**  

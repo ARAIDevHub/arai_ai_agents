@@ -1,19 +1,19 @@
-"""
-Module: gemini_model
-=========================
-This module implements the GeminiModel class for interacting with the Gemini API.
-
-Title: Gemini Model
-Summary: Gemini model implementation.
-Authors:
-    - @TheBlockRhino
-Date: 2024-12-31
-Last Updated: 2024-12-31
-URLs:
-    - https://aria-ai.io
-    - https://github.com/ARIA-DevHub/aria-ai-agents
-    - https://x.com/TheBlockRhino
-"""
+#
+# Module: gemini_model
+#
+# This module implements the GeminiModel class for interacting with the Gemini API.
+#
+# Title: Gemini Model
+# Summary: Gemini model implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
 import os
 import google.generativeai as genai
 from .base_model import ModelInterface
@@ -24,6 +24,9 @@ load_dotenv()
 
 class GeminiModel(ModelInterface):
     """Gemini model implementation.
+
+    Attributes:
+        model (str): The name of the Gemini model to use.
     """
 
     def __init__(self, api_key=None, model_name="gemini-exp-1206"):
@@ -41,13 +44,6 @@ class GeminiModel(ModelInterface):
         else:
             genai.configure(api_key=os.environ.get('GOOGLE_GEMINI_API_KEY'))
         self.model = genai.GenerativeModel(model_name)
-
-        """
-        # Load agent template configuration
-        agent_template_path = os.path.join("templates", "agent_template.yaml")
-        with open(agent_template_path, "r") as f:
-            self.agent_template = yaml.safe_load(f)
-        """
 
     # -------------------------------------------------------------------
     # Helper to generate a response to a given prompt using the Gemini API.
