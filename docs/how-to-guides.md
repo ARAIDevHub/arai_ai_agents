@@ -1,6 +1,6 @@
 # How-To Guide: Setting up ARIA AI, Google Gemini, and Twitter
 
-This guide walks you through the essential steps for installing **ARIA AI Agents** in a conda environment, configuring the Google Gemini API key, and authenticating a Twitter account for agent interactions.
+This guide walks you through the essential steps for installing **ARIA AI Agents** in a conda environment, configuring the Google Gemini API key, and authenticating a Twitter account for agent interactions. We also detail how environment variables are managed via a `.env` file using `python-dotenv`.
 
 ---
 
@@ -11,6 +11,10 @@ This guide walks you through the essential steps for installing **ARIA AI Agents
 3. [Obtain a Google Gemini API Key](#3-obtain-a-google-gemini-api-key)  
 4. [Get a Twitter API Key](#4-get-a-twitter-api-key)  
 5. [Authenticate Your Twitter Account](#5-authenticate-your-twitter-account)  
+6. [Debug Mode](#6-debug-mode)  
+7. [Processing Speed & Wait Times](#7-processing-speed--wait-times)  
+8. [Next Steps](#8-next-steps)  
+9. [Troubleshooting](#9-troubleshooting)
 
 ---
 
@@ -24,7 +28,7 @@ Conda environments keep dependencies isolated and help avoid conflicts with othe
      ```bash
      conda update conda
      ```
-   
+
 2. **Create a New Environment**  
    - In your terminal or Anaconda Prompt, run:
      ```bash
@@ -68,22 +72,29 @@ You now have an isolated environment ready for ARIA AI Agents.
 
 1. **Sign Up or Log In**  
    - Go to [Google Cloud Console](https://console.cloud.google.com/).
+
 2. **Create a New Project** (if needed)  
    - Click **Select a project** → **New Project**. Give it a name, then create it.
+
 3. **Enable the Gemini API**  
    - Navigate to **APIs & Services** → **Library**.
    - Search for **Gemini API** (or equivalent) and enable it.
+
 4. **Create Credentials**  
    - Under **APIs & Services** → **Credentials**, click **+ CREATE CREDENTIALS** → **API key**.
    - Copy the **API key** (e.g., `AIzaSyD...`).
-5. **Set the Environment Variable** (or place it in your `.env`):
-   ```bash
-   export GEMINI_API_KEY="AIzaSyD..."
-   ```
-   > **Tip**: Place the key in your `.env` file at the root of the project:
-   > ```bash
-   > GOOGLE_GEMINI_API_KEY=AIzaSyD...
-   > ```
+
+5. **Set the Environment Variable**  
+   - Either place it in your system environment:
+     ```bash
+     export GEMINI_API_KEY="AIzaSyD..."
+     ```
+   - **Or** place the key in your `.env` file at the root of the project:
+     ```bash
+     GOOGLE_GEMINI_API_KEY=AIzaSyD...
+     ```
+
+*(ARIA uses `python-dotenv` to automatically load variables from `.env` if configured.)*
 
 ---
 
@@ -93,8 +104,10 @@ To allow ARIA AI Agents to interact with Twitter, you need developer credentials
 
 1. **Apply for a Twitter Developer Account**  
    - Go to the [Twitter Developer Portal](https://developer.twitter.com/) and apply for a Developer account.
+
 2. **Create a Project & App**  
    - Once approved, create a **Project**, then create an **App** within that project.
+
 3. **Generate Keys & Tokens**  
    - Under **Keys and tokens**, generate an **API Key**, **API Secret Key**, and **Bearer Token** (or OAuth 2.0 Client if required).
    - Copy these values somewhere secure.
@@ -113,63 +126,96 @@ TWITTER_BEARER_TOKEN=AAAAAAAAAAAAAAAAAAAAAAA
 
 ARIA AI Agents includes modules or scripts (e.g., `twitter_app_auth.py`) to handle Twitter OAuth or token-based authentication. Below is a typical approach:
 
-1. **Locate the Auth File**  
-   - In `aria_ai_agents/auth/twitter_app_auth.py` (or a similar file in the `auth/` folder):
+1. **Load Environment Variables**  
+   Make sure you have `python-dotenv` installed and your `.env` file in the project root. For example:
+   ```python
+   from dotenv import load_dotenv
+   load_dotenv()  # This will load your .env variables
+   ```
+
+2. **Locate the Auth File**  
+   - In `aria_ai_agents/auth/twitter_app_auth.py` (or a similar file):
      ```python
-     # Example snippet
      import os
-     
+     from dotenv import load_dotenv
+
+     load_dotenv()  # ensures environment variables are loaded
+
      TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
      TWITTER_API_SECRET = os.getenv("TWITTER_API_SECRET")
      TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
-     
+
      # Additional OAuth logic, if needed
      ```
-2. **Set Your Credentials**  
+
+3. **Set Your Credentials**  
    - Store your credentials in a `.env` file or environment variables. The code snippet above automatically pulls from your environment.
-3. **Run the App**  
+
+4. **Run the App**  
    - When you run `python main.py`, the application will attempt to initialize the `TwitterConnector` (if configured), using your environment variables.
-4. **Test Connectivity**  
+
+5. **Test Connectivity**  
    - Use the connector or a test script to verify you can post or retrieve tweets.  
    - Example:
      ```python
      from aria_ai_agents.connectors.twitter_connector import TwitterConnector
-     
+     import os
+
      connector = TwitterConnector(
-         api_key=TWITTER_API_KEY,
-         api_secret=TWITTER_API_SECRET,
-         bearer_token=TWITTER_BEARER_TOKEN
+         api_key=os.getenv("TWITTER_API_KEY"),
+         api_secret=os.getenv("TWITTER_API_SECRET"),
+         bearer_token=os.getenv("TWITTER_BEARER_TOKEN")
      )
      connector.test_connection()
      ```
 
-5. **Twitter access tokens**
-   - You will need to get the access tokens for the account you want to post to twitter.
-   - The twitter_app_auth.py file has a function to get the access tokens for the account you want to post to twitter.
-   - Save your access tokens in the .env file at the root of the project.
-   - Example:
+6. **Twitter Access Tokens**  
+   - To post on behalf of a user, you will need *access tokens* for the specific Twitter account.
+   - The `twitter_app_auth.py` file may contain a function to fetch or handle these tokens.
+   - Save your access tokens in the `.env` file:
+     ```bash
+     TWITTER_ACCESS_TOKEN=XXXXXXXX
+     TWITTER_ACCESS_TOKEN_SECRET=YYYYYYYY
+     ```
 
-   ```python
-   TWITTER_ACCESS_TOKEN=
-   TWITTER_ACCESS_TOKEN_SECRET=
-   ```
-
-6. **Enable Twitter Live Mode**  
-
-   - Set `twitter_live = True` in the `main.py` file so you can post to twitter live.   
-
-   ```bash
-   twitter_live = True
-   ```
-Once successfully authenticated, your ARIA agents can interact with Twitter—posting tweets, reading mentions, or replying to DMs, depending on your configuration.
-
-## 6. Debug Mode
-
-   By default the posting to twitter is disabled. You do not have to authenticate your twitter account to see the tweets in the log file for your agent in the config folder/agent_folder/agentName_post_log.yaml. This is by design so that people can test the ai without the need to setup twitter api right away. Doing a a trial run before posting to twitter live is a good idea and helps see any issues that the ai might have overlooked.
+7. **Enable Twitter Live Mode**  
+   - Set `twitter_live = True` in the `main.py` file so you can post to Twitter live:
+     ```python
+     twitter_live = True
+     ```
+   - Once successfully authenticated, your ARIA agents can interact with Twitter—posting tweets, reading mentions, or replying to DMs, depending on your configuration.
 
 ---
 
-## Next Steps
+## 6. Debug Mode
+
+By default, posting to Twitter is **disabled** so you can see generated tweets in log files without actually publishing. This is by design so that you can test AI output before using real APIs:
+
+- **Log-Only Mode**  
+  The system logs tweets to a `yaml` file, typically located at `configs/agent_folder/agentName_post_log.yaml`.  
+- **Trial Run**  
+  Check this file to verify the AI is generating appropriate, non-repetitive content.  
+- **Switch to Live**  
+  Once you’re satisfied, enable `twitter_live = True` to start posting live.
+
+---
+
+## 7. Processing Speed & Wait Times
+
+Depending on your prompt complexity, **ARIA AI** may take a few minutes to generate a response—especially if the agent is creating **long-form or multiple pieces** of content. The system is waiting for the LLM (e.g., Google Gemini) to process and return a detailed answer.
+
+- **CLI Feedback**  
+  Keep an eye on your command-line interface (CLI). You’ll see logging messages that indicate whether the agent is still running or if an error occurs.  
+- **Batch Generation**  
+  If you’re generating content in batches (e.g., multiple tweets or entire episodes), expect longer wait times as the AI compiles all required context.  
+- **Crash Handling**  
+  If the CLI exits unexpectedly or logs an error, it’s likely that the model or process has crashed. You can check the logs for details and rerun once you’ve addressed the issue.
+
+*Reminder*: The more context (characters, episodes, story arcs) we include, the more time the model may need to process your request.
+
+---
+
+## 8. Next Steps
 
 - **Using ARIA with Other Models**: Check out the [API Reference Documentation](api/main.md) for integrating additional LLMs like OpenAI or Anthropic.
 - **Setting Up Additional Connectors**: See our [How-To Guides](how-to-guides.md) for adding Discord, Slack, or Telegram connectors.
@@ -177,14 +223,21 @@ Once successfully authenticated, your ARIA agents can interact with Twitter—po
 
 ---
 
-### Troubleshooting
+## 9. Troubleshooting
 
-- **Conda Environment Not Found**: Ensure you spelled the environment name correctly or re-run `conda activate aria_ai_agents`.
-- **Credential Errors**: Double-check environment variables are set in your `.env` or system variables. Make sure you restart the shell if you updated `.env`.
-- **Authentication Failures**: Validate your **Google** or **Twitter** keys/tokens in their respective developer dashboards.
+- **Conda Environment Not Found**  
+  Ensure you spelled the environment name correctly or re-run `conda activate aria_ai_agents`.
+
+- **Credential Errors**  
+  Double-check environment variables are set in your `.env` or system variables. Make sure you restart the shell if you updated `.env`.
+
+- **Authentication Failures**  
+  Validate your **Google** or **Twitter** keys/tokens in their respective developer dashboards.
+
+If you run into any issues, feel free to open an [Issue](https://github.com/aria-ai/aria_ai_agents/issues) or check the project’s [FAQ](./faq.md) (if available).
 
 ---
 
-**That’s it!** You’ve now set up your environment, installed ARIA AI Agents, obtained the necessary API keys, and authenticated your Twitter account. If you run into any issues, feel free to open an [Issue](https://github.com/aria-ai/aria_ai_agents/issues) or check the project’s [FAQ](./faq.md) (if available).
+**That’s it!** You’ve now set up your environment, installed ARIA AI Agents, obtained the necessary API keys, and authenticated your Twitter account. Remember that **complex or large-scale AI tasks** may take a bit longer to generate responses, so don’t worry if you see some delay—it’s just the model crafting detailed content.  
 
-*Happy building with ARIA AI Agents!*
+**Happy building with ARIA AI Agents!**

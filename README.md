@@ -1,5 +1,7 @@
 # ARIA AI Agents ⚡
 
+![ARIA AI Agents](docs/images/ARIA_AI_Agents_Logo.png)
+
 Welcome to **ARIA AI Agents** – a Python-based system for managing AI agents, their interactions, and associated connectors. This project is designed to streamline the setup of multi-agent workflows and help developers easily integrate different language models, connectors, and prompt-chaining strategies.
 
 > **Highlights**  
