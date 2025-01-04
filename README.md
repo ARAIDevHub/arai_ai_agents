@@ -1,7 +1,7 @@
 # ARIA AI Agents ⚡
 
 <p align="center">
-  <img src="docs/assets/images/AVA_LOG_BASE_WHITE.png" alt="ARIA AI Agents Logo" width="100">
+  <img src="docs/assets/images/AVA_LOG_BASE_GREY.png" alt="ARIA AI Agents Logo" width="100">
 </p>
 
 Welcome to **ARIA AI Agents** – a Python-based system for managing AI agents, their interactions, and associated connectors. This project is designed to streamline the setup of multi-agent workflows and help developers easily integrate different language models, connectors, and prompt-chaining strategies.
@@ -78,6 +78,36 @@ This will launch the **main** application, which initializes your agents, connec
    cd aria_ai_agents
    python main.py
    ```
+6. You should see a welcome prompt similar to:
+
+   ```plaintext
+   === Main Menu ===
+   Welcome to ARIA Agents.
+   Please select an option:
+
+   Current Agent: None
+
+   = Agent Management =
+   1. Select an existing Agent
+   2. Create a new Agent
+
+   = Media Management =
+   3. Create a new Season
+   4. Create Season posts
+
+   = Scheduler Management =
+   5. Start Scheduler
+   6. Check posting status
+   7. Force post now
+   8. Pause/Resume posting
+
+   = Miscellaneous =
+   9. Exit
+
+   Enter your choice (1-9):
+   ```
+
+7. See the [CLI Guide](docs/cli-guide.md) for more information on how to use the CLI.
 
 ---
 
@@ -86,29 +116,36 @@ This will launch the **main** application, which initializes your agents, connec
 You can programmatically work with the **ARIA AI Agents** from within your own Python scripts. For example:
 
 ```python
-from aria_ai_agents.models.openai_model import OpenAIModel
-from aria_ai_agents.connectors.discord_connector import DiscordConnector
-from aria_ai_agents.prompt_chaining.chain_manager import ChainManager
+from aria_ai_agents.models.gemini_model import GeminiModel
+from aria_ai_agents.connectors.twitter_connector import TwitterConnector
 
 # 1. Initialize an AI model
-model = OpenAIModel(api_key="YOUR_OPENAI_KEY")
+model = GeminiModel()
 
-# 2. (Optional) Initialize a connector
-discord_conn = DiscordConnector(
-    bot_token="YOUR_DISCORD_BOT_TOKEN",
-    channel_id="DISCORD_CHANNEL_ID"
-)
+# 2. Generate a response
+response = model.generate_response("What is the weather in San Francisco?")
 
-# 3. Work with prompts or chain managers
-chain_manager = ChainManager(config_path="configs/chains.yaml")
-response = chain_manager.run_chain("my_chain_identifier", input_data="Hello AI Agents!")
+# 3. Print the response
 print(response)
+
+# 4. (Optional) Initialize a connector
+twitter_conn = TwitterConnector()
+
+# 5. (Optional) Post the response to Twitter
+twitter_conn.post_to_twitter(response)
+
 ```
 
 Depending on your project design, you might:
 - Create or load multiple agents.
 - Manage different connectors (Discord, Slack, Telegram, etc.).
 - Use a prompt-chaining manager to orchestrate complex LLM calls.
+
+For Prompt Chaining:
+ - Look at the Prompt Chaining folder for python files that implement ARIA unique prompt chaining logic.
+ - Step 1: Creates a new agent with a character background..
+ - Step 2: Creates the seasons and episodes for the agent, this is how unique content is created.
+ - Step 3: Creates the posts based off the agent and season/episode that the agent will post to the connector.
 
 ---
 
@@ -119,13 +156,13 @@ Here’s how your folders and files are organized inside `aria_ai_agents/`. The 
 ```bash
 aria_ai_agents/
 ├─ __pycache__/          # Compiled Python files (ignore in version control)
-├─ auth/                 # Authentication or credential management
-├─ configs/              # YAML/JSON config files for agents, prompt-chaining, etc.
-├─ connectors/           # Modules to connect with external services (Discord, Slack, etc.)
-├─ models/               # Model interfaces (OpenAI, Anthropic, etc.)
+├─ auth/                 # Authentication or credential management for connectors
+├─ configs/              # GeneratedYAML/JSON config files for agents for posting content to connectors.
+├─ connectors/           # Modules to connect with external services (Twitter, Discord, Slack, etc.)
+├─ models/               # Model interfaces (Gemini, OpenAI, Anthropic, etc.)
 ├─ prompt_chaining/      # Logic and utilities for chaining prompts together
-├─ prompts/              # Collections of prompt templates or specialized strings
-├─ templates/            # Potential HTML/Jinja templates for a dashboard or web interface
+├─ prompts/              # Collections of prompt templates for the agents to use.
+├─ templates/            # Templates used for the AI to fill in for the based on prompts chaining  .
 ├─ utils/                # Utility/helper functions shared across modules
 ├─ __init__.py           # Makes `aria_ai_agents` a Python package
 └─ main.py               # Entry point to initialize and run the system
@@ -165,7 +202,7 @@ aria_ai_agents/
 | Concept             | Description                                                                                 |
 |---------------------|---------------------------------------------------------------------------------------------|
 | **Connectors**      | Integrations with external services (Discord, Slack, Telegram, etc.) to provide AI responses. |
-| **Models**          | Unified interface for various large language models (OpenAI, Anthropic, etc.).              |
+| **Models**          | Unified interface for various large language models (OpenAI, Anthropic, Gemini, etc.).      |
 | **Auth**            | Handles storage or retrieval of API credentials and tokens.                                 |
 | **Prompt Chaining** | Logic for composing and chaining prompts in complex sequences.                              |
 | **Prompts**         | Reusable yaml prompt files for LLM queries that are used to create non repeitive content.   |
@@ -176,12 +213,15 @@ aria_ai_agents/
 
 ## Environment Variables
 
-Many components require environment variables. For example, your OpenAI API key, Discord bot token, or other service credentials. A typical `.env` file could look like:
+Many components require environment variables. For example, your Google Gemini API key, Twitter API keys, or other service credentials. A typical `.env` file could look like:
 
 ```bash
-OPENAI_API_KEY=sk-123abc...
-DISCORD_BOT_TOKEN=MzQ2OT...
-ANTHROPIC_API_KEY=anth-xyz
+GOOGLE_GEMINI_API_KEY=...
+TWITTER_API_KEY=...
+TWITTER_API_SECRET=...
+TWITTER_BEARER_TOKEN=...
+TWITTER_ACCESS_TOKEN=...
+TWITTER_ACCESS_TOKEN_SECRET=...
 ```
 
 > **Remember**: Don’t commit your `.env` file to source control if it contains secrets!
