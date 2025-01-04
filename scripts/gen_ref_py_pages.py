@@ -5,7 +5,7 @@ import mkdocs_gen_files
 nav = mkdocs_gen_files.Nav()
 
 root = Path(__file__).parent.parent
-src = root / "ava_ai_agents"
+src = root / "aria_ai_agents"
 
 print(f"Looking for Python files in: {src}")
 
@@ -20,11 +20,11 @@ for path in sorted(src.rglob("__init__.py")):
     if parts:
         # Create the module index page
         with mkdocs_gen_files.open(full_doc_path, "w") as fd:
-            ident = "ava_ai_agents"
+            ident = "aria_ai_agents"
             if parts:
                 ident += "." + ".".join(parts)
             print(f"Writing module index: {ident}")
-            fd.write(f"# {parts[-1] if parts else 'ava_ai_agents'}\n\n")
+            fd.write(f"# {parts[-1] if parts else 'aria_ai_agents'}\n\n")
             fd.write(f"::: {ident}")
 
         mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
@@ -53,7 +53,7 @@ for path in sorted(src.rglob("*.py")):
     print(f"Added to nav: {parts} -> {doc_path.as_posix()}")
 
     with mkdocs_gen_files.open(full_doc_path, "w") as fd:
-        ident = "ava_ai_agents." + ".".join(parts)
+        ident = "aria_ai_agents." + ".".join(parts)
         print(f"Writing docs for: {ident}")
         fd.write(f"# {parts[-1]}\n\n")  # Add a title
         fd.write(f"::: {ident}")
