@@ -39,7 +39,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github-alt
-      link: https://github.com/AVADevHub/ava_agent_prompt_chaining
+      link: https://github.com/ARIADevHub/ava_agent_prompt_chaining
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/AVA_AI_AGENTS
 
@@ -90,4 +90,4 @@ nav:
 
 
 copyright: |
-  &copy; 2024 <a href="https://github.com/AVADevHub"  target="_blank" rel="noopener">AVADevHub</a>
+  &copy; 2024 <a href="https://github.com/ARIADevHub"  target="_blank" rel="noopener">ARIADevHub</a>

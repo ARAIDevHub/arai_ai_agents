@@ -28,5 +28,12 @@ jobs:
         with:          
           key: ${{ github.ref }}
           path: .cache
-      - run: pip install mkdocs-material
-      - run: mkdocs gh-deploy --force
+      - run: pip install --upgrade pip
+      - run: pip install \
+          mkdocs-material \
+          mkdocs-gen-files \
+          mkdocs-literate-nav \
+          mkdocs-include-markdown-plugin \
+          mkdocs-section-index \
+          mkdocstrings
+      - run: mkdocs gh-deploy --force          
