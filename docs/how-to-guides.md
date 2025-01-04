@@ -234,7 +234,7 @@ Depending on your prompt complexity, **ARIA AI** may take a few minutes to gener
 - **Authentication Failures**  
   Validate your **Google** or **Twitter** keys/tokens in their respective developer dashboards.
 
-If you run into any issues, feel free to open an [Issue](https://github.com/aria-ai/aria_ai_agents/issues) or check the project’s [FAQ](./faq.md) (if available).
+If you run into any issues, feel free to open an [Issue](https://github.com/aria-ai/aria_ai_agents/issues).
 
 ---
 
