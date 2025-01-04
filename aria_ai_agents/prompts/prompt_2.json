@@ -1,0 +1,31 @@
+{
+  "description": "You are an expert in creative writing, season/episode design, and structured storytelling.",
+  "goal": "Create a new season for {{ agent_name }}, who was previously defined in the following agent JSON:\n\n{{ agent_json }}",
+  "previous_season": "This provides the previous season details, including description and highlights for the season. Ignore if none is provided as this means we are creating season 1, so there is no previous season.\n{{ previous_season }}",
+  "task": "Season Creation",
+  "instructions": {
+    "season_name": "If none is provided, create a unique and fitting name based on {{ agent_name }} and the agent’s JSON. Use something that can also work as a Twitter hashtag. Season Name: {{ season_name }}",
+    "season_number": "If none is provided, default to 1. Season Number: {{ season_number }}",
+    "season_description": "If none is provided, create a unique description based on {{ agent_name }}’s JSON. Season Description: {{ season_description }}",
+    "season_highlights": "If none is provided, invent highlights relevant to the agent’s concept or storyline. Season Highlights: {{ season_highlights }}",
+    "season_summary": "If none is provided, create a concise summary that captures the essence of this season. Season Summary: {{ season_summary }}",
+    "episodes": {
+      "total": 28,
+      "description": "We want 28 episodes total (one for each day over 4 weeks). If none are provided, create 28 unique episodes.",
+      "episode_fields": [
+        "episode_id",
+        "episode_name",
+        "episode_number",
+        "episode_description",
+        "episode_highlights",
+        "episode_posted (default False)",
+        "episode_summary"
+      ]
+    }
+  },
+  "output_requirements": {
+    "format": "Only output valid JSON. Do not include any text outside of the JSON structure.",
+    "structure": "Output a single, complete JSON object that includes all the fields mentioned above (season_name, season_number, season_description, season_highlights, season_summary, episodes)."
+  },
+  "output": "`json\n{{ season_json }}\n`"
+}
