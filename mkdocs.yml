@@ -39,9 +39,9 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github-alt
-      link: https://github.com/ARIADevHub/ava_agent_prompt_chaining
+      link: https://github.com/ARIADevHub/aria_ai_agents
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/AVA_AI_AGENTS
+      link: https://twitter.com/ARIA_AI_AGENTS
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -85,8 +85,8 @@ nav:
   - Reference: reference.md
   - Explanation: explanation.md
   - Code Examples: code.md
-  - Code Reference: api/
-  - Yaml Reference: yaml/
+  - API Reference: api/
+  - Prompt Reference: yaml/
 
 
 copyright: |
