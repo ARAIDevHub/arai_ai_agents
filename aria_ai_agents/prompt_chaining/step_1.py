@@ -9,7 +9,7 @@ from utils.template_types import TemplateType
 # -------------------------------------------------------------------
 # Step 1: Create a new agent
 # -------------------------------------------------------------------
-def step_1(ai_model, concept: str, chain_step: bool = False):
+def step_1(ai_model, concept: str):
     '''
     Description:
         Create a new agent
@@ -73,6 +73,8 @@ def step_1(ai_model, concept: str, chain_step: bool = False):
         yaml_data=agent_template
     )
 
+    return agent_file_path
+
     # step 1.8: Move onto the next step of creating a new season
-    if chain_step:
-        next_step.step_2(ai_model, agent_file_path)
+    # if chain_step:
+    #   next_step.step_2(ai_model, agent_file_path, chain_step)

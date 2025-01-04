@@ -7,7 +7,7 @@ from utils.content_generator import ContentGenerator
 from utils.template_types import TemplateType
 import prompt_chaining.step_3 as next_step
 
-def step_2(ai_model, agent_file_path, chain_step: bool = False):
+def step_2(ai_model, agent_file_path):
     '''
     Description:
         Create a new season for the agent
@@ -38,16 +38,32 @@ def step_2(ai_model, agent_file_path, chain_step: bool = False):
     # step 2.3: find the previous season 
     # get last season file 
     previous_season = None
-    season_folders = [f for f in os.listdir(manager.agents_config_dir) if f.startswith("season_")]
+    # Update the path to include the agent's specific directory
+    agent_seasons_dir = os.path.join(manager.agents_config_dir, agent_yaml['name'])
     
-    if season_folders:
-        # Sort the folders by season number and get the last one
-        last_folder = sorted(season_folders, key=lambda x: int(x.split('_')[1]))[-1]
+
+    # Check if the agent directory exists
+    if os.path.exists(agent_seasons_dir):
+        # Look for season folders in the agent's directory
+        season_folders = [f for f in os.listdir(agent_seasons_dir) if f.startswith("season_")]
         
-        with open(os.path.join(manager.agents_config_dir, last_folder, last_folder + ".yaml"), 'r', encoding='utf-8') as file:
-            previous_season = yaml.safe_load(file)
+        if season_folders:
+            # Sort the folders by season number and get the last one
+            last_folder = sorted(season_folders, key=lambda x: int(x.split('_')[1]))[-1]
+            
+            season_file_path = os.path.join(agent_seasons_dir, last_folder, f"{last_folder}.yaml")
+            print(f"Looking for previous season at: {season_file_path}")  # Debug print
+            
+            if os.path.exists(season_file_path):
+                with open(season_file_path, 'r', encoding='utf-8') as file:
+                    previous_season = yaml.safe_load(file)
+                print(f"Found previous season: {last_folder}")
+        else:
+            print(f"No season folders found in {agent_seasons_dir}")
     else:
-        print(f"No previous season found for {agent_yaml['name']}")           
+        print(f"Agent directory not found at {agent_seasons_dir}")
+
+
 
     # step 2.3: Generate a new season name, topic, and communication style with the prompt_2 template
     # prompt 2 Season Creation:
@@ -87,6 +103,8 @@ def step_2(ai_model, agent_file_path, chain_step: bool = False):
         yaml_data=season_template
     )
 
+    return season_file_path
+
     # step 2.8: Move onto the next step of creating a new season
-    if chain_step:
-        next_step.step_3(ai_model, agent_file_path, season_file_path)
+    # if chain_step:
+    #   next_step.step_3(ai_model, agent_file_path, season_file_path, chain_step)

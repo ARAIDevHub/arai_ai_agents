@@ -144,10 +144,10 @@ class PostManager:
 
         if post_number >= 12-1:
             self.change_episode(self.episode_number + 1)
-            self.post_number = 1
+            self.post_number = 0
         
         # Get the post content and clean it up, remember post numbers vs index starting at 0
-        post_content = self.episode_data['episode']['posts'][post_number-1]['post_content']
+        post_content = self.episode_data['episode']['posts'][post_number]['post_content']
         post_content = ' '.join(post_content.split()).strip()
         # Convert Unicode escape sequences to emojis
         post_content = post_content.encode().decode('unicode-escape')
@@ -162,7 +162,7 @@ class PostManager:
 
         return post_content
 
-    def post_to_twitter(self):
+    def post_to_twitter(self, live_post: bool = False):
         '''
         Description: Post to twitter
 
@@ -177,8 +177,19 @@ class PostManager:
         '''
         # print ("Preparing to post to twitter" + "\n")
 
+        # get the next post number
         tweet_content = self.next_post_number(self.post_number)
-        # print (tweet_content)
+
+        # if live_post is true, post to twitter
+        if live_post:
+            tweet_result = self.twitter_connector.post_tweet(tweet_content)
+
+            print (tweet_result)        
+
+            # reset the post number if the tweet failed so the post can be attempted again
+            if tweet_result.startswith("Error"):
+                self.post_number -= 1        
+        
         # save to log file
         try:
             # First, read existing log if it exists
@@ -201,14 +212,5 @@ class PostManager:
                 yaml.dump(log_data, f, allow_unicode=True)
 
         except Exception as e:
-            print(f"Error writing to log file: {e}")
-
-        '''
-        tweet_result = self.twitter_connector.post_tweet(tweet_content)
-
-        print (tweet_result)        
-
-        # reset the post number if the tweet failed so the post can be attempted again
-        if tweet_result.startswith("Error"):
-            self.post_number -= 1                
-        '''
+            print(f"Error writing to log file: {e}")        
+        

@@ -58,25 +58,32 @@ def step_3(ai_model, agent_file_path, season_file_path):
         # if we do, skip to the next episode
         # check by file name
         try:
-            # use relative path to get to project root (two levels up from utils)
-            project_root = os.path.dirname(os.path.dirname(__file__))
-        
-            # Set the directories relative to project root
-            agents_config_dir = os.path.join(project_root, "configs")      
-        
-            # create file name
-            episode_file_path = os.path.join(
-                agents_config_dir,
-                f"{agent_yaml['name']}",
-                f"season_{season_template['season']['season_number']}",
-                f"s_{season_template['season']['season_number']}_episode_{episode['episode_number']}.yaml"
+            # Get the project root directory (notice we're adding aria_ai_agents to match the actual path)
+            project_root = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "aria_ai_agents"
             )
-            # Check if file exists
+            
+            # Create file name using the exact same path as shown in the output
+            episode_file_path = os.path.join(
+                project_root,
+                "configs",
+                agent_yaml['name'],
+                f"season_{season_template['season']['season_number']}",
+                f"s{season_template['season']['season_number']}_episode_{episode['episode_number']}.yaml"
+            )
+            
+            print(f"Checking for existing episode at: {episode_file_path}")  # Debug print
+            
             if os.path.exists(episode_file_path):
-                print(f"Episode {episode['episode_number']} already exists, skipping...")
+                print(f"Episode {episode['episode_number']} already exists at {episode_file_path}, skipping...")
+                with open(episode_file_path, 'r', encoding='utf-8') as f:
+                    previous_episode = yaml.safe_load(f)
                 continue
             
-        except FileNotFoundError:
+        except Exception as e:
+            print(f"Error checking episode existence: {str(e)}")
+            print(f"Current working directory: {os.getcwd()}")  # Debug print
             pass
 
         # step 3.8: create a new episode template
