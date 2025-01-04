@@ -1,224 +1,210 @@
-# How-To Guide: Setting up ARIA AI, Google Gemini, and Twitter
+# Getting Started with the Gemini API using Python
 
-This guide walks you through the essential steps for installing **ARIA AI Agents** in a conda environment, configuring the Google Gemini API key, and authenticating a Twitter account for agent interactions. We also detail how environment variables are managed via a `.env` file using `python-dotenv`.
+This tutorial will guide you through the process of setting up and making your first request to the Gemini API using the Google's Generative AI Python library.
 
 ---
 
 ## Table of Contents
 
-1. [Set Up a Conda Environment](#1-set-up-a-conda-environment)  
-2. [Install ARIA AI Agents](#2-install-aria-ai-agents)  
-3. [Obtain a Google Gemini API Key](#3-obtain-a-google-gemini-api-key)  
-4. [Get a Twitter API Key](#4-get-a-twitter-api-key)  
-5. [Authenticate Your Twitter Account](#5-authenticate-your-twitter-account)  
-6. [Debug Mode](#6-debug-mode)  
-7. [Next Steps](#next-steps)  
-8. [Troubleshooting](#troubleshooting)
+1. [Prerequisites](#prerequisites)
+2. [Configure Your API Key](#configure-your-api-key)
+3. [Initialize the Model](#initialize-the-model)
+4. [Make Your First Request](#make-your-first-request)
+5. [Using the Chat Interface](#using-the-chat-interface)
+6. [Exploring Further](#exploring-further)
+7. [Troubleshooting](#troubleshooting)
+8. [Conclusion](#conclusion)
 
 ---
 
-## 1. Set Up a Conda Environment
+## Prerequisites
 
-Conda environments keep dependencies isolated and help avoid conflicts with other projects on your system.
+Before you begin, make sure you have the following:
 
-1. **Install or Update Conda**  
-   - Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/) if you haven’t already.
-   - Ensure your conda is up to date:
-     ```bash
-     conda update conda
-     ```
+- **Python 3.11+ installed**  
+  You can check your Python version by running:
+  ```bash
+  python --version
+  ```
+  or:
+  ```bash
+  python3 --version
+  ```
 
-2. **Create a New Environment**  
-   - In your terminal or Anaconda Prompt, run:
-     ```bash
-     conda create --name aria_ai_agents python=3.11
-     ```
-   - Activate your new environment:
-     ```bash
-     conda activate aria_ai_agents
-     ```
+- **A Google Cloud Project**  
+  If you don't have one, create a new project in the [Google Cloud Console](https://console.cloud.google.com/).
 
-You now have an isolated environment ready for ARIA AI Agents.
+- **A Gemini API Key**  
+  1. Go to [Google AI Studio](https://ai.google.dev/).
+  2. Click on **"Get API Key"**.
+  3. Select your Google Cloud Project where you want to enable the API.
+  4. Click on **"Create API Key"**. Copy this key; you'll need it later.
 
----
-
-## 2. Install ARIA AI Agents
-
-1. **Clone the Repository**  
-   ```bash
-   git clone https://github.com/aria-ai/aria_ai_agents.git
-   ```
-2. **Navigate to the Project Directory**  
-   ```bash
-   cd aria_ai_agents
-   ```
-3. **Install Dependencies**  
-   Within your `aria_ai_agents` folder, install the required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. **Run the Main Script**  
-   ```bash
-   python main.py
-   ```
-   This starts the primary ARIA AI Agents application, which includes agent configurations, connectors, and any prompt-chaining logic.
+- **The `google-generativeai` Python library**  
+  You can install it using pip:
+  ```bash
+  pip install google-generativeai
+  ```
 
 ---
 
-## 3. Obtain a Google Gemini API Key
+## Configure Your API Key
 
-*(Note: The steps below are illustrative. Refer to Google’s official documentation for the most up-to-date instructions.)*
+The `google-generativeai` library needs your API key to authenticate your requests to the Gemini API. There are a couple of ways to provide it:
 
-1. **Sign Up or Log In**  
-   - Go to [Google Cloud Console](https://console.cloud.google.com/).
+### Method 1: Environment Variable (Recommended)
 
-2. **Create a New Project** (if needed)  
-   - Click **Select a project** → **New Project**. Give it a name, then create it.
+1. Set an environment variable named `GOOGLE_API_KEY` with your API key as the value.
 
-3. **Enable the Gemini API**  
-   - Navigate to **APIs & Services** → **Library**.
-   - Search for **Gemini API** (or equivalent) and enable it.
-
-4. **Create Credentials**  
-   - Under **APIs & Services** → **Credentials**, click **+ CREATE CREDENTIALS** → **API key**.
-   - Copy the **API key** (e.g., `AIzaSyD...`).
-
-5. **Set the Environment Variable**  
-   - Either place it in your system environment:
+   - **Linux/macOS:**
      ```bash
-     export GEMINI_API_KEY="AIzaSyD..."
-     ```
-   - **Or** place the key in your `.env` file at the root of the project:
-     ```bash
-     GOOGLE_GEMINI_API_KEY=AIzaSyD...
+     export GOOGLE_API_KEY="YOUR_API_KEY"
      ```
 
-*(ARIA uses `python-dotenv` to automatically load variables from `.env` if configured.)*
+   - **Windows:**
+     ```bash
+     setx GOOGLE_API_KEY "YOUR_API_KEY"
+     ```
+     *(You might need to restart your console or IDE for it to take effect.)*
 
----
+2. Then in your Python code, configure like this:
+   ```python
+   import google.generativeai as genai
+   import os
 
-## 4. Get a Twitter API Key
+   genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+   ```
 
-To allow ARIA AI Agents to interact with Twitter, you need developer credentials.
+### Method 2: Directly in Your Code (Less Secure)
 
-1. **Apply for a Twitter Developer Account**  
-   - Go to the [Twitter Developer Portal](https://developer.twitter.com/) and apply for a Developer account.
+You can set your API key directly in your Python code. **However, this is less secure, especially if you are sharing or versioning your code.**
 
-2. **Create a Project & App**  
-   - Once approved, create a **Project**, then create an **App** within that project.
+```python
+import google.generativeai as genai
 
-3. **Generate Keys & Tokens**  
-   - Under **Keys and tokens**, generate an **API Key**, **API Secret Key**, and **Bearer Token** (or OAuth 2.0 Client if required).
-   - Copy these values somewhere secure.
-
-Example `.env` variables:
-
-```bash
-TWITTER_API_KEY=xxxxxxxxxxxxxxxxxxx
-TWITTER_API_SECRET=yyyyyyyyyyyyyyyyyyyyyyyyy
-TWITTER_BEARER_TOKEN=AAAAAAAAAAAAAAAAAAAAAAA
+genai.configure(api_key="YOUR_API_KEY")  # Replace "YOUR_API_KEY" with your actual key
 ```
 
 ---
 
-## 5. Authenticate Your Twitter Account
+## Initialize the Model
 
-ARIA AI Agents includes modules or scripts (e.g., `twitter_app_auth.py`) to handle Twitter OAuth or token-based authentication. Below is a typical approach:
+Now, let's initialize the `GenerativeModel` with the `gemini-pro` model:
 
-1. **Load Environment Variables**  
-   Make sure you have `python-dotenv` installed and your `.env` file in the project root. For example:
-   ```python
-   from dotenv import load_dotenv
-   load_dotenv()  # This will load your .env variables
-   ```
+```python
+import google.generativeai as genai
 
-2. **Locate the Auth File**  
-   - In `aria_ai_agents/auth/twitter_app_auth.py` (or a similar file):
-     ```python
-     import os
-     from dotenv import load_dotenv
+# ... API key configuration (see "Configure Your API Key") ...
 
-     load_dotenv()  # ensures environment variables are loaded
-
-     TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
-     TWITTER_API_SECRET = os.getenv("TWITTER_API_SECRET")
-     TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
-
-     # Additional OAuth logic, if needed
-     ```
-
-3. **Set Your Credentials**  
-   - Store your credentials in a `.env` file or environment variables. The code snippet above automatically pulls from your environment.
-
-4. **Run the App**  
-   - When you run `python main.py`, the application will attempt to initialize the `TwitterConnector` (if configured), using your environment variables.
-
-5. **Test Connectivity**  
-   - Use the connector or a test script to verify you can post or retrieve tweets.  
-   - Example:
-     ```python
-     from aria_ai_agents.connectors.twitter_connector import TwitterConnector
-
-     connector = TwitterConnector(
-         api_key=os.getenv("TWITTER_API_KEY"),
-         api_secret=os.getenv("TWITTER_API_SECRET"),
-         bearer_token=os.getenv("TWITTER_BEARER_TOKEN")
-     )
-     connector.test_connection()
-     ```
-
-6. **Twitter Access Tokens**  
-   - To post on behalf of a user, you will need *access tokens* for the specific Twitter account.
-   - The `twitter_app_auth.py` file may contain a function to fetch or handle these tokens.
-   - Save your access tokens in the `.env` file:
-     ```bash
-     TWITTER_ACCESS_TOKEN=XXXXXXXX
-     TWITTER_ACCESS_TOKEN_SECRET=YYYYYYYY
-     ```
-
-7. **Enable Twitter Live Mode**  
-   - Set `twitter_live = True` in the `main.py` file so you can post to Twitter live:
-     ```python
-     twitter_live = True
-     ```
-   - Once successfully authenticated, your ARIA agents can interact with Twitter—posting tweets, reading mentions, or replying to DMs, depending on your configuration.
+model = genai.GenerativeModel("gemini-pro")
+```
 
 ---
 
-## 6. Debug Mode
+## Make Your First Request
 
-By default, posting to Twitter is **disabled** so you can see generated tweets in log files without actually publishing. This is by design so that you can test AI output before using real APIs:
+Let's send a simple prompt to the Gemini API and get a response:
 
-- **Log-Only Mode**  
-  The system logs tweets to a `yaml` file, typically located at `configs/agent_folder/agentName_post_log.yaml`.  
-- **Trial Run**  
-  Check this file to verify the AI is generating appropriate, non-repetitive content.  
-- **Switch to Live**  
-  Once you’re satisfied, enable `twitter_live = True` to start posting live.
+```python
+import google.generativeai as genai
 
----
+# ... API key configuration and model initialization (see "Configure Your API Key" & "Initialize the Model") ...
 
-## 7. Next Steps
+prompt = "What is the capital of France?"
 
-- **Using ARIA with Other Models**: Check out the [API Reference Documentation](api/main.md) for integrating additional LLMs like OpenAI or Anthropic.
-- **Setting Up Additional Connectors**: See our [How-To Guides](how-to-guides.md) for adding Discord, Slack, or Telegram connectors.
-- **Managing Prompts & Templates**: Explore the [Prompt Reference](yaml/prompts/prompt_chaining.md) for advanced usage of prompt chaining and template customization.
+response = model.generate_content(prompt)
 
----
+print(response.text)
+```
 
-## 8. Troubleshooting
+**Expected Output:**
+```
+The capital of France is Paris.
+```
+*(Or a similar, more elaborate response.)*
 
-- **Conda Environment Not Found**  
-  Ensure you spelled the environment name correctly or re-run `conda activate aria_ai_agents`.
-
-- **Credential Errors**  
-  Double-check environment variables are set in your `.env` or system variables. Make sure you restart the shell if you updated `.env`.
-
-- **Authentication Failures**  
-  Validate your **Google** or **Twitter** keys/tokens in their respective developer dashboards.
+**Explanation**:
+- **prompt**: This variable holds the text prompt you are sending to the model.
+- **model.generate_content(prompt)**: This calls the API, sending the prompt and receiving the generated content.
+- **response.text**: This accesses the text part of the response from the model.
 
 ---
 
-That’s it! You’ve now set up your environment, installed ARIA AI Agents, obtained the necessary API keys, and authenticated your Twitter account. If you run into any issues, feel free to open an [Issue](https://github.com/aria-ai/aria_ai_agents/issues) or check the project’s [FAQ](./faq.md) (if available).
+## Using the Chat Interface
 
-**Happy building with ARIA AI Agents!**
+The Gemini API also supports a **chat interface** where you can have back-and-forth conversations.
+
+```python
+import google.generativeai as genai
+
+# ... API key configuration (see "Configure Your API Key") ...
+
+model = genai.GenerativeModel("gemini-pro")
+
+messages = []
+
+messages.append({
+    "role": "user",
+    "parts": ["What is the capital of France?"]
+})
+
+response = model.generate_content(messages)
+print(response.text)
+
+# Add model's response back into the conversation history
+messages.append({
+    "role": "model",
+    "parts": [response.text]
+})
+
+# User asks another question
+messages.append({
+    "role": "user",
+    "parts": ["And what is its population?"]
+})
+
+response = model.generate_content(messages)
+print(response.text)
+```
+
+### Explanation
+
+- **messages**: This list stores the history of your conversation.
+- **Adding messages**: Each item in `messages` is a dictionary with:
+  - **role**: Either `"user"` or `"model"`.
+  - **parts**: A list of strings (or other content parts) representing the message content.
+- **model.generate_content(messages)**: Takes the entire message history to provide context for the model.
+- **Appending the model's response**: To maintain conversation flow, you append the AI's response to `messages` so it “remembers” earlier turns.
+
+---
+
+## Exploring Further
+
+- **More Model Parameters**  
+  Check out the Google AI for Developers documentation to learn about additional parameters (e.g., `temperature`, `top_k`, `top_p`) for controlling the model's generation.
+  
+- **Safety Settings**  
+  You can configure safety settings to control what type of content the model generates. See the **Safety Settings** documentation.
+
+- **Other Models**  
+  Explore other available models, such as `gemini-pro-vision` for multimodal input (text + images).
+
+---
+
+## Troubleshooting
+
+- **API key not found error**  
+  Make sure your API key is correctly configured as an environment variable or in your code.
+  
+- **PermissionDenied error**  
+  Verify that the API key is associated with a Google Cloud project that has the Gemini API enabled.
+  
+- **Other errors**  
+  Refer to the Gemini API documentation for more detailed error messages and troubleshooting steps.
+
+---
+
+## Conclusion
+
+Congratulations! You've now successfully made your first request to the Gemini API and even tried out a simple conversation. This is just the beginning of what you can do with this powerful API. Explore the documentation and experiment with different prompts and model parameters to unlock the full potential of **Google's Generative AI** models.
+```

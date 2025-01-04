@@ -81,9 +81,10 @@ plugins:
           docstring_style: google
 
 nav:
-  - Home: index.md  
-  - Tutorials: tutorials.md
+  - Home: index.md 
+  - ARIA CLI Usage Guide: cli-guide.md
   - How-to Guides: how-to-guides.md  
+  - AI Tutorial: tutorials.md
   - LLMS Explained: about-llms.md
   - ARIA AI Agents: explanation.md  
   - Resources: resources.md
