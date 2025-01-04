@@ -1,21 +1,19 @@
-"""
-Module: base_model
-=========================
-
-This module implements the BaseModel class for interacting with ai apis.
-
-Title: Base Model
-Summary: Base model implementation.
-Authors:
-    - @TheBlockRhino
-Date: 2024-12-31
-Last Updated: 2024-12-31
-URLs:
-    - https://aria-ai.io
-    - https://github.com/ARIA-DevHub/aria-ai-agents
-    - https://x.com/TheBlockRhino
-"""
-
+#
+# Module: base_model
+#
+# This module implements the ModelInterface class for interacting with ai apis.
+#
+# Title: Base Model
+# Summary: Base model implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
 from abc import ABC, abstractmethod # Import the ABC class and abstractmethod from the abc module
 
 class ModelInterface(ABC):

@@ -35,6 +35,7 @@ theme:
         name: Switch to dark mode
       primary: teal
       accent: purple 
+  logo: assets/images/logo.png
 
 extra:
   social:
@@ -77,18 +78,25 @@ plugins:
           options:
             show_source: true
             show_root_heading: true
+          docstring_style: google
 
 nav:
   - Home: index.md  
-  - Code Examples: code.md
   - Tutorials: tutorials.md
   - How-to Guides: how-to-guides.md  
   - LLMS Explained: about-llms.md
   - ARIA AI Agents: explanation.md  
   - Resources: resources.md
   - API Reference: api/
-  - Prompt Reference: yaml/
-
+  - Prompt Reference:
+    - Prompts:
+        - Prompt Chaining: yaml/prompts/prompt_chaining.md
+    - Templates:
+        - Agent Template: yaml/templates/agent_template.md
+        - Episode Template: yaml/templates/episode_template.md
+        - Season Template: yaml/templates/season_template.md
+        - Tracker Template: yaml/templates/tracker_template.md
+    
 
 copyright: |
   &copy; 2024 <a href="https://github.com/ARIADevHub"  target="_blank" rel="noopener">ARIADevHub</a>

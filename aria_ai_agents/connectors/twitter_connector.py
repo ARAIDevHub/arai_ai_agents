@@ -1,20 +1,19 @@
-"""
-Module: twitter_connector
-=========================
-
-This module implements the TwitterConnector class for interacting with Twitter APIs.
-
-Title: Twitter Connector
-Summary: Twitter connector implementation.
-Authors:
-    - @TheBlockRhino
-Date: 2024-12-31
-Last Updated: 2024-12-31
-URLs:
-    - https://aria-ai.io
-    - https://github.com/ARIA-DevHub/aria-ai-agents
-    - https://x.com/TheBlockRhino
-"""
+#
+# Module: twitter_connector
+#
+# This module implements the TwitterConnector class for interacting with Twitter APIs.
+#
+# Title: Twitter Connector
+# Summary: Twitter connector implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
 
 import os
 import time
@@ -28,6 +27,15 @@ class TwitterConnector:
 
     This class handles OAuth 1.0a and OAuth 2.0 authentication for
     posting tweets and retrieving data from Twitter.
+
+    Attributes:
+        api_key (str): The API key for the Twitter API.
+        api_secret_key (str): The API secret key for the Twitter API.
+        access_token (str): The access token for the Twitter API.
+        access_token_secret (str): The access token secret for the Twitter API.
+        bearer_token (str): The bearer token for the Twitter API.
+        bot_username (str): The username of the bot.
+        bot_id (str): The ID of the bot.
     """
 
     def __init__(self):

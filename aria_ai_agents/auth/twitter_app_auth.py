@@ -1,3 +1,19 @@
+#
+# Module: twitter_app_auth
+#
+# This module implements the TwitterAppAuth class for authenticating with the Twitter API using OAuth 1.0a.
+#
+# Title: Twitter App Auth
+# Summary: Twitter app authentication implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
 import os
 from dotenv import load_dotenv
 import tweepy
@@ -7,12 +23,33 @@ import yaml
 load_dotenv()
 
 class TwitterAppAuth:
+    """
+    A class for authenticating with the Twitter API using OAuth 1.0a.
+
+    Attributes:
+        api_key (str): The API key for the Twitter API.
+        api_secret_key (str): The API secret key for the Twitter API.
+        bearer_token (str): The bearer token for the Twitter API.
+    """
     def __init__(self):
+        """Initializes the TwitterAppAuth class.
+
+        Example:
+            >>> twitter_auth = TwitterAppAuth()
+        """
         self.api_key = os.getenv("TWITTER_API_KEY") 
         self.api_secret_key = os.getenv("TWITTER_API_KEY_SECRET") 
         self.bearer_token = os.getenv("TWITTER_BEARER_TOKEN") 
 
     def setup_twitter_auth(self):
+        """Sets up the Twitter authentication.
+
+        Raises:
+            ValueError: If Twitter API credentials are not present in the environment variables.
+
+        Example:
+            >>> twitter_auth.setup_twitter_auth()
+        """
         try:
             # Initialize OAuth 1.0a handler
             self.auth = tweepy.OAuth1UserHandler(
@@ -77,6 +114,15 @@ class TwitterAppAuth:
 
 
     def save_credentials(self, access_token, access_token_secret):
+        """Saves the Twitter access tokens to a YAML file.
+
+        Args:
+            access_token (str): The access token for the Twitter API.
+            access_token_secret (str): The access token secret for the Twitter API.
+
+        Example:
+            >>> twitter_auth.save_credentials(access_token, access_token_secret)
+        """
         try:                  
             tokens = {
                 'TWITTER_ACCESS_TOKEN': access_token,
@@ -93,5 +139,10 @@ class TwitterAppAuth:
 
 
 if __name__ == "__main__":
+    """Main function to run the TwitterAppAuth class.
+
+    Example:
+        >>> python twitter_app_auth.py
+    """
     auth = TwitterAppAuth()
     auth.setup_twitter_auth()

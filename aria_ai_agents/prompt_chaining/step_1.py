@@ -1,3 +1,20 @@
+#
+# Module: step_1
+#
+# This module implements the step_1 function for creating a new agent.
+#
+# Title: Step 1
+# Summary: Step 1 implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
+
 # standard imports
 import yaml
 
@@ -19,11 +36,14 @@ def step_1(ai_model, concept: str):
         debug (bool, optional): whether to print debug information. Defaults to False.
 
     Returns:
-        None
+        agent_file_path: The path to the agent yaml file
 
-    Example:
-        ai_model = OpenAI(api_key="your_api_key")
-        step_1(ai_model, debug=True)
+    Raises:
+        Exception: If there's an error creating the agent
+
+        Example:
+        >>> ai_model = GeminiModel()
+        >>> step_1(ai_model, "alien drone pilot who is a sarcastic asshole visiting earth to report back his findings to his home planet")
     '''
 
     # Step 1.1: Create a new agent
@@ -74,7 +94,3 @@ def step_1(ai_model, concept: str):
     )
 
     return agent_file_path
-
-    # step 1.8: Move onto the next step of creating a new season
-    # if chain_step:
-    #   next_step.step_2(ai_model, agent_file_path, chain_step)

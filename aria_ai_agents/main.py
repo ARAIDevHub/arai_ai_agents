@@ -1,3 +1,20 @@
+#
+# Module: main
+#
+# This module implements the main function for the ARIA Agents application.
+#
+# Title: ARIA Agents
+# Summary: ARIA Agents implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
+
 # standard imports
 import os
 import yaml
@@ -82,6 +99,7 @@ if __name__ == "__main__":
         post_every_x_minutes (int): The frequency of posts in minutes
         ai_model (GeminiModel): The AI model to use for generating posts
         twitter_live (bool): Whether to post to twitter live
+        agent_file_path (str): The path to the agent file
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--run-time', type=int, default=0, 

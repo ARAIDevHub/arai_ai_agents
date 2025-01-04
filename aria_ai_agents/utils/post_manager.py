@@ -1,3 +1,20 @@
+#
+# Module: post_manager
+#
+# This module implements the PostManager class for managing the posts for an agent.
+#
+# Title: Post Manager
+# Summary: Post manager implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
+
 # standard imports
 import yaml
 import os
@@ -7,19 +24,30 @@ import datetime
 import connectors.twitter_connector as twitter
 
 class PostManager:
+    """Manages the post manager.
+
+    Attributes:
+        agent_name (str): The name of the agent
+        root_folder (str): The root folder
+        agent_folder (str): The agent folder
+        season_folder (str): The season folder
+        episode_folder (str): The episode folder
+        tracker_file (str): The tracker file
+        season_file (str): The season file
+        episode_file (str): The episode file
+    """
     def __init__(self, agent_name: str):
-        '''
-        Description: Initialize the post manager
+        """Initialize the post manager
 
         Args:
             agent_name (str): The name of the agent
 
-        Returns:
-            None
+        Raises:
+            Exception: If there's an error initializing the post manager
 
         Example:
-            post_manager = PostManager("ZorpTheAlien")
-        '''
+            >>> post_manager = PostManager("ZorpTheAlien")
+        """
 
         # step 1: get the twitter connector
         self.twitter_connector = twitter.TwitterConnector()
@@ -72,18 +100,14 @@ class PostManager:
 
 
     def change_season(self, season_number: int):
-        '''
-        Description: Change the season
+        """Change the season
 
         Args:
             season_number (int): The season number
 
-        Returns:
-            None
-
         Example:
-            post_manager.change_season(1)
-        '''
+            >>> post_manager.change_season(1)
+        """
 
         print(f"Changing season to ({season_number} + 1)")
         self.season_file = f"configs/{self.agent_name}/season_{season_number}/season_{season_number}.yaml"
@@ -99,18 +123,14 @@ class PostManager:
         print(f"Changed season to {self.season_file}")
 
     def change_episode(self, episode_number: int):  
-        '''
-        Description: Change the episode
+        """Change the episode
 
         Args:
             episode_number (int): The episode number
 
-        Returns:
-            None
-
         Example:
-            post_manager.change_episode(1)
-        '''
+            >>> post_manager.change_episode(1)
+        """
 
         if episode_number >= 28-1:
             self.change_season(self.season_number + 1)            
@@ -129,18 +149,20 @@ class PostManager:
         print(f"Changed episode to {self.episode_file}")
 
     def next_post_number(self, post_number: int):
-        '''
-        Description: Change the post number
+        """Change the post number
 
         Args:
             post_number (int): The post number
 
         Returns:
-            post_content (str): The post content
+            str: The post content
+
+        Raises:
+            Exception: If there's an error changing the post number
 
         Example:
-            post_content = post_manager.change_post_number(1)
-        '''
+            >>> post_content = post_manager.change_post_number(1)
+        """
 
         if post_number >= 12-1:
             self.change_episode(self.episode_number + 1)
@@ -163,18 +185,17 @@ class PostManager:
         return post_content
 
     def post_to_twitter(self, live_post: bool = False):
-        '''
-        Description: Post to twitter
+        """Post to twitter
 
         Args:
-            None
+            live_post (bool, optional): Whether to post to twitter. Defaults to False.
 
-        Returns:
-            None
-        
+        Raises:
+            Exception: If there's an error posting to twitter
+
         Example:
-            post_manager.post_to_twitter()
-        '''
+            >>> post_manager.post_to_twitter()
+        """
         # print ("Preparing to post to twitter" + "\n")
 
         # get the next post number
