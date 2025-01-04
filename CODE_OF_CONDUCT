@@ -66,23 +66,22 @@ URLs:
 When **modifying an existing module**, add your name to the list of authors, and **update the last updated date**. For example:
 
 ```python
-"""
-Module: my_existing_module
-==========================
-
-Existing module description...
-
-Title: Some Title
-Summary: High-level summary.
-Authors:
-    - @TheBlockRhino
-    - @YourName
-Date: 2024-12-31
-Last Updated: 2025-01-03
-URLs:
-    - https://aria-ai.io
-    - ...
-"""
+#
+# Module: twitter_app_auth
+#
+# This module implements the TwitterAppAuth class for authenticating with the Twitter API using OAuth 1.0a.
+#
+# Title: Twitter App Auth
+# Summary: Twitter app authentication implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
 ```
 
 Please make sure the rest of the comments in the file are also updated to match your changes, and follow the **Google Style** guidelines for any function/class docstrings.
