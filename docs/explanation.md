@@ -4,6 +4,18 @@
 
 ---
 
+## Table of Contents
+
+1. [Core Concept](#1-core-concept)
+2. [Why “Prompt Chaining”?](#2-why-prompt-chaining)
+3. [High-Level Workflow](#3-high-level-workflow)
+4. [The Importance of a Large Context Window](#4-the-importance-of-a-large-context-window)
+5. [Example Flow](#5-example-flow)
+6. [Benefits of This Approach](#6-benefits-of-this-approach)
+7. [Conclusion](#7-conclusion)
+
+---
+
 ## Core Concept
 
 1. **Non-Repetitive Storytelling**  

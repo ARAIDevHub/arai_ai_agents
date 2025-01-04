@@ -1,3 +1,20 @@
+#
+# Module: step_3
+#
+# This module implements the step_3 function for creating a new episode posts for an agent.
+#
+# Title: Step 3
+# Summary: Step 3 implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
+
 # standard imports
 import os
 import yaml
@@ -13,15 +30,17 @@ def step_3(ai_model, agent_file_path, season_file_path):
 
     Args:
         ai_model: The AI model to use for generating responses
+        agent_file_path: The path to the agent yaml file
         season_file_path: The path to the season yaml file
 
-    Returns:
-        None    
+    Raises:
+        Exception: If there's an error creating the episode posts        
 
     Example:
-        ai_model = OpenAI(api_key="your_api_key")
-        agent_file_path = "agent_template.yaml"
-        step_2(ai_model, agent_file_path)
+        >>> ai_model = GeminiModel()
+        >>> agent_file_path = "agent_template.yaml"
+        >>> season_file_path = "season_template.yaml"
+        >>> step_3(ai_model, agent_file_path, season_file_path)
     '''
     print("Step 3: Create a batch of posts for episode") 
 

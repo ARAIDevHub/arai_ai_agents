@@ -2,6 +2,8 @@
 
 This guide walks you through the essential steps for installing **ARIA AI Agents** in a conda environment, configuring the Google Gemini API key, and authenticating a Twitter account for agent interactions.
 
+---
+
 ## Table of Contents
 
 1. [Set Up a Conda Environment](#1-set-up-a-conda-environment)  
@@ -78,9 +80,9 @@ You now have an isolated environment ready for ARIA AI Agents.
    ```bash
    export GEMINI_API_KEY="AIzaSyD..."
    ```
-   > **Tip**: On Windows, use `set GEMINI_API_KEY="AIzaSyD..."`, or place the key in your `.env` file:
+   > **Tip**: Place the key in your `.env` file at the root of the project:
    > ```bash
-   > GEMINI_API_KEY=AIzaSyD...
+   > GOOGLE_GEMINI_API_KEY=AIzaSyD...
    > ```
 
 ---
@@ -141,15 +143,37 @@ ARIA AI Agents includes modules or scripts (e.g., `twitter_app_auth.py`) to hand
      connector.test_connection()
      ```
 
+5. **Twitter access tokens**
+   - You will need to get the access tokens for the account you want to post to twitter.
+   - The twitter_app_auth.py file has a function to get the access tokens for the account you want to post to twitter.
+   - Save your access tokens in the .env file at the root of the project.
+   - Example:
+
+   ```python
+   TWITTER_ACCESS_TOKEN=
+   TWITTER_ACCESS_TOKEN_SECRET=
+   ```
+
+6. **Enable Twitter Live Mode**  
+
+   - Set `twitter_live = True` in the `main.py` file so you can post to twitter live.   
+
+   ```bash
+   twitter_live = True
+   ```
 Once successfully authenticated, your ARIA agents can interact with Twitter—posting tweets, reading mentions, or replying to DMs, depending on your configuration.
+
+## 6. Debug Mode
+
+   By default the posting to twitter is disabled. You do not have to authenticate your twitter account to see the tweets in the log file for your agent in the config folder/agent_folder/agentName_post_log.yaml. This is by design so that people can test the ai without the need to setup twitter api right away. Doing a a trial run before posting to twitter live is a good idea and helps see any issues that the ai might have overlooked.
 
 ---
 
 ## Next Steps
 
-- **Using ARIA with Other Models**: Check out the [Reference Documentation](reference.md) for integrating additional LLMs like OpenAI or Anthropic.
+- **Using ARIA with Other Models**: Check out the [API Reference Documentation](api/main.md) for integrating additional LLMs like OpenAI or Anthropic.
 - **Setting Up Additional Connectors**: See our [How-To Guides](how-to-guides.md) for adding Discord, Slack, or Telegram connectors.
-- **Managing Prompts & Templates**: Explore the [Prompt Reference](prompt_reference.md) for advanced usage of prompt chaining and template customization.
+- **Managing Prompts & Templates**: Explore the [Prompt Reference](yaml/prompts/prompt_chaining.md) for advanced usage of prompt chaining and template customization.
 
 ---
 

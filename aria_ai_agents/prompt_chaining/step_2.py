@@ -1,3 +1,20 @@
+#
+# Module: step_2
+#
+# This module implements the step_2 function for creating a new season for an agent.
+#
+# Title: Step 2
+# Summary: Step 2 implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
+
 # standard imports
 import os
 import yaml
@@ -17,12 +34,15 @@ def step_2(ai_model, agent_file_path):
         agent_file_path: The path to the agent yaml file
 
     Returns:
-        None    
+        season_file_path: The path to the season yaml file
+
+    Raises:
+        Exception: If there's an error creating the season
 
     Example:
-        ai_model = OpenAI(api_key="your_api_key")
-        agent_file_path = "agent_template.yaml"
-        step_2(ai_model, agent_file_path)
+        >>> ai_model = GeminiModel()
+        >>> agent_file_path = "agent_template.yaml"
+        >>> step_2(ai_model, agent_file_path)
     '''
     print("Step 2: Create a new season") 
 
@@ -104,7 +124,3 @@ def step_2(ai_model, agent_file_path):
     )
 
     return season_file_path
-
-    # step 2.8: Move onto the next step of creating a new season
-    # if chain_step:
-    #   next_step.step_3(ai_model, agent_file_path, season_file_path, chain_step)

@@ -1,3 +1,20 @@
+#
+# Module: content_generator
+#
+# This module implements the ContentGenerator class for generating content for the agents.
+#
+# Title: Content Generator
+# Summary: Content generator implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-04
+# URLs:
+#     - https://aria-ai.io
+#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://x.com/TheBlockRhino
+
 # standard imports
 import os
 import shutil
@@ -17,21 +34,14 @@ class ContentGenerator:
         agents_config_dir (str): the directory to save the agent configurations
         templates_dir (str): the directory to save the agent templates
         agent_template_path (str): the path to the agent template
+        chain_prompts_path (str): the path to the chain prompts
     """
 
     def __init__(self):
-        """
-        Description:
-            Initialize the ContentGenerator class.
-
-        Args:
-            None
-
-        Returns:
-            None
+        """Initialize the ContentGenerator class.
 
         Example:
-            content_generator = ContentGenerator()            
+            >>> content_generator = ContentGenerator()            
         """
         # use relative path to get to project root (two levels up from utils)
         project_root = os.path.dirname(os.path.dirname(__file__))
@@ -54,19 +64,20 @@ class ContentGenerator:
     # Helper to create a new agent yaml file
     # -------------------------------------------------------------------
     def create_new_template_yaml(self, template_type: TemplateType) -> dict:
-        """
-        Description:
-            Create a new agent configuration based on the template configuration file.
+        """Create a new agent configuration based on the template configuration file.
 
         Args:
-            None
+            template_type (TemplateType): the type of template to create
 
         Returns:
             dict: the new agent configuration
 
+        Raises:
+            ValueError: If the template type is invalid
+
         Example:
-            agent_config = create_new_agent_yaml()
-            print(agent_config)
+            >>> agent_config = create_new_agent_yaml()
+            >>> print(agent_config)
         """
         # 1. Ensure directory exist
         os.makedirs(self.templates_dir, exist_ok=True)
@@ -95,13 +106,8 @@ class ContentGenerator:
     # Helper to safely parse YAML from the LLM's response
     # -------------------------------------------------------------------
     def process_and_save_agent_response(self, response) -> dict:
-        """
-        Description:
-            Attempts to parse YAML from LLM text. 
+        """Attempts to parse YAML from LLM text. 
         
-        Future work: 
-            May need error-handling if the LLM returns invalid YAML.
-
         Args:
             response (str): the response from the LLM
             debug (bool, optional): whether to print debug information. Defaults to False.
@@ -109,10 +115,13 @@ class ContentGenerator:
         Returns:
             dict: the parsed YAML
 
+        Raises:
+            Exception: If there's an error parsing the YAML
+
         Example:
-            response = "```yaml\nname: John Doe\nage: 30\n```"
-            parsed = parse_yaml_from_response(response)
-            print(parsed)
+            >>> response = "```yaml\nname: John Doe\nage: 30\n```"
+            >>> parsed = parse_yaml_from_response(response)
+            >>> print(parsed)
         """
         
         # 1. response = self.fix_yaml_from_response(response, debug)
@@ -142,12 +151,6 @@ class ContentGenerator:
         # 6. Move files to agent directory                
         saved_raw_path = self.move_file(raw_save_path, file_dir)
         saved_processed_path = self.move_file(save_path, file_dir)
-
-        # 7. Rename the files                
-        # self.rename_file(saved_raw_path, response["name"] + "_raw.yaml")
-        # self.rename_file(saved_processed_path, response["name"] + "_processed.yaml")
-        # self.rename_file(saved_raw_path, "raw.yaml")
-        # self.rename_file(saved_processed_path, "processed.yaml")
         
         # 8. return the response
         return response
@@ -156,9 +159,7 @@ class ContentGenerator:
     # Helper to save the raw response to a file
     # -------------------------------------------------------------------
     def save_raw_response(self, response) -> str:
-        """
-        Description:
-            Saves the raw response to a file.
+        """Saves the raw response to a file.
 
         Args:
             response (str): the response from the LLM
@@ -167,10 +168,13 @@ class ContentGenerator:
         Returns:
             str: the path to the saved yaml file
 
+        Raises:
+            Exception: If there's an error saving the response
+
         Example:
-            response = "```yaml\nname: John Doe\nage: 30\n```"
-            save_path = save_raw_response(response)
-            print(save_path)
+            >>> response = "```yaml\nname: John Doe\nage: 30\n```"
+            >>> save_path = save_raw_response(response)
+            >>> print(save_path)
         """
         # 1. create a file to save the response
         save_path = os.path.join(self.agents_config_dir, "raw_response.yaml")
@@ -191,24 +195,21 @@ class ContentGenerator:
     # Helper to create a yaml file from LLM text
     # -------------------------------------------------------------------
     def create_yaml_from_response(self, response) -> str:
-        """
-        Description:
-            Attempts to create a yaml file from LLM text. 
+        """Attempts to create a yaml file from LLM text. 
         
-        Future work: 
-            May need error-handling if the LLM returns invalid YAML.
-
         Args:
             response (str): the response from the LLM
-            debug (bool, optional): whether to print debug information. Defaults to False.
 
         Returns:
             str: the path to the saved yaml file
 
+        Raises:
+            Exception: If there's an error saving the response
+
         Example:
-            response = "```yaml\nname: John Doe\nage: 30\n```"
-            save_path = create_yaml_from_response(response)
-            print(save_path)
+            >>> response = "```yaml\nname: John Doe\nage: 30\n```"
+            >>> save_path = create_yaml_from_response(response)
+            >>> print(save_path)
         """
         # 1. strip out '''yaml and ''' 
         # remove new lines and leading and trailing whitespace
@@ -235,9 +236,7 @@ class ContentGenerator:
     # Helper to rename file
     # -------------------------------------------------------------------
     def rename_file(self, old_path, new_name) -> str:
-        """
-        Description:
-            Renames a file.
+        """Renames a file.
 
         Args:
             old_path (str): the old path to the file
@@ -246,8 +245,11 @@ class ContentGenerator:
         Returns:
             str: the new path to the file
 
+        Raises:
+            Exception: If there's an error renaming the file
+
         Example:
-            rename_file("tests/test.yaml", "test_new.yaml")
+            >>> rename_file("tests/test.yaml", "test_new.yaml")
         """
         # 1. Ensure directory exists
         os.makedirs(os.path.dirname(old_path), exist_ok=True)
@@ -265,9 +267,7 @@ class ContentGenerator:
     # Helper to move file
     # -------------------------------------------------------------------
     def move_file(self, old_path, new_dir) -> str:
-        """
-        Description:
-            Moves a file.
+        """Moves a file.
 
         Args:
             old_path (str): the old path to the file
@@ -276,8 +276,11 @@ class ContentGenerator:
         Returns:
             str: the new path to the file after moving
 
+        Raises:
+            Exception: If there's an error moving the file
+
         Example:
-            move_file("tests/test.yaml", "agents/test")
+            >>> move_file("tests/test.yaml", "agents/test")
         """
         # 1. Ensure directory exists
         os.makedirs(new_dir, exist_ok=True)
@@ -296,9 +299,7 @@ class ContentGenerator:
     # Helper to add new agent data to the current agent data
     # -------------------------------------------------------------------
     def add_data_to_template(self, current_data, new_data) -> dict:
-        """
-        Description:
-            Adds new agent data to the current agent data.
+        """Adds new agent data to the current agent data.
 
         Args:
             new_data (dict): the new data
@@ -307,11 +308,14 @@ class ContentGenerator:
         Returns:
             dict: the updated agent data
 
+        Raises:
+            Exception: If there's an error adding the data
+
         Example:
-            new_data = {"name": "John Doe", "age": 30}
-            current_data = {"name": "Jane Doe", "age": 25}
-            updated_data = add_data_to_template(new_data, current_data)
-            print(updated_data)
+            >>> new_data = {"name": "John Doe", "age": 30}
+            >>> current_data = {"name": "Jane Doe", "age": 25}
+            >>> updated_data = add_data_to_template(new_data, current_data)
+            >>> print(updated_data)
         """
         # 1. ensure we have a dictionary to work with
         if isinstance(current_data, str):
@@ -333,9 +337,7 @@ class ContentGenerator:
     # Helper to create filepath
     # -------------------------------------------------------------------
     def create_filepath(self, agent_name: str, season_number: int, episode_number: int, template_type: TemplateType):
-        """
-        Description:
-            Creates a filepath for the agent data.
+        """Creates a filepath for the agent data.
 
         Args:
             agent_name (str): the name of the agent
@@ -346,8 +348,11 @@ class ContentGenerator:
         Returns:
             str: the filepath
 
+        Raises:
+            Exception: If there's an error creating the filepath
+
         Example:
-            create_filepath("John Doe", "0", TemplateType.AGENT)
+            >>> create_filepath("John Doe", "0", TemplateType.AGENT)
         """
         # 1. create the filepath based on the template type
         if template_type == TemplateType.AGENT:            
@@ -361,20 +366,21 @@ class ContentGenerator:
     # Helper to save the agent data to a yaml file
     # -------------------------------------------------------------------
     def save_yaml_file(self, save_path: str, yaml_data: dict):
-        """
-        Description:
-            Save agent data to a YAML file at the specified path or default location.
-        
+        """Saves the agent data to a yaml file.
+
         Args:
-            filepath: The path to save the YAML file
-            yaml_data: The data to save to the YAML file
+            save_path (str): The path to save the YAML file
+            yaml_data (dict): The data to save to the YAML file
 
         Returns:
-            None
+            str: the path to the saved yaml file
+
+        Raises:
+            Exception: If there's an error saving the yaml file
 
         Example:
-            agent_data = {"name": "John Doe", "age": 30}
-            save_yaml_file(filepath="tests/test.yaml", yaml_data=agent_data)
+            >>> agent_data = {"name": "John Doe", "age": 30}
+            >>> save_yaml_file(filepath="tests/test.yaml", yaml_data=agent_data)
         """              
         # 1. Ensure directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -396,25 +402,26 @@ class ContentGenerator:
     # Generic prompt runner that works with any prompt template
     # -------------------------------------------------------------------
     def run_prompt(self, prompt_key, template_vars, ai_model, debug=False):
-        """
-        Description:
-            Generic prompt runner that works with any prompt template
+        """Generic prompt runner that works with any prompt template.
         
         Args:
-            prompt_key: The key for the prompt template (e.g., "prompt_1", "prompt_2")
-            template_vars: dict of variables to pass to the template
-            ai_model: The AI model to use for generating responses
+            prompt_key (str): The key for the prompt template (e.g., "prompt_1", "prompt_2")
+            template_vars (dict): dict of variables to pass to the template
+            ai_model (ModelInterface): The AI model to use for generating responses
             debug (bool, optional): whether to print debug information. Defaults to False.
 
         Returns:
             dict: the parsed YAML
 
+        Raises:
+            Exception: If there's an error running the prompt
+
         Example:
-            prompt_key = "prompt_1"
-            template_vars = {"name": "John Doe", "age": 30}
-            ai_model = OpenAI(api_key="your_api_key")
-            parsed = run_prompt(prompt_key, template_vars, ai_model, debug=True)
-            print(parsed)
+            >>> prompt_key = "prompt_1"
+            >>> template_vars = {"name": "John Doe", "age": 30}
+            >>> ai_model = OpenAI(api_key="your_api_key")
+            >>> parsed = run_prompt(prompt_key, template_vars, ai_model, debug=True)
+            >>> print(parsed)
         """
         # 1. Load the chain prompts from the YAML file
         with open(self.chain_prompts_path, "r", encoding="utf-8") as f:

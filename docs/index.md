@@ -10,14 +10,17 @@ We follow the [Diátaxis documentation framework](https://diataxis.fr/) to organ
 
 1. [Tutorials](tutorials.md) – Step-by-step guides to get started with ARIA  
 2. [How-To Guides](how-to-guides.md) – Practical guides for specific ARIA tasks  
-3. [Reference](reference.md) – Technical reference for ARIA’s APIs and components  
-4. [Explanation](explanation.md) – Conceptual guides about ARIA’s architecture and design
+3. [LLMS Explained](about-llms.md) – Conceptual guides about LLMs and how they work  
+4. [ARIA AI Agents](explanation.md) – Conceptual guides about ARIA’s architecture and design
+5. [Resources](resources.md) – Resources for learning how to program AI agents
+6. [API Reference](api/main.md) – Technical reference for ARIA’s APIs and components  
+7. [Prompt Reference](yaml/prompts/prompt_chaining.md) – Technical reference for ARIA’s prompts and templates
 
 For **code examples**, **API references**, and **prompt references**, refer to the dedicated pages:
 
 - [Code Examples](code.md)
-- [API Reference](api/) – (Files located in `docs/api/`)
-- [Prompt Reference](yaml/) – (Files located in `docs/yaml/`)
+- [API Reference](api/main.md)
+- [Prompt Reference](yaml/prompts/prompt_chaining.md)
 
 Quickly find what you’re looking for by using the navigation links on top or in the sidebar.
 
