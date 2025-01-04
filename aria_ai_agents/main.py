@@ -81,6 +81,7 @@ if __name__ == "__main__":
         current_agent (str): The name of the current agent
         post_every_x_minutes (int): The frequency of posts in minutes
         ai_model (GeminiModel): The AI model to use for generating posts
+        twitter_live (bool): Whether to post to twitter live
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--run-time', type=int, default=0, 
@@ -94,6 +95,12 @@ if __name__ == "__main__":
     current_agent = None
     agent_file_path = None
     post_every_x_minutes = None
+
+    # change this to true if you want to post to twitter live
+    # remember you need a twitter api
+    # authenticate the twitter account
+    # and add the necessary keys to the .env at the root of the project
+    twitter_live = False
 
     # Instantiate your AI model
     ai_model = GeminiModel()
@@ -153,20 +160,21 @@ if __name__ == "__main__":
 
             try:                
                 agent_concept = input("\nProvide a concept for the new agent: ")                
-                if agent_concept:
-                    # Create the new agent using the prompt chaining
-                    step_1.step_1(ai_model, agent_concept)
-                    # Refresh the list of agents after creation
-                    agents = list_available_agents()
-                    # Get the newly created agent (assuming it's the last one added)
-                    current_agent = agents[-1]
-                    config = load_agent_config(current_agent)
-                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}.yaml")
-                    # copy over tracker.yaml from the template folder to the new agent
-                    shutil.copy(os.path.join("template", "tracker_template.yaml"), os.path.join("configs", current_agent, "tracker.yaml"))
-                    print(f"\nCreated new agent: {current_agent}")
-                else:
-                    print("Please provide a concept for the new agent!")
+                
+                # Create the new agent using the prompt chaining
+                print("Creating the new agent...")
+                agent_file_path = step_1.step_1(ai_model, agent_concept)
+                print("New agent created at: ", agent_file_path)                
+                new_agent_dir = os.path.dirname(agent_file_path)
+                print("All agent files will go into: ", new_agent_dir)
+                print("Copying over tracker.yaml...")                
+                shutil.copy(os.path.join("templates", "tracker_template.yaml"), os.path.join(new_agent_dir, "tracker.yaml"))
+                print("Creating the new season...")
+                season_file_path = step_2.step_2(ai_model, agent_file_path)
+                print("Creating the new season posts...")
+                step_3.step_3(ai_model, agent_file_path, season_file_path)                
+                print(f"\nCreated new agent: {current_agent}")
+
             except Exception as e:
                 print(f"Error creating agent: {str(e)}")
 
@@ -177,7 +185,7 @@ if __name__ == "__main__":
             else:
                 try:
                     print("Creating a new season...")
-                    step_2.step_2(ai_model, current_agent)
+                    step_2.step_2(ai_model, agent_file_path)
                 except Exception as e:
                     print(f"Error creating season: {str(e)}")
 
@@ -219,7 +227,9 @@ if __name__ == "__main__":
             # Clear existing schedule
             schedule.clear()
             # Set up new schedule
-            schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter)
+            schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
+            # uncomment this line if you wnat to test the scheduler and the content made by ai
+            # schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
             scheduler_running = True
             scheduler_thread = threading.Thread(target=run_scheduler)
             scheduler_thread.start()
