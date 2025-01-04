@@ -1,1 +1,204 @@
-TBD
+# How to Contribute
+
+Welcome to the **ARIA AI Agents** project! We appreciate your interest in contributing. This guide outlines our contribution process, coding conventions, and best practices to ensure a smooth and collaborative experience.
+
+## Table of Contents
+
+1. [Code of Conduct](#code-of-conduct)  
+2. [Getting Started](#getting-started)  
+3. [Branching & Workflow](#branching--workflow)  
+4. [Style & Documentation](#style--documentation)  
+    - [Docstring Guidelines](#docstring-guidelines)  
+    - [Author Attribution](#author-attribution)  
+5. [Commit Messages & Tagging](#commit-messages--tagging)  
+6. [Testing Your Changes](#testing-your-changes)  
+7. [Pull Requests](#pull-requests)  
+8. [Need Help?](#need-help)
+
+---
+
+## 1. Code of Conduct
+
+Please review our [Code of Conduct](./CODE_OF_CONDUCT.md) before contributing. By participating, you agree to uphold a respectful and inclusive environment for everyone.
+
+---
+
+## 2. Getting Started
+
+**1. Fork & Clone**  
+- Fork this repository using the **Fork** button on GitHub.  
+- Clone your fork locally, for example:
+  ```bash
+  git clone https://github.com/<your-username>/aria_ai_agents.git
+  ```
+- Set up your remote so you can pull changes from the official repo later:
+  ```bash
+  git remote add upstream https://github.com/aria-ai/aria_ai_agents.git
+  ```
+
+**2. Create a Virtual Environment**  
+We recommend using [conda](https://docs.conda.io/en/latest/) or [venv](https://docs.python.org/3/library/venv.html):
+```bash
+conda create --name aria_ai_agents python=3.11
+conda activate aria_ai_agents
+```
+  
+**3. Install Dependencies**  
+```bash
+pip install -r requirements.txt
+```
+
+**4. You’re All Set!**  
+Now you can explore the codebase, run `main.py`, or execute tests to ensure everything is working.
+
+---
+
+## 3. Branching & Workflow
+
+1. **Create a Branch**  
+   - Use a descriptive name for your branch, for example:  
+     - `feat/new-twitter-connector`  
+     - `fix/spelling-typos`  
+     - `docs/improve-readme`
+   ```bash
+   git checkout -b feat/new-twitter-connector
+   ```
+2. **Make Changes & Commit**  
+   - Keep commits small and focused.  
+   - Write clear commit messages (see [Commit Messages & Tagging](#commit-messages--tagging)).
+
+3. **Pull & Rebase** (before pushing)  
+   - Keep your branch up-to-date with the main branch:
+     ```bash
+     git checkout main
+     git pull upstream main
+     git checkout feat/new-twitter-connector
+     git rebase main
+     ```
+4. **Push Your Branch**  
+   ```bash
+   git push origin feat/new-twitter-connector
+   ```
+
+---
+
+## 4. Style & Documentation
+
+### Docstring Guidelines
+
+We follow **Google Style Python Docstrings**:  
+[https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
+
+- **Module Docstrings**  
+  At the top of each new or updated module, include something like:
+  ```python
+  """
+  Module: twitter_connector
+  =========================
+
+  This module implements the TwitterConnector class for interacting with Twitter APIs.
+
+  Title: Twitter Connector
+  Summary: Twitter connector implementation.
+  Authors:
+      - @TheBlockRhino
+  Date: 2024-12-31
+  Last Updated: 2024-12-31
+  URLs:
+      - https://aria-ai.io
+      - https://github.com/ARIADevHub/aria-ai-agents
+      - https://x.com/TheBlockRhino
+  """
+  ```
+  - If you **modify** an existing file, add your name to the **Authors** list and update the **Last Updated** field.
+
+- **Function & Class Docstrings**  
+  Use the Google-style format for parameters, returns, exceptions, etc. Example:
+  ```python
+  def my_function(param1: str, param2: int) -> bool:
+      """
+      Perform an example operation and return a boolean.
+
+      Args:
+          param1 (str): Description of param1.
+          param2 (int): Description of param2.
+
+      Returns:
+          bool: Explanation of the return value.
+      """
+  ```
+
+### Author Attribution
+
+Whenever you add a **substantial** piece of work (new module, major refactor), be sure to:
+- Add your handle to the module docstring’s **Authors** list.
+- Keep track of changes in the **Last Updated** date.
+
+---
+
+## 5. Commit Messages & Tagging
+
+We recommend [semantic versioning](https://www.gitkraken.com/gitkon/semantic-versioning-git-tags) and **descriptive commit messages**.
+
+- **Prefix** your commits with a type, for example:
+  - `feat:` when you add a new feature
+  - `fix:` when you fix a bug
+  - `docs:` for documentation updates
+  - `test:` for test-related changes
+  - `refactor:` for code improvements without changing functionality
+  - `perf:` for performance improvements
+  - `chore:` for minor tasks like updating `.gitignore`
+
+**Example**:
+```
+feat: add advanced prompt chaining for TwitterConnector
+
+- Created prompt_chain_v2.py
+- Updated docstrings in twitter_connector.py
+- Bumped version from 1.2.0 to 1.3.0
+```
+
+Use **Git Tags** (`git tag v1.3.0`) for:
+- Major releases
+- Milestones
+
+---
+
+## 6. Testing Your Changes
+
+1. **Run Existing Tests**  
+   ```bash
+   pytest
+   ```
+   or
+   ```bash
+   python -m unittest discover tests
+   ```
+2. **Add New Tests**  
+   - Place new tests in the `tests/` folder, matching your new modules or functionalities.
+   - Ensure all tests pass before submitting a pull request.
+
+---
+
+## 7. Pull Requests
+
+1. **Open a Pull Request** in your fork’s **GitHub** page.  
+2. **Provide a clear description** of what you changed and why.  
+3. **Reference** any relevant **issues** or user stories (e.g., `Closes #42`).  
+4. Wait for a **review**. Maintainers may request changes or clarifications.
+
+**Pro-Tip**: If your PR covers multiple changes, consider splitting it into smaller PRs for easier review.
+
+---
+
+## 8. Need Help?
+
+- Check the [Issues](https://github.com/aria-ai/aria_ai_agents/issues) or [Discussions](https://github.com/aria-ai/aria_ai_agents/discussions) for open topics.  
+- Ask questions or clarifications in a GitHub Issue.  
+
+We appreciate your time and effort in making **ARIA AI Agents** even better. Thank you for contributing!
+
+---
+
+*Happy coding!*  
+*The ARIA AI Agents community*

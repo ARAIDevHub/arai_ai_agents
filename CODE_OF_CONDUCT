@@ -1,40 +1,141 @@
+# Code of Conduct & Contribution Guidelines
 
-Google Style Python Docstrings
-https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+Welcome to our project! We expect all contributors to abide by our **Code of Conduct** (outlined below) and adhere to our **Project Contribution Standards**, which specify how to document code, attribute authors, and write Git commit messages. 
 
-Authors
-If you create a new module, add this to the top of the file:
+## 1. Our Pledge
 
+In the interest of fostering an open and welcoming environment, we, as contributors and maintainers, pledge to make participation in our project and our community a harassment-free experience for everyone—regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-    """
-    Module: twitter_connector
-    =========================
+## 2. Expected Behavior
 
-    This module implements the TwitterConnector class for interacting with Twitter APIs.
+- Be kind and courteous to others.
+- Respect differing viewpoints and experiences.
+- Gracefully accept constructive criticism.
+- Give and receive feedback in a positive manner.
+- Collaborate and help each other whenever possible.
 
-    Title: Twitter Connector
-    Summary: Twitter connector implementation.
-    Authors:
-        - @TheBlockRhino
-    Date: 2024-12-31
-    Last Updated: 2024-12-31
-    URLs:
-        - https://ava-ai.io
-        - https://github.com/AVADevHub/ava-ai-agents
-        - https://x.com/TheBlockRhino
-    """
+## 3. Unacceptable Behavior
 
-If you modify an existing module, add your name to the list of authors, and edit the last updated date:
+- The use of sexualized language or imagery and unwelcome sexual attention.
+- Trolling, insulting or derogatory comments, and personal or political attacks.
+- Public or private harassment.
+- Publishing others’ private information (e.g., physical or electronic addresses) without explicit permission.
+- Other conduct which could reasonably be considered inappropriate.
 
-    Authors:
-        - @TheBlockRhino
-        - @YourName
-    Date: xxxx-xx-xx
-    Last Updated: New-Date
+## 4. Reporting and Enforcement
 
-Update the rest of the comments in the file to match your changes.
-Make sure your git commit message is descriptive on the changes you made.
-Use Tags for many commits and major changes or additions.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at `[YOUR CONTACT EMAIL HERE]`. The project team will review and investigate all complaints and respond in a way that it deems appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
 
-Git Commit Message Format:
-https://www.gitkraken.com/gitkon/semantic-versioning-git-tags
+---
+
+# Project Contribution Standards
+
+In addition to general conduct, our project enforces **coding style**, **docstring conventions**, **author attribution**, and **commit message guidelines** to ensure clarity and consistency. 
+
+## 5. Docstring Style
+
+We follow the **Google Style Python Docstrings** as documented here:  
+[https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
+
+Please ensure all public functions, classes, and modules include docstrings adhering to this style. 
+
+### 5.1 Module-Level Docstring Format
+
+When creating a **new module**, please include a docstring at the top with the following structure (update the content as appropriate):
+
+```python
+"""
+Module: twitter_connector
+=========================
+
+This module implements the TwitterConnector class for interacting with Twitter APIs.
+
+Title: Twitter Connector
+Summary: Twitter connector implementation.
+Authors:
+    - @TheBlockRhino
+Date: 2024-12-31
+Last Updated: 2024-12-31
+URLs:
+    - https://aria-ai.io
+    - https://github.com/ARIADevHub/aria-ai-agents
+    - https://x.com/TheBlockRhino
+"""
+```
+
+When **modifying an existing module**, add your name to the list of authors, and **update the last updated date**. For example:
+
+```python
+"""
+Module: my_existing_module
+==========================
+
+Existing module description...
+
+Title: Some Title
+Summary: High-level summary.
+Authors:
+    - @TheBlockRhino
+    - @YourName
+Date: 2024-12-31
+Last Updated: 2025-01-03
+URLs:
+    - https://aria-ai.io
+    - ...
+"""
+```
+
+Please make sure the rest of the comments in the file are also updated to match your changes, and follow the **Google Style** guidelines for any function/class docstrings.
+
+---
+
+## 6. Git Commit Messages
+
+We encourage **descriptive, consistent commit messages**. Use semantic versioning and tagging where appropriate. For guidelines, see:  
+[https://www.gitkraken.com/gitkon/semantic-versioning-git-tags](https://www.gitkraken.com/gitkon/semantic-versioning-git-tags)
+
+### 6.1 Examples
+
+- **feat:** Introduce a new feature (`feat: add user login flow`)
+- **fix:** Bug fix or patch (`fix: handle null pointer in user data`)
+- **docs:** Documentation-only changes (`docs: update readme installation steps`)
+- **style:** Changes that do not affect meaning (white-space, formatting, etc.)
+- **refactor:** Code change that neither fixes a bug nor adds a feature
+- **perf:** Code change that improves performance
+- **test:** Add or correct tests
+
+**Example** commit message:
+
+```
+feat: add advanced prompt chaining for TwitterConnector
+
+- Created new step_4.py for multi-step Twitter workflow
+- Updated docstring for step_3.py with new Authors entry
+- Bumped version from 1.2.0 to 1.3.0
+```
+
+---
+
+## 7. Adding Tags & Versions
+
+For **major changes** or new releases, we recommend creating a new Git tag using semantic versioning (e.g., `v2.0.0`). Use tags to mark milestones or significant updates, so others can easily reference or roll back to stable states.
+
+---
+
+## 8. Scope
+
+This Code of Conduct and Contribution Standards apply to:
+- All repositories under the `[YOUR_ORG/PROJECT]` umbrella.
+- Communication channels such as GitHub issues, pull requests, and social media references.
+
+## 9. Attribution
+
+This Code of Conduct is based on the [Contributor Covenant](https://www.contributor-covenant.org), with custom additions to guide documentation practices and commit messages in our project.
+
+---
+
+**Thank you for helping us maintain a welcoming, organized, and productive environment!**  
+
+If you have any questions or concerns about this Code of Conduct or the Contribution Standards, please contact `[YOUR CONTACT EMAIL HERE]`. 
+
+*Happy coding and contributing!*
