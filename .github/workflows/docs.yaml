@@ -10,33 +10,23 @@ name: Docs
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+    branches: 
+      - master
+      - main
 # Allows pushing to gh-pages
 permissions:
   contents: write
-
 jobs:
-  build-and-deploy-docs:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Check out the code
       - uses: actions/checkout@v3
-
-      # 2. Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
-      # 3. Install MkDocs (with the Material theme)
-      - name: Install MkDocs
-        run: |
-          pip install --upgrade pip
-          pip install mkdocs-material
-
-      # 4. Deploy documentation to GitHub Pages
-      - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
+      - uses: actions/cache@v2
+        with:          
+          key: ${{ github.ref }}
+          path: .cache
+      - run: pip install mkdocs-material
+      - run: mkdocs gh-deploy --force

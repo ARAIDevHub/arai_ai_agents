@@ -3,7 +3,12 @@ A Python-based system for managing AI agents and their interactions.
 ## Installation
 
 ```bash
+git clone https://github.com/aria-ai/aria_ai_agents.git
+conda create --name aria_ai_agents python=3.11
+conda activate aria_ai_agents
 pip install -r requirements.txt
+cd aria_ai_agents
+python main.py
 ```
 
 ## Usage
