@@ -4,6 +4,18 @@ Welcome to the **ARAI AI Agents** documentation site! ARAI (Autonomous Responsiv
 
 ---
 
+## Project Overview
+
+ARIA simplifies creating and managing AI agents by providing:
+
+> 🚀 **Multiple AI Models**: Connect to OpenAI, Anthropic, or other LLMs.  
+> ⚙️ **Modular Architecture**: Plug and play new connectors (Discord, Twitter, Telegram, etc.) with minimal effort.  
+> 🔗 **Prompt Chaining**: Build, modify, and chain prompts to accomplish complex tasks.  
+> 🧠 **Memory & Templates**: Store persistent context and quickly adapt to different use cases. [WIP]  
+> 📊 **CLI**: Monitor and manage agent interactions in real-time.
+
+---
+
 ## Documentation Structure
 
 We follow the [Diátaxis documentation framework](https://diataxis.fr/) to organize content into four main sections:
@@ -24,20 +36,6 @@ For **code examples**, **API references**, and **prompt references**, refer to t
 
 Quickly find what you’re looking for by using the navigation links on top or in the sidebar.
 
----
-
-## Project Overview
-
-ARAI simplifies creating and managing AI agents by providing:
-
-> 🚀 **Multiple AI Models**: Connect to OpenAI, Anthropic, or other LLMs.  
-> ⚙️ **Modular Architecture**: Plug and play new connectors (Discord, Twitter, Telegram, etc.) with minimal effort.  
-> 🔗 **Prompt Chaining**: Build, modify, and chain prompts to accomplish complex tasks.  
-> 🧠 **Memory & Templates**: Store persistent context and quickly adapt to different use cases. [WIP]  
-> 📊 **CLI**: Monitor and manage agent interactions in real-time.
-
----
-
 ## Acknowledgements
 
 This project builds upon various open-source technologies and research in the field of artificial intelligence and autonomous agents. Special thanks to all contributors and the broader AI research community for their ongoing work in advancing agent-based systems.
@@ -45,3 +43,8 @@ This project builds upon various open-source technologies and research in the fi
 ---
 
 > **Get Started** by checking out the [Tutorials](tutorials.md) or explore the [How-To Guides](how-to-guides.md) for more specific tasks!
+
+---
+
+> **Note:** This project is still in development and the documentation is a work in progress.
+
