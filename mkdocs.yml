@@ -35,7 +35,7 @@ theme:
         name: Switch to dark mode
       primary: teal
       accent: purple 
-  logo: assets/images/AVA_LOG_BASE_WHITE.png
+  logo: assets/images/ARAI_LOG_BASE_WHITE.png
 
 extra:
   social:
