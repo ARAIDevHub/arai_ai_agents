@@ -1,18 +1,18 @@
 #
 # Module: main
 #
-# This module implements the main function for the ARIA Agents application.
+# This module implements the main function for the ARAI Agents application.
 #
-# Title: ARIA Agents
-# Summary: ARIA Agents implementation.
+# Title: ARAI Agents
+# Summary: ARAI Agents implementation.
 # Authors:
 #     - @TheBlockRhino
 # Created: 2024-12-31
 # Last edited by: @TheBlockRhino
 # Last edited date: 2025-01-04
 # URLs:
-#     - https://aria-ai.io
-#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://arai-ai.io
+#     - https://github.com/ARAI-DevHub/arai-ai-agents
 #     - https://x.com/TheBlockRhino
 
 # standard imports
@@ -24,7 +24,7 @@ import time
 import threading
 import argparse
 
-# custom ARIA imports
+# custom ARAI imports
 from models.gemini_model import GeminiModel
 import utils.post_manager as twitter_manager
 import prompt_chaining.step_1 as step_1
@@ -89,7 +89,7 @@ def run_scheduler():
         time.sleep(1)
 
 if __name__ == "__main__":
-    """ Main entry point for the ARIA Agents application 
+    """ Main entry point for the ARAI Agents application 
 
     Global:
         scheduler_running (bool): Whether the scheduler is running
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
     while True:
         print("\n=== Main Menu ===")
-        print("Welcome to ARIA Agents.")
+        print("Welcome to ARAI Agents.")
         print("Please select an option:\n")
 
         print("Current Agent: ", current_agent)

@@ -1,3 +1,3 @@
 # utils
 
-::: aria_ai_agents.utils
+::: arai_ai_agents.utils

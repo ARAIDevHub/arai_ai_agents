@@ -1,6 +1,6 @@
-# Explanation: ARIA’s Prompt Chaining Approach
+# Explanation: ARAI’s Prompt Chaining Approach
 
-**ARIA AI Agents** employs a narrative-based prompt chaining methodology to create cohesive, non-repetitive, and engaging content—ranging from **tweets** and **social media posts** to entire **story arcs**. This approach draws inspiration from **Hollywood screenwriters**, using seasons and episodes to structure continuous storylines and maintain context.
+**ARAI AI Agents** employs a narrative-based prompt chaining methodology to create cohesive, non-repetitive, and engaging content—ranging from **tweets** and **social media posts** to entire **story arcs**. This approach draws inspiration from **Hollywood screenwriters**, using seasons and episodes to structure continuous storylines and maintain context.
 
 ---
 
@@ -43,7 +43,7 @@ Typical AI-generated content can become repetitive when prompts are not carefull
   The AI “knows” the characters’ personalities, the setting, and prior events. This leads to more believable and varied outputs.
 
 - **Batch & Story-Based Generation**  
-  Instead of randomly generating single posts, ARIA processes entire sequences of posts together, referencing each other for narrative coherence.
+  Instead of randomly generating single posts, ARAI processes entire sequences of posts together, referencing each other for narrative coherence.
 
 ---
 
@@ -68,7 +68,7 @@ Typical AI-generated content can become repetitive when prompts are not carefull
      - The overall “season” summary  
 
 4. **Batch Generation**  
-   - ARIA then prompts the AI to generate multiple posts at once (or in succession) so they share context and maintain narrative continuity.  
+   - ARAI then prompts the AI to generate multiple posts at once (or in succession) so they share context and maintain narrative continuity.  
    - This ensures each post references the correct timeline and plot details.
 
 5. **Season Rollovers**  
@@ -82,7 +82,7 @@ Typical AI-generated content can become repetitive when prompts are not carefull
 To make prompt chaining truly effective, the underlying AI model needs a large **context window**. The **context window** refers to the amount of text (measured in tokens) that the model can “remember” and consider when generating a response.
 
 - **Why We Use `2.0 Experimental Advanced model in Gemini Advanced.`**  
-  By default, ARIA uses the `Gemini-Exp-1206` model because it offers a large context window. This is ideal for our narrative-driven approach because:
+  By default, ARAI uses the `Gemini-Exp-1206` model because it offers a large context window. This is ideal for our narrative-driven approach because:
   
   - **Long-Term Memory:**  
     The model can retain information from earlier parts of the conversation (e.g., details from previous episodes or seasons), which is crucial for maintaining consistency in long-running storylines.
@@ -94,7 +94,7 @@ To make prompt chaining truly effective, the underlying AI model needs a large *
     With more context available, the model is less likely to fall back on repetitive phrases or generic responses.
 
 - **Model Selection and Context Window:**  
-  When choosing a model for ARIA, the size of the context window is a primary consideration. While a larger context window generally improves performance on complex tasks, it can also increase computational cost and latency. The `gemini-pro` model provides a good balance between context size and efficiency for our use case.
+  When choosing a model for ARAI, the size of the context window is a primary consideration. While a larger context window generally improves performance on complex tasks, it can also increase computational cost and latency. The `gemini-pro` model provides a good balance between context size and efficiency for our use case.
 
 ---
 
@@ -133,11 +133,11 @@ To make prompt chaining truly effective, the underlying AI model needs a large *
 
 ## Conclusion
 
-**ARIA AI Agents** leverages a *story-first, chain-of-thought approach* to generating content. By structuring the process akin to **Hollywood screenwriting** and dividing it into **seasons, episodes, and scenes**, ARIA creates vibrant, interconnected narratives. Each step references previous context, preventing repetitive output and fostering deeper engagement for readers (or social media audiences).
+**ARAI AI Agents** leverages a *story-first, chain-of-thought approach* to generating content. By structuring the process akin to **Hollywood screenwriting** and dividing it into **seasons, episodes, and scenes**, ARAI creates vibrant, interconnected narratives. Each step references previous context, preventing repetitive output and fostering deeper engagement for readers (or social media audiences).
 
 If you’d like to learn more about setting up your environment or configuring connectors:
 
 - Check our [How-To Guides](./how-to-guides.md) for environment & API key setup  
 - Look at the [Tutorials](./tutorials.md) for step-by-step instructions on building your first season-based storyline  
 
-**Happy storytelling with ARIA!**
+**Happy storytelling with ARAI!**

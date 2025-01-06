@@ -1,10 +1,10 @@
-# ARIA AI Agents ⚡
+# ARAI AI Agents ⚡
 
 <p align="center">
-  <img src="docs/assets/images/AVA_LOG_BASE_GREY.png" alt="ARIA AI Agents Logo" width="100">
+  <img src="docs/assets/images/AVA_LOG_BASE_GREY.png" alt="ARAI AI Agents Logo" width="100">
 </p>
 
-Welcome to **ARIA AI Agents** – a Python-based system for managing AI agents, their interactions, and associated connectors. This project is designed to streamline the setup of multi-agent workflows and help developers easily integrate different language models, connectors, and prompt-chaining strategies.
+Welcome to **ARAI AI Agents** – a Python-based system for managing AI agents, their interactions, and associated connectors. This project is designed to streamline the setup of multi-agent workflows and help developers easily integrate different language models, connectors, and prompt-chaining strategies.
 
 > **Highlights**  
 > 🚀 **Multiple AI Models**: Connect to OpenAI, Anthropic, or other LLMs.  
@@ -33,20 +33,20 @@ Welcome to **ARIA AI Agents** – a Python-based system for managing AI agents, 
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/aria-ai/aria_ai_agents.git
+git clone https://github.com/arai-ai/arai_ai_agents.git
 
 # 2. Move into the project directory
-cd aria_ai_agents
+cd arai_ai_agents
 
 # 3. Create a virtual environment (conda example)
-conda create --name aria_ai_agents python=3.11
-conda activate aria_ai_agents
+conda create --name arai_ai_agents python=3.11
+conda activate arai_ai_agents
 
 # 4. Install dependencies
 pip install -r requirements.txt
 
 # 5. Run the main script
-cd aria_ai_agents
+cd arai_ai_agents
 python main.py
 ```
 
@@ -58,16 +58,16 @@ This will launch the **main** application, which initializes your agents, connec
 
 1. **Clone** the repository:
    ```bash
-   git clone https://github.com/aria-ai/aria_ai_agents.git
+   git clone https://github.com/arai-ai/arai_ai_agents.git
    ```
 2. **Navigate** to the project folder:
    ```bash
-   cd aria_ai_agents
+   cd arai_ai_agents
    ```
 3. **Create** a virtual environment (e.g., using `conda`):
    ```bash
-   conda create --name aria_ai_agents python=3.11
-   conda activate aria_ai_agents
+   conda create --name arai_ai_agents python=3.11
+   conda activate arai_ai_agents
    ```
 4. **Install** dependencies:
    ```bash
@@ -75,14 +75,14 @@ This will launch the **main** application, which initializes your agents, connec
    ```
 5. **Run** the main script:
    ```bash
-   cd aria_ai_agents
+   cd arai_ai_agents
    python main.py
    ```
 6. You should see a welcome prompt similar to:
 
    ```plaintext
    === Main Menu ===
-   Welcome to ARIA Agents.
+   Welcome to ARAI Agents.
    Please select an option:
 
    Current Agent: None
@@ -113,11 +113,11 @@ This will launch the **main** application, which initializes your agents, connec
 
 ## Usage
 
-You can programmatically work with the **ARIA AI Agents** from within your own Python scripts. For example:
+You can programmatically work with the **ARAI AI Agents** from within your own Python scripts. For example:
 
 ```python
-from aria_ai_agents.models.gemini_model import GeminiModel
-from aria_ai_agents.connectors.twitter_connector import TwitterConnector
+from arai_ai_agents.models.gemini_model import GeminiModel
+from arai_ai_agents.connectors.twitter_connector import TwitterConnector
 
 # 1. Initialize an AI model
 model = GeminiModel()
@@ -142,7 +142,7 @@ Depending on your project design, you might:
 - Use a prompt-chaining manager to orchestrate complex LLM calls.
 
 For Prompt Chaining:
- - Look at the Prompt Chaining folder for python files that implement ARIA unique prompt chaining logic.
+ - Look at the Prompt Chaining folder for python files that implement ARAI unique prompt chaining logic.
  - Step 1: Creates a new agent with a character background..
  - Step 2: Creates the seasons and episodes for the agent, this is how unique content is created.
  - Step 3: Creates the posts based off the agent and season/episode that the agent will post to the connector.
@@ -151,10 +151,10 @@ For Prompt Chaining:
 
 ## Project Structure
 
-Here’s how your folders and files are organized inside `aria_ai_agents/`. The main entry point is **`main.py`**, and each folder handles a different piece of functionality:
+Here’s how your folders and files are organized inside `arai_ai_agents/`. The main entry point is **`main.py`**, and each folder handles a different piece of functionality:
 
 ```bash
-aria_ai_agents/
+arai_ai_agents/
 ├─ __pycache__/          # Compiled Python files (ignore in version control)
 ├─ auth/                 # Authentication or credential management for connectors
 ├─ configs/              # GeneratedYAML/JSON config files for agents for posting content to connectors.
@@ -164,7 +164,7 @@ aria_ai_agents/
 ├─ prompts/              # Collections of prompt templates for the agents to use.
 ├─ templates/            # Templates used for the AI to fill in for the based on prompts chaining  .
 ├─ utils/                # Utility/helper functions shared across modules
-├─ __init__.py           # Makes `aria_ai_agents` a Python package
+├─ __init__.py           # Makes `arai_ai_agents` a Python package
 └─ main.py               # Entry point to initialize and run the system
 ```
 
@@ -255,6 +255,6 @@ This project is licensed under the terms of the [MIT License](./LICENSE). Feel f
 ---
 
 > **Happy coding!** 🎉  
-> We hope this framework accelerates your AI-driven projects. If you have questions, feel free to [open an issue](https://github.com/aria-ai/aria_ai_agents/issues) or start a discussion.
+> We hope this framework accelerates your AI-driven projects. If you have questions, feel free to [open an issue](https://github.com/arai-ai/arai_ai_agents/issues) or start a discussion.
 
-*Made with ❤️ by the ARIA AI Agents Devs.*
+*Made with ❤️ by the ARAI AI Agents Devs.*

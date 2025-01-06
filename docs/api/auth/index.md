@@ -1,3 +1,3 @@
 # auth
 
-::: aria_ai_agents.auth
+::: arai_ai_agents.auth
