@@ -11,15 +11,15 @@
 # Last edited by: @TheBlockRhino
 # Last edited date: 2025-01-04
 # URLs:
-#     - https://aria-ai.io
-#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://arai-ai.io
+#     - https://github.com/ARAI-DevHub/arai-ai-agents
 #     - https://x.com/TheBlockRhino
 
 # standard imports
 import os
 import yaml
 
-# custom ARIA imports
+# custom ARAI imports
 from utils.content_generator import ContentGenerator
 from utils.template_types import TemplateType
 
@@ -77,10 +77,10 @@ def step_3(ai_model, agent_file_path, season_file_path):
         # if we do, skip to the next episode
         # check by file name
         try:
-            # Get the project root directory (notice we're adding aria_ai_agents to match the actual path)
+            # Get the project root directory (notice we're adding arai_ai_agents to match the actual path)
             project_root = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-                "aria_ai_agents"
+                "arai_ai_agents"
             )
             
             # Create file name using the exact same path as shown in the output

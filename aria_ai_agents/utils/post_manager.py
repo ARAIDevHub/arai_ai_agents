@@ -11,8 +11,8 @@
 # Last edited by: @TheBlockRhino
 # Last edited date: 2025-01-04
 # URLs:
-#     - https://aria-ai.io
-#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://arai-ai.io
+#     - https://github.com/ARAI-DevHub/arai-ai-agents
 #     - https://x.com/TheBlockRhino
 
 # standard imports
@@ -20,7 +20,7 @@ import yaml
 import os
 import datetime
 
-# custom ARIA code imports
+# custom ARAI code imports
 import connectors.twitter_connector as twitter
 
 class PostManager:

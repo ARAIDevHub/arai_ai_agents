@@ -1,6 +1,6 @@
-# Explanation: Understanding LLMs, Prompt Engineering, and ARIA AI
+# Explanation: Understanding LLMs, Prompt Engineering, and ARAI AI
 
-**ARIA AI Agents** leverages advanced **Large Language Models (LLMs)** to produce non-repetitive, context-aware content through various strategies, including **prompt chaining**. This document provides a brief history of AI, explains how LLMs differ from other AI approaches, covers tokenization and prompts, and explores two popular prompt engineering techniques—*Prompt Chaining* and *Chain-of-Thought (CoT) Prompting*. We’ll also highlight ARIA’s approach to orchestrating these methods.
+**ARAI AI Agents** leverages advanced **Large Language Models (LLMs)** to produce non-repetitive, context-aware content through various strategies, including **prompt chaining**. This document provides a brief history of AI, explains how LLMs differ from other AI approaches, covers tokenization and prompts, and explores two popular prompt engineering techniques—*Prompt Chaining* and *Chain-of-Thought (CoT) Prompting*. We’ll also highlight ARAI’s approach to orchestrating these methods.
 
 ---
 
@@ -11,7 +11,7 @@
 3. [Tokens, Prompts & Generation](#3-tokens-prompts-generation)
 4. [Two Paths to Take: Prompt Chaining vs. Chain-of-Thought Prompting](#4-two-paths-to-take-prompt-chaining-vs-chain-of-thought-prompting)
 5. [Limitations of LLMs](#5-limitations-of-llms)
-6. [How ARIA AI Agents Leverage LLMs](#6-how-aria-ai-agents-leverage-llms)
+6. [How ARAI AI Agents Leverage LLMs](#6-how-arai-ai-agents-leverage-llms)
 7. [Conclusion](#7-conclusion)
 
 ---
@@ -86,7 +86,7 @@
   2. **Prompt 2**: “Using the backstory, outline a 5-episode arc.”  
   3. **Prompt 3**: “Write the first episode’s script referencing the outline.”
 
-This approach is central to how **ARIA** orchestrates episodes and seasons while preventing repetitive content.
+This approach is central to how **ARAI** orchestrates episodes and seasons while preventing repetitive content.
 
 ### 4.2 Chain-of-Thought (CoT) Prompting
 
@@ -103,7 +103,7 @@ This approach is central to how **ARIA** orchestrates episodes and seasons while
   1. Prompt: “Explain how to solve this math problem step by step, then provide the final answer.”  
   2. The model outputs a *reasoning chain* (hidden or partially visible) and a final solution.
 
-In short, **CoT** is more about unveiling the reasoning process. **Prompt Chaining** is about splitting tasks into multiple sequential steps. **ARIA** primarily uses *Prompt Chaining* but can combine CoT for more in-depth reasoning within each step.
+In short, **CoT** is more about unveiling the reasoning process. **Prompt Chaining** is about splitting tasks into multiple sequential steps. **ARAI** primarily uses *Prompt Chaining* but can combine CoT for more in-depth reasoning within each step.
 
 ---
 
@@ -126,18 +126,18 @@ In short, **CoT** is more about unveiling the reasoning process. **Prompt Chaini
 
 ---
 
-## 6. How ARIA AI Agents Leverage LLMs
+## 6. How ARAI AI Agents Leverage LLMs
 
-**ARIA AI Agents** harness LLMs with a focus on **Prompt Chaining** for narrative-driven content. Some highlights:
+**ARAI AI Agents** harness LLMs with a focus on **Prompt Chaining** for narrative-driven content. Some highlights:
 
 1. **Story-First Content**  
-   ARIA uses a *TV show or cinematic model*—seasons, episodes, scenes—to maintain overarching context.  
+   ARAI uses a *TV show or cinematic model*—seasons, episodes, scenes—to maintain overarching context.  
 2. **Chained Prompts**  
    - Each step (episode, scene, or post) references the preceding step’s output, ensuring continuity and preventing repetition.  
 3. **Multi-Agent Collaboration**  
-   - ARIA can integrate multiple agent personalities, each guided by specialized prompts or constraints.  
+   - ARAI can integrate multiple agent personalities, each guided by specialized prompts or constraints.  
 4. **Chain-of-Thought (Optional)**  
-   - For specific logic or puzzle-based tasks, ARIA can enable CoT to capture the LLM’s reasoning process more transparently.
+   - For specific logic or puzzle-based tasks, ARAI can enable CoT to capture the LLM’s reasoning process more transparently.
 
 ---
 
@@ -145,7 +145,7 @@ In short, **CoT** is more about unveiling the reasoning process. **Prompt Chaini
 
 Modern **Large Language Models** give us *unprecedented flexibility* in text generation. By employing **Prompt Chaining** and, when necessary, **Chain-of-Thought Prompting**, we guide LLMs toward more coherent, context-rich outputs that serve both creative and analytical tasks.
 
-**ARIA AI** exemplifies these methods by:
+**ARAI AI** exemplifies these methods by:
 - Building multi-episode narratives that avoid redundancy.
 - Utilizing carefully structured prompts to maintain story context across seasons.
 - Embracing or bypassing CoT as required by the complexity of each scenario.
@@ -155,6 +155,6 @@ Modern **Large Language Models** give us *unprecedented flexibility* in text gen
 > **Next Steps**:
 > - Check out our [How-To Guides](./how-to-guides.md) for environment setup and configuring your LLM keys.  
 > - Dive into [tutorials](./tutorials.md) for hands-on practice creating your first story-driven agent.  
-> - See the [Reference](./reference.md) docs for ARIA’s APIs and modules.  
+> - See the [Reference](./reference.md) docs for ARAI’s APIs and modules.  
 
-**Happy prompt engineering with ARIA AI!**
+**Happy prompt engineering with ARAI AI!**

@@ -1,3 +1,3 @@
 # models
 
-::: aria_ai_agents.models
+::: arai_ai_agents.models

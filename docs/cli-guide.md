@@ -1,6 +1,6 @@
-# ARIA CLI Usage Guide
+# ARAI CLI Usage Guide
 
-The **ARIA AI Agents** command-line interface (CLI) offers a straightforward way to manage your AI agents, create media content (seasons/episodes), and schedule or force posts. This guide will walk you through the main menu options and typical use cases.
+The **ARAI AI Agents** command-line interface (CLI) offers a straightforward way to manage your AI agents, create media content (seasons/episodes), and schedule or force posts. This guide will walk you through the main menu options and typical use cases.
 
 ---
 
@@ -20,11 +20,11 @@ The **ARIA AI Agents** command-line interface (CLI) offers a straightforward way
 
 1. **Activate your Conda environment** (if using conda):
    ```bash
-   conda activate aria_ai_agents
+   conda activate arai_ai_agents
    ```
-2. **Navigate** to your `aria_ai_agents` folder:
+2. **Navigate** to your `arai_ai_agents` folder:
    ```bash
-   cd aria_ai_agents
+   cd arai_ai_agents
    ```
 3. **Run** the CLI script:
    ```bash
@@ -34,7 +34,7 @@ The **ARIA AI Agents** command-line interface (CLI) offers a straightforward way
 
    ```plaintext
    === Main Menu ===
-   Welcome to ARIA Agents.
+   Welcome to ARAI Agents.
    Please select an option:
 
    Current Agent: None
@@ -95,7 +95,7 @@ The CLI will then process prompts and **batch-generate** content (e.g., social m
 ---
 
 ### 5. Start Scheduler
-ARIA includes a **scheduler** that can automatically post content at set intervals:
+ARAI includes a **scheduler** that can automatically post content at set intervals:
 1. When you start the scheduler, you’ll see logs or debug info showing if posting is live or in “test mode.”  
 2. The system will queue up any scheduled posts from the currently selected agent (or all agents, depending on your config).
 
@@ -168,6 +168,6 @@ When you’re done:
 
 ## Conclusion
 
-That’s the basics of using the **ARIA AI Agents** CLI. From selecting or creating new agents, to generating multi-episode story arcs, to scheduling or forcing posts, the menu-based system keeps everything at your fingertips. If you have questions or encounter issues, check out the official [GitHub repository](https://github.com/aria-ai/aria_ai_agents) or submit an Issue for assistance.
+That’s the basics of using the **ARAI AI Agents** CLI. From selecting or creating new agents, to generating multi-episode story arcs, to scheduling or forcing posts, the menu-based system keeps everything at your fingertips. If you have questions or encounter issues, check out the official [GitHub repository](https://github.com/arai-ai/arai_ai_agents) or submit an Issue for assistance.
 
-**Happy creating and scheduling with ARIA!**
+**Happy creating and scheduling with ARAI!**

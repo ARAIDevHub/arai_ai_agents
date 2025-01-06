@@ -4,7 +4,7 @@
 # - Checks out your code.
 # - Sets up Python 3.x.
 # - Installs dependencies from requirements.txt if it exists.
-# - Runs ARIA AI Agents test suite with pytest if there’s a tests/ folder.
+# - Runs ARAI AI Agents test suite with pytest if there’s a tests/ folder.
 
 name: Tests
 

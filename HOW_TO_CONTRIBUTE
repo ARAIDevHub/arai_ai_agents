@@ -1,6 +1,6 @@
 # How to Contribute
 
-Welcome to the **ARIA AI Agents** project! We appreciate your interest in contributing. This guide outlines our contribution process, coding conventions, and best practices to ensure a smooth and collaborative experience.
+Welcome to the **ARAI AI Agents** project! We appreciate your interest in contributing. This guide outlines our contribution process, coding conventions, and best practices to ensure a smooth and collaborative experience.
 
 ## Table of Contents
 
@@ -29,18 +29,18 @@ Please review our [Code of Conduct](./CODE_OF_CONDUCT.md) before contributing. B
 - Fork this repository using the **Fork** button on GitHub.  
 - Clone your fork locally, for example:
   ```bash
-  git clone https://github.com/<your-username>/aria_ai_agents.git
+  git clone https://github.com/<your-username>/arai_ai_agents.git
   ```
 - Set up your remote so you can pull changes from the official repo later:
   ```bash
-  git remote add upstream https://github.com/aria-ai/aria_ai_agents.git
+  git remote add upstream https://github.com/arai-ai/arai_ai_agents.git
   ```
 
 **2. Create a Virtual Environment**  
 We recommend using [conda](https://docs.conda.io/en/latest/) or [venv](https://docs.python.org/3/library/venv.html):
 ```bash
-conda create --name aria_ai_agents python=3.11
-conda activate aria_ai_agents
+conda create --name arai_ai_agents python=3.11
+conda activate arai_ai_agents
 ```
   
 **3. Install Dependencies**  
@@ -105,8 +105,8 @@ We follow **Google Style Python Docstrings**:
   Date: 2024-12-31
   Last Updated: 2024-12-31
   URLs:
-      - https://aria-ai.io
-      - https://github.com/ARIADevHub/aria-ai-agents
+      - https://arai-ai.io
+      - https://github.com/ARAIDevHub/arai-ai-agents
       - https://x.com/TheBlockRhino
   """
   ```
@@ -193,12 +193,12 @@ Use **Git Tags** (`git tag v1.3.0`) for:
 
 ## 8. Need Help?
 
-- Check the [Issues](https://github.com/aria-ai/aria_ai_agents/issues) or [Discussions](https://github.com/aria-ai/aria_ai_agents/discussions) for open topics.  
+- Check the [Issues](https://github.com/arai-ai/arai_ai_agents/issues) or [Discussions](https://github.com/arai-ai/arai_ai_agents/discussions) for open topics.  
 - Ask questions or clarifications in a GitHub Issue.  
 
-We appreciate your time and effort in making **ARIA AI Agents** even better. Thank you for contributing!
+We appreciate your time and effort in making **ARAI AI Agents** even better. Thank you for contributing!
 
 ---
 
 *Happy coding!*  
-*The ARIA AI Agents community*
+*The ARAI AI Agents community*

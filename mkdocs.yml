@@ -1,5 +1,5 @@
-site_name: ARIA AI Agents
-site_description: Documentation for ARIA AI Agents
+site_name: ARAI AI Agents
+site_description: Documentation for ARAI AI Agents
 site_author: TheBlockRhino
 
 # The docs directory (where your .md files live)
@@ -40,9 +40,9 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github-alt
-      link: https://github.com/ARIADevHub/aria_ai_agents
+      link: https://github.com/ARAIDevHub/arai_ai_agents
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/ARIA_AI_AGENTS
+      link: https://twitter.com/ARAI_AI_AGENTS
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -82,11 +82,11 @@ plugins:
 
 nav:
   - Home: index.md 
-  - ARIA CLI Usage Guide: cli-guide.md
+  - ARAI CLI Usage Guide: cli-guide.md
   - How-to Guides: how-to-guides.md  
   - AI Tutorial: tutorials.md
   - LLMS Explained: about-llms.md
-  - ARIA AI Agents: explanation.md  
+  - ARAI AI Agents: explanation.md  
   - Resources: resources.md
   - API Reference: api/
   - Prompt Reference:
@@ -100,4 +100,4 @@ nav:
     
 
 copyright: |
-  &copy; 2024 <a href="https://github.com/ARIADevHub"  target="_blank" rel="noopener">ARIADevHub</a>
+  &copy; 2024 <a href="https://github.com/ARAIDevHub"  target="_blank" rel="noopener">ARAIDevHub</a>
