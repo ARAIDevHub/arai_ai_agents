@@ -25,7 +25,7 @@ def process_yaml_files():
     """
     Automatically find YAML files and create markdown documentation.
     """
-    yaml_source = root_dir / "aria_ai_agents"  # YAML source folder
+    yaml_source = root_dir / "arai_ai_agents"  # YAML source folder
     output_dir = root_dir / "docs" / "yaml"
 
     print(f"Looking for YAML files in: {yaml_source}")

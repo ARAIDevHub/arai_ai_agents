@@ -1,3 +1,3 @@
 # connectors
 
-::: aria_ai_agents.connectors
+::: arai_ai_agents.connectors

@@ -11,15 +11,15 @@
 # Last edited by: @TheBlockRhino
 # Last edited date: 2025-01-04
 # URLs:
-#     - https://aria-ai.io
-#     - https://github.com/ARIA-DevHub/aria-ai-agents
+#     - https://arai-ai.io
+#     - https://github.com/ARAI-DevHub/arai-ai-agents
 #     - https://x.com/TheBlockRhino
 
 # standard imports
 import os
 import yaml
 
-# custom ARIA imports
+# custom ARAI imports
 from utils.content_generator import ContentGenerator
 from utils.template_types import TemplateType
 import prompt_chaining.step_3 as next_step
