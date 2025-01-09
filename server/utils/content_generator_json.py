@@ -7,9 +7,9 @@
 # Summary: Content generator implementation.
 # Authors:
 #     - @TheBlockRhino
-# Created: 2024-12-31
+# Created: 2025-01-02
 # Last edited by: @TheBlockRhino
-# Last edited date: 2025-01-04
+# Last edited date: 2025-01-09
 # URLs:
 #     - https://arai-ai.io
 #     - https://github.com/ARAI-DevHub/arai-ai-agents
@@ -367,9 +367,9 @@ class ContentGenerator:
         elif template_type == TemplateType.AGENT:            
             return os.path.join(self.agents_config_dir, agent_name, agent_name + ".json")
         elif template_type == TemplateType.SEASON:
-            return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "season_" + str(season_number) + ".yaml")
+            return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "season_" + str(season_number) + ".json")
         elif template_type == TemplateType.EPISODE:
-            return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "s" + str(season_number) + "_episode_" + str(episode_number) + ".yaml")
+            return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "s" + str(season_number) + "_episode_" + str(episode_number) + ".json")
 
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file
@@ -478,7 +478,7 @@ class ContentGenerator:
         # 6. return json_response
         return json_response
         
-    def merge_agent_details(self, master_data: dict, agent_data: dict) -> dict:
+    def merge_details(self, template_data: dict, merge_data: dict, template_type: TemplateType) -> dict:
         """Merges agent details by replacing fields in master with agent data.
         
         Args:
@@ -488,15 +488,21 @@ class ContentGenerator:
         Returns:
             dict: Updated master data with agent details
         """
-        if isinstance(master_data, str):
-            master_data = json.loads(master_data)
+        if isinstance(template_data, str):
+            template_data = json.loads(template_data)
         
         # Deep copy to avoid modifying original
-        result = copy.deepcopy(master_data)
+        result = copy.deepcopy(template_data)
         
         # Replace agent_details section
-        if "agent" in agent_data and "agent_details" in agent_data["agent"]:
-            result["agent"]["agent_details"] = agent_data["agent"]["agent_details"]
+        if template_type == TemplateType.AGENT:
+            if "agent" in merge_data and "agent_details" in merge_data["agent"]:
+                result["agent"]["agent_details"] = merge_data["agent"]["agent_details"]
+        elif template_type == TemplateType.SEASON:
+            if "agent" in merge_data and "seasons" in merge_data:
+                result["agent"]["seasons"][0] = merge_data["agent"]["seasons"][0]
+        else:
+            print("Error: agent_details not found in merge_data")
             
         return result
 
@@ -523,3 +529,60 @@ class ContentGenerator:
             
         return result
         
+    def initialize_seasons(self, master_data: dict, seasons_data: dict) -> dict:
+        """Initializes the seasons array in the master data.
+        
+        Args:
+            master_data (dict): The master template data
+            seasons_data (dict): The seasons data to initialize
+            
+        Returns:
+            dict: Updated master data with initialized seasons
+        """
+
+        if isinstance(master_data, str):
+            master_data = json.loads(master_data)
+        
+        # Deep copy to avoid modifying original
+        result = copy.deepcopy(master_data)
+
+        if "agent" in master_data and "seasons" in master_data["agent"]:
+            result["agent"]["seasons"] = seasons_data["seasons"]
+            
+        print(f"result is: {result}")            
+        return result
+
+    def append_episodes(self, master_data: dict, posts_data: dict, season_index: int, episode_index: int) -> dict:
+        """Appends new episodes data to existing season data.
+        
+        Args:
+            master_data (dict): The master template data
+            episodes_data (dict): The episodes data to append
+            season_index (int): Index of the season to update
+            episode_index (int): Index of the episode to update
+            
+        Returns:
+            dict: Updated master data with appended episodes
+        """
+        if isinstance(master_data, str):
+            master_data = json.loads(master_data)
+            
+        result = copy.deepcopy(master_data)
+        
+        # Validate the nested structure exists
+        if "agent" not in result:
+            result["agent"] = {}
+        if "seasons" not in result["agent"]:
+            result["agent"]["seasons"] = []
+        if season_index >= len(result["agent"]["seasons"]):
+            result["agent"]["seasons"].append({"episodes": []})
+        if "episodes" not in result["agent"]["seasons"][season_index]:
+            result["agent"]["seasons"][season_index]["episodes"] = []
+        if episode_index >= len(result["agent"]["seasons"][season_index]["episodes"]):
+            result["agent"]["seasons"][season_index]["episodes"].append({})
+        
+        # Replace posts array with new data
+        if "posts" in posts_data:
+            result["agent"]["seasons"][season_index]["episodes"][episode_index]["posts"] = posts_data["posts"]
+        
+        return result

@@ -104,7 +104,7 @@ prompt_2 (Season Creation): |
 
   Output Requirements:
   - Only output valid JSON. Do not include any text outside of the JSON structure.
-  - Output a single, complete JSON file that includes all the fields mentioned above (season_name, season_number, season_description, season_highlights, season_summary, episodes).
+  - Output a single, complete JSON file in a seasons array that includes all the fields mentioned above (season_name, season_number, season_description, season_highlights, season_summary, episodes).
 
   Output exactly as the json file:
   ```json

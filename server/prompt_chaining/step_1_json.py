@@ -7,9 +7,9 @@
 # Summary: Step 1 implementation.
 # Authors:
 #     - @TheBlockRhino
-# Created: 2024-12-31
+# Created: 2025-01-02
 # Last edited by: @TheBlockRhino
-# Last edited date: 2025-01-04
+# Last edited date: 2025-01-09
 # URLs:
 #     - https://arai-ai.io
 #     - https://github.com/ARAI-DevHub/arai-ai-agents
@@ -54,11 +54,12 @@ def step_1(ai_model, concept: str):
     # Step 1.1: Create a new agent
     manager = ContentGenerator()
     # agent_template = manager.create_new_template_yaml(TemplateType.AGENT)
-    agent_template = json.load(open("templates/agent.json"))
-    agent_master_template = json.load(open("templates/master.json"))
+    agent_template = manager.create_new_template_json(TemplateType.AGENT)
+    agent_master_template = manager.create_new_template_json(TemplateType.MASTER)
 
     # step 1.2: Generate a new agent name, topic, personality, and communication style with the prompt_1 template
     # prompt 1 Character Creation:
+    print("Crafting prompt for AI to create a new agent")
     prompt_1_vars = {
         # "agent_name": "",
         # "personality": "",
@@ -69,6 +70,7 @@ def step_1(ai_model, concept: str):
     }
 
     # step 1.3: Run the prompt
+    print("Sending prompt to AI to create a new agent")
     agent_data = manager.run_prompt(
         prompt_key="prompt_1 (Character Sheet Creation)",
         template_vars=prompt_1_vars, 
@@ -76,8 +78,8 @@ def step_1(ai_model, concept: str):
         debug=True
     )
 
-    print(f"agent_data is: {agent_data}")
-    print(f"agent_master_template is: {agent_master_template}")
+    #print(f"agent_data is: {agent_data}")
+    #print(f"agent_master_template is: {agent_master_template}")
 
     # step 1.4: Add the agent data to the agent template
     # agent_master_template = manager.add_data_to_template(
@@ -85,15 +87,19 @@ def step_1(ai_model, concept: str):
     #     new_data=agent_data
     # )
     #   
-    agent_master_template = manager.merge_agent_details(
+    print("Merging agent details into the master template")
+    agent_master_template = manager.merge_details(
         master_data=agent_master_template,
-        agent_data=agent_data
+        merge_data=agent_data,
+        template_type=TemplateType.MASTER
     )
 
     # step 1.5: store the concept in the agent template
+    print("Storing the concept in the agent template")
     agent_master_template["concept"] = prompt_1_vars["concept"]
 
     # step 1.6: create the file path for master file
+    print("Creating the file path for the master file")
     agent_master_file_path = manager.create_filepath(
         agent_name=agent_master_template["agent"]["agent_details"]["name"], 
         season_number=0,
@@ -102,6 +108,7 @@ def step_1(ai_model, concept: str):
     )
 
     # create the file path for agent file
+    print("Creating the file path for the agent file")
     agent_file_path = manager.create_filepath(
         agent_name=agent_data["agent"]["agent_details"]["name"], 
         season_number=0,
@@ -110,16 +117,19 @@ def step_1(ai_model, concept: str):
     )
 
     # step 1.7: Save the agent data to a file
+    print("Saving the agent data to a file")
     manager.save_json_file(
         save_path=agent_master_file_path,
         json_data=agent_master_template
     )
 
+    print("Saving the agent data to a file")
     manager.save_json_file(
         save_path=agent_file_path,
         json_data=agent_data
     )
 
+    print("Step 1 complete")
     return agent_file_path
 
 
