@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Brain, Wand2, MessageSquare, Save, Sparkles, RefreshCcw } from 'lucide-react';
+import { createAgent } from '../api/agents'; // Import the API function
 
 interface Agent {
   name: string;
@@ -119,22 +120,9 @@ const AgentCreator: React.FC = () => {
 
   // Function to handle form submission, send agent data to the server, and reset the form
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    console.log(`handleSubmit Event - Sending agent data to the server `);
     event.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/agents', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(agent),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const newAgent = await response.json();
+      const newAgent = await createAgent(agent); // Use the API function here
       console.log("Agent created:", newAgent);
       // Reset the form
       setAgent({

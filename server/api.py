@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import json
+import glob
 
 # Import modules from your existing codebase (if needed)
 # Example:
@@ -48,6 +50,20 @@ def create_agent():
 
     agents.append(data)
     return jsonify(data), 201
+
+# Route to GET all characters from the configs folder
+@app.route('/api/characters', methods=['GET'])
+def get_characters():
+    # Fetch all JSON files in the configs folder with 'master' in the name
+    files = glob.glob('configs/*master*.json')
+    print("The found files are ", files)
+    characters = []
+
+    for file in files:
+        with open(file, 'r') as f:
+            characters.append(json.load(f))
+
+    return jsonify(characters)
 
 # --- Other potential endpoints ---
 # - /api/agents/<id> (GET, PUT, DELETE)
