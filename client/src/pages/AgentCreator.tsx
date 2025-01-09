@@ -11,8 +11,6 @@ interface Agent {
   hashtags: string;
   emojis: string;
   selectedImage: number;
-  level: number;
-  experience: number;
 }
 
 interface SuggestionChipsProps {
@@ -32,8 +30,6 @@ const AgentCreator: React.FC = () => {
     hashtags: '',
     emojis: '',
     selectedImage: 0,
-    level: 1,
-    experience: 0
   });
 
   const mockImages = [0, 1, 2, 3];
@@ -62,14 +58,15 @@ const AgentCreator: React.FC = () => {
     ]
   };
 
+  // Function to handle suggestion chip clicks and update the agent's field with the selected value
   const handleSuggestionClick = (field: keyof Agent, value: string): void => {
     setAgent(prev => ({
       ...prev,
       [field]: value,
-      experience: prev.experience + 10
     }));
   };
 
+  // Component to render suggestion chips for a given field with provided options
   const SuggestionChips: React.FC<SuggestionChipsProps> = ({ field, options }) => (
     <div className="flex flex-wrap gap-2 mb-4">
       {options.map((option, index) => (
@@ -86,6 +83,7 @@ const AgentCreator: React.FC = () => {
     </div>
   );
 
+  // Input component for text input fields with styling
   const Input: React.FC<{
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -98,6 +96,7 @@ const AgentCreator: React.FC = () => {
     />
   );
 
+  // Textarea component for multi-line text input fields with styling
   const Textarea: React.FC<{
     value: string;
     onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -111,10 +110,47 @@ const AgentCreator: React.FC = () => {
     />
   );
 
+  // Function to handle input changes and update the agent's corresponding field
   const handleInputChange = (field: keyof Agent) => (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
     setAgent({ ...agent, [field]: e.target.value });
+  };
+
+  // Function to handle form submission, send agent data to the server, and reset the form
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    console.log(`handleSubmit Event - Sending agent data to the server `);
+    event.preventDefault();
+    try {
+      const response = await fetch('http://localhost:5000/api/agents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(agent),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const newAgent = await response.json();
+      console.log("Agent created:", newAgent);
+      // Reset the form
+      setAgent({
+        name: '',
+        personality: '',
+        communication_style: '',
+        backstory: '',
+        universe: '',
+        topic_expertise: '',
+        hashtags: '',
+        emojis: '',
+        selectedImage: 0,
+      });
+    } catch (error) {
+      console.error("Error creating agent:", error);
+    }
   };
 
   return (
@@ -122,12 +158,6 @@ const AgentCreator: React.FC = () => {
       {/* Left Panel */}
       <div className="w-1/2 p-6 border-r border-orange-500/20">
         <div className="h-full flex flex-col space-y-6">
-          {/* Level Badge */}
-          <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-2 
-                         rounded-lg self-end">
-            Level {agent.level}
-          </div>
-
           {/* Main Character Image */}
           <div className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
                          via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center">
@@ -153,28 +183,25 @@ const AgentCreator: React.FC = () => {
           </div>
 
           {/* Character Info Card */}
-          <div className="flex flex-col items-center space-y-4 rounded-lg p-6 bg-gradient-to-br 
-                         from-slate-900/80 via-cyan-900/20 to-orange-900/20 border border-orange-500/20">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-orange-400 
-                          to-red-400 bg-clip-text text-transparent">
-              {agent.name || 'New Agent'}
-            </h2>
-            <div className="text-2xl">{agent.emojis}</div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {agent.hashtags.split(' ').filter(Boolean).map((tag, i) => (
-                <span key={i} className="px-2 py-1 rounded-full bg-gradient-to-r 
-                                       from-cyan-600 to-orange-600 text-white text-sm">
-                  #{tag}
-                </span>
-              ))}
+          <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
+            <div className="mb-4">
+              <div className="text-lg font-semibold text-orange-400">Agent Name</div>
+              <div className="text-gray-300">{agent.name}</div>
+            </div>
+            <div className="mb-4">
+              <div className="text-lg font-semibold text-orange-400">Personality</div>
+              <div className="text-gray-300">{agent.personality}</div>
+            </div>
+            <div>
+              <div className="text-lg font-semibold text-orange-400">Communication Style</div>
+              <div className="text-gray-300">{agent.communication_style}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Panel */}
-      <div className="w-1/2 p-6 overflow-y-auto">
-        {/* Tabs */}
+      <div className="w-1/2 p-6">
         <div className="flex gap-4 mb-6 bg-slate-900/50 p-2 rounded-lg">
           {[
             { id: 'basic' as const, icon: Brain, label: 'Basic Info' },
@@ -193,104 +220,106 @@ const AgentCreator: React.FC = () => {
           ))}
         </div>
 
-        <div className="space-y-6">
-          {activeTab === 'basic' && (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
-                <Input
-                  value={agent.name}
-                  onChange={handleInputChange('name')}
-                  placeholder="Enter agent name"
-                />
-              </div>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            {activeTab === 'basic' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
+                  <Input
+                    value={agent.name}
+                    onChange={handleInputChange('name')}
+                    placeholder="Enter agent name"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Universe</label>
-                <SuggestionChips field="universe" options={suggestions.universes} />
-                <Input
-                  value={agent.universe}
-                  onChange={handleInputChange('universe')}
-                  placeholder="Enter or select universe"
-                />
-              </div>
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Universe</label>
+                  <SuggestionChips field="universe" options={suggestions.universes} />
+                  <Input
+                    value={agent.universe}
+                    onChange={handleInputChange('universe')}
+                    placeholder="Enter or select universe"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
-                <Input
-                  value={agent.topic_expertise}
-                  onChange={handleInputChange('topic_expertise')}
-                  placeholder="Enter expertise areas"
-                />
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
+                  <Input
+                    value={agent.topic_expertise}
+                    onChange={handleInputChange('topic_expertise')}
+                    placeholder="Enter expertise areas"
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'personality' && (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
-                <SuggestionChips field="personality" options={suggestions.personalities} />
-                <Textarea
-                  value={agent.personality}
-                  onChange={handleInputChange('personality')}
-                  placeholder="Describe agent personality"
-                  rows={3}
-                />
+            {activeTab === 'personality' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
+                  <SuggestionChips field="personality" options={suggestions.personalities} />
+                  <Textarea
+                    value={agent.personality}
+                    onChange={handleInputChange('personality')}
+                    placeholder="Describe agent personality"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
+                  <Textarea
+                    value={agent.backstory}
+                    onChange={handleInputChange('backstory')}
+                    placeholder="Enter agent backstory"
+                    rows={4}
+                  />
+                </div>
               </div>
+            )}
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
-                <Textarea
-                  value={agent.backstory}
-                  onChange={handleInputChange('backstory')}
-                  placeholder="Enter agent backstory"
-                  rows={4}
-                />
+            {activeTab === 'style' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
+                  <SuggestionChips field="communication_style" options={suggestions.communication_styles} />
+                  <Textarea
+                    value={agent.communication_style}
+                    onChange={handleInputChange('communication_style')}
+                    placeholder="Describe communication style"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
+                  <Input
+                    value={agent.hashtags}
+                    onChange={handleInputChange('hashtags')}
+                    placeholder="ai agent custom (without #)"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
+                  <Input
+                    value={agent.emojis}
+                    onChange={handleInputChange('emojis')}
+                    placeholder="🤖 ✨ 💡"
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {activeTab === 'style' && (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
-                <SuggestionChips field="communication_style" options={suggestions.communication_styles} />
-                <Textarea
-                  value={agent.communication_style}
-                  onChange={handleInputChange('communication_style')}
-                  placeholder="Describe communication style"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
-                <Input
-                  value={agent.hashtags}
-                  onChange={handleInputChange('hashtags')}
-                  placeholder="ai agent custom (without #)"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
-                <Input
-                  value={agent.emojis}
-                  onChange={handleInputChange('emojis')}
-                  placeholder="🤖 ✨ 💡"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <button className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r from-cyan-600 
-                          to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white 
-                          transition-all duration-300 flex items-center justify-center">
-          <Save className="w-4 h-4 mr-2" />
-          Save Agent
-        </button>
+          <button type="submit" className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r from-cyan-600 
+                            to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white 
+                            transition-all duration-300 flex items-center justify-center">
+            <Save className="w-4 h-4 mr-2" />
+            Save Agent
+          </button>
+        </form>
       </div>
     </div>
   );
