@@ -1,6 +1,7 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Brain, Wand2, MessageSquare, Save, Sparkles, RefreshCcw } from 'lucide-react';
-import { createAgent } from '../api/agents'; // Import the API function
+import { createAgent } from '../api/agentsAPI'; // Import the API function
+import { getCharacters } from '../api/agentsAPI'; // Ensure you import the getCharacters function
 
 interface Agent {
   name: string;
@@ -140,6 +141,19 @@ const AgentCreator: React.FC = () => {
       console.error("Error creating agent:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchCharacters = async () => {
+      try {
+        const characters = await getCharacters(); // Call getCharacters on load
+        console.log(characters); // Handle the characters as needed
+      } catch (error) {
+        console.error('Error fetching characters:', error);
+      }
+    };
+
+    fetchCharacters();
+  }, []); // Empty dependency array to run on mount
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">

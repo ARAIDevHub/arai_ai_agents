@@ -1,24 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, Sparkles } from 'lucide-react';
-import { getCharacters } from '../api/agents'; // Import the API function
 
-const Home: React.FC = () => {
-  const [characters, setCharacters] = useState([]);
-
-  useEffect(() => {
-    const fetchCharacters = async () => {
-      try {
-        const data = await getCharacters(); // Use the API function here
-        setCharacters(data);
-      } catch (error) {
-        console.error("Error fetching characters:", error);
-      }
-    };
-
-    fetchCharacters();
-  }, []);
-
+const Home = () => {
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
       {/* Hero Section */}
