@@ -368,7 +368,7 @@ const AgentCreator: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
-                  <TraitButtons field="personality" options={suggestions.personalities} />
+                  <TraitButtons field="personality" options={agent.personality} />
                   <Textarea
                     value={agent.personality}
                     onChange={handleInputChange('personality')}
