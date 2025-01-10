@@ -24,6 +24,8 @@ class TemplateType:
         EPISODE (str): the type of template for an episode
         PROFILE_PICTURE (str): the type of template for a profile picture
     """
+    MASTER = "master"
+    TRACKER = "tracker"
     AGENT = "agent"
     SEASON = "season"
     EPISODE = "episode"

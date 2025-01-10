@@ -1,0 +1,14 @@
+{
+  "agent": {
+    "agent_details": {
+      "name": "",
+      "personality": "",
+      "communication_style": "",
+      "backstory": "",
+      "universe": "",
+      "topic_expertise": [],
+      "hashtags": [],
+      "emojis": []
+    }
+  }
+}

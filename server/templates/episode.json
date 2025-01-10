@@ -1,0 +1,20 @@
+{
+  "episode": {
+    "episode_name": "",
+    "episode_number": 0,
+    "episode_description": "",
+    "episode_highlights": "",
+    "episode_summary": "",
+    "episode_posted": false,
+    "current_post_number": 0,
+    "posts": [
+      {
+        "post_id": "",
+        "post_number": 0,
+        "post_content": "",
+        "post_highlights": "",
+        "post_posted": false
+      }
+    ]
+  }
+}
