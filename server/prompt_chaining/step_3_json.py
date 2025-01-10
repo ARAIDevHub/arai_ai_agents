@@ -27,7 +27,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.content_generator_json import ContentGenerator
 from utils.template_types import TemplateType
 
-def step_3(ai_model, master_file_path):
+def step_3(ai_model, master_file_path, number_of_posts):
     '''
     Description:
         Create a new episode posts for the agent
@@ -57,7 +57,7 @@ def step_3(ai_model, master_file_path):
         agent_master_json = json.load(file)  
 
     # extract agent details from master json
-    agent_json = agent_master_json['agent']['agent_details']
+    agent_details = agent_master_json['agent']['agent_details']
 
     # get last season file 
     current_season = None    
@@ -94,12 +94,12 @@ def step_3(ai_model, master_file_path):
         # note that emojis will be output as unicode characters due to the yaml dump
 
         prompt_3_vars = {
-            "agent_name": agent_json["name"],
-            "agent_json": json.dumps(agent_json),
+            "agent_name": agent_details["name"],
+            "agent_json": json.dumps(agent_details),
             "season_json": json.dumps(season_details),
             "episode_json": json.dumps(episode_data),
             "previous_episode": json.dumps(previous_episode),
-            "number_of_posts": 12,
+            "number_of_posts": number_of_posts,
             "post_length": 277
         }
 
@@ -154,5 +154,5 @@ def step_3(ai_model, master_file_path):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_3(ai_model, "configs/Zorp/Zorp_master.json")
+    step_3(ai_model, "configs/Zorp/Zorp_master.json", 6)
 

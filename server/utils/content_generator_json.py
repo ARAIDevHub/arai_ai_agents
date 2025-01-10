@@ -478,7 +478,7 @@ class ContentGenerator:
         # 6. return json_response
         return json_response
         
-    def merge_details(self, template_data: dict, merge_data: dict, template_type: TemplateType) -> dict:
+    def merge_agent_details(self, master_data: dict, agent_data: dict) -> dict:
         """Merges agent details by replacing fields in master with agent data.
         
         Args:
@@ -488,21 +488,17 @@ class ContentGenerator:
         Returns:
             dict: Updated master data with agent details
         """
-        if isinstance(template_data, str):
-            template_data = json.loads(template_data)
+        if isinstance(master_data, str):
+            master_data = json.loads(master_data)
         
         # Deep copy to avoid modifying original
-        result = copy.deepcopy(template_data)
+        result = copy.deepcopy(master_data)
         
         # Replace agent_details section
-        if template_type == TemplateType.AGENT:
-            if "agent" in merge_data and "agent_details" in merge_data["agent"]:
-                result["agent"]["agent_details"] = merge_data["agent"]["agent_details"]
-        elif template_type == TemplateType.SEASON:
-            if "agent" in merge_data and "seasons" in merge_data:
-                result["agent"]["seasons"][0] = merge_data["agent"]["seasons"][0]
+        if "agent" in agent_data and "agent_details" in agent_data["agent"]:
+            result["agent"]["agent_details"] = agent_data["agent"]["agent_details"]
         else:
-            print("Error: agent_details not found in merge_data")
+            print("Error: agent_details not found in agent_data")
             
         return result
 

@@ -27,9 +27,9 @@ import argparse
 # custom ARAI imports
 from models.gemini_model import GeminiModel
 import utils.post_manager as twitter_manager
-import prompt_chaining.step_1 as step_1
-import prompt_chaining.step_2 as step_2
-import prompt_chaining.step_3 as step_3
+import prompt_chaining.step_1_json as step_1
+import prompt_chaining.step_2_json as step_2
+import prompt_chaining.step_3_json as step_3
 
 def list_available_seasons(agent_name):
     """List all available seasons for an agent
@@ -184,14 +184,12 @@ if __name__ == "__main__":
                 agent_file_path = step_1.step_1(ai_model, agent_concept)
                 print("New agent created at: ", agent_file_path)                
                 new_agent_dir = os.path.dirname(agent_file_path)
-                print("All agent files will go into: ", new_agent_dir)
-                print("Copying over tracker.yaml...")                
-                shutil.copy(os.path.join("templates", "tracker_template.yaml"), os.path.join(new_agent_dir, "tracker.yaml"))
+                print("All agent files will go into: ", new_agent_dir)             
                 print("Creating the new season...")
-                season_file_path = step_2.step_2(ai_model, agent_file_path)
+                step_2.step_2(ai_model, agent_file_path, 3)
                 print("Creating the new season posts...")
-                step_3.step_3(ai_model, agent_file_path, season_file_path)                
-                print(f"\nCreated new agent: {current_agent}")
+                step_3.step_3(ai_model, agent_file_path, 6)                
+                print(f"\nCreated new agent: {agent_file_path}")
 
             except Exception as e:
                 print(f"Error creating agent: {str(e)}")

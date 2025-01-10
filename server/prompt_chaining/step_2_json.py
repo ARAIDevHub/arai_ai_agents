@@ -28,7 +28,7 @@ from utils.content_generator_json import ContentGenerator
 from utils.template_types import TemplateType
 import prompt_chaining.step_3_json as next_step
 
-def step_2(ai_model, agent_file_path, master_file_path):
+def step_2(ai_model, master_file_path, number_of_episodes):
     '''
     Description:
         Create a new season for the agent
@@ -61,13 +61,13 @@ def step_2(ai_model, agent_file_path, master_file_path):
         agent_master_json = json.load(file)  
 
     # extract agent from master json
-    agent_json = agent_master_json['agent']['agent_details']
+    agent_details = agent_master_json['agent']['agent_details']
 
     # step 2.3: find the previous season 
     # get last season file 
     previous_season = None    
     # Get the last season from the seasons array if it exists
-    seasons = agent_json['agent']['seasons']
+    seasons = agent_master_json['agent']['seasons']
     previous_season = seasons[-1] if seasons else None
     
     if previous_season:
@@ -75,17 +75,16 @@ def step_2(ai_model, agent_file_path, master_file_path):
     else:
         print("No previous seasons found")
 
-
-
     # step 2.3: Generate a new season name, topic, and communication style with the prompt_2 template
     # prompt 2 Season Creation:
     # note that emojis will be output as unicode characters due to the json dump
     print("Crafting prompt for AI to create a new season")
     prompt_2_vars = {
-        "agent_name": agent_json["name"],
-        "agent_json": json.dumps(agent_json),
+        "agent_name": agent_details["name"],
+        "agent_json": json.dumps(agent_details),
         "season_json": json.dumps(season_template),
-        "previous_season": json.dumps(previous_season)
+        "previous_season": json.dumps(previous_season),
+        "number_of_episodes": number_of_episodes
     }
 
     # step 2.4: Run the prompt 
@@ -99,53 +98,22 @@ def step_2(ai_model, agent_file_path, master_file_path):
 
     print(f"season data is: {season_data}")
 
-    # # step 2.5: Add the season data to the season template
-    # print("Adding season data to the season template")
-    # season_template = manager.merge_details(
-    #     template_data=season_template,
-    #     merge_data=season_data, 
-    #     template_type=TemplateType.SEASON
-    # )
-
-    # print(f"season template is: {season_template}")
-
-    # # step 2.6: create the file path    
-    # print("Number of seasons: ", len(seasons))
-    # #season_number = len(seasons)-1 if seasons else 0
-    # #will always be 0 for now as this is the template and not master
-    # print("Creating the file path for the season")
-    # season_file_path = manager.create_filepath(
-    #     agent_name=agent_master_json["agent"]["agent_details"]["name"],
-    #     season_number=season_template["seasons"][0]["season_number"],
-    #     episode_number=0,
-    #     template_type=TemplateType.SEASON
-    # )
-
-    # # step 2.7: Save the season data to a file
-    # print("Saving the season data to a file")
-    # manager.save_json_file(
-    #     save_path=season_file_path,
-    #     json_data=season_template
-    # )
-
     # step 2.8: append the season data to the master data
     if len(seasons) <= 1 and seasons[0]["season_number"] == 0:
         print("First season, so we need to initialize the seasons array")
-        agent_json = manager.initialize_seasons(
+        agent_master_json = manager.initialize_seasons(
             master_data=agent_master_json,
             seasons_data=season_data
         )
     else:
         print("Appending the season data to the master data")
-        agent_json = manager.append_seasons(
+        agent_master_json = manager.append_seasons(
             master_data=agent_master_json,
-            seasons_data=season_template
+            seasons_data=season_template,
         )
 
     # step 2.9: save the master data to a file
     print("Saving the master data to a file")
-    #print(f"saving agent json to: {master_file_path}")
-    #print(f"agent data is: {agent_json}")
     manager.save_json_file(
         save_path=master_file_path,
         json_data=agent_master_json
@@ -157,24 +125,4 @@ def step_2(ai_model, agent_file_path, master_file_path):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_2(ai_model, "configs/Zorp/Zorp_master.json")
-
-    # master_file_path = "configs/Zorp/Zorp_master.json"
-
-    # agent_json = None    
-    # with open(master_file_path, 'r', encoding='utf-8') as file:
-    #     agent_json = json.load(file)
-
-    # season_file_path = "configs/temporary/processed_response.json"
-    # season_json = None    
-    # with open(season_file_path, 'r', encoding='utf-8') as file:
-    #     season_json = json.load(file)
-
-    # manager = ContentGenerator()
-
-    # agent_json = manager.initialize_seasons(
-    #     master_data=agent_json,
-    #     seasons_data=season_json
-    # )
-
-    # print(f"agent json is: {agent_json}")
+    step_2(ai_model, "configs/Zorp/Zorp_master.json", 3)

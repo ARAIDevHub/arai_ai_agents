@@ -75,23 +75,14 @@ def step_1(ai_model, concept: str):
         prompt_key="prompt_1 (Character Sheet Creation)",
         template_vars=prompt_1_vars, 
         ai_model=ai_model,
-        debug=True
+        debug=False
     )
 
-    #print(f"agent_data is: {agent_data}")
-    #print(f"agent_master_template is: {agent_master_template}")
-
-    # step 1.4: Add the agent data to the agent template
-    # agent_master_template = manager.add_data_to_template(
-    #     current_data=agent_master_template,
-    #     new_data=agent_data
-    # )
-    #   
+    # step 1.4: Merge agent details into the master template
     print("Merging agent details into the master template")
-    agent_master_template = manager.merge_details(
+    agent_master_template = manager.merge_agent_details(
         master_data=agent_master_template,
-        merge_data=agent_data,
-        template_type=TemplateType.MASTER
+        agent_data=agent_data
     )
 
     # step 1.5: store the concept in the agent template
@@ -107,15 +98,6 @@ def step_1(ai_model, concept: str):
         template_type=TemplateType.MASTER
     )
 
-    # create the file path for agent file
-    print("Creating the file path for the agent file")
-    agent_file_path = manager.create_filepath(
-        agent_name=agent_data["agent"]["agent_details"]["name"], 
-        season_number=0,
-        episode_number=0,
-        template_type=TemplateType.AGENT
-    )
-
     # step 1.7: Save the agent data to a file
     print("Saving the agent data to a file")
     manager.save_json_file(
@@ -123,14 +105,8 @@ def step_1(ai_model, concept: str):
         json_data=agent_master_template
     )
 
-    print("Saving the agent data to a file")
-    manager.save_json_file(
-        save_path=agent_file_path,
-        json_data=agent_data
-    )
-
     print("Step 1 complete")
-    return agent_file_path
+    return agent_master_file_path
 
 
 import models.gemini_model as gemini_model
