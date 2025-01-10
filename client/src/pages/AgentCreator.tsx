@@ -15,6 +15,7 @@ interface AgentDetails {
   personality: string[];
   topic_expertise: string[];
   universe: string;
+  selectedImage?: number;  // Added for image selection
 }
 
 interface Agent {
@@ -59,6 +60,7 @@ const AgentCreator: React.FC = () => {
     topic_expertise: [],
     hashtags: [],
     emojis: [],
+    selectedImage: undefined,
   });
   const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
 
@@ -164,6 +166,8 @@ const AgentCreator: React.FC = () => {
         topic_expertise: [],
         hashtags: [],
         emojis: [],
+        selectedImage: undefined,  // Reset image selection
+
       });
     } catch (error) {
       console.error("Error creating agent:", error);
@@ -243,7 +247,9 @@ const AgentCreator: React.FC = () => {
       universe: details.universe, 
       topic_expertise: Array.isArray(details.topic_expertise) ? details.topic_expertise : [],
       hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
-      emojis: Array.isArray(details.emojis) ? details.emojis : []
+      emojis: Array.isArray(details.emojis) ? details.emojis : [],
+      selectedImage: undefined  // Reset image selection when changing characters
+
     });
     console.log("[handleCharacterSelect] The current agent is :", agent); 
   };
@@ -255,8 +261,16 @@ const AgentCreator: React.FC = () => {
         <div className="h-full flex flex-col space-y-6">
           {/* Main Character Image */}
           <div className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center">
-            <Brain className="w-32 h-32 text-cyan-400" />
+                          via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center"
+               style={{ 
+                 backgroundImage: agent.selectedImage !== undefined ? `url(${agentImages[agent.selectedImage]})` : 'none', 
+                 backgroundSize: 'cover', 
+                 backgroundPosition: 'center' 
+               }}>
+            {/* Only show Brain icon when no image is selected */}
+            {agent.selectedImage === undefined && (
+              <Brain className="w-32 h-32 text-cyan-400" />
+            )}
             <button className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
                               from-orange-600 to-red-600 text-white flex items-center">
               <RefreshCcw className="w-4 h-4 mr-2" />
@@ -266,13 +280,19 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {mockImages.map((_, index) => (
+            {agentImages.map((image, index) => (
               <div 
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 via-cyan-900/20 
-                           to-orange-900/20 rounded-lg cursor-pointer ${
-                           agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
-                onClick={() => setAgent({...agent, selectedImage: index})}
+                            to-orange-900/20 rounded-lg cursor-pointer ${
+                              agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''
+                            }`}
+                onClick={() => setAgent({ ...agent, selectedImage: index })}
+                style={{ 
+                  backgroundImage: `url(${image})`, 
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               />
             ))}
           </div>
@@ -283,14 +303,14 @@ const AgentCreator: React.FC = () => {
               <div className="text-lg font-semibold text-orange-400">Agent Name</div>
               <div className="text-gray-300">{agent.name}</div>
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">Personality</div>
               <div className="text-gray-300">{agent.personality}</div>
             </div>
             <div>
               <div className="text-lg font-semibold text-orange-400">Communication Style</div>
               <div className="text-gray-300">{agent.communication_style}</div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -391,19 +411,21 @@ const AgentCreator: React.FC = () => {
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
+                  <TraitButtons field="hashtags" options={agent.hashtags} />
                   <Input
                     value={agent.hashtags.join(', ')} // Join hashtags for display
                     onChange={handleInputChange('hashtags')}
-                    placeholder="ai agent custom (without #)"
+                    placeholder="#arai"
                   />
                 </div>
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
+                  <TraitButtons field="emojis" options={agent.emojis} />
                   <Input
                     value={agent.emojis.join(' ')} // Join emojis for display
                     onChange={handleInputChange('emojis')}
-                    placeholder="🤖 ✨ 💡"
+                    placeholder="✨"
                   />
                 </div>
               </div>
