@@ -30,7 +30,12 @@ export async function getCharacters() {
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-  return await response.json();
+  const data = await response.json();
+  console.log("[agentsApi] - response", response);  
+  console.log("[agentsApi] - data", data);  
+  
+  // Return the data directly
+  return data; // Returns an array of the characters
 }
 
 // ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent) 

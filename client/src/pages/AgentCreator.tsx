@@ -1,40 +1,60 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Brain, Wand2, MessageSquare, Save, Sparkles, RefreshCcw } from 'lucide-react';
-import { createAgent } from '../api/agentsAPI'; // Import the API function
-import { getCharacters } from '../api/agentsAPI'; // Ensure you import the getCharacters function
+import { Brain, Wand2, MessageSquare, Save, Sparkles } from 'lucide-react';
+import { createAgent, getCharacters } from '../api/agentsAPI'; // Import the API functions
+
+interface AgentDetails {
+  backstory: string;
+  communication_style: string | string[]; // Adjusted to handle both string and array
+  emojis: string[];
+  hashtags: string[];
+  name: string;
+  personality: string | string[]; // Adjusted to handle both string and array
+  topic_expertise: string;
+  universe: string;
+}
 
 interface Agent {
-  name: string;
-  personality: string;
-  communication_style: string;
-  backstory: string;
-  universe: string;
-  topic_expertise: string;
-  hashtags: string;
-  emojis: string;
-  selectedImage: number;
+  agent: {
+    agent_details: AgentDetails;
+    ai_model: {
+      memory_store: string;
+      model_name: string;
+      model_type: string;
+    };
+    connectors: {
+      discord: boolean;
+      telegram: boolean;
+      twitter: boolean;
+    };
+    seasons: any[]; // Adjust as needed
+    tracker: {
+      current_episode_number: number;
+      current_post_number: number;
+      current_season_number: number;
+      post_every_x_minutes: number;
+    };
+  };
+  concept: string;
 }
 
 interface SuggestionChipsProps {
-  field: keyof Agent;
+  field: keyof AgentDetails;
   options: string[];
 }
 
 const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'basic' | 'personality' | 'style'>('basic');
-  const [agent, setAgent] = useState<Agent>({
+  const [agent, setAgent] = useState<AgentDetails>({
     name: '',
     personality: '',
     communication_style: '',
     backstory: '',
     universe: '',
     topic_expertise: '',
-    hashtags: '',
-    emojis: '',
-    selectedImage: 0,
+    hashtags: [],
+    emojis: [],
   });
-
-  const mockImages = [0, 1, 2, 3];
+  const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
 
   const suggestions = {
     personalities: [
@@ -61,7 +81,7 @@ const AgentCreator: React.FC = () => {
   };
 
   // Function to handle suggestion chip clicks and update the agent's field with the selected value
-  const handleSuggestionClick = (field: keyof Agent, value: string): void => {
+  const handleSuggestionClick = (field: keyof AgentDetails, value: string): void => {
     setAgent(prev => ({
       ...prev,
       [field]: value,
@@ -113,7 +133,7 @@ const AgentCreator: React.FC = () => {
   );
 
   // Function to handle input changes and update the agent's corresponding field
-  const handleInputChange = (field: keyof Agent) => (
+  const handleInputChange = (field: keyof AgentDetails) => (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
     setAgent({ ...agent, [field]: e.target.value });
@@ -133,9 +153,8 @@ const AgentCreator: React.FC = () => {
         backstory: '',
         universe: '',
         topic_expertise: '',
-        hashtags: '',
-        emojis: '',
-        selectedImage: 0,
+        hashtags: [],
+        emojis: [],
       });
     } catch (error) {
       console.error("Error creating agent:", error);
@@ -146,7 +165,7 @@ const AgentCreator: React.FC = () => {
     const fetchCharacters = async () => {
       try {
         const characters = await getCharacters(); // Call getCharacters on load
-        console.log(characters); // Handle the characters as needed
+        setCharacters(characters); // Store fetched characters in state
       } catch (error) {
         console.error('Error fetching characters:', error);
       }
@@ -155,35 +174,26 @@ const AgentCreator: React.FC = () => {
     fetchCharacters();
   }, []); // Empty dependency array to run on mount
 
+  // New function to handle character selection
+  const handleCharacterSelect = (character: Agent) => {
+    const agentDetails = character.agent.agent_details; // Access agent details
+    setAgent({
+      name: agentDetails.name,
+      personality: Array.isArray(agentDetails.personality) ? agentDetails.personality.join(', ') : agentDetails.personality,
+      communication_style: agentDetails.communication_style,
+      backstory: agentDetails.backstory,
+      universe: agentDetails.universe,
+      topic_expertise: agentDetails.topic_expertise,
+      hashtags: agentDetails.hashtags,
+      emojis: agentDetails.emojis,
+    }); // Update agent state with selected character's details
+  };
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
       {/* Left Panel */}
       <div className="w-1/2 p-6 border-r border-orange-500/20">
         <div className="h-full flex flex-col space-y-6">
-          {/* Main Character Image */}
-          <div className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center">
-            <Brain className="w-32 h-32 text-cyan-400" />
-            <button className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
-                              from-orange-600 to-red-600 text-white flex items-center">
-              <RefreshCcw className="w-4 h-4 mr-2" />
-              Generate New
-            </button>
-          </div>
-
-          {/* Image Selection Grid */}
-          <div className="grid grid-cols-4 gap-4">
-            {mockImages.map((_, index) => (
-              <div 
-                key={index}
-                className={`aspect-square bg-gradient-to-br from-slate-900/80 via-cyan-900/20 
-                           to-orange-900/20 rounded-lg cursor-pointer ${
-                           agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
-                onClick={() => setAgent({...agent, selectedImage: index})}
-              />
-            ))}
-          </div>
-
           {/* Character Info Card */}
           <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
             <div className="mb-4">
@@ -204,24 +214,6 @@ const AgentCreator: React.FC = () => {
 
       {/* Right Panel */}
       <div className="w-1/2 p-6">
-        <div className="flex gap-4 mb-6 bg-slate-900/50 p-2 rounded-lg">
-          {[
-            { id: 'basic' as const, icon: Brain, label: 'Basic Info' },
-            { id: 'personality' as const, icon: Wand2, label: 'Personality' },
-            { id: 'style' as const, icon: MessageSquare, label: 'Style' }
-          ].map(({ id, icon: Icon, label }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-white
-                         ${activeTab === id ? 'bg-gradient-to-r from-cyan-600 to-orange-600' : ''}`}
-            >
-              <Icon className="w-4 h-4 mr-2" />
-              {label}
-            </button>
-          ))}
-        </div>
-
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             {activeTab === 'basic' && (
@@ -237,11 +229,10 @@ const AgentCreator: React.FC = () => {
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Universe</label>
-                  <SuggestionChips field="universe" options={suggestions.universes} />
                   <Input
                     value={agent.universe}
                     onChange={handleInputChange('universe')}
-                    placeholder="Enter or select universe"
+                    placeholder="Enter universe"
                   />
                 </div>
 
@@ -297,7 +288,7 @@ const AgentCreator: React.FC = () => {
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
                   <Input
-                    value={agent.hashtags}
+                    value={agent.hashtags.join(', ')} // Join hashtags for display
                     onChange={handleInputChange('hashtags')}
                     placeholder="ai agent custom (without #)"
                   />
@@ -306,7 +297,7 @@ const AgentCreator: React.FC = () => {
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
                   <Input
-                    value={agent.emojis}
+                    value={agent.emojis.join(' ')} // Join emojis for display
                     onChange={handleInputChange('emojis')}
                     placeholder="🤖 ✨ 💡"
                   />
@@ -322,6 +313,23 @@ const AgentCreator: React.FC = () => {
             Save Agent
           </button>
         </form>
+
+        {/* Character Selection Section */}
+        <div className="w-1/2 p-6">
+          <label className="text-sm text-cyan-200 block mb-2">Select Existing Character</label>
+          <select
+            onChange={(e) => {
+              const selectedCharacter = characters.find(c => c.agent.agent_details.name === e.target.value);
+              if (selectedCharacter) handleCharacterSelect(selectedCharacter);
+            }}
+            className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 text-white"
+          >
+            <option value="">-- Select a Character --</option>
+            {characters.map((character, index) => (
+              <option key={index} value={character.agent.agent_details.name}>{character.agent.agent_details.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );
