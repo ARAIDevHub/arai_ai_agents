@@ -8,12 +8,12 @@ import agent4 from '../assets/agent-images/agent4.jpg';
 
 interface AgentDetails {
   backstory: string;
-  communication_style: string | string[];
+  communication_style: string[];
   emojis: string[];
   hashtags: string[];
   name: string;
-  personality: string | string[];
-  topic_expertise: string;
+  personality: string[];
+  topic_expertise: string[];
   universe: string;
 }
 
@@ -50,18 +50,19 @@ const agentImages = [agent1, agent2, agent3, agent4];
 
 const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'basic' | 'personality' | 'style'>('basic');
-  const [agent, setAgent] = useState<AgentDetails & { selectedImage?: number }>({
+  const [agent, setAgent] = useState<AgentDetails>({
     name: '',
-    personality: '',
-    communication_style: '',
+    personality: [],
+    communication_style: [],
     backstory: '',
     universe: '',
-    topic_expertise: '',
+    topic_expertise: [],
     hashtags: [],
     emojis: [],
-    selectedImage: undefined,
   });
   const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
+
+  const mockImages = [0, 1, 2, 3];
 
   const suggestions = {
     personalities: [
@@ -97,6 +98,7 @@ const AgentCreator: React.FC = () => {
 
   // Component to render suggestion chips for a given field with provided options
   const SuggestionChips: React.FC<SuggestionChipsProps> = ({ field, options }) => (
+    console.log("[SuggestionChips] field:", field, "options:", options),
     <div className="flex flex-wrap gap-2 mb-4">
       {options.map((option, index) => (
         <button
@@ -155,14 +157,13 @@ const AgentCreator: React.FC = () => {
       // Reset the form
       setAgent({
         name: '',
-        personality: '',
-        communication_style: '',
+        personality: [],
+        communication_style: [],
         backstory: '',
         universe: '',
-        topic_expertise: '',
+        topic_expertise: [],
         hashtags: [],
         emojis: [],
-        selectedImage: undefined,
       });
     } catch (error) {
       console.error("Error creating agent:", error);
@@ -200,10 +201,8 @@ const AgentCreator: React.FC = () => {
             agent: {
               agent_details: {
                 name,
-                personality: Array.isArray(personality) ? personality.join(', ') : personality,
-                communication_style: Array.isArray(communication_style) 
-                  ? communication_style.join(', ') 
-                  : communication_style,
+                personality: Array.isArray(personality) ? personality : [],
+                communication_style: Array.isArray(communication_style) ? communication_style : [],
                 backstory,
                 universe,
                 topic_expertise,
@@ -228,8 +227,7 @@ const AgentCreator: React.FC = () => {
             universe: firstChar.universe,
             topic_expertise: firstChar.topic_expertise,
             hashtags: firstChar.hashtags,
-            emojis: firstChar.emojis,
-            selectedImage: undefined,
+            emojis: firstChar.emojis
           });
         }
 
@@ -258,10 +256,21 @@ const AgentCreator: React.FC = () => {
       universe: details.universe,
       topic_expertise: details.topic_expertise,
       hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
-      emojis: Array.isArray(details.emojis) ? details.emojis : [],
-      selectedImage: undefined,
+      emojis: Array.isArray(details.emojis) ? details.emojis : []
     });
+    console.log("[handleCharacterSelect] The current agent is :", agent); 
   };
+
+  function loadCharacter(characterId) {
+    // Fetch character data based on characterId
+    const character = fetchCharacterData(characterId);
+    
+    // Set the current character for use in the rest of the page
+    currentCharacter = character; // Assuming currentCharacter is defined in a higher scope
+
+    // Return the current character
+    return currentCharacter;
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
@@ -270,12 +279,8 @@ const AgentCreator: React.FC = () => {
         <div className="h-full flex flex-col space-y-6">
           {/* Main Character Image */}
           <div className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center"
-               style={{ backgroundImage: agent.selectedImage !== undefined ? `url(${agentImages[agent.selectedImage]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-            {/* Conditionally render the Brain icon */}
-            {agent.selectedImage === undefined && (
-              <Brain className="w-32 h-32 text-cyan-400" />
-            )}
+                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center">
+            <Brain className="w-32 h-32 text-cyan-400" />
             <button className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
                               from-orange-600 to-red-600 text-white flex items-center">
               <RefreshCcw className="w-4 h-4 mr-2" />
@@ -285,14 +290,13 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {agentImages.map((image, index) => (
+            {mockImages.map((_, index) => (
               <div 
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 via-cyan-900/20 
                            to-orange-900/20 rounded-lg cursor-pointer ${
                            agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
                 onClick={() => setAgent({...agent, selectedImage: index})}
-                style={{ backgroundImage: `url(${image})`, backgroundSize: 'cover' }}
               />
             ))}
           </div>
@@ -350,11 +354,10 @@ const AgentCreator: React.FC = () => {
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Universe</label>
-                  <SuggestionChips field="universe" options={suggestions.universes} />
                   <Input
                     value={agent.universe}
                     onChange={handleInputChange('universe')}
-                    placeholder="Enter or select universe"
+                    placeholder="Enter universe"
                   />
                 </div>
 
