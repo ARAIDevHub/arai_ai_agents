@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply m-0 min-h-screen bg-slate-950;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Only keep custom styles that can't be handled by Tailwind */
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-r from-cyan-400 via-orange-400 to-red-400 bg-clip-text text-transparent;
+  }
+}
