@@ -41,7 +41,7 @@ interface Agent {
   concept: string;
 }
 
-interface SuggestionChipsProps {
+interface TraitButtonsProps {
   field: keyof AgentDetails;
   options: string[];
 }
@@ -89,7 +89,7 @@ const AgentCreator: React.FC = () => {
   };
 
   // Function to handle suggestion chip clicks and update the agent's field with the selected value
-  const handleSuggestionClick = (field: keyof AgentDetails, value: string): void => {
+  const handleTraitButtonsClick = (field: keyof AgentDetails, value: string): void => {
     setAgent(prev => ({
       ...prev,
       [field]: value,
@@ -97,7 +97,7 @@ const AgentCreator: React.FC = () => {
   };
 
   // Component to render suggestion chips for a given field with provided options
-  const SuggestionChips: React.FC<SuggestionChipsProps> = ({ field, options }) => (
+  const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options }) => (
     console.log("[SuggestionChips] field:", field, "options:", options),
     <div className="flex flex-wrap gap-2 mb-4">
       {options.map((option, index) => (
@@ -105,7 +105,7 @@ const AgentCreator: React.FC = () => {
           key={index}
           className="px-3 py-1 rounded-full bg-cyan-900/30 hover:bg-cyan-800/30 text-cyan-200 
                      border border-orange-500/30 transition-all duration-300 flex items-center"
-          onClick={() => handleSuggestionClick(field, option)}
+          onClick={() => handleTraitButtonsClick(field, option)}
         >
           <Sparkles className="w-4 h-4 mr-2 text-orange-400" />
           {option}
@@ -170,8 +170,10 @@ const AgentCreator: React.FC = () => {
     }
   };
 
+  // Function to load characters from the server and set them in the state
   useEffect(() => {
     const loadCharacters = async () => {
+      console.log("[loadCharacters] Loading characters...");
       try {
         const charactersData = await getCharacters();
         console.log('Raw characters data:', charactersData);
@@ -187,11 +189,11 @@ const AgentCreator: React.FC = () => {
           const {
             agent_details: {
               name = '',
-              personality = '',
-              communication_style = '',
+              personality = [],
+              communication_style = [],
               backstory = '',
               universe = '',
-              topic_expertise = '',
+              topic_expertise = [],
               hashtags = [],
               emojis = []
             } = {} // Default empty object if agent_details is undefined
@@ -202,6 +204,7 @@ const AgentCreator: React.FC = () => {
               agent_details: {
                 name,
                 personality: Array.isArray(personality) ? personality : [],
+
                 communication_style: Array.isArray(communication_style) ? communication_style : [],
                 backstory,
                 universe,
@@ -250,27 +253,16 @@ const AgentCreator: React.FC = () => {
 
     setAgent({
       name: details.name,
-      personality: details.personality,
+      personality: Array.isArray(details.personality) ? details.personality : [],
       communication_style: details.communication_style,
       backstory: details.backstory,
-      universe: details.universe,
-      topic_expertise: details.topic_expertise,
+      universe: details.universe, 
+      topic_expertise: Array.isArray(details.topic_expertise) ? details.topic_expertise : [],
       hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
       emojis: Array.isArray(details.emojis) ? details.emojis : []
     });
     console.log("[handleCharacterSelect] The current agent is :", agent); 
   };
-
-  function loadCharacter(characterId) {
-    // Fetch character data based on characterId
-    const character = fetchCharacterData(characterId);
-    
-    // Set the current character for use in the rest of the page
-    currentCharacter = character; // Assuming currentCharacter is defined in a higher scope
-
-    // Return the current character
-    return currentCharacter;
-  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
@@ -376,7 +368,7 @@ const AgentCreator: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
-                  <SuggestionChips field="personality" options={suggestions.personalities} />
+                  <TraitButtons field="personality" options={suggestions.personalities} />
                   <Textarea
                     value={agent.personality}
                     onChange={handleInputChange('personality')}
@@ -401,7 +393,7 @@ const AgentCreator: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
-                  <SuggestionChips field="communication_style" options={suggestions.communication_styles} />
+                  <TraitButtons field="communication_style" options={suggestions.communication_styles} />
                   <Textarea
                     value={agent.communication_style}
                     onChange={handleInputChange('communication_style')}
