@@ -177,12 +177,12 @@ const AgentCreator: React.FC = () => {
       try {
         const charactersData = await getCharacters();
         console.log('Raw characters data:', charactersData);
-
+  
         if (!Array.isArray(charactersData)) {
           console.error('Expected array of characters, received:', typeof charactersData);
           return;
         }
-
+  
         // Map the raw data to a simpler structure we need
         const processedCharacters = charactersData.map(char => {
           const { agent } = char;
@@ -198,13 +198,12 @@ const AgentCreator: React.FC = () => {
               emojis = []
             } = {} // Default empty object if agent_details is undefined
           } = agent || {}; // Default empty object if agent is undefined
-
+  
           return {
             agent: {
               agent_details: {
                 name,
                 personality: Array.isArray(personality) ? personality : [],
-
                 communication_style: Array.isArray(communication_style) ? communication_style : [],
                 backstory,
                 universe,
@@ -215,30 +214,15 @@ const AgentCreator: React.FC = () => {
             }
           };
         });
-
+  
         console.log('Processed characters:', processedCharacters);
         setCharacters(processedCharacters);
-
-        // If there are characters, set the first one as default
-        if (processedCharacters.length > 0) {
-          const firstChar = processedCharacters[0].agent.agent_details;
-          setAgent({
-            name: firstChar.name,
-            personality: firstChar.personality,
-            communication_style: firstChar.communication_style,
-            backstory: firstChar.backstory,
-            universe: firstChar.universe,
-            topic_expertise: firstChar.topic_expertise,
-            hashtags: firstChar.hashtags,
-            emojis: firstChar.emojis
-          });
-        }
-
+  
       } catch (error) {
         console.error('Error loading characters:', error);
       }
     };
-
+  
     loadCharacters();
   }, []);
 
@@ -350,15 +334,18 @@ const AgentCreator: React.FC = () => {
                     value={agent.universe}
                     onChange={handleInputChange('universe')}
                     placeholder="Enter universe"
+                    style={{ height: '50px' }}
                   />
                 </div>
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
-                  <Input
+                  <TraitButtons field="personality" options={agent.topic_expertise} />
+                  <Textarea
                     value={agent.topic_expertise}
                     onChange={handleInputChange('topic_expertise')}
-                    placeholder="Enter expertise areas"
+                    placeholder="Describe agent topic_expertise"
+                    rows={3}
                   />
                 </div>
               </div>
