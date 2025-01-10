@@ -1,6 +1,10 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Brain, Wand2, MessageSquare, Save, Sparkles, RefreshCcw } from 'lucide-react';
 import { createAgent, getCharacters } from '../api/agentsAPI'; // Import the API functions
+import agent1 from '../assets/agent-images/agent1.jpg';
+import agent2 from '../assets/agent-images/agent2.jpg';
+import agent3 from '../assets/agent-images/agent3.jpg';
+import agent4 from '../assets/agent-images/agent4.jpg';
 
 interface AgentDetails {
   backstory: string;
@@ -42,9 +46,11 @@ interface SuggestionChipsProps {
   options: string[];
 }
 
+const agentImages = [agent1, agent2, agent3, agent4];
+
 const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'basic' | 'personality' | 'style'>('basic');
-  const [agent, setAgent] = useState<AgentDetails>({
+  const [agent, setAgent] = useState<AgentDetails & { selectedImage?: number }>({
     name: '',
     personality: '',
     communication_style: '',
@@ -53,10 +59,9 @@ const AgentCreator: React.FC = () => {
     topic_expertise: '',
     hashtags: [],
     emojis: [],
+    selectedImage: undefined,
   });
   const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
-
-  const mockImages = [0, 1, 2, 3];
 
   const suggestions = {
     personalities: [
@@ -157,6 +162,7 @@ const AgentCreator: React.FC = () => {
         topic_expertise: '',
         hashtags: [],
         emojis: [],
+        selectedImage: undefined,
       });
     } catch (error) {
       console.error("Error creating agent:", error);
@@ -222,7 +228,8 @@ const AgentCreator: React.FC = () => {
             universe: firstChar.universe,
             topic_expertise: firstChar.topic_expertise,
             hashtags: firstChar.hashtags,
-            emojis: firstChar.emojis
+            emojis: firstChar.emojis,
+            selectedImage: undefined,
           });
         }
 
@@ -251,7 +258,8 @@ const AgentCreator: React.FC = () => {
       universe: details.universe,
       topic_expertise: details.topic_expertise,
       hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
-      emojis: Array.isArray(details.emojis) ? details.emojis : []
+      emojis: Array.isArray(details.emojis) ? details.emojis : [],
+      selectedImage: undefined,
     });
   };
 
@@ -262,8 +270,12 @@ const AgentCreator: React.FC = () => {
         <div className="h-full flex flex-col space-y-6">
           {/* Main Character Image */}
           <div className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center">
-            <Brain className="w-32 h-32 text-cyan-400" />
+                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center"
+               style={{ backgroundImage: agent.selectedImage !== undefined ? `url(${agentImages[agent.selectedImage]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            {/* Conditionally render the Brain icon */}
+            {agent.selectedImage === undefined && (
+              <Brain className="w-32 h-32 text-cyan-400" />
+            )}
             <button className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
                               from-orange-600 to-red-600 text-white flex items-center">
               <RefreshCcw className="w-4 h-4 mr-2" />
@@ -273,13 +285,14 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {mockImages.map((_, index) => (
+            {agentImages.map((image, index) => (
               <div 
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 via-cyan-900/20 
                            to-orange-900/20 rounded-lg cursor-pointer ${
                            agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
                 onClick={() => setAgent({...agent, selectedImage: index})}
+                style={{ backgroundImage: `url(${image})`, backgroundSize: 'cover' }}
               />
             ))}
           </div>
