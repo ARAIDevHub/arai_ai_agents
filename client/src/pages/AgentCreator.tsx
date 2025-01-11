@@ -64,32 +64,6 @@ const AgentCreator: React.FC = () => {
   });
   const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
 
-  const mockImages = [0, 1, 2, 3];
-
-  const suggestions = {
-    personalities: [
-      "Wise Mentor",
-      "Quirky Inventor",
-      "Strategic Advisor",
-      "Creative Muse",
-      "Technical Expert"
-    ],
-    universes: [
-      "Cyberpunk Future",
-      "Medieval Fantasy",
-      "Modern Corporate",
-      "Space Exploration",
-      "Steampunk Era"
-    ],
-    communication_styles: [
-      "Professional & Concise",
-      "Friendly & Casual",
-      "Academic & Detailed",
-      "Witty & Humorous",
-      "Socratic & Inquisitive"
-    ]
-  };
-
   // Function to handle suggestion chip clicks and update the agent's field with the selected value
   const handleTraitButtonsClick = (field: keyof AgentDetails, value: string): void => {
     setAgent(prev => ({
@@ -121,9 +95,11 @@ const AgentCreator: React.FC = () => {
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     placeholder?: string;
-  }> = ({ ...props }) => (
+    style?: React.CSSProperties;
+  }> = ({ style, ...props }) => (
     <input
       {...props}
+      style={style}
       className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
                  text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
     />
@@ -147,7 +123,20 @@ const AgentCreator: React.FC = () => {
   const handleInputChange = (field: keyof AgentDetails) => (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
-    setAgent({ ...agent, [field]: e.target.value });
+    const value = e.target.value;
+    
+    // Handle array fields
+    if (field === 'personality' || field === 'communication_style' || field === 'topic_expertise') {
+      setAgent(prev => ({
+        ...prev,
+        [field]: value.split(',').map(item => item.trim()).filter(item => item !== '')
+      }));
+    } else {
+      setAgent(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   // Function to handle form submission, send agent data to the server, and reset the form
@@ -189,7 +178,7 @@ const AgentCreator: React.FC = () => {
   
         // Map the raw data to a simpler structure we need
         const processedCharacters = charactersData.map(char => {
-          const { agent } = char;
+          const { agent, concept = '' } = char; // Add concept with default empty string
           const {
             agent_details: {
               name = '',
@@ -200,8 +189,26 @@ const AgentCreator: React.FC = () => {
               topic_expertise = [],
               hashtags = [],
               emojis = []
-            } = {} // Default empty object if agent_details is undefined
-          } = agent || {}; // Default empty object if agent is undefined
+            } = {},
+            // Add missing required fields with default values
+            ai_model = {
+              memory_store: '',
+              model_name: '',
+              model_type: ''
+            },
+            connectors = {
+              discord: false,
+              telegram: false,
+              twitter: false
+            },
+            seasons = [],
+            tracker = {
+              current_episode_number: 0,
+              current_post_number: 0,
+              current_season_number: 0,
+              post_every_x_minutes: 0
+            }
+          } = agent || {};
   
           return {
             agent: {
@@ -214,8 +221,13 @@ const AgentCreator: React.FC = () => {
                 topic_expertise,
                 hashtags: Array.isArray(hashtags) ? hashtags : [],
                 emojis: Array.isArray(emojis) ? emojis : []
-              }
-            }
+              },
+              ai_model,
+              connectors,
+              seasons,
+              tracker
+            },
+            concept
           };
         });
   
@@ -362,7 +374,7 @@ const AgentCreator: React.FC = () => {
                   <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
                   <TraitButtons field="personality" options={agent.topic_expertise} />
                   <Textarea
-                    value={agent.topic_expertise}
+                    value={Array.isArray(agent.topic_expertise) ? agent.topic_expertise.join(', ') : ''}
                     onChange={handleInputChange('topic_expertise')}
                     placeholder="Describe agent topic_expertise"
                     rows={3}
@@ -377,7 +389,7 @@ const AgentCreator: React.FC = () => {
                   <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
                   <TraitButtons field="personality" options={agent.personality} />
                   <Textarea
-                    value={agent.personality}
+                    value={Array.isArray(agent.personality) ? agent.personality.join(', ') : ''}
                     onChange={handleInputChange('personality')}
                     placeholder="Describe agent personality"
                     rows={3}
@@ -400,9 +412,9 @@ const AgentCreator: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
-                  <TraitButtons field="communication_style" options={suggestions.communication_styles} />
+                  <TraitButtons field="communication_style" options={agent.communication_style} />
                   <Textarea
-                    value={agent.communication_style}
+                    value={Array.isArray(agent.communication_style) ? agent.communication_style.join(', ') : ''}
                     onChange={handleInputChange('communication_style')}
                     placeholder="Describe communication style"
                     rows={3}
