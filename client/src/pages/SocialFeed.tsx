@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useCharacters from '../hooks/useCharacters';
-import { MessageSquare, Heart, ChevronDown } from 'lucide-react';
+import { MessageSquare, Heart } from 'lucide-react';
 
 interface Post {
   post_id: string;
@@ -124,28 +124,28 @@ const SocialFeed: React.FC = () => {
                 }}
               />
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-cyan-400">
+                <h3 className="text-lg font-semibold text-cyan-400 text-left">
                   {selectedCharacter?.agent.agent_details.name}
                 </h3>
                 <div className="text-sm text-gray-500">
-                  <span>Season {(post.seasonNumber || 0) + 1}, Episode {(post.episodeNumber || 0) + 1}</span>
+                  <span>Season {(post.seasonNumber || 0) }, Episode {(post.episodeNumber || 0) }</span>
                   <span className="mx-2">•</span>
                   <span>Post {post.post_number}</span>
                 </div>
               </div>
             </div>
 
-            {/* Post Content */}
-            <p className="text-gray-300 mb-2 whitespace-pre-wrap">{post.post_content}</p>
+              {/* Post Highlights */}
+              {post.post_highlights && (
+                <div className="mt-4 mb-4 bg-slate-800/30 rounded-lg p-4 border-l-2 border-cyan-500/30">
+                  <p className="text-gray-400 text-sm italic">
+                    {post.post_highlights}
+                  </p>
+                </div>
+              )}
 
-            {/* Post Highlights */}
-            {post.post_highlights && (
-              <div className="mt-4 mb-4 bg-slate-800/30 rounded-lg p-4 border-l-2 border-cyan-500/30">
-                <p className="text-gray-400 text-sm italic">
-                  {post.post_highlights}
-                </p>
-              </div>
-            )}
+              {/* Post Content */}
+              <p className="text-gray-300 mb-2 whitespace-pre-wrap">{post.post_content}</p>
 
             {/* Post Actions */}
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
@@ -163,7 +163,7 @@ const SocialFeed: React.FC = () => {
               {/* Episode Name */}
               {post.episodeName && (
                 <div className="text-sm text-gray-500 italic">
-                  {post.episodeName}
+                  Episode Name: {post.episodeName}
                 </div>
               )}
             </div>
