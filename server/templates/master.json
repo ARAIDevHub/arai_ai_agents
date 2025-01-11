@@ -2,8 +2,8 @@
   "agent": {
     "agent_details": {
       "name": "",
-      "personality": "",
-      "communication_style": "",
+      "personality": [],
+      "communication_style": [],
       "backstory": "",
       "universe": "",
       "topic_expertise": [],
