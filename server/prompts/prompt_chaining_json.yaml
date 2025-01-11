@@ -19,6 +19,7 @@ prompt_1 (Character Sheet Creation): |
     3.  Develop Personality and Style:
         - Create a detailed personality for the agent.
         - Define a clear communication style for the agent.
+        - Create a list of keywords.
         - Personality: {{ personality }}
         - Communication Style: {{ style }}
 
