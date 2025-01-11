@@ -48,8 +48,11 @@ def create_agent():
 @app.route('/api/characters', methods=['GET'])
 def get_characters():
     try:
-        # Use ** to match any number of subdirectories
-        files = glob.glob('configs/**/*master*.json', recursive=True)
+        # Use os.path.join for cross-platform path handling
+        config_dir = 'configs'
+        pattern = os.path.join(config_dir, '**', '*master*.json')
+        # Use os.path.normpath to normalize path separators
+        files = [os.path.normpath(f) for f in glob.glob(pattern, recursive=True)]
         print(f"[get_characters] - Found {len(files)} files: {files}")
 
         if not files:
@@ -59,7 +62,7 @@ def get_characters():
         characters = []
         for file in files:
             try:
-                with open(file, 'r') as f:
+                with open(file, 'r', encoding='utf-8') as f:
                     characters.append(json.load(f))
             except json.JSONDecodeError as e:
                 print(f"[get_characters] - Error parsing JSON from {file}: {str(e)}")
