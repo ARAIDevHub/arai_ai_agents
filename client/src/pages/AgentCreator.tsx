@@ -5,47 +5,8 @@ import agent1 from '../assets/agent-images/agent1.jpg';
 import agent2 from '../assets/agent-images/agent2.jpg';
 import agent3 from '../assets/agent-images/agent3.jpg';
 import agent4 from '../assets/agent-images/agent4.jpg';
-
-interface AgentDetails {
-  backstory: string;
-  communication_style: string[];
-  emojis: string[];
-  hashtags: string[];
-  name: string;
-  personality: string[];
-  topic_expertise: string[];
-  universe: string;
-  selectedImage?: number;  // Added for image selection
-}
-
-interface Agent {
-  agent: {
-    agent_details: AgentDetails;
-    ai_model: {
-      memory_store: string;
-      model_name: string;
-      model_type: string;
-    };
-    connectors: {
-      discord: boolean;
-      telegram: boolean;
-      twitter: boolean;
-    };
-    seasons: any[]; // Adjust as needed
-    tracker: {
-      current_episode_number: number;
-      current_post_number: number;
-      current_season_number: number;
-      post_every_x_minutes: number;
-    };
-  };
-  concept: string;
-}
-
-interface TraitButtonsProps {
-  field: keyof AgentDetails;
-  options: string[];
-}
+import { AgentDetails, Agent } from '../interfaces/AgentInterfaces'; // Import the interfaces
+import TraitButtons from '../components/TraitButtons'; // Import the new TraitButtons component
 
 const agentImages = [agent1, agent2, agent3, agent4];
 
@@ -63,32 +24,6 @@ const AgentCreator: React.FC = () => {
     selectedImage: undefined,
   });
   const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
-
-  // Function to handle suggestion chip clicks and update the agent's field with the selected value
-  const handleTraitButtonsClick = (field: keyof AgentDetails, value: string): void => {
-    setAgent(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // Component to render suggestion chips for a given field with provided options
-  const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options }) => (
-    console.log("[SuggestionChips] field:", field, "options:", options),
-    <div className="flex flex-wrap gap-2 mb-4">
-      {options.map((option, index) => (
-        <button
-          key={index}
-          className="px-3 py-1 rounded-full bg-cyan-900/30 hover:bg-cyan-800/30 text-cyan-200 
-                     border border-orange-500/30 transition-all duration-300 flex items-center"
-          onClick={() => handleTraitButtonsClick(field, option)}
-        >
-          <Sparkles className="w-4 h-4 mr-2 text-orange-400" />
-          {option}
-        </button>
-      ))}
-    </div>
-  );
 
   // Input component for text input fields with styling
   const Input: React.FC<{
@@ -244,26 +179,38 @@ const AgentCreator: React.FC = () => {
 
   // New function to handle character selection
   const handleCharacterSelect = (character: Agent) => {
-    const details = character.agent?.agent_details;
+    const agent = character.agent?.agent_details;
     
-    if (!details) {
+    if (!agent) {
       console.error('Selected character has invalid data structure');
       return;
     }
 
     setAgent({
-      name: details.name,
-      personality: Array.isArray(details.personality) ? details.personality : [],
-      communication_style: details.communication_style,
-      backstory: details.backstory,
-      universe: details.universe, 
-      topic_expertise: Array.isArray(details.topic_expertise) ? details.topic_expertise : [],
-      hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
-      emojis: Array.isArray(details.emojis) ? details.emojis : [],
+      name: agent.name,
+      personality: Array.isArray(agent.personality) ? agent.personality : [],
+      communication_style: agent.communication_style,
+      backstory: agent.backstory,
+      universe: agent.universe, 
+      topic_expertise: Array.isArray(agent.topic_expertise) ? agent.topic_expertise : [],
+      hashtags: Array.isArray(agent.hashtags) ? agent.hashtags : [],
+      emojis: Array.isArray(agent.emojis) ? agent.emojis : [],
       selectedImage: undefined  // Reset image selection when changing characters
 
     });
     console.log("[handleCharacterSelect] The current agent is :", agent); 
+  };
+
+  // Function to handle deleting a trait from the agent's field
+  const handleDeleteTrait = (field: keyof AgentDetails, value: string) => {
+    setAgent(prev => {
+      const updatedAgent = {
+        ...prev,
+        [field]: prev[field].filter((trait: string) => trait !== value) // Remove the trait
+      };
+      console.log("Updated agent after deletion:", updatedAgent); // Log the updated agent
+      return updatedAgent; // Return the updated agent state
+    });
   };
 
   return (
@@ -347,7 +294,7 @@ const AgentCreator: React.FC = () => {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit}>
+        {/* <form onSubmit={handleSubmit}> */}
           <div className="space-y-6">
             {activeTab === 'basic' && (
               <div className="space-y-6">
@@ -372,7 +319,11 @@ const AgentCreator: React.FC = () => {
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
-                  <TraitButtons field="personality" options={agent.topic_expertise} />
+                  <TraitButtons 
+                    field="topic_expertise" 
+                    options={agent.topic_expertise} 
+                    onTraitButtonClick={handleDeleteTrait}
+                  />
                   <Textarea
                     value={Array.isArray(agent.topic_expertise) ? agent.topic_expertise.join(', ') : ''}
                     onChange={handleInputChange('topic_expertise')}
@@ -387,7 +338,11 @@ const AgentCreator: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
-                  <TraitButtons field="personality" options={agent.personality} />
+                  <TraitButtons 
+                    field="personality" 
+                    options={agent.personality} 
+                    onTraitButtonClick={handleDeleteTrait}
+                  />
                   <Textarea
                     value={Array.isArray(agent.personality) ? agent.personality.join(', ') : ''}
                     onChange={handleInputChange('personality')}
@@ -412,7 +367,11 @@ const AgentCreator: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
-                  <TraitButtons field="communication_style" options={agent.communication_style} />
+                  <TraitButtons 
+                    field="communication_style" 
+                    options={agent.communication_style} 
+                    onTraitButtonClick={handleDeleteTrait}
+                  />
                   <Textarea
                     value={Array.isArray(agent.communication_style) ? agent.communication_style.join(', ') : ''}
                     onChange={handleInputChange('communication_style')}
@@ -423,7 +382,11 @@ const AgentCreator: React.FC = () => {
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
-                  <TraitButtons field="hashtags" options={agent.hashtags} />
+                  <TraitButtons 
+                    field="hashtags" 
+                    options={agent.hashtags} 
+                    onTraitButtonClick={handleDeleteTrait}
+                  />
                   <Input
                     value={agent.hashtags.join(', ')} // Join hashtags for display
                     onChange={handleInputChange('hashtags')}
@@ -433,7 +396,11 @@ const AgentCreator: React.FC = () => {
 
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
-                  <TraitButtons field="emojis" options={agent.emojis} />
+                  <TraitButtons 
+                    field="emojis" 
+                    options={agent.emojis} 
+                    onTraitButtonClick={handleDeleteTrait}
+                  />
                   <Input
                     value={agent.emojis.join(' ')} // Join emojis for display
                     onChange={handleInputChange('emojis')}
@@ -450,7 +417,7 @@ const AgentCreator: React.FC = () => {
             <Save className="w-4 h-4 mr-2" />
             Save Agent
           </button>
-        </form>
+        {/* </form> */}
 
         {/* Character Selection Section */}
         <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-orange-500/20">
