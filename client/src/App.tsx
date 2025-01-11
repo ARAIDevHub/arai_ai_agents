@@ -8,6 +8,9 @@ import SocialFeed from './pages/SocialFeed';
 import AgentStudio from './pages/AgentStudio';
 import './App.css';
 
+// Components
+// import Header from './components/Header';
+
 
 function App() {
   const location = useLocation();
@@ -19,10 +22,12 @@ function App() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
       {/* Header */}
       <header className="bg-gradient-to-r from-cyan-900 to-orange-900 shadow-xl">
-        <div className="container mx-auto px-6 py-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-            ARAI AI
-          </h1>
+        <div className="container mx-auto px-2 py-0 flex justify-center items-center h-20">
+          <img 
+            src="./src/assets/araiBannerTransarent.png" 
+            alt="ARAI AI Logo" 
+            className="h-36 w-auto bg-gradient-to-r from-cyan-400 via-orange-400 to-red-400 bg-clip-text text-transparent"
+          />
         </div>
       </header>
 

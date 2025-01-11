@@ -1,4 +1,23 @@
 {
+<<<<<<< HEAD
+  "season_number": 0,
+  "episode_name": "",
+  "episode_number": 0,
+  "episode_overview": "",
+  "episode_summary": "",
+  "episode_highlights": "",
+  "episode_posted": false,
+  "current_post_number": 0,
+  "posts": [
+    {
+      "post_id": "",
+      "post_number": 0,
+      "post_content": "",
+      "post_highlights": "",
+      "post_posted": false
+    }
+  ]
+=======
   "episode": {
     "episode_name": "",
     "episode_number": 0,
@@ -17,4 +36,5 @@
       }
     ]
   }
+>>>>>>> main
 }

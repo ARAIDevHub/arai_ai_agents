@@ -1,83 +1,87 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Brain, Wand2, MessageSquare, Save, Sparkles, RefreshCcw } from 'lucide-react';
+import { createAgent, getCharacters } from '../api/agentsAPI'; // Import the API functions
+import agent1 from '../assets/agent-images/agent1.jpg';
+import agent2 from '../assets/agent-images/agent2.jpg';
+import agent3 from '../assets/agent-images/agent3.jpg';
+import agent4 from '../assets/agent-images/agent4.jpg';
 
-interface Agent {
-  name: string;
-  personality: string;
-  communication_style: string;
+interface AgentDetails {
   backstory: string;
+  communication_style: string[];
+  emojis: string[];
+  hashtags: string[];
+  name: string;
+  personality: string[];
+  topic_expertise: string[];
   universe: string;
-  topic_expertise: string;
-  hashtags: string;
-  emojis: string;
-  selectedImage: number;
-  level: number;
-  experience: number;
+  selectedImage?: number;  // Added for image selection
 }
 
-interface SuggestionChipsProps {
-  field: keyof Agent;
+interface Agent {
+  agent: {
+    agent_details: AgentDetails;
+    ai_model: {
+      memory_store: string;
+      model_name: string;
+      model_type: string;
+    };
+    connectors: {
+      discord: boolean;
+      telegram: boolean;
+      twitter: boolean;
+    };
+    seasons: any[]; // Adjust as needed
+    tracker: {
+      current_episode_number: number;
+      current_post_number: number;
+      current_season_number: number;
+      post_every_x_minutes: number;
+    };
+  };
+  concept: string;
+}
+
+interface TraitButtonsProps {
+  field: keyof AgentDetails;
   options: string[];
 }
 
+const agentImages = [agent1, agent2, agent3, agent4];
+
 const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'basic' | 'personality' | 'style'>('basic');
-  const [agent, setAgent] = useState<Agent>({
+  const [agent, setAgent] = useState<AgentDetails>({
     name: '',
-    personality: '',
-    communication_style: '',
+    personality: [],
+    communication_style: [],
     backstory: '',
     universe: '',
-    topic_expertise: '',
-    hashtags: '',
-    emojis: '',
-    selectedImage: 0,
-    level: 1,
-    experience: 0
+    topic_expertise: [],
+    hashtags: [],
+    emojis: [],
+    selectedImage: undefined,
   });
+  const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
 
-  const mockImages = [0, 1, 2, 3];
-
-  const suggestions = {
-    personalities: [
-      "Wise Mentor",
-      "Quirky Inventor",
-      "Strategic Advisor",
-      "Creative Muse",
-      "Technical Expert"
-    ],
-    universes: [
-      "Cyberpunk Future",
-      "Medieval Fantasy",
-      "Modern Corporate",
-      "Space Exploration",
-      "Steampunk Era"
-    ],
-    communication_styles: [
-      "Professional & Concise",
-      "Friendly & Casual",
-      "Academic & Detailed",
-      "Witty & Humorous",
-      "Socratic & Inquisitive"
-    ]
-  };
-
-  const handleSuggestionClick = (field: keyof Agent, value: string): void => {
+  // Function to handle suggestion chip clicks and update the agent's field with the selected value
+  const handleTraitButtonsClick = (field: keyof AgentDetails, value: string): void => {
     setAgent(prev => ({
       ...prev,
       [field]: value,
-      experience: prev.experience + 10
     }));
   };
 
-  const SuggestionChips: React.FC<SuggestionChipsProps> = ({ field, options }) => (
+  // Component to render suggestion chips for a given field with provided options
+  const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options }) => (
+    console.log("[SuggestionChips] field:", field, "options:", options),
     <div className="flex flex-wrap gap-2 mb-4">
       {options.map((option, index) => (
         <button
           key={index}
           className="px-3 py-1 rounded-full bg-cyan-900/30 hover:bg-cyan-800/30 text-cyan-200 
                      border border-orange-500/30 transition-all duration-300 flex items-center"
-          onClick={() => handleSuggestionClick(field, option)}
+          onClick={() => handleTraitButtonsClick(field, option)}
         >
           <Sparkles className="w-4 h-4 mr-2 text-orange-400" />
           {option}
@@ -86,18 +90,22 @@ const AgentCreator: React.FC = () => {
     </div>
   );
 
+  // Input component for text input fields with styling
   const Input: React.FC<{
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     placeholder?: string;
-  }> = ({ ...props }) => (
+    style?: React.CSSProperties;
+  }> = ({ style, ...props }) => (
     <input
       {...props}
+      style={style}
       className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
                  text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
     />
   );
 
+  // Textarea component for multi-line text input fields with styling
   const Textarea: React.FC<{
     value: string;
     onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -111,10 +119,151 @@ const AgentCreator: React.FC = () => {
     />
   );
 
-  const handleInputChange = (field: keyof Agent) => (
+  // Function to handle input changes and update the agent's corresponding field
+  const handleInputChange = (field: keyof AgentDetails) => (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
-    setAgent({ ...agent, [field]: e.target.value });
+    const value = e.target.value;
+    
+    // Handle array fields
+    if (field === 'personality' || field === 'communication_style' || field === 'topic_expertise') {
+      setAgent(prev => ({
+        ...prev,
+        [field]: value.split(',').map(item => item.trim()).filter(item => item !== '')
+      }));
+    } else {
+      setAgent(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };
+
+  // Function to handle form submission, send agent data to the server, and reset the form
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const newAgent = await createAgent(agent); // Use the API function here
+      console.log("Agent created:", newAgent);
+      // Reset the form
+      setAgent({
+        name: '',
+        personality: [],
+        communication_style: [],
+        backstory: '',
+        universe: '',
+        topic_expertise: [],
+        hashtags: [],
+        emojis: [],
+        selectedImage: undefined,  // Reset image selection
+
+      });
+    } catch (error) {
+      console.error("Error creating agent:", error);
+    }
+  };
+
+  // Function to load characters from the server and set them in the state
+  useEffect(() => {
+    const loadCharacters = async () => {
+      console.log("[loadCharacters] Loading characters...");
+      try {
+        const charactersData = await getCharacters();
+        console.log('Raw characters data:', charactersData);
+  
+        if (!Array.isArray(charactersData)) {
+          console.error('Expected array of characters, received:', typeof charactersData);
+          return;
+        }
+  
+        // Map the raw data to a simpler structure we need
+        const processedCharacters = charactersData.map(char => {
+          const { agent, concept = '' } = char; // Add concept with default empty string
+          const {
+            agent_details: {
+              name = '',
+              personality = [],
+              communication_style = [],
+              backstory = '',
+              universe = '',
+              topic_expertise = [],
+              hashtags = [],
+              emojis = []
+            } = {},
+            // Add missing required fields with default values
+            ai_model = {
+              memory_store: '',
+              model_name: '',
+              model_type: ''
+            },
+            connectors = {
+              discord: false,
+              telegram: false,
+              twitter: false
+            },
+            seasons = [],
+            tracker = {
+              current_episode_number: 0,
+              current_post_number: 0,
+              current_season_number: 0,
+              post_every_x_minutes: 0
+            }
+          } = agent || {};
+  
+          return {
+            agent: {
+              agent_details: {
+                name,
+                personality: Array.isArray(personality) ? personality : [],
+                communication_style: Array.isArray(communication_style) ? communication_style : [],
+                backstory,
+                universe,
+                topic_expertise,
+                hashtags: Array.isArray(hashtags) ? hashtags : [],
+                emojis: Array.isArray(emojis) ? emojis : []
+              },
+              ai_model,
+              connectors,
+              seasons,
+              tracker
+            },
+            concept
+          };
+        });
+  
+        console.log('Processed characters:', processedCharacters);
+        setCharacters(processedCharacters);
+  
+      } catch (error) {
+        console.error('Error loading characters:', error);
+      }
+    };
+  
+    loadCharacters();
+  }, []);
+
+  // New function to handle character selection
+  const handleCharacterSelect = (character: Agent) => {
+    const details = character.agent?.agent_details;
+    
+    if (!details) {
+      console.error('Selected character has invalid data structure');
+      return;
+    }
+
+    setAgent({
+      name: details.name,
+      personality: Array.isArray(details.personality) ? details.personality : [],
+      communication_style: details.communication_style,
+      backstory: details.backstory,
+      universe: details.universe, 
+      topic_expertise: Array.isArray(details.topic_expertise) ? details.topic_expertise : [],
+      hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
+      emojis: Array.isArray(details.emojis) ? details.emojis : [],
+      selectedImage: undefined  // Reset image selection when changing characters
+
+    });
+    console.log("[handleCharacterSelect] The current agent is :", agent); 
   };
 
   return (
@@ -122,16 +271,18 @@ const AgentCreator: React.FC = () => {
       {/* Left Panel */}
       <div className="w-1/2 p-6 border-r border-orange-500/20">
         <div className="h-full flex flex-col space-y-6">
-          {/* Level Badge */}
-          <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-2 
-                         rounded-lg self-end">
-            Level {agent.level}
-          </div>
-
           {/* Main Character Image */}
           <div className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                         via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center">
-            <Brain className="w-32 h-32 text-cyan-400" />
+                          via-cyan-900/20 to-orange-900/20 border border-orange-500/20 flex items-center justify-center"
+               style={{ 
+                 backgroundImage: agent.selectedImage !== undefined ? `url(${agentImages[agent.selectedImage]})` : 'none', 
+                 backgroundSize: 'cover', 
+                 backgroundPosition: 'center' 
+               }}>
+            {/* Only show Brain icon when no image is selected */}
+            {agent.selectedImage === undefined && (
+              <Brain className="w-32 h-32 text-cyan-400" />
+            )}
             <button className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
                               from-orange-600 to-red-600 text-white flex items-center">
               <RefreshCcw className="w-4 h-4 mr-2" />
@@ -141,40 +292,43 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {mockImages.map((_, index) => (
+            {agentImages.map((image, index) => (
               <div 
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 via-cyan-900/20 
-                           to-orange-900/20 rounded-lg cursor-pointer ${
-                           agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
-                onClick={() => setAgent({...agent, selectedImage: index})}
+                            to-orange-900/20 rounded-lg cursor-pointer ${
+                              agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''
+                            }`}
+                onClick={() => setAgent({ ...agent, selectedImage: index })}
+                style={{ 
+                  backgroundImage: `url(${image})`, 
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               />
             ))}
           </div>
 
           {/* Character Info Card */}
-          <div className="flex flex-col items-center space-y-4 rounded-lg p-6 bg-gradient-to-br 
-                         from-slate-900/80 via-cyan-900/20 to-orange-900/20 border border-orange-500/20">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-orange-400 
-                          to-red-400 bg-clip-text text-transparent">
-              {agent.name || 'New Agent'}
-            </h2>
-            <div className="text-2xl">{agent.emojis}</div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {agent.hashtags.split(' ').filter(Boolean).map((tag, i) => (
-                <span key={i} className="px-2 py-1 rounded-full bg-gradient-to-r 
-                                       from-cyan-600 to-orange-600 text-white text-sm">
-                  #{tag}
-                </span>
-              ))}
+          <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
+            <div className="mb-4">
+              <div className="text-lg font-semibold text-orange-400">Agent Name</div>
+              <div className="text-gray-300">{agent.name}</div>
             </div>
+            {/* <div className="mb-4">
+              <div className="text-lg font-semibold text-orange-400">Personality</div>
+              <div className="text-gray-300">{agent.personality}</div>
+            </div>
+            <div>
+              <div className="text-lg font-semibold text-orange-400">Communication Style</div>
+              <div className="text-gray-300">{agent.communication_style}</div>
+            </div> */}
           </div>
         </div>
       </div>
 
       {/* Right Panel */}
-      <div className="w-1/2 p-6 overflow-y-auto">
-        {/* Tabs */}
+      <div className="w-1/2 p-6">
         <div className="flex gap-4 mb-6 bg-slate-900/50 p-2 rounded-lg">
           {[
             { id: 'basic' as const, icon: Brain, label: 'Basic Info' },
@@ -193,104 +347,137 @@ const AgentCreator: React.FC = () => {
           ))}
         </div>
 
-        <div className="space-y-6">
-          {activeTab === 'basic' && (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
-                <Input
-                  value={agent.name}
-                  onChange={handleInputChange('name')}
-                  placeholder="Enter agent name"
-                />
-              </div>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            {activeTab === 'basic' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
+                  <Input
+                    value={agent.name}
+                    onChange={handleInputChange('name')}
+                    placeholder="Enter agent name"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Universe</label>
-                <SuggestionChips field="universe" options={suggestions.universes} />
-                <Input
-                  value={agent.universe}
-                  onChange={handleInputChange('universe')}
-                  placeholder="Enter or select universe"
-                />
-              </div>
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Universe</label>
+                  <Input
+                    value={agent.universe}
+                    onChange={handleInputChange('universe')}
+                    placeholder="Enter universe"
+                    style={{ height: '50px' }}
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
-                <Input
-                  value={agent.topic_expertise}
-                  onChange={handleInputChange('topic_expertise')}
-                  placeholder="Enter expertise areas"
-                />
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
+                  <TraitButtons field="personality" options={agent.topic_expertise} />
+                  <Textarea
+                    value={Array.isArray(agent.topic_expertise) ? agent.topic_expertise.join(', ') : ''}
+                    onChange={handleInputChange('topic_expertise')}
+                    placeholder="Describe agent topic_expertise"
+                    rows={3}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'personality' && (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
-                <SuggestionChips field="personality" options={suggestions.personalities} />
-                <Textarea
-                  value={agent.personality}
-                  onChange={handleInputChange('personality')}
-                  placeholder="Describe agent personality"
-                  rows={3}
-                />
-              </div>
+            {activeTab === 'personality' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Personality Type</label>
+                  <TraitButtons field="personality" options={agent.personality} />
+                  <Textarea
+                    value={Array.isArray(agent.personality) ? agent.personality.join(', ') : ''}
+                    onChange={handleInputChange('personality')}
+                    placeholder="Describe agent personality"
+                    rows={3}
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
-                <Textarea
-                  value={agent.backstory}
-                  onChange={handleInputChange('backstory')}
-                  placeholder="Enter agent backstory"
-                  rows={4}
-                />
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
+                  <Textarea
+                    value={agent.backstory}
+                    onChange={handleInputChange('backstory')}
+                    placeholder="Enter agent backstory"
+                    rows={4}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'style' && (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
-                <SuggestionChips field="communication_style" options={suggestions.communication_styles} />
-                <Textarea
-                  value={agent.communication_style}
-                  onChange={handleInputChange('communication_style')}
-                  placeholder="Describe communication style"
-                  rows={3}
-                />
-              </div>
+            {activeTab === 'style' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Communication Style</label>
+                  <TraitButtons field="communication_style" options={agent.communication_style} />
+                  <Textarea
+                    value={Array.isArray(agent.communication_style) ? agent.communication_style.join(', ') : ''}
+                    onChange={handleInputChange('communication_style')}
+                    placeholder="Describe communication style"
+                    rows={3}
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
-                <Input
-                  value={agent.hashtags}
-                  onChange={handleInputChange('hashtags')}
-                  placeholder="ai agent custom (without #)"
-                />
-              </div>
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Hashtags</label>
+                  <TraitButtons field="hashtags" options={agent.hashtags} />
+                  <Input
+                    value={agent.hashtags.join(', ')} // Join hashtags for display
+                    onChange={handleInputChange('hashtags')}
+                    placeholder="#arai"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
-                <Input
-                  value={agent.emojis}
-                  onChange={handleInputChange('emojis')}
-                  placeholder="🤖 ✨ 💡"
-                />
+                <div>
+                  <label className="text-sm text-cyan-200 block mb-2">Emojis</label>
+                  <TraitButtons field="emojis" options={agent.emojis} />
+                  <Input
+                    value={agent.emojis.join(' ')} // Join emojis for display
+                    onChange={handleInputChange('emojis')}
+                    placeholder="✨"
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          <button type="submit" className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r from-cyan-600 
+                            to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white 
+                            transition-all duration-300 flex items-center justify-center">
+            <Save className="w-4 h-4 mr-2" />
+            Save Agent
+          </button>
+        </form>
+
+        {/* Character Selection Section */}
+        <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-orange-500/20">
+          <label className="text-sm text-cyan-200 block mb-2">
+            Select Existing Character
+          </label>
+          <select
+            onChange={(e) => {
+              const selected = characters.find(
+                c => c.agent?.agent_details?.name === e.target.value
+              );
+              if (selected) handleCharacterSelect(selected);
+            }}
+            className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                       text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+          >
+            <option value="">-- Select a Character --</option>
+            {characters.map((char, idx) => (
+              <option 
+                key={idx} 
+                value={char.agent?.agent_details?.name}
+              >
+                {char.agent?.agent_details?.name || 'Unnamed Character'}
+              </option>
+            ))}
+          </select>
         </div>
-
-        <button className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r from-cyan-600 
-                          to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white 
-                          transition-all duration-300 flex items-center justify-center">
-          <Save className="w-4 h-4 mr-2" />
-          Save Agent
-        </button>
       </div>
     </div>
   );
