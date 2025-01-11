@@ -51,11 +51,17 @@ const SocialFeed: React.FC = () => {
 
     // Sort posts by season number, episode number, and post number
     return allPosts.sort((a, b) => {
-      if (a.seasonNumber !== b.seasonNumber) {
-        return a.seasonNumber - b.seasonNumber;
+      // Provide default values in case of undefined
+      const aSeasonNum = a.seasonNumber ?? 0;
+      const bSeasonNum = b.seasonNumber ?? 0;
+      const aEpisodeNum = a.episodeNumber ?? 0;
+      const bEpisodeNum = b.episodeNumber ?? 0;
+
+      if (aSeasonNum !== bSeasonNum) {
+        return aSeasonNum - bSeasonNum;
       }
-      if (a.episodeNumber !== b.episodeNumber) {
-        return a.episodeNumber - b.episodeNumber;
+      if (aEpisodeNum !== bEpisodeNum) {
+        return aEpisodeNum - bEpisodeNum;
       }
       return a.post_number - b.post_number;
     });
