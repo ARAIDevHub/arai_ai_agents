@@ -1,10 +1,10 @@
-# ARAI AI Agents ⚡
-
 <p align="center">
-  <img src="docs/assets/images/AVA_LOG_BASE_GREY.png" alt="ARAI AI Agents Logo" width="100">
+  <img src="docs/assets/images/logos/theblockrhino_banner_trim.png" alt="ARAI AI Agents Logo" width="350">
 </p>
 
 Welcome to **ARAI AI Agents** – a Python-based system for managing AI agents, their interactions, and associated connectors. This project is designed to streamline the setup of multi-agent workflows and help developers easily integrate different language models, connectors, and prompt-chaining strategies.
+
+---
 
 > **Highlights**  
 > 🚀 **Multiple AI Models**: Connect to OpenAI, Anthropic, or other LLMs.  
@@ -14,6 +14,20 @@ Welcome to **ARAI AI Agents** – a Python-based system for managing AI agents, 
 > 📊 **CLI**: Monitor and manage agent interactions in real-time.
 
 ---
+
+## Socials
+
+- 🌐 **Website**: [arai-ai.io](https://arai-ai.io/)
+- 🐦 **Twitter**: [@ARAI_AI_AGENTS](https://x.com/ARAI_AI_AGENTS)
+- 📚 **Documentation**: [araidevhub.github.io/arai_ai_agents](https://araidevhub.github.io/arai_ai_agents/)
+- 📝 **Contract**: `ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump`
+
+---
+
+<p align="center">
+  <img src="docs/assets/gifs/featureReleaseTeaser.gif" alt="Feature Release Teaser" width="600">
+</p>
+
 
 ## Table of Contents
 
