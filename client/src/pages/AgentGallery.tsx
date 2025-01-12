@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Sparkles } from 'lucide-react';
+import image1 from '../assets/agent-images/agent1.jpg';
+import image2 from '../assets/agent-images/agent2.jpg';
+import image3 from '../assets/agent-images/agent3.jpg';
+import image4 from '../assets/agent-images/agent4.jpg';
 
 // Define the Agent type
 interface Agent {
@@ -132,6 +136,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
 const AgentGallery: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
+  const agentImages = [image1, image2, image3, image4];
+
   const agents: Agent[] = [
     {
       id: 1,
@@ -169,6 +175,7 @@ const AgentGallery: React.FC = () => {
   const displayAgents: Agent[] = [...Array(12)].map((_, i) => ({
     ...agents[i % agents.length],
     id: i + 1,
+    avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
   }));
 
   return (
