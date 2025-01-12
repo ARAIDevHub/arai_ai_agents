@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { Heart, MessageCircle, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Heart,
+  MessageCircle,
+  Sparkles,
+  PlusCircle,
+  CheckCircle,
+} from 'lucide-react';
 import image1 from '../assets/agent-images/agent1.jpg';
 import image2 from '../assets/agent-images/agent2.jpg';
 import image3 from '../assets/agent-images/agent3.jpg';
@@ -22,9 +28,16 @@ interface Agent {
 interface AgentCardProps {
   agent: Agent;
   onSelect: (agent: Agent) => void;
+  onAdd?: (agent: Agent) => void; // Optional onAdd prop for random agents
+  isUserAgent?: boolean; // Flag to indicate if it's a user agent
 }
 
-const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
+const AgentCard: React.FC<AgentCardProps> = ({
+  agent,
+  onSelect,
+  onAdd,
+  isUserAgent,
+}) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -32,7 +45,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
       className="perspective w-64 h-[500px]"
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
-      onClick={() => onSelect(agent)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(agent);
+      }}
     >
       <div
         className={`relative w-full h-full duration-500 preserve-3d ${
@@ -114,7 +130,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
             </div>
 
             {/* Tags at bottom */}
-            <div className="absolute bottom-4 left-4 right-4">
+            <div className="absolute bottom-12 left-4 right-4">
               <div className="flex gap-2 flex-wrap">
                 {agent.tags.map((tag, index) => (
                   <span
@@ -126,6 +142,33 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                 ))}
               </div>
             </div>
+
+            {/* Action button at bottom */}
+            <div className="absolute bottom-2 left-4 right-4">
+              {isUserAgent ? (
+                <button
+                  className="w-full px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(agent);
+                  }}
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Select Agent
+                </button>
+              ) : (
+                <button
+                  className="w-full px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAdd && onAdd(agent);
+                  }}
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  Add Agent
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -136,27 +179,83 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
 const AgentGallery: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
+  const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
+  const [yourAgents, setYourAgents] = useState<Agent[]>([]);
 
   const agentImages = [image1, image2, image3, image4];
 
   const generateRandomAgent = (): Agent => {
-    const names = ["Empress", "Lovers", "Magician", "Hermit", "Hierophant"];
-    const roles = ["Nature's Guardian", "Harmony Weaver", "Mystic Seer", "Wise Wanderer", "Spiritual Guide"];
-    const personalities = ["Warm, nurturing", "Balanced, intuitive", "Mysterious, insightful", "Solitary, contemplative", "Traditional, knowledgeable"];
-    const communicationStyles = ["Speaks with gentle wisdom", "Communicates through heart-centered wisdom", "Speaks in riddles and metaphors", "Shares wisdom through silence and observation", "Conveys knowledge through teachings and rituals"];
+    const names = [
+      'Empress',
+      'Lovers',
+      'Magician',
+      'Hermit',
+      'Hierophant',
+      'The Chariot',
+      'Strength',
+      'The Wheel',
+      'Justice',
+      'The Hanged Man',
+    ];
+    const roles = [
+      "Nature's Guardian",
+      'Harmony Weaver',
+      'Mystic Seer',
+      'Wise Wanderer',
+      'Spiritual Guide',
+      'Divine Messenger',
+      'Inner Power',
+      'Karmic Cycle',
+      'Cosmic Balance',
+      'Spiritual Surrender',
+    ];
+    const personalities = [
+      'Warm, nurturing',
+      'Balanced, intuitive',
+      'Mysterious, insightful',
+      'Solitary, contemplative',
+      'Traditional, knowledgeable',
+      'Dynamic, purposeful',
+      'Courageous, determined',
+      'Cyclical, transformative',
+      'Fair, objective',
+      'Sacrificial, enlightened',
+    ];
+    const communicationStyles = [
+      'Speaks with gentle wisdom',
+      'Communicates through heart-centered wisdom',
+      'Speaks in riddles and metaphors',
+      'Shares wisdom through silence and observation',
+      'Conveys knowledge through teachings and rituals',
+      'Speaks with clarity and direction',
+      'Expresses with passion and conviction',
+      'Communicates through symbols and omens',
+      'Speaks with truth and integrity',
+      'Shares insights from higher realms',
+    ];
     const abilities = [
-      ["Nature attunement", "Growth facilitation", "Abundance manifestation"],
-      ["Relationship guidance", "Choice illumination", "Soul connection"],
-      ["Divination", "Energy manipulation", "Reality crafting"],
-      ["Introspection", "Spiritual insight", "Pathfinding"],
-      ["Sacred knowledge", "Ritual mastery", "Blessing bestowal"]
+      ['Nature attunement', 'Growth facilitation', 'Abundance manifestation'],
+      ['Relationship guidance', 'Choice illumination', 'Soul connection'],
+      ['Divination', 'Energy manipulation', 'Reality crafting'],
+      ['Introspection', 'Spiritual insight', 'Pathfinding'],
+      ['Sacred knowledge', 'Ritual mastery', 'Blessing bestowal'],
+      ['Guidance', 'Protection', 'Swift action'],
+      ['Inner strength', 'Courage', 'Resilience'],
+      ['Fate reading', 'Destiny shaping', 'Karma balancing'],
+      ['Truth seeking', 'Equilibrium restoration', 'Moral compass'],
+      ['Spiritual awakening', 'Letting go', 'Higher perspective'],
     ];
     const tags = [
-      ["#nature", "#nurture", "#abundance"],
-      ["#harmony", "#choice", "#connection"],
-      ["#mystic", "#insight", "#manifestation"],
-      ["#wisdom", "#solitude", "#enlightenment"],
-      ["#spirituality", "#tradition", "#guidance"]
+      ['#nature', '#nurture', '#abundance'],
+      ['#harmony', '#choice', '#connection'],
+      ['#mystic', '#insight', '#manifestation'],
+      ['#wisdom', '#solitude', '#enlightenment'],
+      ['#spirituality', '#tradition', '#guidance'],
+      ['#divine', '#purpose', '#action'],
+      ['#strength', '#courage', '#innerpower'],
+      ['#karma', '#destiny', '#transformation'],
+      ['#justice', '#balance', '#truth'],
+      ['#surrender', '#awakening', '#higherconsciousness'],
     ];
 
     const randomIndex = Math.floor(Math.random() * names.length);
@@ -166,7 +265,7 @@ const AgentGallery: React.FC = () => {
       name: names[randomIndex],
       avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
       role: roles[randomIndex],
-      shortDescription: "...", // You can add short descriptions if needed
+      shortDescription: '...', // You can add short descriptions if needed
       tags: tags[randomIndex],
       personality: personalities[randomIndex],
       communicationStyle: communicationStyles[randomIndex],
@@ -174,8 +273,27 @@ const AgentGallery: React.FC = () => {
     };
   };
 
-  const randomAgents: Agent[] = [...Array(6)].map(() => generateRandomAgent());
-  const yourAgents: Agent[] = []; // Replace with actual user-created agents
+  const handleAddAgent = (agent: Agent) => {
+    setYourAgents((prevAgents) => [...prevAgents, agent]);
+    setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
+  };
+
+  const handleCreateRandomAgents = () => {
+    const newRandomAgents = [...Array(3)].map(() => generateRandomAgent());
+    setRandomAgents(newRandomAgents);
+  };
+
+  // Initial agents
+  const initialRandomAgents = [...Array(5)].map(() => generateRandomAgent());
+  const initialYourAgents = [...Array(2)].map(() => {
+    const agent = generateRandomAgent();
+    return { ...agent, id: agent.id + 1000 }; // Ensure unique IDs
+  });
+
+  useEffect(() => {
+    setRandomAgents(initialRandomAgents);
+    setYourAgents(initialYourAgents);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
@@ -208,34 +326,82 @@ const AgentGallery: React.FC = () => {
             </button>
           </div>
           <h1 className="text-2xl font-bold">Mystic Agents Gallery</h1>
-          <button className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700">
-            Create Agent
+          <button
+            className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
+            onClick={handleCreateRandomAgents}
+          >
+            Random
           </button>
         </header>
 
-        {/* Random Agents Section */}
-        {filter !== 'yourAgents' && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
-            <div className="flex flex-wrap gap-6 justify-center">
-              {randomAgents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} onSelect={setSelectedAgent} />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Agents Section */}
+        <div>
+          {/* All Agents */}
+          {filter === 'all' && (
+            <>
+              <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
+              <div className="flex flex-wrap gap-6 justify-center">
+                {randomAgents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent}
+                    onSelect={setSelectedAgent}
+                    onAdd={handleAddAgent}
+                    isUserAgent={false}
+                  />
+                ))}
+              </div>
+              <h2 className="text-xl font-semibold mt-8 mb-4">Your Agents</h2>
+              <div className="flex flex-wrap gap-6 justify-center">
+                {yourAgents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent}
+                    onSelect={setSelectedAgent}
+                    onAdd={handleAddAgent}
+                    isUserAgent={true}
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
-        {/* Your Agents Section */}
-        {filter !== 'random' && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Your Agents</h2>
-            <div className="flex flex-wrap gap-6 justify-center">
-              {yourAgents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} onSelect={setSelectedAgent} />
-              ))}
-            </div>
-          </div>
-        )}
+          {/* Random Agents */}
+          {filter === 'random' && (
+            <>
+              <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
+              <div className="flex flex-wrap gap-6 justify-center">
+                {randomAgents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent}
+                    onSelect={setSelectedAgent}
+                    onAdd={handleAddAgent}
+                    isUserAgent={false}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Your Agents */}
+          {filter === 'yourAgents' && (
+            <>
+              <h2 className="text-xl font-semibold mb-4">Your Agents</h2>
+              <div className="flex flex-wrap gap-6 justify-center">
+                {yourAgents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent}
+                    onSelect={setSelectedAgent}
+                    onAdd={handleAddAgent}
+                    isUserAgent={true}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Display the selected agent's name */}
         {selectedAgent && (
