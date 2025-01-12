@@ -272,56 +272,6 @@ const AgentCreator: React.FC = () => {
             />
           </div>
 
-          {/* Agent Name Input */}
-          <div>
-            <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
-            <input
-              value={agent.name}
-              onChange={(e) => setAgent({ ...agent, name: e.target.value })}
-              placeholder="Enter agent name"
-              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
-          </div>
-
-          {/* Universe Input */}
-          <div>
-            <label className="text-sm text-cyan-200 block mb-2">Universe</label>
-            <input
-              value={agent.universe}
-              onChange={(e) => setAgent({ ...agent, universe: e.target.value })}
-              placeholder="Enter universe"
-              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
-          </div>
-
-          {/* Topic Expertise Textarea */}
-          <div>
-            <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
-            <textarea
-              value={agent.topic_expertise.join(', ')} // Join array for display
-              onChange={(e) => setAgent({ ...agent, topic_expertise: e.target.value.split(',').map(item => item.trim()) })}
-              placeholder="Describe agent topic expertise"
-              rows={3}
-              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
-          </div>
-
-          {/* Backstory Textarea */}
-          <div>
-            <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
-            <textarea
-              value={agent.backstory}
-              onChange={(e) => setAgent({ ...agent, backstory: e.target.value })}
-              placeholder="Enter agent backstory"
-              rows={4}
-              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
-          </div>
-
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
             {agentImages.map((image, index) => (
