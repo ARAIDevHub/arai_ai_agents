@@ -283,9 +283,9 @@ const AgentGallery: React.FC = () => {
     setRandomAgents(newRandomAgents);
   };
 
-  // Initial agents
-  const initialRandomAgents = [...Array(5)].map(() => generateRandomAgent());
-  const initialYourAgents = [...Array(2)].map(() => {
+  // Initial agents (3 random, 5 your agents)
+  const initialRandomAgents = [...Array(3)].map(() => generateRandomAgent());
+  const initialYourAgents = [...Array(5)].map(() => {
     const agent = generateRandomAgent();
     return { ...agent, id: agent.id + 1000 }; // Ensure unique IDs
   });
