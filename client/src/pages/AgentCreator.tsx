@@ -25,6 +25,23 @@ const AgentCreator: React.FC = () => {
   });
   const [characters, setCharacters] = useState<Agent[]>([]); // State to hold fetched characters
 
+  // New state for testing area
+  const [testInput, setTestInput] = useState<string>(''); // State for the testing textarea
+
+  // New function to handle changes in the testing textarea
+  const handleTestInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setTestInput(e.target.value); // Update the test input state
+  };
+
+  // New function to handle key down events in the testing textarea
+  const handleTestInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent the default behavior (new line)
+      console.log('Processed input:', testInput); // Process the input (e.g., log it)
+      setTestInput(''); // Optionally clear the textarea after processing
+    }
+  };
+
   // Input component for text input fields with styling
   const Input: React.FC<{
     value: string;
@@ -54,24 +71,28 @@ const AgentCreator: React.FC = () => {
     />
   );
 
-  // Function to handle input changes and update the agent's corresponding field
-  const handleInputChange = (field: keyof AgentDetails) => (
+  // Function to handle input changes for text fields and update the agent's corresponding field
+  const handleTextChange = (field: keyof AgentDetails) => (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
     const value = e.target.value;
-    
-    // Handle array fields
-    if (field === 'personality' || field === 'communication_style' || field === 'topic_expertise') {
-      setAgent(prev => ({
-        ...prev,
-        [field]: value.split(',').map(item => item.trim()).filter(item => item !== '')
-      }));
-    } else {
-      setAgent(prev => ({
-        ...prev,
-        [field]: value
-      }));
-    }
+    setAgent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Function to handle input changes for array fields (traits) and update the agent's corresponding field
+  const handleTraitChange = (field: keyof AgentDetails) => (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
+    const value = e.target.value;
+    // Handle array fields differently for emojis (split by space) and others (split by comma)
+    const separator = field === 'emojis' ? ' ' : ',';
+    setAgent(prev => ({
+      ...prev,
+      [field]: value.split(separator).map(item => item.trim()).filter(item => item !== '')
+    }));
   };
 
   // Function to handle form submission, send agent data to the server, and reset the form
@@ -237,6 +258,70 @@ const AgentCreator: React.FC = () => {
             </button>
           </div>
 
+          {/* Testing Area */}
+          <div>
+            <label className="text-sm text-cyan-200 block mb-2">Testing Area</label>
+            <textarea
+              value={testInput} // Bind the textarea to the testInput state
+              onChange={handleTestInputChange} // Use the new handler
+              onKeyDown={handleTestInputKeyDown} // Add the key down handler
+              placeholder="Enter test input here and press Enter"
+              rows={4}
+              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
+
+          {/* Agent Name Input */}
+          <div>
+            <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
+            <input
+              value={agent.name}
+              onChange={(e) => setAgent({ ...agent, name: e.target.value })}
+              placeholder="Enter agent name"
+              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
+
+          {/* Universe Input */}
+          <div>
+            <label className="text-sm text-cyan-200 block mb-2">Universe</label>
+            <input
+              value={agent.universe}
+              onChange={(e) => setAgent({ ...agent, universe: e.target.value })}
+              placeholder="Enter universe"
+              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
+
+          {/* Topic Expertise Textarea */}
+          <div>
+            <label className="text-sm text-cyan-200 block mb-2">Topic Expertise</label>
+            <textarea
+              value={agent.topic_expertise.join(', ')} // Join array for display
+              onChange={(e) => setAgent({ ...agent, topic_expertise: e.target.value.split(',').map(item => item.trim()) })}
+              placeholder="Describe agent topic expertise"
+              rows={3}
+              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
+
+          {/* Backstory Textarea */}
+          <div>
+            <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
+            <textarea
+              value={agent.backstory}
+              onChange={(e) => setAgent({ ...agent, backstory: e.target.value })}
+              placeholder="Enter agent backstory"
+              rows={4}
+              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
+
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
             {agentImages.map((image, index) => (
@@ -302,7 +387,7 @@ const AgentCreator: React.FC = () => {
                   <label className="text-sm text-cyan-200 block mb-2">Agent Name</label>
                   <Input
                     value={agent.name}
-                    onChange={handleInputChange('name')}
+                    onChange={handleTextChange('name')}
                     placeholder="Enter agent name"
                   />
                 </div>
@@ -311,7 +396,7 @@ const AgentCreator: React.FC = () => {
                   <label className="text-sm text-cyan-200 block mb-2">Universe</label>
                   <Input
                     value={agent.universe}
-                    onChange={handleInputChange('universe')}
+                    onChange={handleTextChange('universe')}
                     placeholder="Enter universe"
                     style={{ height: '50px' }}
                   />
@@ -326,7 +411,7 @@ const AgentCreator: React.FC = () => {
                   />
                   <Textarea
                     value={Array.isArray(agent.topic_expertise) ? agent.topic_expertise.join(', ') : ''}
-                    onChange={handleInputChange('topic_expertise')}
+                    onChange={handleTraitChange('topic_expertise')}
                     placeholder="Describe agent topic_expertise"
                     rows={3}
                   />
@@ -345,7 +430,7 @@ const AgentCreator: React.FC = () => {
                   />
                   <Textarea
                     value={Array.isArray(agent.personality) ? agent.personality.join(', ') : ''}
-                    onChange={handleInputChange('personality')}
+                    onChange={handleTraitChange('personality')}
                     placeholder="Describe agent personality"
                     rows={3}
                   />
@@ -355,7 +440,7 @@ const AgentCreator: React.FC = () => {
                   <label className="text-sm text-cyan-200 block mb-2">Backstory</label>
                   <Textarea
                     value={agent.backstory}
-                    onChange={handleInputChange('backstory')}
+                    onChange={handleTextChange('backstory')}
                     placeholder="Enter agent backstory"
                     rows={4}
                   />
@@ -374,7 +459,7 @@ const AgentCreator: React.FC = () => {
                   />
                   <Textarea
                     value={Array.isArray(agent.communication_style) ? agent.communication_style.join(', ') : ''}
-                    onChange={handleInputChange('communication_style')}
+                    onChange={handleTraitChange('communication_style')}
                     placeholder="Describe communication style"
                     rows={3}
                   />
@@ -389,7 +474,7 @@ const AgentCreator: React.FC = () => {
                   />
                   <Input
                     value={agent.hashtags.join(', ')} // Join hashtags for display
-                    onChange={handleInputChange('hashtags')}
+                    onChange={handleTraitChange('hashtags')}
                     placeholder="#arai"
                   />
                 </div>
@@ -403,7 +488,7 @@ const AgentCreator: React.FC = () => {
                   />
                   <Input
                     value={agent.emojis.join(' ')} // Join emojis for display
-                    onChange={handleInputChange('emojis')}
+                    onChange={handleTraitChange('emojis')}
                     placeholder="✨"
                   />
                 </div>
