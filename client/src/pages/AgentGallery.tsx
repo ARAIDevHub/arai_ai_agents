@@ -5,6 +5,7 @@ import {
   Sparkles,
   PlusCircle,
   CheckCircle,
+  RefreshCcw,
 } from 'lucide-react';
 import image1 from '../assets/agent-images/agent1.jpg';
 import image2 from '../assets/agent-images/agent2.jpg';
@@ -30,6 +31,7 @@ interface AgentCardProps {
   onSelect: (agent: Agent) => void;
   onAdd?: (agent: Agent) => void; // Optional onAdd prop for random agents
   isUserAgent?: boolean; // Flag to indicate if it's a user agent
+  onRegenerate?: (agentId: number) => void; // Optional onRegenerate prop
 }
 
 const AgentCard: React.FC<AgentCardProps> = ({
@@ -37,141 +39,156 @@ const AgentCard: React.FC<AgentCardProps> = ({
   onSelect,
   onAdd,
   isUserAgent,
+  onRegenerate,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
-    <div
-      className="perspective w-64 h-[500px]"
-      onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect(agent);
-      }}
-    >
+    <div className="relative">
       <div
-        className={`relative w-full h-full duration-500 preserve-3d ${
-          isFlipped ? 'rotate-y-180' : ''
-        }`}
+        className="perspective w-64 h-[500px]"
+        onMouseEnter={() => setIsFlipped(true)}
+        onMouseLeave={() => setIsFlipped(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(agent);
+        }}
       >
-        {/* Front of card */}
-        <div className="absolute w-full h-full backface-hidden">
-          <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-purple-500/30">
-            {/* Image container - 80% of card height */}
-            <div className="relative h-[400px]">
-              <img
-                src={agent.avatar}
-                alt={agent.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
-            </div>
+        <div
+          className={`relative w-full h-full duration-500 preserve-3d ${
+            isFlipped ? 'rotate-y-180' : ''
+          }`}
+        >
+          {/* Front of card */}
+          <div className="absolute w-full h-full backface-hidden">
+            <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-purple-500/30">
+              {/* Image container - 80% of card height */}
+              <div className="relative h-[400px]">
+                <img
+                  src={agent.avatar}
+                  alt={agent.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
+              </div>
 
-            {/* Title area - 20% of card height */}
-            <div className="h-[100px] p-4 bg-gray-800/95">
-              <h3 className="text-xl font-bold text-gray-100 mb-1">
-                {agent.name}
-              </h3>
-              <p className="text-purple-300 text-sm">{agent.role}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Back of card */}
-        <div className="absolute w-full h-full backface-hidden rotate-y-180">
-          <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-purple-500/30">
-            {/* Header with small image */}
-            <div className="flex gap-4 mb-4">
-              <img
-                src={agent.avatar}
-                alt={agent.name}
-                className="w-20 h-20 rounded-lg object-cover"
-              />
-              <div>
-                <h3 className="text-xl font-bold text-gray-100">
+              {/* Title area - 20% of card height */}
+              <div className="h-[100px] p-4 bg-gray-800/95">
+                <h3 className="text-xl font-bold text-gray-100 mb-1">
                   {agent.name}
                 </h3>
-                <p className="text-purple-400 text-sm">{agent.role}</p>
+                <p className="text-purple-300 text-sm">{agent.role}</p>
               </div>
             </div>
+          </div>
 
-            {/* Content sections */}
-            <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
-              <div>
-                <div className="flex items-center gap-2 text-gray-300 mb-1">
-                  <Heart className="w-4 h-4 text-purple-400" />
-                  <span className="font-medium">Personality</span>
+          {/* Back of card */}
+          <div className="absolute w-full h-full backface-hidden rotate-y-180">
+            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-purple-500/30">
+              {/* Header with small image */}
+              <div className="flex gap-4 mb-4">
+                <img
+                  src={agent.avatar}
+                  alt={agent.name}
+                  className="w-20 h-20 rounded-lg object-cover"
+                />
+                <div>
+                  <h3 className="text-xl font-bold text-gray-100">
+                    {agent.name}
+                  </h3>
+                  <p className="text-purple-400 text-sm">{agent.role}</p>
                 </div>
-                <p className="text-gray-400 text-sm">{agent.personality}</p>
               </div>
 
-              <div>
-                <div className="flex items-center gap-2 text-gray-300 mb-1">
-                  <MessageCircle className="w-4 h-4 text-purple-400" />
-                  <span className="font-medium">Communication</span>
+              {/* Content sections */}
+              <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
+                <div>
+                  <div className="flex items-center gap-2 text-gray-300 mb-1">
+                    <Heart className="w-4 h-4 text-purple-400" />
+                    <span className="font-medium">Personality</span>
+                  </div>
+                  <p className="text-gray-400 text-sm">{agent.personality}</p>
                 </div>
-                <p className="text-gray-400 text-sm">
-                  {agent.communicationStyle}
-                </p>
+
+                <div>
+                  <div className="flex items-center gap-2 text-gray-300 mb-1">
+                    <MessageCircle className="w-4 h-4 text-purple-400" />
+                    <span className="font-medium">Communication</span>
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    {agent.communicationStyle}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 text-gray-300 mb-1">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span className="font-medium">Abilities</span>
+                  </div>
+                  <ul className="text-gray-400 text-sm pl-4 list-disc space-y-1">
+                    {agent.abilities.map((ability, index) => (
+                      <li key={index}>{ability}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              <div>
-                <div className="flex items-center gap-2 text-gray-300 mb-1">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span className="font-medium">Abilities</span>
-                </div>
-                <ul className="text-gray-400 text-sm pl-4 list-disc space-y-1">
-                  {agent.abilities.map((ability, index) => (
-                    <li key={index}>{ability}</li>
+              {/* Tags at bottom */}
+              <div className="absolute bottom-12 left-4 right-4">
+                <div className="flex gap-2 flex-wrap">
+                  {agent.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-purple-900/50 rounded-full text-xs text-purple-300"
+                    >
+                      {tag}
+                    </span>
                   ))}
-                </ul>
+                </div>
               </div>
-            </div>
 
-            {/* Tags at bottom */}
-            <div className="absolute bottom-12 left-4 right-4">
-              <div className="flex gap-2 flex-wrap">
-                {agent.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 bg-purple-900/50 rounded-full text-xs text-purple-300"
+              {/* Action button at bottom */}
+              <div className="absolute bottom-2 left-4 right-4">
+                {isUserAgent ? (
+                  <button
+                    className="w-full px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelect(agent);
+                    }}
                   >
-                    {tag}
-                  </span>
-                ))}
+                    <CheckCircle className="w-4 h-4" />
+                    Select Agent
+                  </button>
+                ) : (
+                  <button
+                    className="w-full px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAdd && onAdd(agent);
+                    }}
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    Add Agent
+                  </button>
+                )}
               </div>
-            </div>
-
-            {/* Action button at bottom */}
-            <div className="absolute bottom-2 left-4 right-4">
-              {isUserAgent ? (
-                <button
-                  className="w-full px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect(agent);
-                  }}
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Select Agent
-                </button>
-              ) : (
-                <button
-                  className="w-full px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAdd && onAdd(agent);
-                  }}
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  Add Agent
-                </button>
-              )}
             </div>
           </div>
         </div>
       </div>
+      {/* Regenerate icon */}
+      {!isUserAgent && (
+        <button
+          className="absolute bottom-2 right-2 p-2 bg-gray-700 rounded-full hover:bg-gray-600"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRegenerate && onRegenerate(agent.id);
+          }}
+        >
+          <RefreshCcw className="w-4 h-4 text-gray-300" />
+        </button>
+      )}
     </div>
   );
 };
@@ -278,7 +295,15 @@ const AgentGallery: React.FC = () => {
     setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
   };
 
-  const handleCreateRandomAgents = () => {
+  const handleRegenerateAgent = (agentId: number) => {
+    setRandomAgents((prevAgents) =>
+      prevAgents.map((agent) =>
+        agent.id === agentId ? generateRandomAgent() : agent
+      )
+    );
+  };
+
+  const handleRegenerateAll = () => {
     const newRandomAgents = [...Array(3)].map(() => generateRandomAgent());
     setRandomAgents(newRandomAgents);
   };
@@ -326,12 +351,14 @@ const AgentGallery: React.FC = () => {
             </button>
           </div>
           <h1 className="text-2xl font-bold">Mystic Agents Gallery</h1>
-          <button
-            className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
-            onClick={handleCreateRandomAgents}
-          >
-            Random
-          </button>
+          {(filter === 'all' || filter === 'random') && (
+            <button
+              className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
+              onClick={handleRegenerateAll}
+            >
+              Regenerate All
+            </button>
+          )}
         </header>
 
         {/* Agents Section */}
@@ -348,6 +375,7 @@ const AgentGallery: React.FC = () => {
                     onSelect={setSelectedAgent}
                     onAdd={handleAddAgent}
                     isUserAgent={false}
+                    onRegenerate={handleRegenerateAgent}
                   />
                 ))}
               </div>
@@ -378,6 +406,7 @@ const AgentGallery: React.FC = () => {
                     onSelect={setSelectedAgent}
                     onAdd={handleAddAgent}
                     isUserAgent={false}
+                    onRegenerate={handleRegenerateAgent}
                   />
                 ))}
               </div>
