@@ -10,7 +10,6 @@ import {
   Wand2,
   MessageSquare,
   Save,
-  Sparkles,
   RefreshCcw,
 } from 'lucide-react';
 import { createAgent, getCharacters } from '../api/agentsAPI';
@@ -19,7 +18,7 @@ import agent2 from '../assets/agent-images/agent2.jpg';
 import agent3 from '../assets/agent-images/agent3.jpg';
 import agent4 from '../assets/agent-images/agent4.jpg';
 import { AgentDetails, Agent } from '../interfaces/AgentInterfaces';
-import TraitButtons from '../components/TraitButtons';
+import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
 
 const agentImages = [agent1, agent2, agent3, agent4];
 
@@ -31,10 +30,10 @@ const AgentCreator: React.FC = () => {
   // 1) States
   // ──────────────────────────────────────────────────────────────────────────────
   //
-  const [activeTab, setActiveTab] = useState<'basic' | 'personality' | 'style'>(
-    'basic'
-  );
+  const [activeTab, setActiveTab] =
+    useState<'basic' | 'personality' | 'style'>('basic');
 
+  // The main agent object
   const [agent, setAgent] = useState<AgentDetails>({
     name: '',
     personality: [],
@@ -46,16 +45,17 @@ const AgentCreator: React.FC = () => {
     emojis: [],
     selectedImage: undefined,
   });
-
-  const [characters, setCharacters] = useState<Agent[]>([]);
   console.log('[AgentCreator] Current agent:', agent);
 
-  // Testing area state
+  // The fetched characters
+  const [characters, setCharacters] = useState<Agent[]>([]);
+
+  // Testing area text
   const [testInput, setTestInput] = useState<string>('');
 
+  //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 2) Local "draft" states for each text field
-  //    so we only commit to `agent` on Enter.
+  // 2) Local Drafts for “normal” fields (name, universe, backstory)
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const [draftFields, setDraftFields] = useState<{
@@ -68,7 +68,7 @@ const AgentCreator: React.FC = () => {
     backstory: '',
   });
 
-  // Keep local drafts in sync if `agent` changes (e.g. selecting a character)
+  // Keep them in sync if agent changes
   useEffect(() => {
     setDraftFields({
       name: agent.name || '',
@@ -79,14 +79,48 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 3) Testing Area: same logic as before
+  // 3) Local Drafts for trait fields => single “draftTraits” object
+  // ──────────────────────────────────────────────────────────────────────────────
+  //
+  // We'll unify the logic for topic_expertise, personality, communication_style,
+  // hashtags, and emojis. We'll store them all as strings. On Enter, we'll parse
+  // them into arrays and commit to agent.
+  //
+  const [draftTraits, setDraftTraits] = useState<{
+    topic_expertise: string;
+    personality: string;
+    communication_style: string;
+    hashtags: string;
+    emojis: string;
+  }>({
+    topic_expertise: '',
+    personality: '',
+    communication_style: '',
+    hashtags: '',
+    emojis: '',
+  });
+
+  // Whenever agent changes, rebuild the draft strings
+  useEffect(() => {
+    setDraftTraits({
+      topic_expertise: agent.topic_expertise.join(', '),
+      personality: agent.personality.join(', '),
+      communication_style: agent.communication_style.join(', '),
+      hashtags: agent.hashtags.join(', '),
+      // For emojis, join by space
+      emojis: agent.emojis.join(' '),
+    });
+  }, [agent]);
+
+  //
+  // ──────────────────────────────────────────────────────────────────────────────
+  // 4) Testing Area (unchanged)
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleTestInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setTestInput(e.target.value);
   };
-
-  const handleTestInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleTestInputKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       console.log('Processed input:', testInput);
@@ -96,7 +130,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 4) Reusable <Input> & <Textarea> components
+  // 5) Reusable Input + Textarea
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const Input: React.FC<{
@@ -117,6 +151,7 @@ const AgentCreator: React.FC = () => {
     />
   );
 
+  // For simpler “manual” textareas
   const Textarea: React.FC<{
     value: string;
     onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -136,13 +171,13 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 5) onChange -> local draft, onKeyDown -> commit on Enter for name/universe/backstory
+  // 6) “Normal” fields => commit on Enter
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleDraftChange =
     (field: keyof typeof draftFields) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setDraftFields((prev) => ({
+    (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+      setDraftFields(prev => ({
         ...prev,
         [field]: e.target.value,
       }));
@@ -150,40 +185,55 @@ const AgentCreator: React.FC = () => {
 
   const handleDraftKeyDown =
     (field: keyof typeof draftFields) =>
-    (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         console.log(`[handleDraftKeyDown] Committing ${field}:`, draftFields[field]);
-        setAgent((prev) => ({
+        setAgent(prev => ({
           ...prev,
-          [field]: draftFields[field], // commit local text to agent
+          [field]: draftFields[field],
         }));
       }
     };
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 6) Trait fields => update agent on every keystroke
+  // 7) Trait fields => single “draftTraits” + commit on Enter
   // ──────────────────────────────────────────────────────────────────────────────
   //
-  const handleTraitChange =
-    (field: keyof AgentDetails) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      const separator = field === 'emojis' ? ' ' : ',';
-      setAgent((prev) => ({
+  const handleTraitDraftChange =
+    (field: keyof typeof draftTraits) =>
+    (e: ChangeEvent<HTMLTextAreaElement>) => {
+      setDraftTraits(prev => ({
         ...prev,
-        [field]: value
-          .split(separator)
-          .map((item) => item.trim())
-          .filter((item) => item !== ''),
+        [field]: e.target.value,
       }));
     };
 
-  // Deleting a trait
+  const handleTraitDraftKeyDown =
+    (field: keyof typeof draftTraits) =>
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        console.log(`[handleTraitDraftKeyDown] Committing trait field: ${field}`);
+        // If field is "emojis", we split by space; otherwise, by comma
+        const separator = field === 'emojis' ? ' ' : ',';
+        const arrayValue = draftTraits[field]
+          .split(separator)
+          .map(item => item.trim())
+          .filter(Boolean);
+
+        setAgent(prev => ({
+          ...prev,
+          [field]: arrayValue,
+        }));
+      }
+    };
+
+  // Deleting a single trait
   const handleDeleteTrait = (field: keyof AgentDetails, value: string) => {
-    console.log('[handleDeleteTrait - Called] Field:', field);
-    setAgent((prev) => {
+    console.log('[handleDeleteTrait - Called] Field:', field, 'Value:', value);
+    setAgent(prev => {
       const updatedAgent = {
         ...prev,
         [field]: prev[field].filter((trait: string) => trait !== value),
@@ -195,7 +245,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 7) Submit form
+  // 8) Submit
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -218,11 +268,14 @@ const AgentCreator: React.FC = () => {
         selectedImage: undefined,
       });
 
-      // Reset local drafts
-      setDraftFields({
-        name: '',
-        universe: '',
-        backstory: '',
+      // Reset local fields
+      setDraftFields({ name: '', universe: '', backstory: '' });
+      setDraftTraits({
+        topic_expertise: '',
+        personality: '',
+        communication_style: '',
+        hashtags: '',
+        emojis: '',
       });
     } catch (error) {
       console.error('Error creating agent:', error);
@@ -231,7 +284,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 8) Load characters on mount
+  // 9) Load characters
   // ──────────────────────────────────────────────────────────────────────────────
   //
   useEffect(() => {
@@ -240,19 +293,15 @@ const AgentCreator: React.FC = () => {
       try {
         const charactersData = await getCharacters();
         console.log('Raw characters data:', charactersData);
-
         if (!Array.isArray(charactersData)) {
           console.error('Expected array of characters, received:', typeof charactersData);
           return;
         }
 
-        const processedCharacters = charactersData.map((char) => {
+        const processed = charactersData.map(char => {
           const { agent, concept = '' } = char;
           console.log('Mapping a character:', char);
-
-          if (!agent) {
-            return { agent: {}, concept };
-          }
+          if (!agent) return { agent: {}, concept };
 
           const {
             agent_details: {
@@ -265,24 +314,11 @@ const AgentCreator: React.FC = () => {
               hashtags = [],
               emojis = [],
             } = {},
-            ai_model = {
-              memory_store: '',
-              model_name: '',
-              model_type: '',
-            },
-            connectors = {
-              discord: false,
-              telegram: false,
-              twitter: false,
-            },
+            ai_model = {},
+            connectors = {},
             seasons = [],
-            tracker = {
-              current_episode_number: 0,
-              current_post_number: 0,
-              current_season_number: 0,
-              post_every_x_minutes: 0,
-            },
-          } = agent || {};
+            tracker = {},
+          } = agent;
 
           return {
             agent: {
@@ -307,8 +343,8 @@ const AgentCreator: React.FC = () => {
           };
         });
 
-        console.log('Processed characters:', processedCharacters);
-        setCharacters(processedCharacters);
+        console.log('Processed characters:', processed);
+        setCharacters(processed);
       } catch (error) {
         console.error('Error loading characters:', error);
       }
@@ -319,12 +355,11 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 9) Handle character selection
+  // 10) Select a character
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleCharacterSelect = (character: Agent) => {
     console.log('[handleCharacterSelect] selected character:', character);
-
     const details = character.agent?.agent_details;
     if (!details) {
       console.error('Selected character has invalid data structure');
@@ -333,15 +368,13 @@ const AgentCreator: React.FC = () => {
 
     setAgent({
       name: details.name || '',
-      personality: Array.isArray(details.personality) ? details.personality : [],
+      personality: details.personality || [],
       communication_style: details.communication_style || [],
       backstory: details.backstory || '',
       universe: details.universe || '',
-      topic_expertise: Array.isArray(details.topic_expertise)
-        ? details.topic_expertise
-        : [],
-      hashtags: Array.isArray(details.hashtags) ? details.hashtags : [],
-      emojis: Array.isArray(details.emojis) ? details.emojis : [],
+      topic_expertise: details.topic_expertise || [],
+      hashtags: details.hashtags || [],
+      emojis: details.emojis || [],
       selectedImage: undefined,
     });
 
@@ -351,13 +384,20 @@ const AgentCreator: React.FC = () => {
       universe: details.universe || '',
       backstory: details.backstory || '',
     });
+    setDraftTraits({
+      topic_expertise: (details.topic_expertise || []).join(', '),
+      personality: (details.personality || []).join(', '),
+      communication_style: (details.communication_style || []).join(', '),
+      hashtags: (details.hashtags || []).join(', '),
+      emojis: (details.emojis || []).join(' '),
+    });
 
     console.log('[handleCharacterSelect] The current agent is :', details);
   };
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 10) Render
+  // 11) Render
   // ──────────────────────────────────────────────────────────────────────────────
   //
   return (
@@ -379,7 +419,6 @@ const AgentCreator: React.FC = () => {
               backgroundPosition: 'center',
             }}
           >
-            {/* Only show Brain icon if no image is selected */}
             {agent.selectedImage === undefined && (
               <Brain className="w-32 h-32 text-cyan-400" />
             )}
@@ -481,11 +520,11 @@ const AgentCreator: React.FC = () => {
                     value={draftFields.name}
                     onChange={handleDraftChange('name')}
                     onKeyDown={handleDraftKeyDown('name')}
-                    placeholder="Enter agent name"
+                    placeholder="Enter agent name (Press Enter to commit)"
+                    rows={2}
                     className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                      text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
-                  
                 </div>
 
                 {/* Universe => local draft */}
@@ -497,13 +536,14 @@ const AgentCreator: React.FC = () => {
                     value={draftFields.universe}
                     onChange={handleDraftChange('universe')}
                     onKeyDown={handleDraftKeyDown('universe')}
-                    placeholder="Enter universe"
-                    rows={5}
+                    placeholder="Enter universe (Press Enter to commit)"
+                    rows={2}
                     className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                      text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"                  />
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  />
                 </div>
 
-                {/* Topic Expertise => trait (updates on keystroke) */}
+                {/* Topic Expertise => local draft => commit on Enter */}
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">
                     Topic Expertise
@@ -514,16 +554,13 @@ const AgentCreator: React.FC = () => {
                     onTraitButtonClick={handleDeleteTrait}
                   />
                   <textarea
-                    value={
-                      Array.isArray(agent.topic_expertise)
-                        ? agent.topic_expertise.join(', ')
-                        : ''
-                    }
-                    onChange={handleTraitChange('topic_expertise')}
-                    placeholder="Describe agent topic expertise"
+                    value={draftTraits.topic_expertise}
+                    onChange={handleTraitDraftChange('topic_expertise')}
+                    onKeyDown={handleTraitDraftKeyDown('topic_expertise')}
+                    placeholder="Comma-separated (e.g. 'AI, Robotics, Music') (Press Enter to commit)"
                     rows={2}
                     className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                      text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"   
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
               </div>
@@ -531,25 +568,24 @@ const AgentCreator: React.FC = () => {
 
             {activeTab === 'personality' && (
               <div className="space-y-6">
-                {/* Personality => trait */}
+                {/* Personality => local draft => commit on Enter */}
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">
-                    Personality Type
+                    Personality
                   </label>
                   <TraitButtons
                     field="personality"
                     options={agent.personality}
                     onTraitButtonClick={handleDeleteTrait}
                   />
-                  <Textarea
-                    value={
-                      Array.isArray(agent.personality)
-                        ? agent.personality.join(', ')
-                        : ''
-                    }
-                    onChange={handleTraitChange('personality')}
-                    placeholder="Describe agent personality"
-                    rows={3}
+                  <textarea
+                    value={draftTraits.personality}
+                    onChange={handleTraitDraftChange('personality')}
+                    onKeyDown={handleTraitDraftKeyDown('personality')}
+                    placeholder="Comma-separated personality traits (Press Enter to commit)"
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
 
@@ -562,10 +598,10 @@ const AgentCreator: React.FC = () => {
                     value={draftFields.backstory}
                     onChange={handleDraftChange('backstory')}
                     onKeyDown={handleDraftKeyDown('backstory')}
-                    placeholder="Enter agent backstory"
-                    rows={5}
+                    placeholder="Enter agent backstory (Press Enter to commit)"
+                    rows={3}
                     className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                    text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"   
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
               </div>
@@ -573,7 +609,7 @@ const AgentCreator: React.FC = () => {
 
             {activeTab === 'style' && (
               <div className="space-y-6">
-                {/* Communication Style => trait */}
+                {/* Communication Style => local draft => commit on Enter */}
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">
                     Communication Style
@@ -583,19 +619,18 @@ const AgentCreator: React.FC = () => {
                     options={agent.communication_style}
                     onTraitButtonClick={handleDeleteTrait}
                   />
-                  <Textarea
-                    value={
-                      Array.isArray(agent.communication_style)
-                        ? agent.communication_style.join(', ')
-                        : ''
-                    }
-                    onChange={handleTraitChange('communication_style')}
-                    placeholder="Describe communication style"
-                    rows={3}
+                  <textarea
+                    value={draftTraits.communication_style}
+                    onChange={handleTraitDraftChange('communication_style')}
+                    onKeyDown={handleTraitDraftKeyDown('communication_style')}
+                    placeholder="Comma-separated (Press Enter to commit)"
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
 
-                {/* Hashtags => trait */}
+                {/* Hashtags => local draft => commit on Enter */}
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">
                     Hashtags
@@ -605,14 +640,18 @@ const AgentCreator: React.FC = () => {
                     options={agent.hashtags}
                     onTraitButtonClick={handleDeleteTrait}
                   />
-                  <Input
-                    value={agent.hashtags.join(', ')}
-                    onChange={handleTraitChange('hashtags')}
-                    placeholder="#arai"
+                  <textarea
+                    value={draftTraits.hashtags}
+                    onChange={handleTraitDraftChange('hashtags')}
+                    onKeyDown={handleTraitDraftKeyDown('hashtags')}
+                    placeholder="Comma-separated #tags (Press Enter to commit)"
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
 
-                {/* Emojis => trait */}
+                {/* Emojis => local draft => commit on Enter => splitted by space */}
                 <div>
                   <label className="text-sm text-cyan-200 block mb-2">
                     Emojis
@@ -622,10 +661,14 @@ const AgentCreator: React.FC = () => {
                     options={agent.emojis}
                     onTraitButtonClick={handleDeleteTrait}
                   />
-                  <Input
-                    value={agent.emojis.join(' ')}
-                    onChange={handleTraitChange('emojis')}
-                    placeholder="✨"
+                  <textarea
+                    value={draftTraits.emojis}
+                    onChange={handleTraitDraftChange('emojis')}
+                    onKeyDown={handleTraitDraftKeyDown('emojis')}
+                    placeholder="Split by space (e.g. '✨ 🚀') (Press Enter to commit)"
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
               </div>
