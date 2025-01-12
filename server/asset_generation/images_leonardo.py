@@ -1,3 +1,20 @@
+#
+# Module: template_types
+#
+# This module implements the TemplateType class for defining the type of template.
+#
+# Title: Template Types
+# Summary: Template types implementation.
+# Authors:
+#     - @TheBlockRhino
+# Created: 2024-12-31
+# Last edited by: @TheBlockRhino
+# Last edited date: 2025-01-12
+# URLs:
+#     - https://arai-ai.io
+#     - https://github.com/ARAI-DevHub/arai-ai-agents
+#     - https://x.com/TheBlockRhino
+
 import requests
 import os
 import dotenv
@@ -45,8 +62,53 @@ def get_image_url(generation_id):
     return response.json()
 
 #--------------------------------
+# Get list of models
+#--------------------------------
+def get_models():
+    url = "https://cloud.leonardo.ai/api/rest/v1/platformModels"
+
+    headers = {
+        "accept": "application/json",
+        "authorization": "Bearer " + os.getenv("LEONARDO_API_KEY", "")
+    }
+
+    response = requests.get(url, headers=headers)
+
+    return response.json()
+
+# Get a list of model styles
+#--------------------------------
+def get_model_styles(model_id):
+    url = "https://cloud.leonardo.ai/api/rest/v1/platformModels/" + model_id + "/styles"
+
+    headers = {
+        "accept": "application/json",
+        "authorization": "Bearer " + os.getenv("LEONARDO_API_KEY", "")
+    }
+
+    response = requests.get(url, headers=headers)
+
+    return response.json()
+
+#--------------------------------
+# Get list of elements
+#--------------------------------
+def get_elements():
+    url = "https://cloud.leonardo.ai/api/rest/v1/elements"
+
+    headers = {
+        "accept": "application/json",
+        "authorization": "Bearer " + os.getenv("LEONARDO_API_KEY", "")
+    }
+
+    response = requests.get(url, headers=headers)
+
+    return response.json()
+
+#--------------------------------
 # Main
 #--------------------------------
 if __name__ == "__main__":
-    print(generated_image("A majestic cat in the snow"))
+    response = get_model_styles("4fc2c951-5a86-4fc1-9ff2-d72a2213bb14")
+    print(response)
 

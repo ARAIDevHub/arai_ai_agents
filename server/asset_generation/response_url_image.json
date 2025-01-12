@@ -1,0 +1,71 @@
+{
+  "generations_by_pk": {
+    "generated_images": [
+      {
+        "url": "https://cdn.leonardo.ai/users/d506f027-508f-4cf3-99ea-811721ad6a3a/generations/e13a3ff6-2ad1-49e5-8101-318a01433e5e/Leonardo_Lightning_XL_A_majestic_cat_in_the_snow_0.jpg",
+        "nsfw": false,
+        "id": "91341c22-abc3-4859-b252-3faa80a73a2e",
+        "likeCount": 0,
+        "motionMP4URL": null,
+        "generated_image_variation_generics": []
+      },
+      {
+        "url": "https://cdn.leonardo.ai/users/d506f027-508f-4cf3-99ea-811721ad6a3a/generations/e13a3ff6-2ad1-49e5-8101-318a01433e5e/Leonardo_Lightning_XL_A_majestic_cat_in_the_snow_1.jpg",
+        "nsfw": false,
+        "id": "fc0fee7e-c383-406c-a81c-2a16ad415e32",
+        "likeCount": 0,
+        "motionMP4URL": null,
+        "generated_image_variation_generics": []
+      },
+      {
+        "url": "https://cdn.leonardo.ai/users/d506f027-508f-4cf3-99ea-811721ad6a3a/generations/e13a3ff6-2ad1-49e5-8101-318a01433e5e/Leonardo_Lightning_XL_A_majestic_cat_in_the_snow_2.jpg",
+        "nsfw": false,
+        "id": "2545978d-4202-48ec-9885-c539b5c59862",
+        "likeCount": 0,
+        "motionMP4URL": null,
+        "generated_image_variation_generics": []
+      },
+      {
+        "url": "https://cdn.leonardo.ai/users/d506f027-508f-4cf3-99ea-811721ad6a3a/generations/e13a3ff6-2ad1-49e5-8101-318a01433e5e/Leonardo_Lightning_XL_A_majestic_cat_in_the_snow_3.jpg",
+        "nsfw": false,
+        "id": "1723ff24-172d-4561-986a-11b04a1e0bce",
+        "likeCount": 0,
+        "motionMP4URL": null,
+        "generated_image_variation_generics": []
+      }
+    ],
+    "modelId": "b24e16ff-06e3-43eb-8d33-4416c2d75876",
+    "motion": null,
+    "motionModel": null,
+    "motionStrength": null,
+    "prompt": "A majestic cat in the snow",
+    "negativePrompt": "",
+    "imageHeight": 768,
+    "imageToVideo": null,
+    "imageWidth": 1024,
+    "inferenceSteps": 15,
+    "seed": 576512331,
+    "ultra": null,
+    "public": false,
+    "scheduler": "EULER_DISCRETE",
+    "sdVersion": "SDXL_LIGHTNING",
+    "status": "COMPLETE",
+    "presetStyle": "DYNAMIC",
+    "initStrength": null,
+    "guidanceScale": null,
+    "id": "e13a3ff6-2ad1-49e5-8101-318a01433e5e",
+    "createdAt": "2025-01-12T01:49:14.407",
+    "promptMagic": false,
+    "promptMagicVersion": null,
+    "promptMagicStrength": null,
+    "photoReal": false,
+    "photoRealStrength": null,
+    "fantasyAvatar": null,
+    "prompt_moderations": [
+      {
+        "moderationClassification": []
+      }
+    ],
+    "generation_elements": []
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "title": "Physical Character Traits Schema",
+  "version": "1.0",
+  "description": "This JSON file outlines the recommended physical character traits a user can specify for AI image generation via Leonardo's API.",
+
+  "traits": {
+    "characterProfile": {
+      "genderBodyType": [
+        "Male",
+        "Female",
+        "Androgynous",
+        "Child-like",
+        "Non-binary"
+      ],
+      "age": [
+        "Teen",
+        "Young Adult",
+        "Adult",
+        "Middle-aged",
+        "Elderly"
+      ],
+      "ethnicitySkinTone": [
+        "Light",
+        "Medium",
+        "Dark",
+        "Olive",
+        "Fantasy (e.g. green for orcs, blue for aliens)"
+      ],
+      "heightBuild": [
+        "Short",
+        "Tall",
+        "Slim",
+        "Athletic",
+        "Muscular",
+        "Heavy-set"
+      ]
+    },
+
+    "faceAndHeadDetails": {
+      "faceShape": [
+        "Round",
+        "Oval",
+        "Square",
+        "Heart-shaped",
+        "Angular"
+      ],
+      "eyes": {
+        "color": [
+          "Brown",
+          "Blue",
+          "Green",
+          "Amber",
+          "Gray",
+          "Fantasy (e.g. purple, red)"
+        ],
+        "shape": [
+          "Large and round",
+          "Narrow",
+          "Slanted",
+          "Almond-shaped"
+        ],
+        "eyebrowStyle": [
+          "Arched",
+          "Bushy",
+          "Thin",
+          "Straight"
+        ]
+      },
+      "nose": [
+        "Small and pointed",
+        "Broad",
+        "Straight",
+        "Hawk-like",
+        "Button"
+      ],
+      "mouthLips": [
+        "Thin lips",
+        "Full lips",
+        "Wide mouth",
+        "Subtle smile",
+        "Neutral"
+      ],
+      "facialHair": [
+        "Clean-shaven",
+        "Stubble",
+        "Goatee",
+        "Full beard",
+        "Moustache"
+      ],
+      "hair": {
+        "length": [
+          "Short",
+          "Medium",
+          "Long",
+          "Bald"
+        ],
+        "style": [
+          "Straight",
+          "Wavy",
+          "Curly",
+          "Braided",
+          "Dreads",
+          "Ponytail",
+          "Mohawk"
+        ],
+        "color": [
+          "Black",
+          "Brown",
+          "Blonde",
+          "Red",
+          "Gray",
+          "Fantasy (e.g. neon pink, silver)"
+        ]
+      }
+    },
+
+    "bodyAndClothing": {
+      "bodyShape": [
+        "Proportional",
+        "Long-legged",
+        "Broad-shouldered",
+        "Pear-shaped",
+        "Stocky"
+      ],
+      "outfitStyle": [
+        "Medieval fantasy",
+        "Futuristic",
+        "Pirate",
+        "Steampunk",
+        "Military",
+        "Casual modern",
+        "High-tech soldier"
+      ],
+      "specificGarments": [
+        "Armor",
+        "Robe",
+        "Jacket",
+        "Dress",
+        "Tunic",
+        "Bodysuit"
+      ],
+      "colorPalette": [
+        "Neutral browns",
+        "Bright primary",
+        "Dark & edgy",
+        "Pastel",
+        "Neon/cyberpunk"
+      ],
+      "accessories": [
+        "Earrings",
+        "Necklace",
+        "Headband",
+        "Goggles",
+        "Gloves",
+        "Hat",
+        "Belts or pouches"
+      ],
+      "armorOrWeapons": [
+        "Leather armor",
+        "Plate mail",
+        "Energy shield",
+        "Katana",
+        "Magic staff"
+      ]
+    },
+
+    "styleAndAesthetic": {
+      "artStyle": [
+        "Semi-realistic",
+        "Cartoon",
+        "Anime",
+        "Stylized",
+        "Pixel Art",
+        "Cel-shaded"
+      ],
+      "moodExpression": [
+        "Confident",
+        "Friendly smile",
+        "Serious and determined",
+        "Mischievous grin",
+        "Angry snarl"
+      ],
+      "lightingOrColorMood": [
+        "Bright and vibrant",
+        "Dark and gothic",
+        "Pastel",
+        "Neon/cyberpunk",
+        "Cinematic lighting"
+      ],
+      "background": [
+        "Transparent",
+        "Simple gradient",
+        "Forest",
+        "Sci-fi cityscape",
+        "Ancient ruins",
+        "Cyberpunk skyline"
+      ]
+    }
+  },
+
+  "exampleUserSelections": {
+    "characterProfile": {
+      "genderBodyType": "Female",
+      "age": "Young Adult",
+      "ethnicitySkinTone": "Dark",
+      "heightBuild": "Athletic"
+    },
+    "faceAndHeadDetails": {
+      "faceShape": "Oval",
+      "eyes": {
+        "color": "Green",
+        "shape": "Large and round",
+        "eyebrowStyle": "Arched"
+      },
+      "nose": "Button",
+      "mouthLips": "Full lips",
+      "facialHair": "Clean-shaven",
+      "hair": {
+        "length": "Medium",
+        "style": "Curly",
+        "color": "Red"
+      }
+    },
+    "bodyAndClothing": {
+      "bodyShape": "Proportional",
+      "outfitStyle": "Futuristic",
+      "specificGarments": "Bodysuit",
+      "colorPalette": "Neon/cyberpunk",
+      "accessories": "Goggles",
+      "armorOrWeapons": "Energy shield"
+    },
+    "styleAndAesthetic": {
+      "artStyle": "Semi-realistic",
+      "moodExpression": "Confident",
+      "lightingOrColorMood": "Neon/cyberpunk",
+      "background": "Cyberpunk skyline"
+    }
+  },
+
+  "examplePrompt": "A semi-realistic portrait of a young adult female with dark skin, an athletic build, an oval face, large green eyes, and medium-length curly red hair. She wears a futuristic bodysuit with neon accents, plus goggles and an energy shield. The background is a dark cyberpunk skyline with vibrant neon lights. She has a confident expression and arched eyebrows."
+}
