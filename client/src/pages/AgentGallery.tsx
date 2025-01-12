@@ -135,68 +135,107 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
 
 const AgentGallery: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
 
   const agentImages = [image1, image2, image3, image4];
 
-  const agents: Agent[] = [
-    {
-      id: 1,
-      name: "The Empress",
-      avatar: "/api/placeholder/400/400",
-      role: "Nature's Guardian",
-      shortDescription: "Nurturing guide of growth and abundance",
-      tags: ["#nature", "#nurture", "#abundance"],
-      personality: "Warm, nurturing, and connected to the natural world",
-      communicationStyle: "Speaks with gentle wisdom and natural metaphors",
-      abilities: [
-        "Nature attunement",
-        "Growth facilitation",
-        "Abundance manifestation",
-      ],
-    },
-    {
-      id: 2,
-      name: "The Lovers",
-      avatar: "/api/placeholder/400/400",
-      role: "Harmony Weaver",
-      tags: ["#harmony", "#choice", "#connection"],
-      personality: "Balanced, intuitive, and deeply connected",
-      communicationStyle: "Communicates through heart-centered wisdom",
-      abilities: [
-        "Relationship guidance",
-        "Choice illumination",
-        "Soul connection",
-      ],
-    },
-    // Add more agents to fill the grid...
-  ];
+  const generateRandomAgent = (): Agent => {
+    const names = ["Empress", "Lovers", "Magician", "Hermit", "Hierophant"];
+    const roles = ["Nature's Guardian", "Harmony Weaver", "Mystic Seer", "Wise Wanderer", "Spiritual Guide"];
+    const personalities = ["Warm, nurturing", "Balanced, intuitive", "Mysterious, insightful", "Solitary, contemplative", "Traditional, knowledgeable"];
+    const communicationStyles = ["Speaks with gentle wisdom", "Communicates through heart-centered wisdom", "Speaks in riddles and metaphors", "Shares wisdom through silence and observation", "Conveys knowledge through teachings and rituals"];
+    const abilities = [
+      ["Nature attunement", "Growth facilitation", "Abundance manifestation"],
+      ["Relationship guidance", "Choice illumination", "Soul connection"],
+      ["Divination", "Energy manipulation", "Reality crafting"],
+      ["Introspection", "Spiritual insight", "Pathfinding"],
+      ["Sacred knowledge", "Ritual mastery", "Blessing bestowal"]
+    ];
+    const tags = [
+      ["#nature", "#nurture", "#abundance"],
+      ["#harmony", "#choice", "#connection"],
+      ["#mystic", "#insight", "#manifestation"],
+      ["#wisdom", "#solitude", "#enlightenment"],
+      ["#spirituality", "#tradition", "#guidance"]
+    ];
 
-  // Duplicate agents to fill the grid
-  const displayAgents: Agent[] = [...Array(12)].map((_, i) => ({
-    ...agents[i % agents.length],
-    id: i + 1,
-    avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
-  }));
+    const randomIndex = Math.floor(Math.random() * names.length);
+
+    return {
+      id: Date.now(), // Unique ID for each random agent
+      name: names[randomIndex],
+      avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
+      role: roles[randomIndex],
+      shortDescription: "...", // You can add short descriptions if needed
+      tags: tags[randomIndex],
+      personality: personalities[randomIndex],
+      communicationStyle: communicationStyles[randomIndex],
+      abilities: abilities[randomIndex],
+    };
+  };
+
+  const randomAgents: Agent[] = [...Array(6)].map(() => generateRandomAgent());
+  const yourAgents: Agent[] = []; // Replace with actual user-created agents
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         <header className="flex justify-between items-center mb-8">
+          <div className="flex gap-4">
+            <button
+              className={`px-4 py-2 rounded-md ${
+                filter === 'all' ? 'bg-purple-600' : 'bg-gray-700'
+              }`}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md ${
+                filter === 'random' ? 'bg-purple-600' : 'bg-gray-700'
+              }`}
+              onClick={() => setFilter('random')}
+            >
+              Random
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md ${
+                filter === 'yourAgents' ? 'bg-purple-600' : 'bg-gray-700'
+              }`}
+              onClick={() => setFilter('yourAgents')}
+            >
+              Your Agents
+            </button>
+          </div>
           <h1 className="text-2xl font-bold">Mystic Agents Gallery</h1>
           <button className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700">
             Create Agent
           </button>
         </header>
 
-        <div className="flex flex-wrap gap-6 justify-center">
-          {displayAgents.map((agent) => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              onSelect={setSelectedAgent}
-            />
-          ))}
-        </div>
+        {/* Random Agents Section */}
+        {filter !== 'yourAgents' && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
+            <div className="flex flex-wrap gap-6 justify-center">
+              {randomAgents.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} onSelect={setSelectedAgent} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Your Agents Section */}
+        {filter !== 'random' && (
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">Your Agents</h2>
+            <div className="flex flex-wrap gap-6 justify-center">
+              {yourAgents.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} onSelect={setSelectedAgent} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Display the selected agent's name */}
         {selectedAgent && (
