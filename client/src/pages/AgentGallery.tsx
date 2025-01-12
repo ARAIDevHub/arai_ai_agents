@@ -31,15 +31,39 @@ interface AgentCardProps {
   onSelect: (agent: Agent) => void;
   onAdd?: (agent: Agent) => void; // Optional onAdd prop for random agents
   isUserAgent?: boolean; // Flag to indicate if it's a user agent
-  onRegenerate?: (agentId: number) => void; // Optional onRegenerate prop
+  setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>; // Add setRandomAgents prop
+  generateRandomAgent: () => Agent; // Add generateRandomAgent prop
 }
+
+// Regenerate Button Component
+interface RegenerateButtonProps {
+  onRegenerate: () => void;
+}
+
+const RegenerateButton: React.FC<RegenerateButtonProps> = ({
+  onRegenerate,
+}) => {
+  return (
+    <button
+      className="w-full mt-2 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+      onClick={(e) => {
+        e.stopPropagation();
+        onRegenerate();
+      }}
+    >
+      <RefreshCcw className="w-4 h-4" />
+      Regenerate
+    </button>
+  );
+};
 
 const AgentCard: React.FC<AgentCardProps> = ({
   agent,
   onSelect,
   onAdd,
   isUserAgent,
-  onRegenerate,
+  setRandomAgents,
+  generateRandomAgent,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -177,17 +201,19 @@ const AgentCard: React.FC<AgentCardProps> = ({
           </div>
         </div>
       </div>
-      {/* Regenerate icon */}
+      {/* Regenerate button below the card */}
       {!isUserAgent && (
-        <button
-          className="absolute bottom-2 right-2 p-2 bg-gray-700 rounded-full hover:bg-gray-600"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRegenerate && onRegenerate(agent.id);
-          }}
-        >
-          <RefreshCcw className="w-4 h-4 text-gray-300" />
-        </button>
+        <div className="mt-2 w-64 mx-auto">
+          <RegenerateButton
+            onRegenerate={() => {
+              setRandomAgents((prevAgents: Agent[]) =>
+                prevAgents.map((a: Agent) =>
+                  a.id === agent.id ? generateRandomAgent() : a
+                )
+              );
+            }}
+          />
+        </div>
       )}
     </div>
   );
@@ -201,6 +227,7 @@ const AgentGallery: React.FC = () => {
 
   const agentImages = [image1, image2, image3, image4];
 
+  // Define generateRandomAgent inside AgentGallery so it's accessible to child components
   const generateRandomAgent = (): Agent => {
     const names = [
       'Empress',
@@ -222,9 +249,9 @@ const AgentGallery: React.FC = () => {
       'Spiritual Guide',
       'Divine Messenger',
       'Inner Power',
-      'Karmic Cycle',
-      'Cosmic Balance',
-      'Spiritual Surrender',
+      'The Wheel',
+      'Justice',
+      'The Hanged Man',
     ];
     const personalities = [
       'Warm, nurturing',
@@ -295,14 +322,6 @@ const AgentGallery: React.FC = () => {
     setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
   };
 
-  const handleRegenerateAgent = (agentId: number) => {
-    setRandomAgents((prevAgents) =>
-      prevAgents.map((agent) =>
-        agent.id === agentId ? generateRandomAgent() : agent
-      )
-    );
-  };
-
   const handleRegenerateAll = () => {
     const newRandomAgents = [...Array(3)].map(() => generateRandomAgent());
     setRandomAgents(newRandomAgents);
@@ -350,7 +369,7 @@ const AgentGallery: React.FC = () => {
               Your Agents
             </button>
           </div>
-          <h1 className="text-2xl font-bold">Mystic Agents Gallery</h1>
+          <h1 className="text-2xl font-bold text-center flex-grow">Mystic Agents Gallery</h1>
           {(filter === 'all' || filter === 'random') && (
             <button
               className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
@@ -375,7 +394,8 @@ const AgentGallery: React.FC = () => {
                     onSelect={setSelectedAgent}
                     onAdd={handleAddAgent}
                     isUserAgent={false}
-                    onRegenerate={handleRegenerateAgent}
+                    setRandomAgents={setRandomAgents}
+                    generateRandomAgent={generateRandomAgent}
                   />
                 ))}
               </div>
@@ -388,6 +408,8 @@ const AgentGallery: React.FC = () => {
                     onSelect={setSelectedAgent}
                     onAdd={handleAddAgent}
                     isUserAgent={true}
+                    setRandomAgents={setRandomAgents}
+                    generateRandomAgent={generateRandomAgent}
                   />
                 ))}
               </div>
@@ -406,7 +428,8 @@ const AgentGallery: React.FC = () => {
                     onSelect={setSelectedAgent}
                     onAdd={handleAddAgent}
                     isUserAgent={false}
-                    onRegenerate={handleRegenerateAgent}
+                    setRandomAgents={setRandomAgents}
+                    generateRandomAgent={generateRandomAgent}
                   />
                 ))}
               </div>
@@ -425,6 +448,8 @@ const AgentGallery: React.FC = () => {
                     onSelect={setSelectedAgent}
                     onAdd={handleAddAgent}
                     isUserAgent={true}
+                    setRandomAgents={setRandomAgents}
+                    generateRandomAgent={generateRandomAgent}
                   />
                 ))}
               </div>
