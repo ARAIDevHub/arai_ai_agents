@@ -513,7 +513,7 @@ const AgentCreator: React.FC = () => {
                     options={agent.topic_expertise}
                     onTraitButtonClick={handleDeleteTrait}
                   />
-                  <Textarea
+                  <textarea
                     value={
                       Array.isArray(agent.topic_expertise)
                         ? agent.topic_expertise.join(', ')
@@ -521,7 +521,9 @@ const AgentCreator: React.FC = () => {
                     }
                     onChange={handleTraitChange('topic_expertise')}
                     placeholder="Describe agent topic expertise"
-                    rows={3}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                      text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"   
                   />
                 </div>
               </div>
@@ -556,12 +558,14 @@ const AgentCreator: React.FC = () => {
                   <label className="text-sm text-cyan-200 block mb-2">
                     Backstory
                   </label>
-                  <Textarea
+                  <textarea
                     value={draftFields.backstory}
                     onChange={handleDraftChange('backstory')}
                     onKeyDown={handleDraftKeyDown('backstory')}
                     placeholder="Enter agent backstory"
                     rows={5}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                    text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"   
                   />
                 </div>
               </div>
