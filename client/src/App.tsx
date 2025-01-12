@@ -6,6 +6,7 @@ import AgentCreator from './pages/AgentCreator';
 import ChatInterface from './pages/ChatInterface';
 import SocialFeed from './pages/SocialFeed';
 import AgentStudio from './pages/AgentStudio';
+import AgentGallery from './pages/AgentGallery';
 import './App.css';
 
 // Components
@@ -62,6 +63,15 @@ function App() {
             Agent Studio
           </Link>
           <Link
+            to="/agent-gallery"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${isActive('/agent-gallery') 
+                ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
+                : 'text-gray-300 hover:text-cyan-400'}`}
+          >
+            Agent Gallery
+          </Link>
+          <Link
             to="/social-feed"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
               ${isActive('/social-feed') 
@@ -89,6 +99,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/agent-creator" element={<AgentCreator />} />
           <Route path="/agent-studio" element={<AgentStudio />} />
+          <Route path="/agent-gallery" element={<AgentGallery />} />
           <Route path="/social-feed" element={<SocialFeed />} />
           <Route path="/chat" element={<ChatInterface />} />
 
