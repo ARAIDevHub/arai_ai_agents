@@ -50,8 +50,6 @@ const AgentCreator: React.FC = () => {
   // The fetched characters
   const [characters, setCharacters] = useState<Agent[]>([]);
 
-  // Testing area text
-  const [testInput, setTestInput] = useState<string>('');
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
@@ -117,16 +115,6 @@ const AgentCreator: React.FC = () => {
   // 4) Testing Area (unchanged)
   // ──────────────────────────────────────────────────────────────────────────────
   //
-  const handleTestInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setTestInput(e.target.value);
-  };
-  const handleTestInputKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      console.log('Processed input:', testInput);
-      setTestInput('');
-    }
-  };
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
@@ -434,20 +422,6 @@ const AgentCreator: React.FC = () => {
               <RefreshCcw className="w-4 h-4 mr-2" />
               Generate New
             </button>
-          </div>
-
-          {/* Testing Area */}
-          <div>
-            <label className="text-sm text-cyan-200 block mb-2">Testing Area</label>
-            <textarea
-              value={testInput}
-              onChange={handleTestInputChange}
-              onKeyDown={handleTestInputKeyDown}
-              placeholder="Enter test input here and press Enter"
-              rows={4}
-              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
           </div>
 
           {/* Image Selection Grid */}
