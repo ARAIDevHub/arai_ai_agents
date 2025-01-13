@@ -1,29 +1,9 @@
 import React, { useState } from 'react';
 import useCharacters from '../hooks/useCharacters';
 import { MessageSquare, Heart } from 'lucide-react';
+import { Episode, Season } from '../interfaces/SeasonsEpisodesInterface';
+import { Post } from '../interfaces/PostsInterface';
 
-interface Post {
-  post_id: string;
-  post_number: number;
-  post_content: string;
-  post_highlights: string;
-  post_posted: boolean;
-  seasonNumber?: number;
-  episodeNumber?: number;
-  episodeName?: string;
-}
-
-interface Episode {
-  episode_name: string;
-  episode_number: number;
-  posts: Post[];
-}
-
-interface Season {
-  season_name: string;
-  season_number: number;
-  episodes: Episode[];
-}
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
