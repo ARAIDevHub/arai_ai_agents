@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCharacters } from '../api/agentsAPI';
+import { Agent } from '../interfaces/AgentInterfaces';
 
 /**
  * useFetchCharacters - A custom hook to fetch characters from the API.
@@ -10,8 +11,8 @@ import { getCharacters } from '../api/agentsAPI';
  * 3. Provides feedback on the fetch process (loading and error states).
  */
 const useFetchCharacters = () => {
-  const [characters, setCharacters] = useState([]); // Holds the raw character data from the API.
-  const [loading, setLoading] = useState(true); // Tracks whether the API call is in progress.
+const [characters, setCharacters] = useState<Agent[]>([]); // Explicitly typed with your Agent interface
+const [loading, setLoading] = useState(true); // Tracks whether the API call is in progress.
   const [error, setError] = useState<Error | null>(null); // Tracks any errors during the fetch process.
 
   useEffect(() => {

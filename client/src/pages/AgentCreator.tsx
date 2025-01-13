@@ -3,7 +3,6 @@ import React, {
   ChangeEvent,
   useEffect,
   KeyboardEvent,
-  CSSProperties,
 } from 'react';
 import {
   Brain,
@@ -50,7 +49,6 @@ const AgentCreator: React.FC = () => {
 
   // The fetched characters
   const [characters, setCharacters] = useState<Agent[]>([]);
-
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
@@ -112,31 +110,10 @@ const AgentCreator: React.FC = () => {
   }, [agent]);
 
 
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 5) Reusable Input + Textarea
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
-  const Input: React.FC<{
-    value: string;
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
-    placeholder?: string;
-    style?: CSSProperties;
-    className?: string;
-  }> = ({ style, className, ...props }) => (
-    <input
-      {...props}
-      style={style}
-      className={`w-full px-3 py-2 rounded-md bg-slate-900/50 
-                  border border-orange-500/20 text-white 
-                  focus:outline-none focus:ring-2 focus:ring-orange-500/50
-                  ${className ?? ''}`}
-    />
-  );
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 6) “Normal” fields => commit on Enter
+  // 5) “Normal” fields => commit on Enter
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleDraftChange =
@@ -163,7 +140,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 7) Trait fields => single “draftTraits” + commit on Enter
+  // 6) Trait fields => single “draftTraits” + commit on Enter
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleTraitDraftChange =
@@ -201,7 +178,9 @@ const AgentCreator: React.FC = () => {
     setAgent(prev => {
       const updatedAgent = {
         ...prev,
-        [field]: prev[field].filter((trait: string) => trait !== value),
+        [field]: Array.isArray(prev[field])
+  ? prev[field].filter((trait: string) => trait !== value)
+  : [],
       };
       console.log('Updated agent after deletion:', updatedAgent);
       return updatedAgent;
@@ -210,7 +189,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 8) Submit
+  // 7) Submit
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -249,7 +228,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 9) Load characters
+  // 8) Load characters
   // ──────────────────────────────────────────────────────────────────────────────
   //
   useEffect(() => {
@@ -309,7 +288,7 @@ const AgentCreator: React.FC = () => {
         });
 
         console.log('Processed characters:', processed);
-        setCharacters(processed);
+        setCharacters(processed as Agent[]);
       } catch (error) {
         console.error('Error loading characters:', error);
       }
@@ -320,7 +299,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 10) Select a character
+  // 9) Select a character
   // ──────────────────────────────────────────────────────────────────────────────
   //
   const handleCharacterSelect = (character: Agent) => {
@@ -364,7 +343,7 @@ const AgentCreator: React.FC = () => {
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
-  // 11) Render
+  // 10) Render
   // ──────────────────────────────────────────────────────────────────────────────
   //
   return (
@@ -630,7 +609,7 @@ const AgentCreator: React.FC = () => {
 
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent<HTMLFormElement>)} 
             className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                        from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
                        text-white transition-all duration-300 flex items-center justify-center"

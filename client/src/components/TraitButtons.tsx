@@ -8,15 +8,6 @@ interface TraitButtonsProps {
   onTraitButtonClick: (field: keyof AgentDetails, value: string) => void; // Pass the click handler as a prop
 }
 
-// Function to handle suggestion chip clicks and update the agent's field with the selected value
-const handleTraitButtonsClick = (field: keyof AgentDetails, value: string, onClick: (field: keyof AgentDetails, value: string) => void): void => {
-  if (typeof onClick === 'function') {
-    onClick(field, value);
-  } else {
-    console.error('onClick is not a function');
-  }
-};
-
 // Component to render suggestion chips for a given field with provided options
 const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options, onTraitButtonClick }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null); // Track selected option
