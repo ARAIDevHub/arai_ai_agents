@@ -50,7 +50,7 @@ def create_agent():
     counter = 1
 
     # Check for duplicates and increment if necessary
-    while os.path.exists(os.path.join(character_dir, filename)):
+    while os.path.exists(os.path.normpath(os.path.join(character_dir, filename))):
         filename = f"{base_filename}_{counter}.json"
         counter += 1
 
