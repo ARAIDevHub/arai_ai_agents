@@ -19,6 +19,7 @@ import agent3 from '../assets/agent-images/agent3.jpg';
 import agent4 from '../assets/agent-images/agent4.jpg';
 import { AgentDetails, Agent } from '../interfaces/AgentInterfaces';
 import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
+import CharacterLoader from '../components/CharacterLoader';
 
 const agentImages = [agent1, agent2, agent3, agent4];
 
@@ -110,13 +111,7 @@ const AgentCreator: React.FC = () => {
     });
   }, [agent]);
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 4) Testing Area (unchanged)
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
 
-  //
   // ──────────────────────────────────────────────────────────────────────────────
   // 5) Reusable Input + Textarea
   // ──────────────────────────────────────────────────────────────────────────────
@@ -132,24 +127,6 @@ const AgentCreator: React.FC = () => {
     <input
       {...props}
       style={style}
-      className={`w-full px-3 py-2 rounded-md bg-slate-900/50 
-                  border border-orange-500/20 text-white 
-                  focus:outline-none focus:ring-2 focus:ring-orange-500/50
-                  ${className ?? ''}`}
-    />
-  );
-
-  // For simpler “manual” textareas
-  const Textarea: React.FC<{
-    value: string;
-    onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-    onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
-    placeholder?: string;
-    rows?: number;
-    className?: string;
-  }> = ({ className, ...props }) => (
-    <textarea
-      {...props}
       className={`w-full px-3 py-2 rounded-md bg-slate-900/50 
                   border border-orange-500/20 text-white 
                   focus:outline-none focus:ring-2 focus:ring-orange-500/50
@@ -392,6 +369,7 @@ const AgentCreator: React.FC = () => {
   //
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
+      <CharacterLoader setCharacters={setCharacters} />
       {/* Left Panel */}
       <div className="w-1/2 p-6 border-r border-orange-500/20">
         <div className="h-full flex flex-col space-y-6">
