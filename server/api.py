@@ -32,17 +32,66 @@ def get_agents():
 @app.route('/api/agents', methods=['POST'])
 def create_agent():
     data = request.get_json()
-    required_fields = ['name', 'personality', 'communication_style', 'backstory', 
-                      'universe', 'topic_expertise', 'hashtags', 'emojis']
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Missing required fields'}), 400
 
-    data['id'] = len(agents) + 1
-    data['level'] = 1
-    data['experience'] = 0
-    data['selectedImage'] = 0
+    print(f"[create_agent] - Received data: {data}")
 
-    agents.append(data)
+    # Extract character name from the data
+    character_name = data.get('name')
+    if not character_name:
+        return jsonify({"error": "Character name is required"}), 400
+
+    # Create a directory for the character
+    character_dir = os.path.join('configs', character_name)
+    os.makedirs(character_dir, exist_ok=True)  # Create the directory if it doesn't exist
+
+    # Generate filename
+    base_filename = f"{character_name}_master"
+    filename = base_filename + ".json"
+    counter = 1
+
+    # Check for duplicates and increment if necessary
+    while os.path.exists(os.path.join(character_dir, filename)):
+        filename = f"{base_filename}_{counter}.json"
+        counter += 1
+
+    # Create the new character structure based on master.json
+    new_character_data = {
+        "agent": {
+            "agent_details": {
+                "name": character_name,
+                "personality": data.get("personality", []),
+                "communication_style": data.get("communication_style", []),
+                "backstory": data.get("backstory", ""),
+                "universe": data.get("universe", ""),
+                "topic_expertise": data.get("topic_expertise", []),
+                "hashtags": data.get("hashtags", []),
+                "emojis": data.get("emojis", [])
+            },
+            "ai_model": {
+                "model_type": data.get("model_type", ""),
+                "model_name": data.get("model_name", ""),
+                "memory_store": data.get("memory_store", "")
+            },
+            "connectors": {
+                "twitter": data.get("twitter", False),
+                "telegram": data.get("telegram", False),
+                "discord": data.get("discord", False)
+            },
+            "tracker": {
+                "current_season_number": 0,
+                "current_episode_number": 0,
+                "current_post_number": 0,
+                "post_every_x_minutes": 0
+            },
+            "seasons": []  # Initialize with an empty list or populate as needed
+        },
+        "concept": data.get("concept", "")
+    }
+
+    # Write data to the new JSON file within the character's directory
+    with open(os.path.join(character_dir, filename), 'w', encoding='utf-8') as f:
+        json.dump(new_character_data, f, ensure_ascii=False, indent=4)
+
     return jsonify(data), 201
 
 @app.route('/api/characters', methods=['GET'])

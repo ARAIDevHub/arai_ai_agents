@@ -507,7 +507,6 @@ const AgentCreator: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             {activeTab === 'basic' && (
               <div className="space-y-6">
@@ -676,7 +675,8 @@ const AgentCreator: React.FC = () => {
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                        from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
                        text-white transition-all duration-300 flex items-center justify-center"
@@ -684,7 +684,6 @@ const AgentCreator: React.FC = () => {
             <Save className="w-4 h-4 mr-2" />
             Save Agent
           </button>
-        </form>
 
         {/* Character Selection */}
         <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-orange-500/20">
