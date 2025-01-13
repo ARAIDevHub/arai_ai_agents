@@ -83,7 +83,7 @@ def create_agent():
                 "current_post_number": 0,
                 "post_every_x_minutes": 0
             },
-            "seasons": []  # Initialize with an empty list or populate as needed
+            "seasons": data.get("seasons",[])  # Initialize with an empty list or populate as needed
         },
         "concept": data.get("concept", "")
     }

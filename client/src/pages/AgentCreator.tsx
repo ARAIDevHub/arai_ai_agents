@@ -376,6 +376,8 @@ const AgentCreator: React.FC = () => {
       hashtags: details.hashtags || [],
       emojis: details.emojis || [],
       selectedImage: undefined,
+      seasons: character.agent?.seasons || [],
+      concept: character.concept || '',
     });
 
     // Also sync local drafts
