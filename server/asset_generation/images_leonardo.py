@@ -18,8 +18,26 @@
 import requests
 import os
 import dotenv
+import time
 
 dotenv.load_dotenv()
+
+# Define model_id and styles at module level
+model_id = "e71a1c2f-4f80-4800-934f-2c68979d8cc8"
+styles = {
+    "Anime None": None,
+    "anime background": "ANIME_BACKGROUND",
+    "Anime Flat Illustration": "ANIME_FLAT_ILLUSTRATION",
+    "Anime General": "ANIME_GENERAL",
+    "Anime Illustration": "ANIME_ILLUSTRATION",
+    "Anime Monoschrome": "ANIME_MONOSCHROME",
+    "Anime Retro": "ANIME_RETRO",
+    "Anime Screencap": "ANIME_SCREENCAP",
+    "Anime Semi-Realism": "ANIME_SEMI_REALISM",
+    "Character Sheet": "CHARACTER_SHEET",
+    "Character Sheet Painterly": "CHARACTER_SHEET_PAINTERLY",
+    "Manga": "MANGA"
+}
 
 #--------------------------------
 # Generate an image from a prompt
@@ -28,13 +46,21 @@ def generated_image(prompt):
     url = "https://cloud.leonardo.ai/api/rest/v1/generations"
 
     payload = {
-        "alchemy": True,
-        "height": 768,
-        "modelId": "b24e16ff-06e3-43eb-8d33-4416c2d75876",
-        "num_images": 4,
-        "presetStyle": "DYNAMIC",
-        "prompt": prompt,
-        "width": 1024
+      "modelId": "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
+      "presetStyle": "DYNAMIC",
+      "scheduler": "LEONARDO",
+      "sd_version": "SDXL_LIGHTNING",
+      "contrast": 1.3,
+      "prompt": "Anime character Nicki. Generate a traditional looking anime character for me. I want her to be an anime girlfriend who is super into the crypto space. Make her attractive with big boobs. I want to see the big boobs clearly. Have her with hair green, eye color blue, skin color tan.",
+      "num_images": 4,
+      "width": 1024,
+      "height": 1024,
+      "alchemy": True,
+      "styleUUID": "b2a54a51-230b-4d4f-ad4e-8409bf58645f",
+      "enhancePrompt": False,
+      "nsfw": True,
+      "public": False,
+      "collectionIds": ["9239334b-78d7-4aa5-98f7-043ba6b66f6d"],
     }
     headers = {
         "accept": "application/json",
@@ -42,9 +68,12 @@ def generated_image(prompt):
         "authorization": "Bearer " + os.getenv("LEONARDO_API_KEY", "")
     }
 
-    response = requests.post(url, json=payload, headers=headers)
-
-    return response.json()
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        return response.json()
+    except Exception as e:
+        print("Error:", str(e))
+        return None
 
 #--------------------------------
 # Get the image URL from a generation ID
@@ -109,6 +138,41 @@ def get_elements():
 # Main
 #--------------------------------
 if __name__ == "__main__":
-    response = get_model_styles("4fc2c951-5a86-4fc1-9ff2-d72a2213bb14")
+    #--------------------------------
+    # Styles
+    #--------------------------------
+    model_id = "e71a1c2f-4f80-4800-934f-2c68979d8cc8"
+    styles = {
+        "Anime None": None,
+        "anime background": "ANIME_BACKGROUND",
+        "Anime Flat Illustration": "ANIME_FLAT_ILLUSTRATION",
+        "Anime General": "ANIME_GENERAL",
+        "Anime Illustration": "ANIME_ILLUSTRATION",
+        "Anime Monoschrome": "ANIME_MONOSCHROME",
+        "Anime Retro": "ANIME_RETRO",
+        "Anime Screencap": "ANIME_SCREENCAP",
+        "Anime Semi-Realism": "ANIME_SEMI_REALISM",
+        "Character Sheet": "CHARACTER_SHEET",
+        "Character Sheet Painterly": "CHARACTER_SHEET_PAINTERLY",
+        "Manga": "MANGA"
+    }
+
+    # Generate the image
+    response = generated_image("A majestic cat in the snow")
+
     print(response)
+
+    generation_id = response["sdGenerationJob"]["generationId"]
+    
+    # Wait for the image to be generated (usually takes 10-20 seconds)
+    print("Waiting for image generation...")
+    time.sleep(20)  # Wait 20 seconds
+    
+    # Get the image URL
+    response_url = get_image_url(generation_id)
+    
+    if response_url.get("generations_by_pk", {}).get("generated_images"):
+        print(response_url["generations_by_pk"]["generated_images"][0]["url"])
+    else:
+        print("Image not ready yet. Try waiting longer or check the generation status.")
 
