@@ -62,7 +62,7 @@ class ContentGenerator:
         self.agent_template_path = os.path.join(self.templates_dir, "agent.json")
         self.season_template_path = os.path.join(self.templates_dir, "season.json")
         self.episode_template_path = os.path.join(self.templates_dir, "episode.json")
-        
+        self.profile_image_template_path = os.path.join(self.templates_dir, "profile_image.json")        
 
     # -------------------------------------------------------------------
     # Helper to create a new agent yaml file

@@ -19,48 +19,76 @@ import requests
 import os
 import dotenv
 import time
+import json
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# custom ARAI imports
+from utils.content_generator_json import ContentGenerator
+from utils.template_types import TemplateType
 
 dotenv.load_dotenv()
 
-# Define model_id and styles at module level
-model_id = "e71a1c2f-4f80-4800-934f-2c68979d8cc8"
-styles = {
-    "Anime None": None,
-    "anime background": "ANIME_BACKGROUND",
-    "Anime Flat Illustration": "ANIME_FLAT_ILLUSTRATION",
-    "Anime General": "ANIME_GENERAL",
-    "Anime Illustration": "ANIME_ILLUSTRATION",
-    "Anime Monoschrome": "ANIME_MONOSCHROME",
-    "Anime Retro": "ANIME_RETRO",
-    "Anime Screencap": "ANIME_SCREENCAP",
-    "Anime Semi-Realism": "ANIME_SEMI_REALISM",
-    "Character Sheet": "CHARACTER_SHEET",
-    "Character Sheet Painterly": "CHARACTER_SHEET_PAINTERLY",
-    "Manga": "MANGA"
-}
-
 #--------------------------------
-# Generate an image from a prompt
+# Generate multiple images from a prompt that are inconsistent with each other
 #--------------------------------
-def generated_image(prompt):
+def generated_image_inconsistent(prompt, model_id, style_uuid, num_images):
     url = "https://cloud.leonardo.ai/api/rest/v1/generations"
 
     payload = {
-      "modelId": "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
+      "modelId": model_id,
       "presetStyle": "DYNAMIC",
       "scheduler": "LEONARDO",
       "sd_version": "SDXL_LIGHTNING",
       "contrast": 1.3,
-      "prompt": "Anime character Nicki. Generate a traditional looking anime character for me. I want her to be an anime girlfriend who is super into the crypto space. Make her attractive with big boobs. I want to see the big boobs clearly. Have her with hair green, eye color blue, skin color tan.",
-      "num_images": 4,
+      "prompt": prompt,
+      "num_images": num_images,
       "width": 1024,
       "height": 1024,
       "alchemy": True,
-      "styleUUID": "b2a54a51-230b-4d4f-ad4e-8409bf58645f",
+      "styleUUID": style_uuid,
       "enhancePrompt": False,
       "nsfw": True,
       "public": False,
-      "collectionIds": ["9239334b-78d7-4aa5-98f7-043ba6b66f6d"],
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": "Bearer " + os.getenv("LEONARDO_API_KEY", "")
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        return response.json()
+    except Exception as e:
+        print("Error:", str(e))
+        return None
+
+#--------------------------------
+# Generate multiple images from a prompt that are consistent with each other
+#--------------------------------
+def generated_image_consistent(prompt, model_id, style_uuid, num_images):
+    url = "https://cloud.leonardo.ai/api/rest/v1/generations"
+
+    payload = {
+      "modelId": model_id,
+      "presetStyle": "DYNAMIC",
+      "scheduler": "LEONARDO",
+      "sd_version": "SDXL_LIGHTNING",
+      "contrast": 1.3,
+      "prompt": prompt,
+      "num_images": num_images,
+      "width": 1024,
+      "height": 1024,
+      "alchemy": True,
+      "styleUUID": style_uuid,
+      "enhancePrompt": False,
+      "nsfw": True,
+      "public": False,
+      "num_inference_steps": 10,
+      "guidance_scale": 7,
+
     }
     headers = {
         "accept": "application/json",
@@ -133,46 +161,3 @@ def get_elements():
     response = requests.get(url, headers=headers)
 
     return response.json()
-
-#--------------------------------
-# Main
-#--------------------------------
-if __name__ == "__main__":
-    #--------------------------------
-    # Styles
-    #--------------------------------
-    model_id = "e71a1c2f-4f80-4800-934f-2c68979d8cc8"
-    styles = {
-        "Anime None": None,
-        "anime background": "ANIME_BACKGROUND",
-        "Anime Flat Illustration": "ANIME_FLAT_ILLUSTRATION",
-        "Anime General": "ANIME_GENERAL",
-        "Anime Illustration": "ANIME_ILLUSTRATION",
-        "Anime Monoschrome": "ANIME_MONOSCHROME",
-        "Anime Retro": "ANIME_RETRO",
-        "Anime Screencap": "ANIME_SCREENCAP",
-        "Anime Semi-Realism": "ANIME_SEMI_REALISM",
-        "Character Sheet": "CHARACTER_SHEET",
-        "Character Sheet Painterly": "CHARACTER_SHEET_PAINTERLY",
-        "Manga": "MANGA"
-    }
-
-    # Generate the image
-    response = generated_image("A majestic cat in the snow")
-
-    print(response)
-
-    generation_id = response["sdGenerationJob"]["generationId"]
-    
-    # Wait for the image to be generated (usually takes 10-20 seconds)
-    print("Waiting for image generation...")
-    time.sleep(20)  # Wait 20 seconds
-    
-    # Get the image URL
-    response_url = get_image_url(generation_id)
-    
-    if response_url.get("generations_by_pk", {}).get("generated_images"):
-        print(response_url["generations_by_pk"]["generated_images"][0]["url"])
-    else:
-        print("Image not ready yet. Try waiting longer or check the generation status.")
-
