@@ -23,6 +23,7 @@ export interface Agent {
       telegram: boolean;
       twitter: boolean;
     };
+    profile_image?: any[];
     seasons: any[]; // Adjust as needed
     tracker: {
       current_episode_number: number;

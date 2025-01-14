@@ -192,7 +192,7 @@ const AgentCreator: React.FC = () => {
   // 7) Submit
   // ──────────────────────────────────────────────────────────────────────────────
   //
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitCreateAgent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log('[handleSubmit] Submitting agent:', agent);
     try {
@@ -236,16 +236,22 @@ const AgentCreator: React.FC = () => {
       console.log('[loadCharacters] Loading characters...');
       try {
         const charactersData = await getCharacters();
-        console.log('Raw characters data:', charactersData);
+        console.log('Raw characters data:', charactersData);  
         if (!Array.isArray(charactersData)) {
           console.error('Expected array of characters, received:', typeof charactersData);
           return;
         }
 
         const processed = charactersData.map(char => {
-          const { agent, concept = '' } = char;
+
+          const agentProfileImage = char.agent.profile_image;
+          const agentConcept = char.concept;
+
+          console.log("Agent profile image:", agentProfileImage);
+
+          const { agent, } = char;
           console.log('Mapping a character:', char);
-          if (!agent) return { agent: {}, concept };
+          if (!agent) return { agent: {} };
 
           const {
             agent_details: {
@@ -268,22 +274,21 @@ const AgentCreator: React.FC = () => {
             agent: {
               agent_details: {
                 name,
-                personality: Array.isArray(personality) ? personality : [],
-                communication_style: Array.isArray(communication_style)
-                  ? communication_style
-                  : [],
+                personality,
+                communication_style,
                 backstory,
                 universe,
                 topic_expertise,
-                hashtags: Array.isArray(hashtags) ? hashtags : [],
-                emojis: Array.isArray(emojis) ? emojis : [],
+                hashtags,
+                emojis,
               },
               ai_model,
               connectors,
+              profile_image: agentProfileImage || [],
               seasons,
               tracker,
             },
-            concept,
+            concept: agentConcept || '',
           };
         });
 
@@ -319,9 +324,10 @@ const AgentCreator: React.FC = () => {
       topic_expertise: details.topic_expertise || [],
       hashtags: details.hashtags || [],
       emojis: details.emojis || [],
-      selectedImage: undefined,
+      selectedImage: 0,
       seasons: character.agent?.seasons || [],
       concept: character.concept || '',
+      profile_image: character.agent?.profile_image || [],
     });
 
     // Also sync local drafts
@@ -359,8 +365,9 @@ const AgentCreator: React.FC = () => {
                         flex items-center justify-center"
             style={{
               backgroundImage:
-                agent.selectedImage !== undefined
-                  ? `url(${agentImages[agent.selectedImage]})`
+                agent.selectedImage !== undefined && 
+                agent.profile_image?.[0]?.generations_by_pk?.generated_images?.[agent.selectedImage]?.url
+                  ? `url(${agent.profile_image[0].generations_by_pk.generated_images[agent.selectedImage].url})`
                   : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -383,7 +390,8 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {agentImages.map((image, index) => (
+            {console.log('Profile images:', agent.profile_image?.[0]?.generations_by_pk?.generated_images)}
+            {agent.profile_image?.[0]?.generations_by_pk?.generated_images?.map((image, index) => (
               <div
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 
@@ -394,7 +402,7 @@ const AgentCreator: React.FC = () => {
                   setAgent((prev) => ({ ...prev, selectedImage: index }));
                 }}
                 style={{
-                  backgroundImage: `url(${image})`,
+                  backgroundImage: image?.url ? `url(${image.url})` : 'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}
@@ -609,7 +617,7 @@ const AgentCreator: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent<HTMLFormElement>)} 
+            onClick={() => handleSubmitCreateAgent({ preventDefault: () => {} } as React.FormEvent<HTMLFormElement>)} 
             className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                        from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
                        text-white transition-all duration-300 flex items-center justify-center"
