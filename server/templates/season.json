@@ -1,24 +1,24 @@
 {
-    "seasons": [
-        {
-          "season_name": "",
-          "season_number": 0,
-          "season_description": "",
-          "season_highlights": "",
-          "season_summary": "",
-          "season_posted": false,
-          "current_episode_number": 0,
-          "episodes": [
-            {
-              "episode_name": "",
-              "episode_number": 0,
-              "episode_description": "",
-              "episode_highlights": "",
-              "episode_summary": "",
-              "episode_posted": false,
-              "current_post_number": 0
-            }
-          ]
-        }
-    ]
+  "seasons": [
+      {
+        "season_name": "",
+        "season_number": 0,
+        "season_description": "",
+        "season_highlights": "",
+        "season_summary": "",
+        "season_posted": false,
+        "current_episode_number": 0,
+        "episodes": [
+          {
+            "episode_name": "",
+            "episode_number": 0,
+            "episode_description": "",
+            "episode_highlights": "",
+            "episode_summary": "",
+            "episode_posted": false,
+            "current_post_number": 0
+          }
+        ]
+      }
+  ]
 }

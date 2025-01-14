@@ -57,7 +57,7 @@ def step_2(ai_model, master_file_path, number_of_episodes):
     season_template = manager.create_new_template_json(TemplateType.SEASON)
 
     # step 2.2: load the agent json file
-    print(f"Loading agent master json file: {master_file_path}")
+    print(f"Loading agent master json file")
     agent_master_json = None    
     with open(master_file_path, 'r', encoding='utf-8') as file:
         agent_master_json = json.load(file)  
@@ -99,7 +99,7 @@ def step_2(ai_model, master_file_path, number_of_episodes):
         ai_model=ai_model,
     )
 
-    print(f"season data is: {season_data}")
+    #print(f"season data is: {season_data}")
 
     # step 2.8: append the season data to the master data
     if len(seasons) <= 1 and seasons[0]["season_number"] == 0:

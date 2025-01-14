@@ -87,7 +87,7 @@ def step_1(ai_model, concept: str):
 
     # step 1.5: store the concept in the agent template
     print("Storing the concept in the agent template")
-    agent_master_template["concept"] = prompt_1_vars["concept"]
+    agent_master_template["agent"]["concept"] = prompt_1_vars["concept"]
 
     # step 1.6: create the file path for master file
     print("Creating the file path for the master file")
