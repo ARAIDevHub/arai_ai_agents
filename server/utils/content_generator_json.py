@@ -593,6 +593,34 @@ class ContentGenerator:
         
         return result
 
+    def append_profile_image_options(self, master_data: dict, profile_image_data: dict) -> dict:
+        """Appends new profile image data to existing master data.
+        
+        Args:
+            master_data (dict): The master template data
+            profile_image_data (dict): The profile image data to append
+            
+        Returns:
+            dict: Updated master data with appended profile image
+        """
+
+        if isinstance(master_data, str):
+            master_data = json.loads(master_data)
+        
+        # Deep copy to avoid modifying original
+        result = copy.deepcopy(master_data)
+
+        # Append new profile image to existing profile image list
+        if "profile_image_options" in profile_image_data:
+            if "profile_image_options" not in result["agent"]:
+                result["agent"]["profile_image_options"] = []
+            
+            # replace the profile image with the new profile image
+            result["agent"]["profile_image_options"] = profile_image_data["profile_image_options"]
+            
+        #print(f"result is: {result}")            
+        return result
+
     def append_profile_image(self, master_data: dict, profile_image_data: dict) -> dict:
         """Appends new profile image data to existing master data.
         
@@ -620,4 +648,3 @@ class ContentGenerator:
             
         #print(f"result is: {result}")            
         return result
-

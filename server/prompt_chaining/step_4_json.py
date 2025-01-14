@@ -37,7 +37,8 @@ def step_4(prompt, master_file_path, model_id, style_uuid, num_images, consisten
     
     # step 4.1: load existing profile image options from templates directory
     manager = ContentGenerator()
-    profile_template = manager.create_new_template_json(TemplateType.PROFILE_IMAGE_OPTIONS)
+    profile_image_options_template = manager.create_new_template_json(TemplateType.PROFILE_IMAGE_OPTIONS)
+    profile_image_template = manager.create_new_template_json(TemplateType.PROFILE_IMAGE)
 
     # step 4.2: load the agent json file
     agent_master_json = None    
@@ -49,9 +50,9 @@ def step_4(prompt, master_file_path, model_id, style_uuid, num_images, consisten
     
     # step 4.4: generate the image
     if consistent:
-        response = images_leonardo.generated_image_consistent(prompt, model_id, style_uuid, num_images)
+        response, payload = images_leonardo.generated_image_consistent(prompt, model_id, style_uuid, num_images)
     else:
-        response = images_leonardo.generated_image_inconsistent(prompt, model_id, style_uuid, num_images)
+        response, payload = images_leonardo.generated_image_inconsistent(prompt, model_id, style_uuid, num_images)
     
     generation_id = response["sdGenerationJob"]["generationId"]
 
@@ -72,16 +73,21 @@ def step_4(prompt, master_file_path, model_id, style_uuid, num_images, consisten
         return None
             
     # step 4.6: append new URL to the array
-    profile_template["profile_image"].append(response_url)
+    profile_image_options_template["profile_image_options"].append(response_url)
+    profile_image_template["profile_image"]["payload"] = payload
+    profile_image_template["profile_image"]["details"]["generationId"] = generation_id
 
     # step 4.7: create the save path, use 0 as we are not in a season or episode
     save_path = manager.create_filepath(agent_details["name"], 0, 0, TemplateType.PROFILE_IMAGE_OPTIONS)
+    save_path_profile_image = manager.create_filepath(agent_details["name"], 0, 0, TemplateType.PROFILE_IMAGE)
 
-    # step 4.8: save the profile image to a file
-    manager.save_json_file(save_path, profile_template)
+    # step 4.8: save the profile image options to a file
+    manager.save_json_file(save_path, profile_image_options_template)
+    manager.save_json_file(save_path_profile_image, profile_image_template)
 
     # step 4.9: append to master file
-    agent_master_json = manager.append_profile_image(agent_master_json, profile_template)
+    agent_master_json = manager.append_profile_image_options(agent_master_json, profile_image_options_template)
+    agent_master_json = manager.append_profile_image(agent_master_json, profile_image_template)
 
     # step 4.10: save the master data to a file
     print("Saving the master data to a file")

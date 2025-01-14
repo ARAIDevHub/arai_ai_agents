@@ -60,10 +60,10 @@ def generated_image_inconsistent(prompt, model_id, style_uuid, num_images):
 
     try:
         response = requests.post(url, json=payload, headers=headers)
-        return response.json()
+        return response.json(), payload
     except Exception as e:
         print("Error:", str(e))
-        return None
+        return None, payload
 
 #--------------------------------
 # Generate multiple images from a prompt that are consistent with each other
@@ -98,10 +98,10 @@ def generated_image_consistent(prompt, model_id, style_uuid, num_images):
 
     try:
         response = requests.post(url, json=payload, headers=headers)
-        return response.json()
+        return response.json(), payload
     except Exception as e:
         print("Error:", str(e))
-        return None
+        return None, payload
 
 #--------------------------------
 # Get the image URL from a generation ID
