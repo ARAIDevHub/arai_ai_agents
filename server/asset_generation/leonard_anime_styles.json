@@ -1,0 +1,50 @@
+{
+      "models": [
+            {
+                  "model name": "Leonardo Anime XL",
+                  "modelId": "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
+                  "styles": [
+                  {
+                        "style name": "Anime General",
+                        "styleUUID": "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
+                  },
+                  {
+                        "style name": "Anime Retro",
+                        "styleUUID": "1824f984-dc0b-4f72-aa32-0442091d488c"
+                  },
+                  {
+                        "style name": "Anime None",
+                        "styleUUID": "e89ca6f0-7653-4db6-8a24-ded9d1267d84"
+                  },
+                  {
+                        "style name": "Anime Background",
+                        "styleUUID": "5f611024-668e-41cc-b538-4569a7985cad"
+                  },
+                  {
+                        "style name": "Anime Flat Illustration",
+                        "styleUUID": ""
+                  },
+                  {
+                        "style name": "Anime Monoschrome",
+                        "styleUUID": ""
+                  },
+                  {
+                        "style name": "Anime Screencap",
+                        "styleUUID": ""
+                  },
+                  {
+                        "style name": "Anime Semi-Realism",
+                        "styleUUID": ""
+                  },
+                  {
+                        "style name": "Character Sheet",
+                        "styleUUID": ""
+                  },
+                  {
+                        "style name": "Manga",
+                        "styleUUID": ""
+                  }
+            ]
+            }
+      ]
+}

@@ -29,4 +29,5 @@ class TemplateType:
     AGENT = "agent"
     SEASON = "season"
     EPISODE = "episode"
-    PROFILE_PICTURE = "profile_picture"
+    PROFILE_IMAGE = "profile_image"
+    PROFILE_IMAGE_OPTIONS = "profile_image_options"

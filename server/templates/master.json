@@ -1,5 +1,6 @@
 {
   "agent": {
+    "concept": "",
     "agent_details": {
       "name": "",
       "personality": [],
@@ -26,6 +27,8 @@
       "current_post_number": 0,
       "post_every_x_minutes": 0
     },
+    "profile_image": {},
+    "profile_image_options": [],
     "seasons": [
       {
         "season_name": "",
@@ -57,6 +60,5 @@
         ]
       }
     ]
-  },
-  "concept": ""
+  }
 }
