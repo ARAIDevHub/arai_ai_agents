@@ -62,7 +62,8 @@ class ContentGenerator:
         self.agent_template_path = os.path.join(self.templates_dir, "agent.json")
         self.season_template_path = os.path.join(self.templates_dir, "season.json")
         self.episode_template_path = os.path.join(self.templates_dir, "episode.json")
-        
+        self.profile_image_template_path = os.path.join(self.templates_dir, "profile_image.json")        
+        self.profile_image_options_template_path = os.path.join(self.templates_dir, "profile_image_options.json")
 
     # -------------------------------------------------------------------
     # Helper to create a new agent yaml file
@@ -97,6 +98,10 @@ class ContentGenerator:
             template_path = self.season_template_path
         elif template_type == TemplateType.EPISODE:
             template_path = self.episode_template_path
+        elif template_type == TemplateType.PROFILE_IMAGE:
+            template_path = self.profile_image_template_path
+        elif template_type == TemplateType.PROFILE_IMAGE_OPTIONS:
+            template_path = self.profile_image_options_template_path
         else:
             raise ValueError(f"Invalid template type: {template_type}")
 
@@ -370,6 +375,11 @@ class ContentGenerator:
             return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "season_" + str(season_number) + ".json")
         elif template_type == TemplateType.EPISODE:
             return os.path.join(self.agents_config_dir, agent_name, "season_" + str(season_number), "s" + str(season_number) + "_episode_" + str(episode_number) + ".json")
+        elif template_type == TemplateType.PROFILE_IMAGE:
+            return os.path.join(self.agents_config_dir, agent_name, "profile_image.json")
+        elif template_type == TemplateType.PROFILE_IMAGE_OPTIONS:
+            return os.path.join(self.agents_config_dir, agent_name, "profile_image_options.json")
+
 
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file
@@ -581,4 +591,60 @@ class ContentGenerator:
         if "posts" in posts_data:
             result["agent"]["seasons"][season_index]["episodes"][episode_index]["posts"] = posts_data["posts"]
         
+        return result
+
+    def append_profile_image_options(self, master_data: dict, profile_image_data: dict) -> dict:
+        """Appends new profile image data to existing master data.
+        
+        Args:
+            master_data (dict): The master template data
+            profile_image_data (dict): The profile image data to append
+            
+        Returns:
+            dict: Updated master data with appended profile image
+        """
+
+        if isinstance(master_data, str):
+            master_data = json.loads(master_data)
+        
+        # Deep copy to avoid modifying original
+        result = copy.deepcopy(master_data)
+
+        # Append new profile image to existing profile image list
+        if "profile_image_options" in profile_image_data:
+            if "profile_image_options" not in result["agent"]:
+                result["agent"]["profile_image_options"] = []
+            
+            # replace the profile image with the new profile image
+            result["agent"]["profile_image_options"] = profile_image_data["profile_image_options"]
+            
+        #print(f"result is: {result}")            
+        return result
+
+    def append_profile_image(self, master_data: dict, profile_image_data: dict) -> dict:
+        """Appends new profile image data to existing master data.
+        
+        Args:
+            master_data (dict): The master template data
+            profile_image_data (dict): The profile image data to append
+            
+        Returns:
+            dict: Updated master data with appended profile image
+        """
+
+        if isinstance(master_data, str):
+            master_data = json.loads(master_data)
+        
+        # Deep copy to avoid modifying original
+        result = copy.deepcopy(master_data)
+
+        # Append new profile image to existing profile image list
+        if "profile_image" in profile_image_data:
+            if "profile_image" not in result["agent"]:
+                result["agent"]["profile_image"] = []
+            
+            # replace the profile image with the new profile image
+            result["agent"]["profile_image"] = profile_image_data["profile_image"]
+            
+        #print(f"result is: {result}")            
         return result
