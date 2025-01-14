@@ -31,14 +31,72 @@ import asset_generation.images_leonardo as images_leonardo
 dotenv.load_dotenv()
 
 #--------------------------------
-# Step 4: Generate a profile image
+# Step 4: Generate a number of images for profile image
 #--------------------------------
-def step_4(prompt, model_id, style_uuid, num_images):
+def step_4(prompt, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5):
+    
+    # step 4.1: load existing profile image options from templates directory
+    manager = ContentGenerator()
+    profile_template = manager.create_new_template_json(TemplateType.PROFILE_IMAGE_OPTIONS)
+
+    # step 4.2: load the agent json file
+    agent_master_json = None    
+    with open(master_file_path, 'r', encoding='utf-8') as file:
+        agent_master_json = json.load(file)  
+
+    # step 4.3: extract agent from master json
+    agent_details = agent_master_json['agent']['agent_details']
+    
+    # step 4.4: generate the image
+    if consistent:
+        response = images_leonardo.generated_image_consistent(prompt, model_id, style_uuid, num_images)
+    else:
+        response = images_leonardo.generated_image_inconsistent(prompt, model_id, style_uuid, num_images)
+    
+    generation_id = response["sdGenerationJob"]["generationId"]
+
+    # step 4.5: retry loop to check for image completion
+    success = False  # Add flag to track success
+    for attempt in range(max_retries):
+        response_url = images_leonardo.get_image_url(generation_id)
+        
+        if response_url.get("generations_by_pk", {}).get("generated_images"):
+            success = True  # Set flag when successful
+            break  # Exit the loop when we have images
+            
+        print(f"Image not ready yet. Attempt {attempt + 1}/{max_retries}. Waiting {delay} seconds...")
+        time.sleep(delay)
+    
+    if not success:
+        print("Max retries reached. Image generation may have failed.")
+        return None
+            
+    # step 4.6: append new URL to the array
+    profile_template["profile_image"].append(response_url)
+
+    # step 4.7: create the save path, use 0 as we are not in a season or episode
+    save_path = manager.create_filepath(agent_details["name"], 0, 0, TemplateType.PROFILE_IMAGE_OPTIONS)
+
+    # step 4.8: save the profile image to a file
+    manager.save_json_file(save_path, profile_template)
+
+    # step 4.9: append to master file
+    agent_master_json = manager.append_profile_image(agent_master_json, profile_template)
+
+    # step 4.10: save the master data to a file
+    print("Saving the master data to a file")
+    manager.save_json_file(
+        save_path=master_file_path,
+        json_data=agent_master_json
+    )
+
+
+if __name__ == "__main__":
     # Setup prompt
     prompt = "Anime character Nicki. Generate a traditional looking anime character for me. I want her to be an anime girlfriend who is super into the crypto space. Make her attractive with big boobs. I want to see the big boobs clearly. Have her with hair green, eye color blue, skin color tan."
     
     # Setup model details
-    model_details = json.loads(open("leonard_anime_styles.json", "r").read())
+    model_details = json.loads(open("asset_generation/leonard_anime_styles.json", "r").read())
     model_id = model_details["models"][0]["modelId"]
     anime_general_style = next(
         style for style in model_details["models"][0]["styles"] 
@@ -47,45 +105,9 @@ def step_4(prompt, model_id, style_uuid, num_images):
     style_uuid = anime_general_style["styleUUID"]
 
     # Setup number of images
-    num_images = 1
+    num_images = 4
 
     # Generate the image
-    response = images_leonardo.generated_image_inconsistent(prompt, model_id, style_uuid, num_images)
-
-    print(response)
-
-    # Get the generation ID
-    generation_id = response["sdGenerationJob"]["generationId"]
-    
-    # Wait for the image to be generated (usually takes 10-20 seconds)
-    print("Waiting for image generation...")
-    time.sleep(20)  # Wait 20 seconds
-    
-    # Get the image URL
-    response_url = images_leonardo.get_image_url(generation_id)
-    
-    # Print the image URL
-    if response_url.get("generations_by_pk", {}).get("generated_images"):
-        new_image_url = response_url["generations_by_pk"]["generated_images"][0]["url"]
-        
-        # Load existing profile images from templates directory
-        manager = ContentGenerator()
-        profile_template = manager.create_new_template_json(TemplateType.PROFILE_IMAGE)
-        # Load existing profile images from templates directory
-        json_path = os.path.join("server", "templates", "profile_image.json")
-        with open(json_path, "r") as f:
-            profile_image = json.load(f)
-        
-        # Append new URL to the array
-        profile_image["profile_image"].append(new_image_url)
-        
-        # Save updated profile images to configs/temporary directory
-        save_path = os.path.join("server", "configs", "temporary", "profile_image.json")
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)  # Create directory if it doesn't exist
-        with open(save_path, "w") as f:
-            json.dump(profile_image, indent=4, fp=f)
-
-    else:
-        print("Image not ready yet. Try waiting longer or check the generation status.")
+    step_4(prompt, "configs/Cipheria/Cipheria_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
 
 
