@@ -214,24 +214,30 @@ const AgentGallery: React.FC = () => {
         <header className="flex justify-between items-center mb-8">
           <div className="flex gap-4">
             <button
-              className={`px-4 py-2 rounded-md ${
-                filter === 'all' ? 'bg-purple-600' : 'bg-gray-700'
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
+                filter === 'all' 
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+                  : 'text-gray-300 hover:text-cyan-400'
               }`}
               onClick={() => setFilter('all')}
             >
               All
             </button>
             <button
-              className={`px-4 py-2 rounded-md ${
-                filter === 'random' ? 'bg-purple-600' : 'bg-gray-700'
+              className={`text-lg font-semibold px-4 py-2 rounded-md ${
+                filter === 'random' 
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+                  : 'text-gray-300 hover:text-cyan-400'
               }`}
               onClick={() => setFilter('random')}
             >
               Random
             </button>
             <button
-              className={`px-4 py-2 rounded-md ${
-                filter === 'yourAgents' ? 'bg-purple-600' : 'bg-gray-700'
+              className={`text-lg font-semibold px-4 py-2 rounded-md ${
+                filter === 'yourAgents' 
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+                  : 'text-gray-300 hover:text-cyan-400'
               }`}
               onClick={() => setFilter('yourAgents')}
             >
@@ -326,12 +332,12 @@ const AgentGallery: React.FC = () => {
         </div>
 
         {/* Display the selected agent's name */}
-        {selectedAgent && (
+        {/* {selectedAgent && (
           <div className="mt-8 text-center">
-            <h2 className="text-xl font-semibold">Selected Agent:</h2>
-            <p>{selectedAgent.name}</p>
+            <h2 className="text-xl font-semibold text-white">Selected Agent:</h2>
+            <p className="text-white">{selectedAgent.name}</p>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

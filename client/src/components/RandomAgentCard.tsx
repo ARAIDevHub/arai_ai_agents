@@ -30,7 +30,7 @@ const RegenerateButton: React.FC<RegenerateButtonProps> = ({
 }) => {
   return (
     <button
-      className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
+      className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
       onClick={(e) => {
         e.stopPropagation();
         onRegenerate();
@@ -185,7 +185,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                 <div className="absolute bottom-2 left-4 right-4">
                   {isUserAgent ? (
                     <button
-                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelect(agent);
@@ -196,7 +196,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                     </button>
                   ) : (
                     <button
-                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         onAdd && onAdd(agent);

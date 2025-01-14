@@ -25,15 +25,16 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentName = agent.agent_details?.name || 'Unknown Agent';
   const agentPersonality = agent.agent_details?.personality || [];
   const agentCommunicationStyle = agent.agent_details?.communication_style || [];
-  const agentAbilities = agent.agent_details?.backstory || 'No backstory available';
+  const agentBackstory = agent.agent_details?.backstory || 'No backstory available';
   const agentHashtags = agent.agent_details?.hashtags || [];
   const agentEmojis = agent.agent_details?.emojis || [];
+  const agentTopicExpertise = agent.agent_details?.topic_expertise || [];
   const concept = agent.concept || 'No concept available';
 
   console.log('[LoadedAgentCard] - agentName:', agentName);
   console.log('[LoadedAgentCard] - agentPersonality:', agentPersonality);
   console.log('[LoadedAgentCard] - agentCommunicationStyle:', agentCommunicationStyle);
-  console.log('[LoadedAgentCard] - agentAbilities:', agentAbilities);
+  console.log('[LoadedAgentCard] - agentAbilities:', agentBackstory);
   console.log('[LoadedAgentCard] - agentHashtags:', agentHashtags);
   console.log('[LoadedAgentCard] - agentEmojis:', agentEmojis);
   console.log('[LoadedAgentCard] - concept:', concept);
@@ -89,7 +90,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                     <h3 className="text-xl font-bold text-gray-100">
                       {agentName}
                     </h3>
-                    <p className="text-orange-400 text-sm">{agent.role}</p>
+                    <p className="text-orange-400 text-sm">{Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert</p>
                   </div>
                 </div>
               <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
@@ -138,7 +139,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
               {/* Action button */}
               <div className="absolute bottom-2 left-4 right-4">
                 <button
-                  className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelect(agent);
