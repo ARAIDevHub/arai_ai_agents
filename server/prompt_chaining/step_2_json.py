@@ -53,14 +53,17 @@ def step_2(ai_model, master_file_path, number_of_episodes):
     # step 2.1: load the season template json file
     manager = ContentGenerator()
     #season_template = manager.create_new_template_yaml(TemplateType.SEASON)
+    print(f"Creating a new season template")
     season_template = manager.create_new_template_json(TemplateType.SEASON)
 
     # step 2.2: load the agent json file
+    print(f"Loading agent master json file: {master_file_path}")
     agent_master_json = None    
     with open(master_file_path, 'r', encoding='utf-8') as file:
         agent_master_json = json.load(file)  
 
     # extract agent from master json
+    print(f"Extracting agent details from master json")
     agent_details = agent_master_json['agent']['agent_details']
 
     # step 2.3: find the previous season 
@@ -125,4 +128,4 @@ def step_2(ai_model, master_file_path, number_of_episodes):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_2(ai_model, "configs/Zorp/Zorp_master.json", 3)
+    step_2(ai_model, "configs/CipherCat/CipherCat_master.json", 3)

@@ -154,5 +154,5 @@ def step_3(ai_model, master_file_path, number_of_posts):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_3(ai_model, "configs/Zorp/Zorp_master.json", 6)
+    step_3(ai_model, "configs/CipherCat/CipherCat_master.json", 6)
 

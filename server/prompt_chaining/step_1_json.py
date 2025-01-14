@@ -25,7 +25,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
 from utils.content_generator_json import ContentGenerator
-import prompt_chaining.step_2 as next_step
+import prompt_chaining.step_2_json as next_step
 from utils.template_types import TemplateType
 
 # -------------------------------------------------------------------

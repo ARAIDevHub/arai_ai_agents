@@ -17,7 +17,7 @@
 
 # standard imports
 import os
-import json
+import yaml
 import schedule
 import shutil
 import time
@@ -26,7 +26,7 @@ import argparse
 
 # custom ARAI imports
 from models.gemini_model import GeminiModel
-import utils.post_manager_json as twitter_manager
+import utils.post_manager as twitter_manager
 import prompt_chaining.step_1_json as step_1
 import prompt_chaining.step_2_json as step_2
 import prompt_chaining.step_3_json as step_3
@@ -41,14 +41,11 @@ def list_available_seasons(agent_name):
         list: List of available season names
     """
     seasons = []
-    config_path = os.path.join("configs", agent_name, f"{agent_name}_master.json")
-    
+    config_path = os.path.join("configs", agent_name)
     if os.path.exists(config_path):
-        with open(config_path, 'r', encoding='utf-8') as f:
-            master_data = json.load(f)
-            for season in master_data["agent"]["seasons"]:
-                seasons.append(season)
-    
+        for item in os.listdir(config_path):
+            if os.path.isdir(os.path.join(config_path, item)):
+                seasons.append(item)
     return seasons
 
 def list_available_agents():
@@ -65,7 +62,7 @@ def list_available_agents():
                 agents.append(item)
     return agents
 
-def load_agent_tracker_config(agent_name):
+def load_agent_config(agent_name):
     """Load configuration for the selected agent
     
     Args:
@@ -74,9 +71,9 @@ def load_agent_tracker_config(agent_name):
     Returns:
         dict: The configuration for the selected agent
     """
-    config_path = os.path.join("configs", agent_name, f"{agent_name}_master.json")
+    config_path = os.path.join("configs", agent_name, "tracker.yaml")
     with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)["agent"]["tracker"]
+        return yaml.safe_load(f)
 
 # run the scheduler
 def run_scheduler():
@@ -166,9 +163,9 @@ if __name__ == "__main__":
                 agent_idx = int(input("\nSelect agent number: ")) - 1
                 if 0 <= agent_idx < len(agents):
                     current_agent = agents[agent_idx]
-                    tracker_config = load_agent_tracker_config(current_agent)
-                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}_master.json")
-                    post_every_x_minutes = tracker_config['post_every_x_minutes']
+                    config = load_agent_config(current_agent)
+                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}.yaml")
+                    post_every_x_minutes = config['post_every_x_minutes']
                     post_manager = twitter_manager.PostManager(current_agent)
                     print(f"\nSelected agent: {current_agent}")
                 else:
@@ -204,7 +201,7 @@ if __name__ == "__main__":
             else:
                 try:
                     print("Creating a new season...")
-                    step_2.step_2(ai_model, agent_file_path, 3)
+                    step_2.step_2(ai_model, agent_file_path)
                 except Exception as e:
                     print(f"Error creating season: {str(e)}")
 
@@ -226,7 +223,8 @@ if __name__ == "__main__":
                     season_idx = int(input("\nSelect season number: ")) - 1
                     if 0 <= season_idx < len(seasons):
                         current_season = seasons[season_idx]
-                        step_3.step_3(ai_model, agent_file_path, 6)
+                        season_file_path = os.path.join("configs", current_agent, current_season, f"{current_season}.yaml")
+                        step_3.step_3(ai_model, agent_file_path, season_file_path)
                         print(f"\nSelected season: {current_season}")
                     else:
                         print("Invalid selection!")
