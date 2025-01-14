@@ -224,7 +224,7 @@ const AgentGallery: React.FC = () => {
               All
             </button>
             <button
-              className={`text-lg font-semibold px-4 py-2 rounded-md ${
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
                 filter === 'random' 
                   ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
                   : 'text-gray-300 hover:text-cyan-400'
@@ -234,7 +234,7 @@ const AgentGallery: React.FC = () => {
               Random
             </button>
             <button
-              className={`text-lg font-semibold px-4 py-2 rounded-md ${
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
                 filter === 'yourAgents' 
                   ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
                   : 'text-gray-300 hover:text-cyan-400'
