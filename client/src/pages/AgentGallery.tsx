@@ -209,7 +209,7 @@ const AgentGallery: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50 p-6">
       <div className="max-w-7xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div className="flex gap-4">
@@ -238,7 +238,7 @@ const AgentGallery: React.FC = () => {
               Your Agents
             </button>
           </div>
-          <h1 className="text-2xl font-bold text-center flex-grow">Mystic Agents Gallery</h1>
+          <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1>
           {(filter === 'all' || filter === 'random') && (
             <button
               className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
@@ -254,7 +254,7 @@ const AgentGallery: React.FC = () => {
           {/* All Agents */}
           {filter === 'all' && (
             <>
-              <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
+              <h2 className="text-xl font-semibold mb-4 text-white">Random Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
                 {randomAgents.map((agent) => (
                   <RandomAgentCard
@@ -269,7 +269,7 @@ const AgentGallery: React.FC = () => {
                   />
                 ))}
               </div>
-              <h2 className="text-xl font-semibold mt-8 mb-4">Your Agents</h2>
+              <h2 className="text-xl font-semibold mt-8 mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                    <LoadedAgentCard
@@ -290,7 +290,7 @@ const AgentGallery: React.FC = () => {
           {/* Random Agents */}
           {filter === 'random' && (
             <>
-              <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
+              <h2 className="text-xl font-semibold mb-4 text-white">Random Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
                 {randomAgents.map((agent) => (
                   <RandomAgentCard
@@ -311,7 +311,7 @@ const AgentGallery: React.FC = () => {
           {/* Your Agents */}
           {filter === 'yourAgents' && (
             <>
-              <h2 className="text-xl font-semibold mb-4">Your Agents</h2>
+              <h2 className="text-xl font-semibold mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
           <LoadedAgentCard

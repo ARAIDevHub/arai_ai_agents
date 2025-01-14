@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Sparkles, CheckCircle } from 'lucide-react';
 import { Agent } from '../interfaces/AgentInterfaces';
+import image1 from '../assets/agent-images/agent1.jpg';
+import image2 from '../assets/agent-images/agent2.jpg';
+import image3 from '../assets/agent-images/agent3.jpg';
+import image4 from '../assets/agent-images/agent4.jpg';
+
+
 
 // Define the props for AgentCard
 interface AgentCardProps {
@@ -11,6 +17,7 @@ interface AgentCardProps {
 }
 
 const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
+  const agentImages = [image1, image2, image3, image4];
   console.log('[LoadedAgentCard] - agent:', agent);  
   agent = agent.agent
   // console.log('[LoadedAgentCard] - agent.agent_details.name:', agent.agent_details.name);
@@ -50,10 +57,10 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
         >
           {/* Front of card */}
           <div className="absolute w-full h-full backface-hidden">
-            <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-purple-500/30">
+            <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
                 <img
-                  src={agentName}
+                  src={agentImages[Math.floor(Math.random() * 4)]}
                   alt={agentName}
                   className="w-full h-full object-cover"
                 />
@@ -63,51 +70,65 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                 <h3 className="text-xl font-bold text-gray-100 mb-1">
                   {agentName}
                 </h3>
-                <p className="text-purple-300 text-sm">{agentName}</p>
+                <p className="text-orange-300 text-sm">{agentName}</p>
               </div>
             </div>
           </div>
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-purple-500/30">
+            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-orange-500/30">
+                {/* Header with small image */}
+                <div className="flex gap-4 mb-4">
+                  <img
+                  src={agentImages[Math.floor(Math.random() * 4)]}
+                  alt={agentName}
+                    className="w-20 h-20 rounded-lg object-cover"
+                  />
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-100">
+                      {agentName}
+                    </h3>
+                    <p className="text-orange-400 text-sm">{agent.role}</p>
+                  </div>
+                </div>
               <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <Heart className="w-4 h-4 text-purple-400" />
+                    <Heart className="w-4 h-4 text-orange-400" />
                     <span className="font-medium">Personality</span>
                   </div>
-                  <p className="text-gray-400 text-sm">{agentPersonality}</p>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <MessageCircle className="w-4 h-4 text-purple-400" />
-                    <span className="font-medium">Communication</span>
-                  </div>
-                  <p className="text-gray-400 text-sm">
-                    {agentCommunicationStyle}
+                  <p className="text-gray-400 text-sm line-clamp-3">
+                    {Array.isArray(agentPersonality) ? agentPersonality.join(', ') : agentPersonality}
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span className="font-medium">Abilities</span>
+                    <MessageCircle className="w-4 h-4 text-orange-400" />
+                    <span className="font-medium">Communication Style</span>
                   </div>
-                  <ul className="text-gray-400 text-sm pl-4 list-disc space-y-1">
-                    {agentEmojis.map((emoji) => (
-                      <li>{emoji}</li>
-                    ))}
-                  </ul>
+                  <p className="text-gray-400 text-sm line-clamp-3">
+                    {Array.isArray(agentCommunicationStyle) ? agentCommunicationStyle.join(', ') : agentCommunicationStyle}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 text-gray-300 mb-1">
+                    <Sparkles className="w-4 h-4 text-orange-400" />
+                    <span className="font-medium mb-2">Emojis</span>
+                  </div>
+                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">
+                    {Array.isArray(agentEmojis) ? agentEmojis.join(' ') : agentEmojis}
+                  </p>
                 </div>
               </div>
               {/* Tags */}
-              <div className="absolute bottom-12 left-4 right-4">
+              <div className="relative">
                 <div className="flex gap-2 flex-wrap">
-                  {agentHashtags.map((hashtag) => (
+                  {(Array.isArray(agentHashtags) ? agentHashtags.slice(0, 4) : []).map((hashtag) => (
                     <span
-                      className="px-2 py-1 bg-purple-900/50 rounded-full text-xs text-purple-300"
+                      className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300"
                     >
                       {hashtag}
                     </span>
@@ -117,7 +138,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
               {/* Action button */}
               <div className="absolute bottom-2 left-4 right-4">
                 <button
-                  className="w-full px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelect(agent);

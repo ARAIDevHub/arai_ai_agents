@@ -30,7 +30,7 @@ const RegenerateButton: React.FC<RegenerateButtonProps> = ({
 }) => {
   return (
     <button
-      className="w-full mt-2 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+      className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
       onClick={(e) => {
         e.stopPropagation();
         onRegenerate();
@@ -95,7 +95,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
           >
             {/* Front of card */}
             <div className="absolute w-full h-full backface-hidden">
-              <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-purple-500/30">
+              <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
                 {/* Image container - 80% of card height */}
                 <div className="relative h-[400px]">
                   <img
@@ -111,14 +111,14 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                   <h3 className="text-xl font-bold text-gray-100 mb-1">
                     {agent.name}
                   </h3>
-                  <p className="text-purple-300 text-sm">{agent.role}</p>
+                  <p className="text-orange-300 text-sm">{agent.role}</p>
                 </div>
               </div>
             </div>
 
             {/* Back of card */}
             <div className="absolute w-full h-full backface-hidden rotate-y-180">
-              <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-purple-500/30">
+              <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-orange-500/30">
                 {/* Header with small image */}
                 <div className="flex gap-4 mb-4">
                   <img
@@ -130,7 +130,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                     <h3 className="text-xl font-bold text-gray-100">
                       {agent.name}
                     </h3>
-                    <p className="text-purple-400 text-sm">{agent.role}</p>
+                    <p className="text-orange-400 text-sm">{agent.role}</p>
                   </div>
                 </div>
 
@@ -138,7 +138,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                 <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
                   <div>
                     <div className="flex items-center gap-2 text-gray-300 mb-1">
-                      <Heart className="w-4 h-4 text-purple-400" />
+                      <Heart className="w-4 h-4 text-orange-400" />
                       <span className="font-medium">Personality</span>
                     </div>
                     <p className="text-gray-400 text-sm">{agent.personality}</p>
@@ -146,7 +146,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
 
                   <div>
                     <div className="flex items-center gap-2 text-gray-300 mb-1">
-                      <MessageCircle className="w-4 h-4 text-purple-400" />
+                      <MessageCircle className="w-4 h-4 text-orange-400" />
                       <span className="font-medium">Communication</span>
                     </div>
                     <p className="text-gray-400 text-sm">
@@ -156,7 +156,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
 
                   <div>
                     <div className="flex items-center gap-2 text-gray-300 mb-1">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
+                      <Sparkles className="w-4 h-4 text-orange-400" />
                       <span className="font-medium">Abilities</span>
                     </div>
                     <ul className="text-gray-400 text-sm pl-4 list-disc space-y-1">
@@ -173,7 +173,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                     {agent.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-purple-900/50 rounded-full text-xs text-purple-300"
+                        className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300"
                       >
                         {tag}
                       </span>
@@ -185,7 +185,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                 <div className="absolute bottom-2 left-4 right-4">
                   {isUserAgent ? (
                     <button
-                      className="w-full px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelect(agent);
@@ -196,7 +196,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                     </button>
                   ) : (
                     <button
-                      className="w-full px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         onAdd && onAdd(agent);
