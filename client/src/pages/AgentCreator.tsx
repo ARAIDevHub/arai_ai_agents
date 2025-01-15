@@ -244,7 +244,7 @@ const AgentCreator: React.FC = () => {
 
         const processed = charactersData.map(char => {
 
-          const agentProfileImage = char.agent.profile_image;
+          const agentProfileImage = char.agent.profile_image_options;
           const agentConcept = char.concept;
 
           console.log("Agent profile image:", agentProfileImage);

@@ -29,7 +29,8 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentHashtags = agent.agent_details?.hashtags || [];
   const agentEmojis = agent.agent_details?.emojis || [];
   const agentTopicExpertise = agent.agent_details?.topic_expertise || [];
-  const concept = agent.concept || 'No concept available';
+  const concept = agent.agent_details?.concept || 'No concept available';
+  const profileImageUrl = agent.profile_image?.details?.url || "";
 
   console.log('[LoadedAgentCard] - agentName:', agentName);
   console.log('[LoadedAgentCard] - agentPersonality:', agentPersonality);
@@ -38,8 +39,8 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   console.log('[LoadedAgentCard] - agentHashtags:', agentHashtags);
   console.log('[LoadedAgentCard] - agentEmojis:', agentEmojis);
   console.log('[LoadedAgentCard] - concept:', concept);
-
-  return (
+  console.log('[LoadedAgentCard] - profileImageUrl:', profileImageUrl);
+    return (
     <div className="relative">
       {/* Label to indicate it's a loaded agent */}
       <div className="absolute top-2 right-2 bg-gray-700 text-white text-xs rounded px-2">
@@ -61,7 +62,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
             <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
                 <img
-                  src={agentImages[Math.floor(Math.random() * 4)]}
+                  src={profileImageUrl}
                   alt={agentName}
                   className="w-full h-full object-cover"
                 />
@@ -82,7 +83,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                 {/* Header with small image */}
                 <div className="flex gap-4 mb-4">
                   <img
-                  src={agentImages[Math.floor(Math.random() * 4)]}
+                  src={profileImageUrl}
                   alt={agentName}
                     className="w-20 h-20 rounded-lg object-cover"
                   />

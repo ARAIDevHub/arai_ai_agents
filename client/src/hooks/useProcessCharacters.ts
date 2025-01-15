@@ -8,26 +8,32 @@
  */
 const useProcessCharacters = (characters: any[]) => {
     const processedCharacters = characters.map((char) => {
-      const { agent, concept = '' } = char; // Default concept to an empty string if not provided.
-  
+      // Char is the raw data from the API
+      // Destructure the char object to extract the necessary fields
+      const { agent } = char;
+      console.log('[useProcessCharacters] - agent:', agent);
+
       return {
         agent: {
           agent_details: {
-            name: agent?.agent_details?.name || '', // Default to an empty string if name is missing.
-            personality: agent?.agent_details?.personality || [], // Ensure personality is an array.
-            communication_style: agent?.agent_details?.communication_style || [], // Ensure communication_style is an array.
-            backstory: agent?.agent_details?.backstory || '', // Default to an empty string if backstory is missing.
-            universe: agent?.agent_details?.universe || '', // Default to an empty string if universe is missing.
-            topic_expertise: agent?.agent_details?.topic_expertise || [], // Ensure topic_expertise is an array.
-            hashtags: agent?.agent_details?.hashtags || [], // Ensure hashtags is an array.
-            emojis: agent?.agent_details?.emojis || [], // Ensure emojis is an array.
+            name: agent?.agent_details?.name || '',
+            personality: agent?.agent_details?.personality || [],
+            communication_style: agent?.agent_details?.communication_style || [],
+            backstory: agent?.agent_details?.backstory || '',
+            universe: agent?.agent_details?.universe || '',
+            topic_expertise: agent?.agent_details?.topic_expertise || [],
+            hashtags: agent?.agent_details?.hashtags || [],
+            emojis: agent?.agent_details?.emojis || [],
+            concept: agent?.concept || '',
           },
-          ai_model: agent?.ai_model || {}, // Default to an empty object if ai_model is missing.
-          connectors: agent?.connectors || {}, // Default to an empty object if connectors are missing.
-          seasons: agent?.seasons || [], // Default to an empty array if seasons are missing.
-          tracker: agent?.tracker || {}, // Default to an empty object if tracker is missing.
-        },
-        concept: concept || '', // Ensure concept is included, defaulting to an empty string if not provided.
+          concept: agent?.concept || '',
+          profile_image: agent?.profile_image || {},
+          profile_image_options: agent?.profile_image_options || [],
+          ai_model: agent?.ai_model || {},
+          connectors: agent?.connectors || {},
+          seasons: agent?.seasons || [],
+          tracker: agent?.tracker || {},
+        }
       };
     });
   
