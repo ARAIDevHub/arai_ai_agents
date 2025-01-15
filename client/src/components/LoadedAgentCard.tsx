@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Sparkles, CheckCircle } from 'lucide-react';
 import { Agent } from '../interfaces/AgentInterfaces';
-import image1 from '../assets/agent-images/agent1.jpg';
-import image2 from '../assets/agent-images/agent2.jpg';
-import image3 from '../assets/agent-images/agent3.jpg';
-import image4 from '../assets/agent-images/agent4.jpg';
-
-
 
 // Define the props for AgentCard
 interface AgentCardProps {
@@ -17,7 +11,6 @@ interface AgentCardProps {
 }
 
 const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
-  const agentImages = [image1, image2, image3, image4];
   console.log('[LoadedAgentCard] - agent:', agent);  
   agent = agent.agent
   // console.log('[LoadedAgentCard] - agent.agent_details.name:', agent.agent_details.name);

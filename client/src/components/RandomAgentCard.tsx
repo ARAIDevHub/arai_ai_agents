@@ -53,19 +53,27 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false); // State to track regeneration
-
+  console.log('[RandomAgentCard] - agent:', agent);
   const handleRegenerate = () => {
-    setIsRegenerating(true); // Show placeholder
-
-    // Simulate regeneration delay (remove in actual implementation)
+    setIsRegenerating(true);
+    
     setTimeout(() => {
-      setRandomAgents((prevAgents: Agent[]) =>
-        prevAgents.map((a: Agent) =>
-          a.id === agent.id ? generateRandomAgent() : a
-        )
-      );
-      setIsRegenerating(false); // Hide placeholder
-    }, 500); // Adjust delay as needed
+      const newAgent = generateRandomAgent();
+      setRandomAgents((prevAgents: Agent[]) => {
+        // Check if the new agent's name or ID already exists
+        while (prevAgents.some(a => a.name === newAgent.name || a.id === newAgent.id)) {
+          // Regenerate if there's a duplicate
+          Object.assign(newAgent, generateRandomAgent());
+        }
+        
+        // Replace the current agent with the new one while maintaining max 3 agents
+        const updatedAgents = prevAgents.map((a: Agent) =>
+          a.id === agent.id ? { ...newAgent, id: newAgent.id } : a
+        );
+        return updatedAgents.slice(0, 3);
+      });
+      setIsRegenerating(false);
+    }, 500);
   };
 
   return (
@@ -147,7 +155,7 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                   <div>
                     <div className="flex items-center gap-2 text-gray-300 mb-1">
                       <MessageCircle className="w-4 h-4 text-orange-400" />
-                      <span className="font-medium">Communication</span>
+                      <span className="font-medium">Communication Style</span>
                     </div>
                     <p className="text-gray-400 text-sm">
                       {agent.communicationStyle}
@@ -157,13 +165,11 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
                   <div>
                     <div className="flex items-center gap-2 text-gray-300 mb-1">
                       <Sparkles className="w-4 h-4 text-orange-400" />
-                      <span className="font-medium">Abilities</span>
+                      <span className="font-medium">Emojis</span>
                     </div>
-                    <ul className="text-gray-400 text-sm pl-4 list-disc space-y-1">
-                      {agent.abilities.map((ability, index) => (
-                        <li key={index}>{ability}</li>
-                      ))}
-                    </ul>
+                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">
+                    {Array.isArray(agent.emojis) ? agent.emojis.join(' ') : agentEmojis}
+                  </p>
                   </div>
                 </div>
 

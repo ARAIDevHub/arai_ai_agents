@@ -52,7 +52,7 @@ const RegenerateButton: React.FC<RegenerateButtonProps> = ({
 }) => {
   return (
     <button
-      className="w-full mt-2 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+      className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md flex items-center justify-center gap-2"
       onClick={(e) => {
         e.stopPropagation();
         onRegenerate();
@@ -124,17 +124,17 @@ const AgentGallery: React.FC = () => {
       'Speaks with truth and integrity',
       'Shares insights from higher realms',
     ];
-    const abilities = [
-      ['Nature attunement', 'Growth facilitation', 'Abundance manifestation'],
-      ['Relationship guidance', 'Choice illumination', 'Soul connection'],
-      ['Divination', 'Energy manipulation', 'Reality crafting'],
-      ['Introspection', 'Spiritual insight', 'Pathfinding'],
-      ['Sacred knowledge', 'Ritual mastery', 'Blessing bestowal'],
-      ['Guidance', 'Protection', 'Swift action'],
-      ['Inner strength', 'Courage', 'Resilience'],
-      ['Fate reading', 'Destiny shaping', 'Karma balancing'],
-      ['Truth seeking', 'Equilibrium restoration', 'Moral compass'],
-      ['Spiritual awakening', 'Letting go', 'Higher perspective'],
+    const emojis = [
+      ['🌱', '🌿', '✨'],
+      ['💝', '🔮', '💫'],
+      ['🎯', '⚡', '🌟'],
+      ['🍃', '🌸', '💫'],
+      ['📚', '🕯️', '🙏'],
+      ['🛡️', '⚔️', '🏃'],
+      ['💪', '🦁', '🎯'],
+      ['🎲', '🌟', '⚖️'],
+      ['⚖️', '🔍', '🧭'],
+      ['🦋', '🌙', '👁️'],
     ];
     const tags = [
       ['#nature', '#nurture', '#abundance'],
@@ -160,7 +160,7 @@ const AgentGallery: React.FC = () => {
       tags: tags[randomIndex],
       personality: personalities[randomIndex],
       communicationStyle: communicationStyles[randomIndex],
-      abilities: abilities[randomIndex],
+      emojis: emojis[randomIndex],
     };
   };
 
@@ -247,9 +247,10 @@ const AgentGallery: React.FC = () => {
           <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1>
           {(filter === 'all' || filter === 'random') && (
             <button
-              className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
+              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md text-white flex items-center gap-2"
               onClick={handleRegenerateAll}
             >
+              <RefreshCcw className="w-4 h-4" />
               Regenerate All
             </button>
           )}
