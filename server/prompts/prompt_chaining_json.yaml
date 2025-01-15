@@ -92,7 +92,7 @@ prompt_2 (Season Creation): |
   - Season Summary: If none is provided, create a concise summary that captures the essence of this season.
       - Season Summary: {{ season_summary }}
 
-  - Episodes: We want **{{ number_of_episodes }} episodes** total (one for each day over 4 weeks).
+  - Episodes: We want **{{ number_of_episodes }} episodes** total. Starting with episode 1.
       - If none are provided, create {{ number_of_episodes }} unique episodes.
       - Each episode entry should have:
           - `episode_id`

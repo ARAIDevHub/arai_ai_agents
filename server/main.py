@@ -169,8 +169,14 @@ if __name__ == "__main__":
                     tracker_config = load_agent_tracker_config(current_agent)
                     agent_file_path = os.path.join("configs", current_agent, f"{current_agent}_master.json")
                     post_every_x_minutes = tracker_config['post_every_x_minutes']
+
+                    if post_every_x_minutes <= 0:
+                        print("Error: Posting interval must be greater than 0!")
+                        continue
+
                     post_manager = twitter_manager.PostManager(current_agent)
                     print(f"\nSelected agent: {current_agent}")
+                    print(f"Posting every {post_every_x_minutes} minutes")
                 else:
                     print("Invalid selection!")
             except ValueError:
@@ -232,29 +238,17 @@ if __name__ == "__main__":
             if scheduler_thread and scheduler_thread.is_alive():
                 print("Scheduler is already running!")
                 continue
-            
-            try:
-                # Clear existing schedule
-                schedule.clear()
-                # Set up new schedule
-                if post_manager is None:
-                    print("Error: Post manager not initialized!")
-                    continue
-                    
-                if post_every_x_minutes is None:
-                    print("Error: Posting interval not set!")
-                    continue
-                    
-                schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
-                # schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
-                scheduler_running = True
-                scheduler_thread = threading.Thread(target=run_scheduler)
-                scheduler_thread.daemon = True  # Make thread daemon so it exits when main program exits
-                scheduler_thread.start()
-                print(f"Scheduler started for {current_agent}")
-                print(f"Will post every {post_every_x_minutes} minutes")
-            except Exception as e:
-                print(f"Error starting scheduler: {str(e)}")
+                
+            # Clear existing schedule
+            schedule.clear()
+            # Set up new schedule
+            #schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
+            # uncomment this line if you wnat to test the scheduler and the content made by ai
+            schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
+            scheduler_running = True
+            scheduler_thread = threading.Thread(target=run_scheduler)
+            scheduler_thread.start()
+            print(f"Scheduler started for {current_agent}")
 
         elif choice == '6':
             if not current_agent:

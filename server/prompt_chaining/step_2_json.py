@@ -138,7 +138,7 @@ def step_2(ai_model, master_file_path, number_of_episodes):
         print("Appending the season data to the master data")
         agent_master_json = manager.append_seasons(
             master_data=agent_master_json,
-            seasons_data=season_template,
+            seasons_data=season_data,
         )
 
     # step 2.9: save the master data to a file

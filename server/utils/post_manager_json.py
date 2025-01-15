@@ -66,41 +66,78 @@ class PostManager:
             json.dump(self.master_data, f, indent=2)
 
     def change_season(self, season_number: int):
-        """Change the current season"""
-        if 0 <= season_number < len(self.master_data["agent"]["seasons"]):
-            self.current_season = season_number
+        """Change the current season
+        
+        Args:
+            season_number (int): The season number (1-based, will be converted to 0-based for array access)
+        """
+        # Convert from 1-based season number to 0-based array index
+        season_index = season_number
+        
+        # Check if season exists and is not posted yet
+        if 0 <= season_index < len(self.master_data["agent"]["seasons"]):
+            print(f"Checking season: {season_index}")
+            season = self.master_data["agent"]["seasons"][season_index]
+            if not season.get("season_posted", False):
+                self.current_season = season_index  # Store as 0-based index
+                self.current_episode = 0
+                self.current_post = 0
+                self._save_master_file()
+                print(f"Changed to season {season_number}")  # Display as 1-based number
+            else:
+                print(f"Season {season_number} has already been posted")
+                raise ValueError(f"Season {season_number} has already been posted")
+        else:
+            print("No more unposted seasons available")
+            # Reset to beginning
+            self.current_season = 0
             self.current_episode = 0
             self.current_post = 0
             self._save_master_file()
-            print(f"Changed to season {season_number + 1}")
-        else:
-            raise ValueError(f"Invalid season number: {season_number}")
+            raise ValueError(f"No more content available to post")
 
     def change_episode(self, episode_number: int):
-        """Change the current episode"""
+        """Change the current episode
+        
+        Args:
+            episode_number (int): The episode number (1-based, will be converted to 0-based for array access)
+        """
+        # Convert from 1-based episode number to 0-based array index
+        episode_index = episode_number
+        
         current_season = self.master_data["agent"]["seasons"][self.current_season]
-        if episode_number >= len(current_season["episodes"]):
-            self.change_season(self.current_season + 1)
+        if episode_index >= len(current_season["episodes"]):
+            print(f"Moving to next season: {self.current_season + 1}")
+            self.change_season(self.current_season + 1)  # Move to next season
             return
 
-        self.current_episode = episode_number
+        self.current_episode = episode_index
         self.current_post = 0
         self._save_master_file()
-        print(f"Changed to episode {episode_number + 1}")
+        print(f"Changed to episode {episode_number}")  # Display as 1-based number
 
     def next_post_number(self, post_number: int) -> str:
-        """Get the next post content and update tracking"""
+        """Get the next post content and update tracking
+        
+        Args:
+            post_number (int): The post number (1-based, will be converted to 0-based for array access)
+        """
+        # Convert from 1-based post number to 0-based array index
+        post_index = post_number
+        
         current_season = self.master_data["agent"]["seasons"][self.current_season]
         current_episode = current_season["episodes"][self.current_episode]
 
-        if post_number >= len(current_episode["posts"]):
-            self.change_episode(self.current_episode + 1)
-            post_number = 0
+        if post_index >= len(current_episode["posts"]):
+            print(f"Moving to next episode: {self.current_episode + 1}")
+            self.change_episode(self.current_episode + 1)  # Move to next episode
+            post_index = 0
 
-        post = current_episode["posts"][post_number]
+        print(f"Getting post: {post_index}")
+        post = current_episode["posts"][post_index]
         post_content = post["post_content"]
         
-        self.current_post = post_number + 1
+        self.current_post = post_index + 1  # Store as 1-based for consistency with display
         self._save_master_file()
         
         return post_content
@@ -121,6 +158,8 @@ class PostManager:
                 self.current_post -= 1
                 self.tracker["current_post_number"] = self.current_post
                 self._save_master_file()
+        else:
+            print(f"\nWould have posted: \n{tweet_content}")
 
         # Log the post
         log_file = os.path.join("configs", self.agent_name, f"{self.agent_name}_post_log.json")
