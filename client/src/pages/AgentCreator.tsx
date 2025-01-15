@@ -38,11 +38,11 @@ const AgentCreator: React.FC = () => {
       topic_expertise: [],
       hashtags: [],
       emojis: [],
+      concept: '',
     },
     profile_image: [],
     profile_image_options: [],
     selectedImage: undefined,
-    concept: '',
     seasons: [],
   });
   console.log('[AgentCreator] Current agent:', agent);
@@ -212,11 +212,11 @@ const AgentCreator: React.FC = () => {
           topic_expertise: [],
           hashtags: [],
           emojis: [],
+          concept: '',
         },
         profile_image: [],
-        profile_image_options:[],
+        profile_image_options: [],
         selectedImage: undefined,
-        concept: '',
         seasons: [],
       });
 
@@ -332,11 +332,11 @@ const AgentCreator: React.FC = () => {
         topic_expertise: details.topic_expertise || [],
         hashtags: details.hashtags || [],
         emojis: details.emojis || [],
+        concept: details.concept || '',
       },
       profile_image: char.agent?.profile_image_options || [],
       profile_image_options: char.agent?.profile_image_options || [],
       selectedImage: 0,
-      concept: char.concept || '',
       seasons: char.agent?.seasons || [],
     });
 
