@@ -20,7 +20,7 @@ import yaml
 import json
 import sys
 import os
-
+import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
@@ -69,14 +69,40 @@ def step_1(ai_model, concept: str):
         "agent_json": json.dumps(agent_template)        
     }
 
-    # step 1.3: Run the prompt
-    print("Sending prompt to AI to create a new agent")
-    agent_data = manager.run_prompt(
-        prompt_key="prompt_1 (Character Sheet Creation)",
-        template_vars=prompt_1_vars, 
-        ai_model=ai_model,
-        debug=False
-    )
+     # Constants for retry configuration
+    max_retries = 3
+    delay = 2  # seconds between retries
+
+    # step 3.11: Run the prompt with retry logic for LLM failures
+    success = False
+    for attempt in range(max_retries):
+        try:
+            # step 1.3: Run the prompt
+            print("Sending prompt to AI to create a new agent")
+            agent_data = manager.run_prompt(
+                prompt_key="prompt_1 (Character Sheet Creation)",
+                template_vars=prompt_1_vars, 
+                ai_model=ai_model,
+                debug=False
+            )
+            
+            # Validate that posts_data is valid JSON and has expected structure
+            if isinstance(agent_data, dict) and 'agent' in agent_data:
+                success = True
+                break
+            else:
+                print(f"Invalid response format. Attempt {attempt + 1}/{max_retries}")
+                
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"Error on attempt {attempt + 1}/{max_retries}: {str(e)}")
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            continue
+    
+    if not success:
+        print("Max retries reached. Failed to get valid response from LLM.")
+        return None
 
     # step 1.4: Merge agent details into the master template
     print("Merging agent details into the master template")

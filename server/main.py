@@ -217,21 +217,12 @@ if __name__ == "__main__":
                 if not seasons:
                     print("No seasons found for this agent!")
                     continue
-                    
-                print("\nAvailable Seasons:")
-                for idx, season in enumerate(seasons, 1):
-                    print(f"{idx}. {season}")
-                
+                                    
                 try:
-                    season_idx = int(input("\nSelect season number: ")) - 1
-                    if 0 <= season_idx < len(seasons):
-                        current_season = seasons[season_idx]
-                        step_3.step_3(ai_model, agent_file_path, 6)
-                        print(f"\nSelected season: {current_season}")
-                    else:
-                        print("Invalid selection!")
-                except ValueError:
-                    print("Please enter a valid number!")
+                    print("Creating a new season posts...")
+                    step_3.step_3(ai_model, agent_file_path, 6)
+                except Exception as e:
+                    print(f"Error creating season posts: {str(e)}")
 
         elif choice == '5':
             if not current_agent:
@@ -241,17 +232,29 @@ if __name__ == "__main__":
             if scheduler_thread and scheduler_thread.is_alive():
                 print("Scheduler is already running!")
                 continue
-                
-            # Clear existing schedule
-            schedule.clear()
-            # Set up new schedule
-            schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
-            # uncomment this line if you wnat to test the scheduler and the content made by ai
-            # schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
-            scheduler_running = True
-            scheduler_thread = threading.Thread(target=run_scheduler)
-            scheduler_thread.start()
-            print(f"Scheduler started for {current_agent}")
+            
+            try:
+                # Clear existing schedule
+                schedule.clear()
+                # Set up new schedule
+                if post_manager is None:
+                    print("Error: Post manager not initialized!")
+                    continue
+                    
+                if post_every_x_minutes is None:
+                    print("Error: Posting interval not set!")
+                    continue
+                    
+                schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
+                # schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
+                scheduler_running = True
+                scheduler_thread = threading.Thread(target=run_scheduler)
+                scheduler_thread.daemon = True  # Make thread daemon so it exits when main program exits
+                scheduler_thread.start()
+                print(f"Scheduler started for {current_agent}")
+                print(f"Will post every {post_every_x_minutes} minutes")
+            except Exception as e:
+                print(f"Error starting scheduler: {str(e)}")
 
         elif choice == '6':
             if not current_agent:

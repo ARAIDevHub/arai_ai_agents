@@ -90,14 +90,40 @@ def step_2(ai_model, master_file_path, number_of_episodes):
         "number_of_episodes": number_of_episodes
     }
 
-    # step 2.4: Run the prompt 
-    print("Sending prompt to AI to create a new season")
-    season_data = manager.run_prompt(
-        # prompt_key="prompt_1 (Character Creation)",
-        prompt_key="prompt_2 (Season Creation)",
-        template_vars=prompt_2_vars, 
-        ai_model=ai_model,
-    )
+    # Constants for retry configuration
+    max_retries = 3
+    delay = 2  # seconds between retries
+
+    # step 3.11: Run the prompt with retry logic for LLM failures
+    success = False
+    for attempt in range(max_retries):
+        try:
+            # step 2.4: Run the prompt 
+            print("Sending prompt to AI to create a new season")
+            season_data = manager.run_prompt(
+                # prompt_key="prompt_1 (Character Creation)",
+                prompt_key="prompt_2 (Season Creation)",
+                template_vars=prompt_2_vars, 
+                ai_model=ai_model,
+            )
+            
+            # Validate that posts_data is valid JSON and has expected structure
+            if isinstance(season_data, dict) and 'seasons' in season_data:
+                success = True
+                break
+            else:
+                print(f"Invalid response format. Attempt {attempt + 1}/{max_retries}")
+                
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"Error on attempt {attempt + 1}/{max_retries}: {str(e)}")
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            continue
+    
+    if not success:
+        print("Max retries reached. Failed to get valid response from LLM.")
+        return None
 
     #print(f"season data is: {season_data}")
 
