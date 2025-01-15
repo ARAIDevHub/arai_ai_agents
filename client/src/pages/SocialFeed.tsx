@@ -102,8 +102,8 @@ const SocialFeed: React.FC = () => {
               <div 
                 className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600"
                 style={{
-                  backgroundImage: selectedCharacter?.agent.agent_details.selectedImage !== undefined 
-                    ? `url(/path/to/your/images/${selectedCharacter.agent.agent_details.selectedImage}.jpg)` 
+                  backgroundImage: selectedCharacter?.agent.profile_image?.details?.url 
+                    ? `url(${selectedCharacter.agent.profile_image.details.url})` 
                     : undefined,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
