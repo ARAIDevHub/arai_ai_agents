@@ -12,15 +12,9 @@ import {
   RefreshCcw,
 } from 'lucide-react';
 import { createAgent, getCharacters } from '../api/agentsAPI';
-import agent1 from '../assets/agent-images/agent1.jpg';
-import agent2 from '../assets/agent-images/agent2.jpg';
-import agent3 from '../assets/agent-images/agent3.jpg';
-import agent4 from '../assets/agent-images/agent4.jpg';
 import { AgentDetails, Agent } from '../interfaces/AgentInterfaces';
 import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
-import CharacterLoader from '../components/CharacterLoader';
-
-const agentImages = [agent1, agent2, agent3, agent4];
+import useCharacters from '../hooks/useCharacters';
 
 const AgentCreator: React.FC = () => {
   console.log('[AgentCreator] Rendering...'); // Keep your console logs
@@ -34,32 +28,34 @@ const AgentCreator: React.FC = () => {
     useState<'basic' | 'personality' | 'style'>('basic');
 
   // The main agent object
-  const [agent, setAgent] = useState<AgentDetails>({
-    name: '',
-    personality: [],
-    communication_style: [],
-    backstory: '',
-    universe: '',
-    topic_expertise: [],
-    hashtags: [],
-    emojis: [],
+  const [agent, setAgent] = useState({
+    agent_details: {
+      name: '',
+      personality: [],
+      communication_style: [],
+      backstory: '',
+      universe: '',
+      topic_expertise: [],
+      hashtags: [],
+      emojis: [],
+    },
+    profile_image: [],
+    profile_image_options: [],
     selectedImage: undefined,
+    concept: '',
+    seasons: [],
   });
   console.log('[AgentCreator] Current agent:', agent);
 
   // The fetched characters
-  const [characters, setCharacters] = useState<Agent[]>([]);
+  const { characters, loading, error } = useCharacters();
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
   // 2) Local Drafts for “normal” fields (name, universe, backstory)
   // ──────────────────────────────────────────────────────────────────────────────
   //
-  const [draftFields, setDraftFields] = useState<{
-    name: string;
-    universe: string;
-    backstory: string;
-  }>({
+  const [draftFields, setDraftFields] = useState({
     name: '',
     universe: '',
     backstory: '',
@@ -68,9 +64,9 @@ const AgentCreator: React.FC = () => {
   // Keep them in sync if agent changes
   useEffect(() => {
     setDraftFields({
-      name: agent.name || '',
-      universe: agent.universe || '',
-      backstory: agent.backstory || '',
+      name: agent.agent_details.name || '',
+      universe: agent.agent_details.universe || '',
+      backstory: agent.agent_details.backstory || '',
     });
   }, [agent]);
 
@@ -100,12 +96,11 @@ const AgentCreator: React.FC = () => {
   // Whenever agent changes, rebuild the draft strings
   useEffect(() => {
     setDraftTraits({
-      topic_expertise: agent.topic_expertise.join(', '),
-      personality: agent.personality.join(', '),
-      communication_style: agent.communication_style.join(', '),
-      hashtags: agent.hashtags.join(', '),
-      // For emojis, join by space
-      emojis: agent.emojis.join(' '),
+      topic_expertise: agent.agent_details.topic_expertise.join(', '),
+      personality: agent.agent_details.personality.join(', '),
+      communication_style: agent.agent_details.communication_style.join(', '),
+      hashtags: agent.agent_details.hashtags.join(', '),
+      emojis: agent.agent_details.emojis.join(' '),
     });
   }, [agent]);
 
@@ -133,7 +128,10 @@ const AgentCreator: React.FC = () => {
         console.log(`[handleDraftKeyDown] Committing ${field}:`, draftFields[field]);
         setAgent(prev => ({
           ...prev,
-          [field]: draftFields[field],
+          agent_details: {
+            ...prev.agent_details,
+            [field]: draftFields[field],
+          }
         }));
       }
     };
@@ -167,7 +165,10 @@ const AgentCreator: React.FC = () => {
 
         setAgent(prev => ({
           ...prev,
-          [field]: arrayValue,
+          agent_details: {
+            ...prev.agent_details,
+            [field]: arrayValue
+          }
         }));
       }
     };
@@ -178,9 +179,10 @@ const AgentCreator: React.FC = () => {
     setAgent(prev => {
       const updatedAgent = {
         ...prev,
-        [field]: Array.isArray(prev[field])
-  ? prev[field].filter((trait: string) => trait !== value)
-  : [],
+        agent_details: {
+          ...prev.agent_details,
+          [field]: prev.agent_details[field].filter((trait: string) => trait !== value)
+        }
       };
       console.log('Updated agent after deletion:', updatedAgent);
       return updatedAgent;
@@ -201,15 +203,21 @@ const AgentCreator: React.FC = () => {
 
       // Reset agent
       setAgent({
-        name: '',
-        personality: [],
-        communication_style: [],
-        backstory: '',
-        universe: '',
-        topic_expertise: [],
-        hashtags: [],
-        emojis: [],
+        agent_details: {
+          name: '',
+          personality: [],
+          communication_style: [],
+          backstory: '',
+          universe: '',
+          topic_expertise: [],
+          hashtags: [],
+          emojis: [],
+        },
+        profile_image: [],
+        profile_image_options:[],
         selectedImage: undefined,
+        concept: '',
+        seasons: [],
       });
 
       // Reset local fields
@@ -244,10 +252,11 @@ const AgentCreator: React.FC = () => {
 
         const processed = charactersData.map(char => {
 
-          const agentProfileImage = char.agent.profile_image_options;
+          const agentProfileImageOptions = char.agent.profile_image_options;
+          console.log('Agent profile image options:', agentProfileImageOptions);  
           const agentConcept = char.concept;
 
-          console.log("Agent profile image:", agentProfileImage);
+          // console.log("Agent profile image options:", agentProfileImageOptions);
 
           const { agent, } = char;
           console.log('Mapping a character:', char);
@@ -284,7 +293,7 @@ const AgentCreator: React.FC = () => {
               },
               ai_model,
               connectors,
-              profile_image: agentProfileImage || [],
+              profile_image: agentProfileImageOptions || [],
               seasons,
               tracker,
             },
@@ -307,35 +316,37 @@ const AgentCreator: React.FC = () => {
   // 9) Select a character
   // ──────────────────────────────────────────────────────────────────────────────
   //
-  const handleCharacterSelect = (character: Agent) => {
-    console.log('[handleCharacterSelect] selected character:', character);
-    const details = character.agent?.agent_details;
-    if (!details) {
-      console.error('Selected character has invalid data structure');
-      return;
-    }
-
+  const handleCharacterSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    const char = characters.find(c => c.agent?.agent_details?.name === e.target.value);
+    if (!char?.agent?.agent_details) return;
+    
+    const details = char.agent.agent_details;
+    
     setAgent({
-      name: details.name || '',
-      personality: details.personality || [],
-      communication_style: details.communication_style || [],
-      backstory: details.backstory || '',
-      universe: details.universe || '',
-      topic_expertise: details.topic_expertise || [],
-      hashtags: details.hashtags || [],
-      emojis: details.emojis || [],
+      agent_details: {
+        name: details.name || '',
+        personality: details.personality || [],
+        communication_style: details.communication_style || [],
+        backstory: details.backstory || '',
+        universe: details.universe || '',
+        topic_expertise: details.topic_expertise || [],
+        hashtags: details.hashtags || [],
+        emojis: details.emojis || [],
+      },
+      profile_image: char.agent?.profile_image_options || [],
+      profile_image_options: char.agent?.profile_image_options || [],
       selectedImage: 0,
-      seasons: character.agent?.seasons || [],
-      concept: character.concept || '',
-      profile_image: character.agent?.profile_image || [],
+      concept: char.concept || '',
+      seasons: char.agent?.seasons || [],
     });
 
-    // Also sync local drafts
+    // Sync local drafts
     setDraftFields({
       name: details.name || '',
       universe: details.universe || '',
       backstory: details.backstory || '',
     });
+    
     setDraftTraits({
       topic_expertise: (details.topic_expertise || []).join(', '),
       personality: (details.personality || []).join(', '),
@@ -343,8 +354,6 @@ const AgentCreator: React.FC = () => {
       hashtags: (details.hashtags || []).join(', '),
       emojis: (details.emojis || []).join(' '),
     });
-
-    console.log('[handleCharacterSelect] The current agent is :', details);
   };
 
   //
@@ -354,7 +363,6 @@ const AgentCreator: React.FC = () => {
   //
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
-      <CharacterLoader setCharacters={setCharacters} />
       {/* Left Panel */}
       <div className="w-1/2 p-6 border-r border-orange-500/20">
         <div className="h-full flex flex-col space-y-6">
@@ -390,8 +398,13 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {console.log('Profile images:', agent.profile_image?.[0]?.generations_by_pk?.generated_images)}
-            {agent.profile_image?.[0]?.generations_by_pk?.generated_images?.map((image, index) => (
+            {console.log('Image options path:', {
+              full_path: agent.profile_image_options?.[0]?.generations_by_pk?.generated_images,
+              step1: agent.profile_image_options,
+              step2: agent.profile_image_options?.[0],
+              step3: agent.profile_image_options?.[0]?.generations_by_pk,
+            })}
+            {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map((image, index) => (
               <div
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 
@@ -414,7 +427,7 @@ const AgentCreator: React.FC = () => {
           <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">Agent Name</div>
-              <div className="text-gray-300">{agent.name}</div>
+              <div className="text-gray-300">{agent.agent_details.name}</div>
             </div>
           </div>
         </div>
@@ -490,7 +503,7 @@ const AgentCreator: React.FC = () => {
                   </label>
                   <TraitButtons
                     field="topic_expertise"
-                    options={agent.topic_expertise}
+                    options={agent.agent_details.topic_expertise}
                     onTraitButtonClick={handleDeleteTrait}
                   />
                   <textarea
@@ -515,7 +528,7 @@ const AgentCreator: React.FC = () => {
                   </label>
                   <TraitButtons
                     field="personality"
-                    options={agent.personality}
+                    options={agent.agent_details.personality}
                     onTraitButtonClick={handleDeleteTrait}
                   />
                   <textarea
@@ -556,7 +569,7 @@ const AgentCreator: React.FC = () => {
                   </label>
                   <TraitButtons
                     field="communication_style"
-                    options={agent.communication_style}
+                    options={agent.agent_details.communication_style}
                     onTraitButtonClick={handleDeleteTrait}
                   />
                   <textarea
@@ -577,7 +590,7 @@ const AgentCreator: React.FC = () => {
                   </label>
                   <TraitButtons
                     field="hashtags"
-                    options={agent.hashtags}
+                    options={agent.agent_details.hashtags}
                     onTraitButtonClick={handleDeleteTrait}
                   />
                   <textarea
@@ -598,7 +611,7 @@ const AgentCreator: React.FC = () => {
                   </label>
                   <TraitButtons
                     field="emojis"
-                    options={agent.emojis}
+                    options={agent.agent_details.emojis}
                     onTraitButtonClick={handleDeleteTrait}
                   />
                   <textarea
@@ -631,24 +644,29 @@ const AgentCreator: React.FC = () => {
           <label className="text-sm text-cyan-200 block mb-2">
             Select Existing Character
           </label>
-          <select
-            onChange={(e) => {
-              const selected = characters.find(
-                (c) => c.agent?.agent_details?.name === e.target.value
-              );
-              if (selected) handleCharacterSelect(selected);
-            }}
-            className="w-full px-3 py-2 rounded-md bg-slate-900/50 border 
+          {loading ? (
+            <div className="text-cyan-400">Loading characters...</div>
+          ) : error ? (
+            <div className="text-red-400">Error loading characters: {error.message}</div>
+          ) : (
+            <select 
+              className="w-full px-3 py-2 rounded-md bg-slate-900/50 border 
                        border-orange-500/20 text-white focus:ring-2 
                        focus:ring-orange-500/50 focus:outline-none"
-          >
-            <option value="">-- Select a Character --</option>
-            {characters.map((char, idx) => (
-              <option key={idx} value={char.agent?.agent_details?.name}>
-                {char.agent?.agent_details?.name || 'Unnamed Character'}
-              </option>
-            ))}
-          </select>
+              onChange={handleCharacterSelect}
+              value={agent.agent_details.name || ""}
+            >
+              <option value="">-- Select a Character --</option>
+              {characters.map((char, index) => (
+                <option 
+                  key={index} 
+                  value={char.agent?.agent_details?.name}
+                >
+                  {char.agent?.agent_details?.name || 'Unnamed Character'}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
     </div>

@@ -17,53 +17,6 @@ import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
 import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
 
-// // Define the Agent type
-// interface Agent {
-//   id: number;
-//   name: string;
-//   avatar: string;
-//   role: string;
-//   shortDescription?: string; // Optional property
-//   tags: string[];
-//   personality: string;
-//   communicationStyle: string;
-//   abilities: string[];
-//   placeholder?: boolean; // Add optional placeholder property
-// }
-
-// Define the props for AgentCard
-interface AgentCardProps {
-  agent: Agent;
-  onSelect: (agent: Agent) => void;
-  onAdd?: (agent: Agent) => void; // Optional onAdd prop for random agents
-  isUserAgent?: boolean; // Flag to indicate if it's a user agent
-  setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>; // Add setRandomAgents prop
-  generateRandomAgent: () => Agent; // Add generateRandomAgent prop
-  isLoadedAgent?: boolean; // New prop to indicate if the agent is loaded
-}
-
-// Regenerate Button Component
-interface RegenerateButtonProps {
-  onRegenerate: () => void;
-}
-
-const RegenerateButton: React.FC<RegenerateButtonProps> = ({
-  onRegenerate,
-}) => {
-  return (
-    <button
-      className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md flex items-center justify-center gap-2"
-      onClick={(e) => {
-        e.stopPropagation();
-        onRegenerate();
-      }}
-    >
-      <RefreshCcw className="w-4 h-4" />
-      Regenerate
-    </button>
-  );
-};
-
 const AgentGallery: React.FC = () => {
   const { characters: loadedAgents, loading, error } = useCharacters();
   console.log('[AgentGallery] - loaded agents:', loadedAgents);

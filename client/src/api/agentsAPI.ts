@@ -11,6 +11,7 @@ export async function getAgents() {
 
 // Function to create a new agent
 export async function createAgent(agentData: any) {
+  console.log('[Client - agentsApi] - agentData', agentData);
   const response = await fetch(`${BASE_URL}/agents`, {
     method: 'POST',
     headers: {
