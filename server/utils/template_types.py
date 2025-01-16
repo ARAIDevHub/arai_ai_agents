@@ -31,3 +31,4 @@ class TemplateType:
     EPISODE = "episode"
     PROFILE_IMAGE = "profile_image"
     PROFILE_IMAGE_OPTIONS = "profile_image_options"
+    CHAT = "chat"
