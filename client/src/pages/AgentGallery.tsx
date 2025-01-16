@@ -143,37 +143,45 @@ const AgentGallery: React.FC = () => {
 
   const generateNewAgent = async () => {
     setIsGenerating(true);
-    const newAgent = generateRandomAgent();
     
     try {
+      // Generate 3 unique agents
+      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
       const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
       const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
       
-      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
-                     Their personality can be described as ${newAgent.personality}. 
+      // Set initial state with loading indicators for all 3 agents
+      setRandomAgents(newAgents.map(agent => ({ ...agent, avatar: '', isLoading: true })));
+
+      // Generate images for all agents concurrently
+      const imagePromises = newAgents.map(async (agent) => {
+        const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
+                     Their personality can be described as ${agent.personality}. 
                      Style: high quality, detailed anime art, character portrait`;
 
-      // Set the initial state with loading indicator
-      setRandomAgents([{ ...newAgent, avatar: '', isLoading: true }]);
-
-      const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
-      
-      if (imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+        const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
+        if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+          throw new Error('No image URL received');
+        }
+        
         const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
         const loadedImageUrl = await loadImageWithFallback(imageUrl);
-        
-        // Only update state once with the final data
-        setRandomAgents([{ ...newAgent, avatar: loadedImageUrl, isLoading: false }]);
-      } else {
-        throw new Error('No image URL received');
-      }
+        return { ...agent, avatar: loadedImageUrl, isLoading: false };
+      });
+
+      // Wait for all images to be generated
+      const completedAgents = await Promise.all(imagePromises);
+      setRandomAgents(completedAgents);
+
     } catch (error) {
-      console.error('[AgentGallery] Error generating agent:', error);
-      setRandomAgents([{
-        ...newAgent,
+      console.error('[AgentGallery] Error generating agents:', error);
+      // If error, show placeholder for all agents
+      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
+      setRandomAgents(newAgents.map(agent => ({
+        ...agent,
         avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
         isLoading: false
-      }]);
+      })));
     } finally {
       setIsGenerating(false);
     }
