@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Heart,
   MessageCircle,
@@ -14,6 +14,28 @@ import RandomAgentCard from '../components/RandomAgentCard'; // Import the new c
 import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
 import { generateSingleImage } from '../api/leonardoApi';
 
+// Add a utility function to handle image loading
+const loadImageWithFallback = async (url: string): Promise<string> => {
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit', // Don't send cookies
+      headers: {
+        'Accept': 'image/*'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Image failed to load');
+    }
+    
+    return url;
+  } catch (error) {
+    console.error('[AgentGallery] Error loading image:', error);
+    return 'https://via.placeholder.com/400x400?text=Image+Load+Failed';
+  }
+};
+
 const AgentGallery: React.FC = () => {
   const { characters: loadedAgents, loading, error } = useCharacters();
   console.log('[AgentGallery] - loaded agents:', loadedAgents);
@@ -22,6 +44,7 @@ const AgentGallery: React.FC = () => {
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const [yourAgents, setYourAgents] = useState<Agent[]>([]);
   const [isGenerating, setIsGenerating] = useState<boolean>(true);
+  const initialMount = useRef(true);
 
   // Define generateRandomAgent inside AgentGallery so it's accessible to child components
   const generateRandomAgent = (): Agent => {
@@ -118,77 +141,49 @@ const AgentGallery: React.FC = () => {
     setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
   };
 
-  const handleRegenerateAll = () => {
+  const generateNewAgent = async () => {
     setIsGenerating(true);
-    // Set all random agents to a loading state
-    setRandomAgents(randomAgents.map(agent => ({
-      ...generateRandomAgent(),
-      avatar: '',
-      isLoading: true
-    })));
+    const newAgent = generateRandomAgent();
+    
+    try {
+      const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+      const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+      
+      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
+                     Their personality can be described as ${newAgent.personality}. 
+                     Style: high quality, detailed anime art, character portrait`;
 
-    // Your existing regeneration logic...
-    setTimeout(() => {
-      const newRandomAgents = [...Array(3)].map(() => ({
-        ...generateRandomAgent(),
+      // Set the initial state with loading indicator
+      setRandomAgents([{ ...newAgent, avatar: '', isLoading: true }]);
+
+      const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
+      
+      if (imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+        const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
+        const loadedImageUrl = await loadImageWithFallback(imageUrl);
+        
+        // Only update state once with the final data
+        setRandomAgents([{ ...newAgent, avatar: loadedImageUrl, isLoading: false }]);
+      } else {
+        throw new Error('No image URL received');
+      }
+    } catch (error) {
+      console.error('[AgentGallery] Error generating agent:', error);
+      setRandomAgents([{
+        ...newAgent,
+        avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
         isLoading: false
-      }));
-      setRandomAgents(newRandomAgents);
+      }]);
+    } finally {
       setIsGenerating(false);
-    }, 500);
+    }
   };
 
   useEffect(() => {
-    const initializeRandomAgents = async () => {
-      console.log('[AgentGallery] Initializing random agents...');
-      setIsGenerating(true);
-      
-      // Create initial placeholder array with all agents at once
-      const placeholders = Array(1).fill(null).map(() => ({
-        ...generateRandomAgent(),
-        avatar: '',
-        isLoading: true
-      }));
-      setRandomAgents(placeholders);
-      
-      // Generate all agents in parallel instead of sequentially
-      const generatedAgents = await Promise.all(
-        placeholders.map(async () => {
-          const agent = generateRandomAgent();
-          console.log('[AgentGallery] Generated random agent:', agent);
-          
-          try {
-            const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-            const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
-            
-            const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
-                         Their personality can be described as ${agent.personality}. 
-                         Style: high quality, detailed anime art, character portrait`;
-            
-            const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
-            
-            if (imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
-              agent.avatar = imageResponse.generations_by_pk.generated_images[0].url;
-              console.log('[AgentGallery] Successfully set agent avatar:', agent.avatar);
-            } else {
-              throw new Error('No image URL received');
-            }
-          } catch (error) {
-            console.error('[AgentGallery] Error generating image:', error);
-            agent.avatar = 'https://via.placeholder.com/400x400?text=Image+Generation+Failed';
-          }
-          
-          return { ...agent, isLoading: false };
-        })
-      );
-      
-      // Update state only once with all generated agents
-      setRandomAgents(generatedAgents);
-      setIsGenerating(false);
-      console.log('[AgentGallery] Generated all random agents:', generatedAgents);
-    };
-
-    initializeRandomAgents();
+    if (initialMount.current) {
+      initialMount.current = false;
+      generateNewAgent();
+    }
   }, []);
 
   return (
@@ -231,7 +226,7 @@ const AgentGallery: React.FC = () => {
           {(filter === 'all' || filter === 'random') && (
             <button
               className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md text-white flex items-center gap-2"
-              onClick={handleRegenerateAll}
+              onClick={generateNewAgent}
             >
               <RefreshCcw className="w-4 h-4" />
               Regenerate All
@@ -241,8 +236,7 @@ const AgentGallery: React.FC = () => {
 
         {/* Agents Section */}
         <div>
-          {/* All Agents */}
-          {filter === 'all' && (
+          {(filter === 'all' || filter === 'random') && (
             <>
               <h2 className="text-xl font-semibold mb-4 text-white">Random Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
@@ -259,56 +253,35 @@ const AgentGallery: React.FC = () => {
                   />
                 ))}
               </div>
+            </>
+          )}
+
+          {filter === 'all' && (
+            <>
               <h2 className="text-xl font-semibold mt-8 mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
-                   <LoadedAgentCard
-                  //  key={agent.id}
-                   agent={agent}
-                   onSelect={setSelectedAgent}
-                  //  onAdd={handleAddAgent}
-                  //  isUserAgent={false}
-                  //  setRandomAgents={setRandomAgents}
-                  //  generateRandomAgent={generateRandomAgent}
-                  //  isLoadedAgent={true}
-                 />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Random Agents */}
-          {filter === 'random' && (
-            <>
-              <h2 className="text-xl font-semibold mb-4 text-white">Random Agents</h2>
-              <div className="flex flex-wrap gap-6 justify-center">
-                {randomAgents.map((agent) => (
-                  <RandomAgentCard
+                  <LoadedAgentCard
                     key={agent.id}
                     agent={agent}
                     onSelect={setSelectedAgent}
-                    onAdd={handleAddAgent}
-                    isUserAgent={false}
-                    setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
-                    isLoadedAgent={true}
                   />
                 ))}
               </div>
             </>
           )}
-
-          {/* Your Agents */}
+          
+          {/* Your Agents filter section */}
           {filter === 'yourAgents' && (
             <>
               <h2 className="text-xl font-semibold mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
-          <LoadedAgentCard
-          key={agent.id}
-          agent={agent}
-          onSelect={setSelectedAgent}
-        />
+                  <LoadedAgentCard
+                    key={agent.id}
+                    agent={agent}
+                    onSelect={setSelectedAgent}
+                  />
                 ))}
               </div>
             </>

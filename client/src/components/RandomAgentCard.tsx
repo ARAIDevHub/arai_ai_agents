@@ -65,35 +65,23 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       
       // Generate image using Leonardo API
       if (generateImage) {
-        // Using the anime model and style from leonard_anime_styles.json
         const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8"; // Leonardo Anime XL
         const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f"; // Anime General
         
-        // Create prompt based on agent characteristics
         const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
                        Their personality can be described as ${newAgent.personality}. 
                        Style: high quality, detailed anime art, character portrait`;
         
         const imageResponse = await generateImage(prompt, modelId, styleUUID);
         
-        // Update the agent's avatar with the new generated image
         if (imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
           newAgent.avatar = imageResponse.generations_by_pk.generated_images[0].url;
         }
       }
 
-      setRandomAgents((prevAgents: Agent[]) => {
-        // Check if the new agent's name or ID already exists
-        while (prevAgents.some(a => a.name === newAgent.name || a.id === newAgent.id)) {
-          Object.assign(newAgent, generateRandomAgent());
-        }
-        
-        // Replace the current agent with the new one while maintaining max 3 agents
-        const updatedAgents = prevAgents.map((a: Agent) =>
-          a.id === agent.id ? { ...newAgent, id: newAgent.id } : a
-        );
-        return updatedAgents.slice(0, 3);
-      });
+      setRandomAgents(prevAgents => 
+        prevAgents.map(a => a.id === agent.id ? newAgent : a)
+      );
 
     } catch (error) {
       console.error('Error generating new agent or image:', error);

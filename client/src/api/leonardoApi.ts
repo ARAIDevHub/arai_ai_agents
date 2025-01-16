@@ -89,8 +89,9 @@ export async function generateSingleImage(
 
     // Poll for the generated image
     let attempts = 0;
-    const maxAttempts = 20;
-    const delayMs = 1000;
+    const maxAttempts = 10;
+    const delayMs = 5000;
+    console.log('[LeonardoApi - generateSingleImage] Polling for generated image...');
 
     while (attempts < maxAttempts) {
       const imageResponse = await fetch(
@@ -109,6 +110,7 @@ export async function generateSingleImage(
       }
 
       await new Promise(resolve => setTimeout(resolve, delayMs));
+      console.log("LeonardoApi - generateSingleImage - Attempts:", attempts);
       attempts++;
     }
 

@@ -11,7 +11,6 @@ const useProcessCharacters = (characters: any[]) => {
       // Char is the raw data from the API
       // Destructure the char object to extract the necessary fields
       const { agent } = char;
-      console.log('[useProcessCharacters] - agent:', agent);
 
       return {
         agent: {

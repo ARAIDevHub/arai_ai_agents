@@ -11,7 +11,6 @@ interface AgentCardProps {
 }
 
 const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
-  console.log('[LoadedAgentCard] - agent:', agent);  
   agent = agent.agent
   // console.log('[LoadedAgentCard] - agent.agent_details.name:', agent.agent_details.name);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -25,14 +24,6 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const concept = agent.agent_details?.concept || 'No concept available';
   const profileImageUrl = agent.profile_image?.details?.url || "";
 
-  console.log('[LoadedAgentCard] - agentName:', agentName);
-  console.log('[LoadedAgentCard] - agentPersonality:', agentPersonality);
-  console.log('[LoadedAgentCard] - agentCommunicationStyle:', agentCommunicationStyle);
-  console.log('[LoadedAgentCard] - agentAbilities:', agentBackstory);
-  console.log('[LoadedAgentCard] - agentHashtags:', agentHashtags);
-  console.log('[LoadedAgentCard] - agentEmojis:', agentEmojis);
-  console.log('[LoadedAgentCard] - concept:', concept);
-  console.log('[LoadedAgentCard] - profileImageUrl:', profileImageUrl);
     return (
     <div className="relative">
       {/* Label to indicate it's a loaded agent */}
