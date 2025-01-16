@@ -16,25 +16,20 @@
 #     - https://x.com/TheBlockRhino
 
 # standard imports
-import yaml
 import os
+import json
 import datetime
 
 # custom ARAI code imports
 import connectors.twitter_connector as twitter
 
 class PostManager:
-    """Manages the post manager.
+    """Manages posts for an agent using JSON configuration files.
 
     Attributes:
         agent_name (str): The name of the agent
-        root_folder (str): The root folder
-        agent_folder (str): The agent folder
-        season_folder (str): The season folder
-        episode_folder (str): The episode folder
-        tracker_file (str): The tracker file
-        season_file (str): The season file
-        episode_file (str): The episode file
+        master_file (str): Path to the agent's master JSON file
+        twitter_connector: Twitter API connector instance
     """
     def __init__(self, agent_name: str):
         """Initialize the post manager
@@ -43,195 +38,146 @@ class PostManager:
             agent_name (str): The name of the agent
 
         Raises:
-            Exception: If there's an error initializing the post manager
-
-        Example:
-            >>> post_manager = PostManager("ZorpTheAlien")
+            FileNotFoundError: If master JSON file doesn't exist
         """
-
-        # step 1: get the twitter connector
+        self.agent_name = agent_name
+        self.master_file = os.path.join("configs", agent_name, f"{agent_name}_master.json")
         self.twitter_connector = twitter.TwitterConnector()
 
-        # step 2: get the agent name
-        self.agent_name = agent_name
+        # Load master configuration
+        with open(self.master_file, 'r', encoding='utf-8') as f:
+            self.master_data = json.load(f)
 
-        # step 3: get the folders
-        self.root_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "configs")
-        #self.agent_folder = os.path.join(self.root_folder, "ZorpTheAlien")
-        self.agent_folder = os.path.join(self.root_folder, self.agent_name)
-        self.season_folder = os.path.join(self.agent_folder, "season_1")
-        self.episode_folder = self.season_folder
+        # Get current tracking info
+        self.tracker = self.master_data["agent"]["tracker"]
+        self.current_season = self.tracker["current_season_number"]
+        self.current_episode = self.tracker["current_episode_number"]
+        self.current_post = self.tracker["current_post_number"]
 
-        print (f"Agent folder: {self.agent_folder}")
+    def _save_master_file(self):
+        """Save the master JSON file with updated tracking information"""
+        # Update master data from local variables
+        self.master_data["agent"]["tracker"]["current_season_number"] = self.current_season
+        self.master_data["agent"]["tracker"]["current_episode_number"] = self.current_episode
+        self.master_data["agent"]["tracker"]["current_post_number"] = self.current_post
 
-        # step 4: get the tracker file
-        self.tracker_file = os.path.join(self.agent_folder, "tracker.yaml")
-
-        # Load the YAML file into a dictionary
-        with open(self.tracker_file, 'r', encoding='utf-8') as f:
-            self.tracker_data = yaml.safe_load(f)
-
-        # step 5: get the season file
-        self.season_file = os.path.join(self.season_folder, "season_" + str(self.tracker_data['current_season_number']) + ".yaml")
-
-        # step 6: get the episode file
-        self.episode_file = os.path.join(self.episode_folder, "s" + str(self.tracker_data['current_season_number']) + "_episode_" + str(self.tracker_data['current_episode_number']) + ".yaml")
-        
-        # step 7: load season yaml file
-        with open(self.season_file, 'r', encoding='utf-8') as f:
-            self.season_data = yaml.safe_load(f)
-
-        # step 8: load episode yaml file
-        # load episode yaml file
-        with open(self.episode_file, 'r', encoding='utf-8') as f:
-            self.episode_data = yaml.safe_load(f)
-
-        # step 9: setup counters
-        # remember that code uses indexes starting at 0
-        # even if we have the number for the season, episode, and post starting at 1
-        self.season_number = self.tracker_data['current_season_number']
-        self.episode_number = self.tracker_data['current_episode_number']
-        self.post_number = self.tracker_data['current_post_number']
-
-        # step 10: print the counters
-        print ("post_number: ", self.post_number)
-        print ("episode_number: ", self.episode_number)
-        print ("season_number: ", self.season_number)
-
+        # Save to file
+        with open(self.master_file, 'w', encoding='utf-8') as f:
+            json.dump(self.master_data, f, indent=2)
 
     def change_season(self, season_number: int):
-        """Change the season
-
-        Args:
-            season_number (int): The season number
-
-        Example:
-            >>> post_manager.change_season(1)
-        """
-
-        print(f"Changing season to ({season_number} + 1)")
-        self.season_file = f"configs/{self.agent_name}/season_{season_number}/season_{season_number}.yaml"
-
-        with open(self.season_file, 'r', encoding='utf-8') as f:
-            self.season_data = yaml.safe_load(f)
-
-        # save the tracker data
-        self.tracker_data['current_season_number'] = season_number
-        with open(self.tracker_file, 'w', encoding='utf-8') as f:
-            yaml.dump(self.tracker_data, f)
-
-        print(f"Changed season to {self.season_file}")
-
-    def change_episode(self, episode_number: int):  
-        """Change the episode
-
-        Args:
-            episode_number (int): The episode number
-
-        Example:
-            >>> post_manager.change_episode(1)
-        """
-
-        if episode_number >= 28-1:
-            self.change_season(self.season_number + 1)            
-            self.episode_number = 1
-
-        self.episode_file = f"configs/{self.agent_name}/season_1/s1_episode_{episode_number}.yaml"
-
-        with open(self.episode_file, 'r', encoding='utf-8') as f:
-            self.episode_data = yaml.safe_load(f)
+        """Change the current season
         
-        # save the tracker data
-        self.tracker_data['current_episode_number'] = episode_number
-        with open(self.tracker_file, 'w', encoding='utf-8') as f:
-            yaml.dump(self.tracker_data, f)
-
-        print(f"Changed episode to {self.episode_file}")
-
-    def next_post_number(self, post_number: int):
-        """Change the post number
-
         Args:
-            post_number (int): The post number
-
-        Returns:
-            str: The post content
-
-        Raises:
-            Exception: If there's an error changing the post number
-
-        Example:
-            >>> post_content = post_manager.change_post_number(1)
+            season_number (int): The season number (1-based, will be converted to 0-based for array access)
         """
-
-        if post_number >= 12-1:
-            self.change_episode(self.episode_number + 1)
-            self.post_number = 0
+        # Convert from 1-based season number to 0-based array index
+        season_index = season_number
         
-        # Get the post content and clean it up, remember post numbers vs index starting at 0
-        post_content = self.episode_data['episode']['posts'][post_number]['post_content']
-        post_content = ' '.join(post_content.split()).strip()
-        # Convert Unicode escape sequences to emojis
-        post_content = post_content.encode().decode('unicode-escape')
+        # Check if season exists and is not posted yet
+        if 0 <= season_index < len(self.master_data["agent"]["seasons"]):
+            print(f"Checking season: {season_index}")
+            season = self.master_data["agent"]["seasons"][season_index]
+            if not season.get("season_posted", False):
+                self.current_season = season_index  # Store as 0-based index
+                self.current_episode = 0
+                self.current_post = 0
+                self._save_master_file()
+                print(f"Changed to season {season_number}")  # Display as 1-based number
+            else:
+                print(f"Season {season_number} has already been posted")
+                raise ValueError(f"Season {season_number} has already been posted")
+        else:
+            print("No more unposted seasons available")
+            # Reset to beginning
+            self.current_season = 0
+            self.current_episode = 0
+            self.current_post = 0
+            self._save_master_file()
+            raise ValueError(f"No more content available to post")
 
-        # save the tracker data
-        self.tracker_data['current_post_number'] = self.post_number
-        with open(self.tracker_file, 'w', encoding='utf-8') as f:
-            yaml.dump(self.tracker_data, f)
+    def change_episode(self, episode_number: int):
+        """Change the current episode
+        
+        Args:
+            episode_number (int): The episode number (1-based, will be converted to 0-based for array access)
+        """
+        # Convert from 1-based episode number to 0-based array index
+        episode_index = episode_number
+        
+        current_season = self.master_data["agent"]["seasons"][self.current_season]
+        if episode_index >= len(current_season["episodes"]):
+            print(f"Moving to next season: {self.current_season + 1}")
+            self.change_season(self.current_season + 1)  # Move to next season
+            return
 
-        # increase post number
-        self.post_number += 1        
+        self.current_episode = episode_index
+        self.current_post = 0
+        self._save_master_file()
+        print(f"Changed to episode {episode_number}")  # Display as 1-based number
 
+    def next_post_number(self, post_number: int) -> str:
+        """Get the next post content and update tracking
+        
+        Args:
+            post_number (int): The post number (1-based, will be converted to 0-based for array access)
+        """
+        # Convert from 1-based post number to 0-based array index
+        post_index = post_number
+        
+        current_season = self.master_data["agent"]["seasons"][self.current_season]
+        current_episode = current_season["episodes"][self.current_episode]
+
+        if post_index >= len(current_episode["posts"]):
+            print(f"Moving to next episode: {self.current_episode + 1}")
+            self.change_episode(self.current_episode + 1)  # Move to next episode
+            post_index = 0
+
+        print(f"Getting post: {post_index}")
+        post = current_episode["posts"][post_index]
+        post_content = post["post_content"]
+        
+        self.current_post = post_index + 1  # Store as 1-based for consistency with display
+        self._save_master_file()
+        
         return post_content
 
     def post_to_twitter(self, live_post: bool = False):
-        """Post to twitter
+        """Post content to Twitter
 
         Args:
-            live_post (bool, optional): Whether to post to twitter. Defaults to False.
-
-        Raises:
-            Exception: If there's an error posting to twitter
-
-        Example:
-            >>> post_manager.post_to_twitter()
+            live_post (bool): Whether to actually post to Twitter (False for testing)
         """
-        # print ("Preparing to post to twitter" + "\n")
+        tweet_content = self.next_post_number(self.current_post)
 
-        # get the next post number
-        tweet_content = self.next_post_number(self.post_number)
-
-        # if live_post is true, post to twitter
         if live_post:
             tweet_result = self.twitter_connector.post_tweet(tweet_content)
+            print(tweet_result)
 
-            print (tweet_result)        
-
-            # reset the post number if the tweet failed so the post can be attempted again
             if tweet_result.startswith("Error"):
-                self.post_number -= 1        
-        
-        # save to log file
+                self.current_post -= 1
+                self.tracker["current_post_number"] = self.current_post
+                self._save_master_file()
+        else:
+            print(f"\nWould have posted: \n{tweet_content}")
+
+        # Log the post
+        log_file = os.path.join("configs", self.agent_name, f"{self.agent_name}_post_log.json")
         try:
-            # First, read existing log if it exists
-            log_file = os.path.join(self.agent_folder, f"{self.agent_name}_post_log.yaml")
             try:
                 with open(log_file, 'r', encoding='utf-8') as f:
-                    log_data = yaml.safe_load(f) or {'posts': []}
+                    log_data = json.load(f)
             except FileNotFoundError:
-                log_data = {'posts': []}
+                log_data = {"posts": []}
 
-            # Add new post to the array
-            log_data['posts'].append({
-                'post_id': f"s_{self.season_number}_e_{self.episode_number}_p_{self.post_number}",
-                'content': tweet_content,
-                'timestamp': str(datetime.datetime.now())
+            log_data["posts"].append({
+                "post_id": f"s_{self.current_season + 1}_e_{self.current_episode + 1}_p_{self.current_post}",
+                "content": tweet_content,
+                "timestamp": datetime.datetime.now().isoformat()
             })
 
-            # Write back the updated log
             with open(log_file, 'w', encoding='utf-8') as f:
-                yaml.dump(log_data, f, allow_unicode=True)
+                json.dump(log_data, f, indent=2)
 
         except Exception as e:
-            print(f"Error writing to log file: {e}")        
-        
+            print(f"Error writing to log file: {e}")
