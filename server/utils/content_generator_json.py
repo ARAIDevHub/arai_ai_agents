@@ -64,6 +64,7 @@ class ContentGenerator:
         self.episode_template_path = os.path.join(self.templates_dir, "episode.json")
         self.profile_image_template_path = os.path.join(self.templates_dir, "profile_image.json")        
         self.profile_image_options_template_path = os.path.join(self.templates_dir, "profile_image_options.json")
+        self.chat_template_path = os.path.join(self.templates_dir, "chat_log.json")
 
     # -------------------------------------------------------------------
     # Helper to create a new agent yaml file
@@ -102,6 +103,8 @@ class ContentGenerator:
             template_path = self.profile_image_template_path
         elif template_type == TemplateType.PROFILE_IMAGE_OPTIONS:
             template_path = self.profile_image_options_template_path
+        elif template_type == TemplateType.CHAT:
+            template_path = self.chat_template_path
         else:
             raise ValueError(f"Invalid template type: {template_type}")
 
@@ -379,7 +382,8 @@ class ContentGenerator:
             return os.path.join(self.agents_config_dir, agent_name, "profile_image.json")
         elif template_type == TemplateType.PROFILE_IMAGE_OPTIONS:
             return os.path.join(self.agents_config_dir, agent_name, "profile_image_options.json")
-
+        elif template_type == TemplateType.CHAT:
+            return os.path.join(self.agents_config_dir, agent_name, agent_name + "_chat_log.json")
 
     # -------------------------------------------------------------------
     # Helper to save the agent data to a yaml file
