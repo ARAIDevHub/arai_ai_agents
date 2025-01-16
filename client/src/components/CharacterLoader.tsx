@@ -20,7 +20,6 @@ const CharacterLoader: React.FC<CharacterLoaderProps> = ({ setCharacters }) => {
 
         const processed = charactersData.map(char => {
           const { agent, concept = '' } = char;
-          console.log('Mapping a character:', char);
           if (!agent) return { agent: {}, concept };
 
           const {

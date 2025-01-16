@@ -10,6 +10,15 @@ export interface AgentDetails {
   selectedImage?: number;  // Added for image selection
 }
 
+export interface ProfileImage {
+  details: {
+    url: string;
+    image_id: string;
+    generationId: string;
+  };
+  payload: any;
+}
+
 export interface Agent {
   agent: {
     agent_details: AgentDetails;
@@ -23,8 +32,9 @@ export interface Agent {
       telegram: boolean;
       twitter: boolean;
     };
-    profile_image?: any[];
-    seasons: any[]; // Adjust as needed
+    profile_image: ProfileImage[];
+    profile_image_options: any[];
+    seasons: any[];
     tracker: {
       current_episode_number: number;
       current_post_number: number;
@@ -33,4 +43,5 @@ export interface Agent {
     };
   };
   concept: string;
+  selectedImage?: number;
 } 

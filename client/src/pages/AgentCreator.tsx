@@ -17,7 +17,6 @@ import TraitButtons from '../components/TraitButtons'; // We'll still use your T
 import useCharacters from '../hooks/useCharacters';
 
 const AgentCreator: React.FC = () => {
-  console.log('[AgentCreator] Rendering...'); // Keep your console logs
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
@@ -259,7 +258,6 @@ const AgentCreator: React.FC = () => {
           // console.log("Agent profile image options:", agentProfileImageOptions);
 
           const { agent, } = char;
-          console.log('Mapping a character:', char);
           if (!agent) return { agent: {} };
 
           const {
@@ -374,8 +372,8 @@ const AgentCreator: React.FC = () => {
             style={{
               backgroundImage:
                 agent.selectedImage !== undefined && 
-                agent.profile_image?.[0]?.generations_by_pk?.generated_images?.[agent.selectedImage]?.url
-                  ? `url(${agent.profile_image[0].generations_by_pk.generated_images[agent.selectedImage].url})`
+                agent.profile_image?.details?.url
+                  ? `url(${agent.profile_image.details.url})`
                   : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -412,7 +410,37 @@ const AgentCreator: React.FC = () => {
                             ${agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
                 onClick={() => {
                   console.log('[ImageSelection] Clicked index:', index);
-                  setAgent((prev) => ({ ...prev, selectedImage: index }));
+                  console.log('[ImageSelection] Selected Image Data:', {
+                    fullImageData: image,
+                    imageUrl: image?.url,
+                    currentProfileImage: agent.profile_image
+                  });
+                  
+                  setAgent((prev) => {
+                    const selectedImageData = prev.profile_image_options[0]?.generations_by_pk?.generated_images[index];
+                    const profile_image_options = prev.profile_image_options[0]?.generations_by_pk;
+                    console.log('[ImageSelection] Profile Image Options:', profile_image_options);
+                    return { 
+                      ...prev, 
+                      selectedImage: index,
+                      profile_image: selectedImageData ? {
+                        details: {
+                          url: selectedImageData.url || '',
+                          image_id: selectedImageData.id || '',
+                          generationId: selectedImageData.generationId || '',
+                          selectedArrayIndex: index || 0,
+                          concept: profile_image_options.concept || '',
+                          modelId: profile_image_options.modelId || '',
+                          guidanceScale: profile_image_options.guidanceScale || '',
+                          createdAt: profile_image_options.createdAt || '',
+                          presetStyle: profile_image_options.presetStyle || '',
+                          prompt: profile_image_options.prompt || '',
+                          scheduler: profile_image_options.scheduler || '',
+                          seed: profile_image_options.seed || '',
+                        }
+                      } : null
+                    };
+                  });
                 }}
                 style={{
                   backgroundImage: image?.url ? `url(${image.url})` : 'none',
