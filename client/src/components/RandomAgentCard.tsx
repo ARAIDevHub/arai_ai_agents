@@ -8,9 +8,10 @@ import {
   RefreshCcw,
 } from 'lucide-react';
 import { Agent } from '../interfaces/AgentInterfaces';
+import { generateSingleImage } from '../api/leonardoApi';
 
 // Define the props for AgentCard
-interface AgentCardProps {
+interface RandomAgentCardProps {
   agent: Agent;
   onSelect: (agent: Agent) => void;
   onAdd?: (agent: Agent) => void; // Optional onAdd prop for random agents
@@ -18,6 +19,7 @@ interface AgentCardProps {
   setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>; // Add setRandomAgents prop
   generateRandomAgent: () => Agent; // Add generateRandomAgent prop
   isLoadedAgent?: boolean; // New prop to indicate if the agent is loaded
+  generateImage?: (prompt: string, modelId: string, styleUUID: string) => Promise<any>; // Add new prop for image generation
 }
 
 // Regenerate Button Component
@@ -42,7 +44,7 @@ const RegenerateButton: React.FC<RegenerateButtonProps> = ({
   );
 };
 
-const RandomAgentCard: React.FC<AgentCardProps> = ({
+const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   agent,
   onSelect,
   onAdd,
@@ -50,19 +52,39 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
   setRandomAgents,
   generateRandomAgent,
   isLoadedAgent,
+  generateImage,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false); // State to track regeneration
   console.log('[RandomAgentCard] - agent:', agent);
-  const handleRegenerate = () => {
+  const handleRegenerate = async () => {
     setIsRegenerating(true);
     
-    setTimeout(() => {
+    try {
       const newAgent = generateRandomAgent();
+      
+      // Generate image using Leonardo API
+      if (generateImage) {
+        // Using the anime model and style from leonard_anime_styles.json
+        const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8"; // Leonardo Anime XL
+        const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f"; // Anime General
+        
+        // Create prompt based on agent characteristics
+        const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
+                       Their personality can be described as ${newAgent.personality}. 
+                       Style: high quality, detailed anime art, character portrait`;
+        
+        const imageResponse = await generateImage(prompt, modelId, styleUUID);
+        
+        // Update the agent's avatar with the new generated image
+        if (imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+          newAgent.avatar = imageResponse.generations_by_pk.generated_images[0].url;
+        }
+      }
+
       setRandomAgents((prevAgents: Agent[]) => {
         // Check if the new agent's name or ID already exists
         while (prevAgents.some(a => a.name === newAgent.name || a.id === newAgent.id)) {
-          // Regenerate if there's a duplicate
           Object.assign(newAgent, generateRandomAgent());
         }
         
@@ -72,8 +94,12 @@ const RandomAgentCard: React.FC<AgentCardProps> = ({
         );
         return updatedAgents.slice(0, 3);
       });
+
+    } catch (error) {
+      console.error('Error generating new agent or image:', error);
+    } finally {
       setIsRegenerating(false);
-    }, 500);
+    }
   };
 
   return (

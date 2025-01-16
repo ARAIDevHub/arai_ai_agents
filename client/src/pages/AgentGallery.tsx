@@ -7,15 +7,12 @@ import {
   CheckCircle,
   RefreshCcw,
 } from 'lucide-react';
-import image1 from '../assets/agent-images/agent1.jpg';
-import image2 from '../assets/agent-images/agent2.jpg';
-import image3 from '../assets/agent-images/agent3.jpg';
-import image4 from '../assets/agent-images/agent4.jpg';
 import agentsData from '../assets/agents.json'; // Import the JSON file
 import { Agent } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
 import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
+import { generateSingleImage } from '../api/leonardoApi';
 
 const AgentGallery: React.FC = () => {
   const { characters: loadedAgents, loading, error } = useCharacters();
@@ -24,8 +21,7 @@ const AgentGallery: React.FC = () => {
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const [yourAgents, setYourAgents] = useState<Agent[]>([]);
-
-  const agentImages = [image1, image2, image3, image4];
+  const [isGenerating, setIsGenerating] = useState<boolean>(true);
 
   // Define generateRandomAgent inside AgentGallery so it's accessible to child components
   const generateRandomAgent = (): Agent => {
@@ -107,7 +103,7 @@ const AgentGallery: React.FC = () => {
     return {
       id: Date.now(), // Unique ID for each random agent
       name: names[randomIndex],
-      avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
+      avatar: '', // Start with empty avatar, will be filled by generateSingleImage
       role: roles[randomIndex],
       shortDescription: '...', // You can add short descriptions if needed
       tags: tags[randomIndex],
@@ -123,42 +119,76 @@ const AgentGallery: React.FC = () => {
   };
 
   const handleRegenerateAll = () => {
-    // Set all random agents to a placeholder state
+    setIsGenerating(true);
+    // Set all random agents to a loading state
     setRandomAgents(randomAgents.map(agent => ({
-      ...agent,
-      placeholder: true
+      ...generateRandomAgent(),
+      avatar: '',
+      isLoading: true
     })));
 
-    // Simulate regeneration delay (remove in actual implementation)
+    // Your existing regeneration logic...
     setTimeout(() => {
-      const newRandomAgents = [...Array(3)].map(() => generateRandomAgent());
+      const newRandomAgents = [...Array(3)].map(() => ({
+        ...generateRandomAgent(),
+        isLoading: false
+      }));
       setRandomAgents(newRandomAgents);
-    }, 500); // Adjust delay as needed
+      setIsGenerating(false);
+    }, 500);
   };
 
   useEffect(() => {
-    // Load agents from JSON
-    const randomAgents = [...Array(3)].map((_, index) => {
-      const randomIndex = Math.floor(Math.random() * agentsData.length);
-      const agent = agentsData[randomIndex];
-      return {
-        ...agent,
-        id: Date.now() + index, // Ensure unique IDs by adding index
-        avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
-      }; // Ensure unique IDs
-    });
+    const initializeRandomAgents = async () => {
+      console.log('[AgentGallery] Initializing random agents...');
+      setIsGenerating(true);
+      
+      // Create initial placeholder array with all agents at once
+      const placeholders = Array(1).fill(null).map(() => ({
+        ...generateRandomAgent(),
+        avatar: '',
+        isLoading: true
+      }));
+      setRandomAgents(placeholders);
+      
+      // Generate all agents in parallel instead of sequentially
+      const generatedAgents = await Promise.all(
+        placeholders.map(async () => {
+          const agent = generateRandomAgent();
+          console.log('[AgentGallery] Generated random agent:', agent);
+          
+          try {
+            const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+            const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+            
+            const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
+                         Their personality can be described as ${agent.personality}. 
+                         Style: high quality, detailed anime art, character portrait`;
+            
+            const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
+            
+            if (imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+              agent.avatar = imageResponse.generations_by_pk.generated_images[0].url;
+              console.log('[AgentGallery] Successfully set agent avatar:', agent.avatar);
+            } else {
+              throw new Error('No image URL received');
+            }
+          } catch (error) {
+            console.error('[AgentGallery] Error generating image:', error);
+            agent.avatar = 'https://via.placeholder.com/400x400?text=Image+Generation+Failed';
+          }
+          
+          return { ...agent, isLoading: false };
+        })
+      );
+      
+      // Update state only once with all generated agents
+      setRandomAgents(generatedAgents);
+      setIsGenerating(false);
+      console.log('[AgentGallery] Generated all random agents:', generatedAgents);
+    };
 
-    const yourAgents = [...Array(5)].map((_, index) => {
-      const agent = agentsData[index % agentsData.length]; // Cycle through agents
-      return {
-        ...agent,
-        id: Date.now() + index + 1000, // Ensure unique IDs by adding index
-        avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
-      }; // Ensure unique IDs
-    });
-
-    setRandomAgents(randomAgents);
-    setYourAgents(yourAgents);
+    initializeRandomAgents();
   }, []);
 
   return (

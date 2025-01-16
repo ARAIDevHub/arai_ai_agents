@@ -437,6 +437,7 @@ const AgentCreator: React.FC = () => {
                           prompt: profile_image_options.prompt || '',
                           scheduler: profile_image_options.scheduler || '',
                           seed: profile_image_options.seed || '',
+                          id: profile_image_options.id || '',
                         }
                       } : null
                     };
