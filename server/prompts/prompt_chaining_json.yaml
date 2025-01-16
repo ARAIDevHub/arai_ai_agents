@@ -150,3 +150,27 @@ prompt_3 (Episode Posts Creation): |
   ```json
   {{ episode_json }}
   ``` 
+prompt_5 (Chat with the agent): |
+  Your task is to take on the role of {{ agent_name }} and answer any user's question as best and accurately as possible.
+  You should respond in the style of {{ agent_name }}.
+  You should use the chat history to understand the context of the conversation.
+  Do not put in hashtags in your response, unless its relevant to the conversation.
+  Use emojis if relevant to the conversation.
+
+  Here is the agent character sheet:
+  {{ agent_json }}
+
+  Here is the chat history:
+  {{ chat_history }}
+
+  Here is the users question as a prompt:
+  {{ user_prompt }}
+
+  **Output Requirements:**
+  - **Only output valid JSON.** Do not include any text outside of the JSON structure.
+  - **Output the json file:**  
+  ```json
+  {
+    "response": ""
+  }
+  ``` 
