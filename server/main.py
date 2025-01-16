@@ -80,14 +80,10 @@ def load_agent_tracker_config(agent_name):
 
 # run the scheduler
 def run_scheduler():
-    """ Continuously run the scheduler in a loop 
-    
-    Global:
-        scheduler_running (bool): Whether the scheduler is running
-    """
+    """ Continuously run the scheduler in a loop """
     global scheduler_running
-    scheduler_running = True
     while scheduler_running:
+        pause_event.wait()  # Block if the scheduler is paused
         schedule.run_pending()
         time.sleep(1)
 
@@ -111,6 +107,8 @@ if __name__ == "__main__":
 
     # Initialize variables
     scheduler_running = False
+    pause_event = threading.Event()  # Allows pausing and resuming
+    pause_event.set()  # Initially, the scheduler is not paused
     scheduler_thread = None
     post_manager = None
     current_agent = None
@@ -269,14 +267,22 @@ if __name__ == "__main__":
             if not scheduler_thread:
                 print("Scheduler hasn't been started yet!")
             else:
-                scheduler_running = not scheduler_running
-                print(f"Posting has been {'paused' if not scheduler_running else 'resumed'}")
+                if pause_event.is_set():
+                    pause_event.clear()  # Pause the scheduler
+                    print("Posting has been paused.")
+                else:
+                    pause_event.set()  # Resume the scheduler
+                    print("Posting has been resumed.")
 
         elif choice == '9':
             print("Shutting down...")
-            scheduler_running = False
+            scheduler_running = False  # Stop the scheduler loop
+            pause_event.set()  # Ensure the thread doesn't hang if paused
+
             if scheduler_thread:
-                scheduler_thread.join()
+                scheduler_thread.join()  # Wait for the thread to exit
+
+            print("Scheduler has been shut down.")
             break
 
         else:
