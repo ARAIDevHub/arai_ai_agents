@@ -17,7 +17,7 @@
 
 # standard imports
 import os
-import json
+import yaml
 import schedule
 import shutil
 import time
@@ -26,7 +26,7 @@ import argparse
 
 # custom ARAI imports
 from models.gemini_model import GeminiModel
-import utils.post_manager_json as twitter_manager
+import utils.post_manager as twitter_manager
 import prompt_chaining.step_1_json as step_1
 import prompt_chaining.step_2_json as step_2
 import prompt_chaining.step_3_json as step_3
@@ -41,14 +41,11 @@ def list_available_seasons(agent_name):
         list: List of available season names
     """
     seasons = []
-    config_path = os.path.join("configs", agent_name, f"{agent_name}_master.json")
-    
+    config_path = os.path.join("configs", agent_name)
     if os.path.exists(config_path):
-        with open(config_path, 'r', encoding='utf-8') as f:
-            master_data = json.load(f)
-            for season in master_data["agent"]["seasons"]:
-                seasons.append(season)
-    
+        for item in os.listdir(config_path):
+            if os.path.isdir(os.path.join(config_path, item)):
+                seasons.append(item)
     return seasons
 
 def list_available_agents():
@@ -65,7 +62,7 @@ def list_available_agents():
                 agents.append(item)
     return agents
 
-def load_agent_tracker_config(agent_name):
+def load_agent_config(agent_name):
     """Load configuration for the selected agent
     
     Args:
@@ -74,16 +71,20 @@ def load_agent_tracker_config(agent_name):
     Returns:
         dict: The configuration for the selected agent
     """
-    config_path = os.path.join("configs", agent_name, f"{agent_name}_master.json")
+    config_path = os.path.join("configs", agent_name, "tracker.yaml")
     with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)["agent"]["tracker"]
+        return yaml.safe_load(f)
 
 # run the scheduler
 def run_scheduler():
-    """ Continuously run the scheduler in a loop """
+    """ Continuously run the scheduler in a loop 
+    
+    Global:
+        scheduler_running (bool): Whether the scheduler is running
+    """
     global scheduler_running
+    scheduler_running = True
     while scheduler_running:
-        pause_event.wait()  # Block if the scheduler is paused
         schedule.run_pending()
         time.sleep(1)
 
@@ -107,8 +108,6 @@ if __name__ == "__main__":
 
     # Initialize variables
     scheduler_running = False
-    pause_event = threading.Event()  # Allows pausing and resuming
-    pause_event.set()  # Initially, the scheduler is not paused
     scheduler_thread = None
     post_manager = None
     current_agent = None
@@ -164,17 +163,11 @@ if __name__ == "__main__":
                 agent_idx = int(input("\nSelect agent number: ")) - 1
                 if 0 <= agent_idx < len(agents):
                     current_agent = agents[agent_idx]
-                    tracker_config = load_agent_tracker_config(current_agent)
-                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}_master.json")
-                    post_every_x_minutes = tracker_config['post_every_x_minutes']
-
-                    if post_every_x_minutes <= 0:
-                        print("Error: Posting interval must be greater than 0!")
-                        continue
-
+                    config = load_agent_config(current_agent)
+                    agent_file_path = os.path.join("configs", current_agent, f"{current_agent}.yaml")
+                    post_every_x_minutes = config['post_every_x_minutes']
                     post_manager = twitter_manager.PostManager(current_agent)
                     print(f"\nSelected agent: {current_agent}")
-                    print(f"Posting every {post_every_x_minutes} minutes")
                 else:
                     print("Invalid selection!")
             except ValueError:
@@ -208,7 +201,7 @@ if __name__ == "__main__":
             else:
                 try:
                     print("Creating a new season...")
-                    step_2.step_2(ai_model, agent_file_path, 3)
+                    step_2.step_2(ai_model, agent_file_path)
                 except Exception as e:
                     print(f"Error creating season: {str(e)}")
 
@@ -221,12 +214,22 @@ if __name__ == "__main__":
                 if not seasons:
                     print("No seasons found for this agent!")
                     continue
-                                    
+                    
+                print("\nAvailable Seasons:")
+                for idx, season in enumerate(seasons, 1):
+                    print(f"{idx}. {season}")
+                
                 try:
-                    print("Creating a new season posts...")
-                    step_3.step_3(ai_model, agent_file_path, 6)
-                except Exception as e:
-                    print(f"Error creating season posts: {str(e)}")
+                    season_idx = int(input("\nSelect season number: ")) - 1
+                    if 0 <= season_idx < len(seasons):
+                        current_season = seasons[season_idx]
+                        season_file_path = os.path.join("configs", current_agent, current_season, f"{current_season}.yaml")
+                        step_3.step_3(ai_model, agent_file_path, season_file_path)
+                        print(f"\nSelected season: {current_season}")
+                    else:
+                        print("Invalid selection!")
+                except ValueError:
+                    print("Please enter a valid number!")
 
         elif choice == '5':
             if not current_agent:
@@ -240,9 +243,9 @@ if __name__ == "__main__":
             # Clear existing schedule
             schedule.clear()
             # Set up new schedule
-            #schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
+            schedule.every(post_every_x_minutes).minutes.do(post_manager.post_to_twitter, twitter_live)
             # uncomment this line if you wnat to test the scheduler and the content made by ai
-            schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
+            # schedule.every(5).seconds.do(post_manager.post_to_twitter, twitter_live)
             scheduler_running = True
             scheduler_thread = threading.Thread(target=run_scheduler)
             scheduler_thread.start()
@@ -267,22 +270,14 @@ if __name__ == "__main__":
             if not scheduler_thread:
                 print("Scheduler hasn't been started yet!")
             else:
-                if pause_event.is_set():
-                    pause_event.clear()  # Pause the scheduler
-                    print("Posting has been paused.")
-                else:
-                    pause_event.set()  # Resume the scheduler
-                    print("Posting has been resumed.")
+                scheduler_running = not scheduler_running
+                print(f"Posting has been {'paused' if not scheduler_running else 'resumed'}")
 
         elif choice == '9':
             print("Shutting down...")
-            scheduler_running = False  # Stop the scheduler loop
-            pause_event.set()  # Ensure the thread doesn't hang if paused
-
+            scheduler_running = False
             if scheduler_thread:
-                scheduler_thread.join()  # Wait for the thread to exit
-
-            print("Scheduler has been shut down.")
+                scheduler_thread.join()
             break
 
         else:

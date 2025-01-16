@@ -53,14 +53,17 @@ def step_2(ai_model, master_file_path, number_of_episodes):
     # step 2.1: load the season template json file
     manager = ContentGenerator()
     #season_template = manager.create_new_template_yaml(TemplateType.SEASON)
+    print(f"Creating a new season template")
     season_template = manager.create_new_template_json(TemplateType.SEASON)
 
     # step 2.2: load the agent json file
+    print(f"Loading agent master json file")
     agent_master_json = None    
     with open(master_file_path, 'r', encoding='utf-8') as file:
         agent_master_json = json.load(file)  
 
     # extract agent from master json
+    print(f"Extracting agent details from master json")
     agent_details = agent_master_json['agent']['agent_details']
 
     # step 2.3: find the previous season 
@@ -87,16 +90,42 @@ def step_2(ai_model, master_file_path, number_of_episodes):
         "number_of_episodes": number_of_episodes
     }
 
-    # step 2.4: Run the prompt 
-    print("Sending prompt to AI to create a new season")
-    season_data = manager.run_prompt(
-        # prompt_key="prompt_1 (Character Creation)",
-        prompt_key="prompt_2 (Season Creation)",
-        template_vars=prompt_2_vars, 
-        ai_model=ai_model,
-    )
+    # Constants for retry configuration
+    max_retries = 3
+    delay = 2  # seconds between retries
 
-    print(f"season data is: {season_data}")
+    # step 3.11: Run the prompt with retry logic for LLM failures
+    success = False
+    for attempt in range(max_retries):
+        try:
+            # step 2.4: Run the prompt 
+            print("Sending prompt to AI to create a new season")
+            season_data = manager.run_prompt(
+                # prompt_key="prompt_1 (Character Creation)",
+                prompt_key="prompt_2 (Season Creation)",
+                template_vars=prompt_2_vars, 
+                ai_model=ai_model,
+            )
+            
+            # Validate that posts_data is valid JSON and has expected structure
+            if isinstance(season_data, dict) and 'seasons' in season_data:
+                success = True
+                break
+            else:
+                print(f"Invalid response format. Attempt {attempt + 1}/{max_retries}")
+                
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"Error on attempt {attempt + 1}/{max_retries}: {str(e)}")
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            continue
+    
+    if not success:
+        print("Max retries reached. Failed to get valid response from LLM.")
+        return None
+
+    #print(f"season data is: {season_data}")
 
     # step 2.8: append the season data to the master data
     if len(seasons) <= 1 and seasons[0]["season_number"] == 0:
@@ -109,7 +138,7 @@ def step_2(ai_model, master_file_path, number_of_episodes):
         print("Appending the season data to the master data")
         agent_master_json = manager.append_seasons(
             master_data=agent_master_json,
-            seasons_data=season_template,
+            seasons_data=season_data,
         )
 
     # step 2.9: save the master data to a file
@@ -125,4 +154,4 @@ def step_2(ai_model, master_file_path, number_of_episodes):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_2(ai_model, "configs/Zorp/Zorp_master.json", 3)
+    step_2(ai_model, "configs/CipherCat/CipherCat_master.json", 3)

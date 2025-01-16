@@ -114,6 +114,6 @@ if __name__ == "__main__":
     num_images = 4
 
     # Generate the image
-    step_4(prompt, "configs/Cipheria/Cipheria_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
+    step_4(prompt, "configs/Aiko_The_Chain/Aiko_The_Chain_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
 
 

@@ -555,7 +555,7 @@ class ContentGenerator:
         if "agent" in master_data and "seasons" in master_data["agent"]:
             result["agent"]["seasons"] = seasons_data["seasons"]
             
-        print(f"result is: {result}")            
+        #print(f"result is: {result}")            
         return result
 
     def append_episodes(self, master_data: dict, posts_data: dict, season_index: int, episode_index: int) -> dict:
