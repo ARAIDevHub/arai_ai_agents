@@ -28,7 +28,40 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.content_generator_json import ContentGenerator
 from utils.template_types import TemplateType
 import asset_generation.images_leonardo as images_leonardo
+from models.gemini_model import GeminiModel
+
 dotenv.load_dotenv()
+
+
+def image_post_description(ai_model, master_file_path, num_images):
+    manager = ContentGenerator()
+    image_descriptions = None
+
+    # step 4.2: load the agent json file
+    agent_master_json = None    
+    with open(master_file_path, 'r', encoding='utf-8') as file:
+        agent_master_json = json.load(file)  
+
+    # step 4.3: extract agent from master json
+    agent_details = agent_master_json['agent']['agent_details']
+
+    print("Crafting prompt for AI to create a new profile image descriptions")
+    prompt_4_vars = {
+        "agent_name": agent_details["name"],
+        "agent_json": json.dumps(agent_details),        
+        "number_of_images": num_images
+    }
+
+    # step 2.4: Run the prompt 
+    print("Sending prompt to AI to create a new profile image descriptions")
+    image_descriptions = manager.run_prompt(
+        prompt_key="prompt_4 (Agent Profile Image)",
+        template_vars=prompt_4_vars, 
+        ai_model=ai_model,
+    )
+
+    # print(f"image_descriptions is: {image_descriptions}")
+    return image_descriptions
 
 #--------------------------------
 # Step 4: Generate a number of images for profile image
@@ -113,7 +146,20 @@ if __name__ == "__main__":
     # Setup number of images
     num_images = 4
 
-    # Generate the image
-    step_4(prompt, "configs/Cipheria/Cipheria_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
+    # Setup AI model
+    ai_model = GeminiModel()
+    master_file_path = "configs/LamboLara/LamboLara_master.json"
+
+    image_descriptions = image_post_description(ai_model, master_file_path, num_images)
+
+    print("\n\n")    
+    print(f"image_descriptions is: {image_descriptions}")
+    print("\n\n")
+    
+    # print the image descriptions
+    for image_description in image_descriptions["profile_image_descriptions"]:
+        print(image_description["description"] + "\n")
+        # Generate the image
+        # step_4(image_description, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
 
 

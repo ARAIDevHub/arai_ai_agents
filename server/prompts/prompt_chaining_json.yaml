@@ -150,3 +150,60 @@ prompt_3 (Episode Posts Creation): |
   ```json
   {{ episode_json }}
   ``` 
+prompt_4 (Agent Profile Image): |
+  You are an expert in creative writing, character design, world-building, and marketing. 
+  You are tasked with developing a visual description for a character profile for social media.
+  This profile image is for a new agent named {{ agent_name }} who will be featured in stories for a Twitter bot. 
+  
+  Based on the agent's JSON, create a visual description for the agent's profile image.
+  {{ agent_json }}
+
+  Make {{ number_of_images }} image description variations.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "profile_image_descriptions": [
+    {
+      "id": 1,
+      "description": ""
+    }]
+  }
+  ```
+
+prompt_6 (Create Social Media Image Post): |
+  You are an expert in creative writing, character design, world-building, and marketing. 
+  You are tasked with developing a series of visual descriptions that will be used to create artwork for a character social media posts.
+  These image descriptions will be used to create images based on the agents current episode. 
+  These will be posted to twitter as a series of posts.
+  
+  Here is the agent's JSON:
+  {{ agent_json }}
+
+  Here is the episode JSON:
+  {{ episode_json }}
+
+  Here are the episode posts:
+  {{ episode_posts }}
+
+  Make {{ number_of_images }} that support the narrative of the episode posts being sent to twitter.
+  Mark were abouts in the order of the posts the image post should be tweeted.
+  Example, post this image after post 1, post this image after post 4, etc.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "image_post_descriptions": [
+      {
+        "image_description": "",
+        "post_after": 
+      }
+    ]
+  }
+  ```
