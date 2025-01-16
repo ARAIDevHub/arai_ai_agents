@@ -124,7 +124,7 @@ const AgentGallery: React.FC = () => {
     const randomIndex = Math.floor(Math.random() * names.length);
 
     return {
-      id: Date.now(), // Unique ID for each random agent
+      id: Math.floor(Math.random() * 1000000), // Generate a random number for the ID
       name: names[randomIndex],
       avatar: '', // Start with empty avatar, will be filled by generateSingleImage
       role: roles[randomIndex],
@@ -184,6 +184,65 @@ const AgentGallery: React.FC = () => {
       })));
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // Add this function to handle single agent regeneration
+  const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
+    const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+    const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+    
+    try {
+      const currentAgent = randomAgents.find(agent => agent.id === agentId);
+      if (!currentAgent) return;
+
+      const newAgentData = generateRandomAgent();
+      const newAgent = {
+        ...newAgentData,
+        id: currentAgent.id // Preserve the original ID
+      };
+
+      setRandomAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === agentId 
+            ? { ...newAgent, avatar: '', isLoading: true }
+            : agent
+        )
+      );
+
+      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
+                     Their personality can be described as ${newAgent.personality}. 
+                     Style: high quality, detailed anime art, character portrait`;
+
+      const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
+      if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+        throw new Error('No image URL received');
+      }
+
+      const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
+      const loadedImageUrl = await loadImageWithFallback(imageUrl);
+
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? { ...newAgent, avatar: loadedImageUrl, isLoading: false }
+            : agent
+        )
+      );
+
+    } catch (error) {
+      console.error('[AgentGallery] Error regenerating single agent:', error);
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? {
+                ...agent,
+                avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
+                isLoading: false
+              }
+            : agent
+        )
+      );
     }
   };
 
@@ -258,6 +317,7 @@ const AgentGallery: React.FC = () => {
                     setRandomAgents={setRandomAgents}
                     generateRandomAgent={generateRandomAgent}
                     isLoadedAgent={true}
+                    onRegenerate={handleSingleAgentRegeneration}
                   />
                 ))}
               </div>
