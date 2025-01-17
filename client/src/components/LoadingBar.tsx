@@ -16,9 +16,9 @@ const LoadingBar = ({ progress }: { progress: number }) => {
       <div className="text-white mb-2 site-text-class">Agent Image Generating...</div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div 
-          className="h-full rounded-full transition-all duration-[20000ms]" 
+          className="h-full rounded-full transition-all duration-[15000ms]" 
           style={{ 
-            width: `${width}%`, 
+            width: `${Math.min(Math.max(width, 0), 100)}%`,
             background: 'linear-gradient(to right, #06b6d4, #f97316)' // Updated gradient from cyan to orange
           }} 
         />
