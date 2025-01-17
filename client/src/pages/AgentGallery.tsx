@@ -52,59 +52,8 @@ const AgentGallery: React.FC = () => {
   // Define generateRandomAgent inside AgentGallery so it's accessible to child components
   const generateRandomAgent = (): Agent => {
 
-    // const personalities = [
-    //   ['Warm', 'nurturing'],
-    //   ['Balanced', 'intuitive'],
-    //   ['Mysterious', 'insightful'],
-    //   ['Solitary', 'contemplative'],
-    //   ['Traditional', 'knowledgeable'],
-    //   ['Dynamic', 'purposeful'],
-    //   ['Courageous', 'determined'],
-    //   ['Cyclical', 'transformative'],
-    //   ['Fair', 'objective'],
-    //   ['Sacrificial', 'enlightened'],
-    // ];
-    // const communicationStyles = [
-    //   ['Gentle', 'Wise'],
-    //   ['Heart-centered', 'Compassionate'],
-    //   ['Riddles', 'Metaphorical'],
-    //   ['Silent', 'Observant'],
-    //   ['Knowledgeable', 'Ritualistic'],
-    //   ['Clear', 'Direct'],
-    //   ['Passionate', 'Convicted'],
-    //   ['Symbolic', 'Ominous'],
-    //   ['Truthful', 'Integrity'],
-    //   ['Insightful', 'Transcendent'],
-    // ];
-    // const emojis = [
-    //   ['🌱', '🌿', '✨'],
-    //   ['💝', '🔮', '💫'],
-    //   ['🎯', '⚡', '🌟'],
-    //   ['🍃', '🌸', '💫'],
-    //   ['📚', '🕯️', '🙏'],
-    //   ['🛡️', '⚔️', '🏃'],
-    //   ['💪', '🦁', '🎯'],
-    //   ['🎲', '🌟', '⚖️'],
-    //   ['⚖️', '🔍', '🧭'],
-    //   ['🦋', '🌙', '👁️'],
-    // ];
-    // const hashtags = [
-    //   ['#nature', '#nurture', '#abundance'],
-    //   ['#harmony', '#choice', '#connection'],
-    //   ['#mystic', '#insight', '#manifestation'],
-    //   ['#wisdom', '#solitude', '#enlightenment'],
-    //   ['#spirituality', '#tradition', '#guidance'],
-    //   ['#divine', '#purpose', '#action'],
-    //   ['#strength', '#courage', '#innerpower'],
-    //   ['#karma', '#destiny', '#transformation'],
-    //   ['#justice', '#balance', '#truth'],
-    //   ['#surrender', '#awakening', '#higherconsciousness'],
-    // ];
-
     const randomIndexTo100 = Math.floor(Math.random() * 99);
     const randomIndexTo500 = Math.floor(Math.random() * 499);
-
-
 
     return {
       id: Math.floor(Math.random() * 1000000), // Generate a random number for the ID
@@ -375,13 +324,6 @@ const AgentGallery: React.FC = () => {
           )}
         </div>
 
-        {/* Display the selected agent's name */}
-        {/* {selectedAgent && (
-          <div className="mt-8 text-center">
-            <h2 className="text-xl font-semibold text-white">Selected Agent:</h2>
-            <p className="text-white">{selectedAgent.name}</p>
-          </div>
-        )} */}
       </div>
     </div>
   );

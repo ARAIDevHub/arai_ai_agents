@@ -8,6 +8,7 @@ import {
   RefreshCcw,
 } from 'lucide-react';
 import { Agent } from '../interfaces/AgentInterfaces';
+import LoadingBar from './LoadingBar';
 
 // Define the props for AgentCard
 interface RandomAgentCardProps {
@@ -56,11 +57,19 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
           <div className="absolute w-full h-full backface-hidden">
             <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
-                <img
-                  src={profileImageUrl}
-                  alt={agentName}
-                  className="w-full h-full object-cover"
-                />
+                {agent.isLoading ? (
+                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <div className="w-3/4">
+                      <LoadingBar progress={50} />
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={agent.avatar}
+                    alt={agentName}
+                    className="w-full h-full object-cover"
+                  />
+                )}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
               </div>
               <div className="h-[100px] p-4 bg-gray-800/95">
