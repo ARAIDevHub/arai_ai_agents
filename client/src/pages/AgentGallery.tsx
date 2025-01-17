@@ -257,7 +257,7 @@ const AgentGallery: React.FC = () => {
               Your Agents
             </button>
           </div>
-          <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1>
+          {/* <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1> */}
           {(filter === 'all' || filter === 'random') && (
             <button
               className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md text-white flex items-center gap-2"
