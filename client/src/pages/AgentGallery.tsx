@@ -118,9 +118,9 @@ const AgentGallery: React.FC = () => {
       setRandomAgents(newAgents.map(agent => ({ ...agent, avatar: '', isLoading: true })));
 
       const imagePromises = newAgents.map(async (agent) => {
-        const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
-                     Their personality can be described as ${agent.personality}. 
-                     Style: high quality, detailed anime art, character portrait`;
+        const prompt = `Generate a character portrait of ${agent.name}. 
+                     Their personality can be described as ${agent.personality} and their communication style is ${agent.communicationStyle}. Make sure to create an image with only one character.`;
+        console.log("Leonardo Image Prompt", prompt)
 
         const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
         if (!imageResponse?.generations_by_pk?.generated_images?.[0]) {
@@ -178,7 +178,7 @@ const AgentGallery: React.FC = () => {
         )
       );
 
-      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
+      const prompt = `Generate an anime character portrait of ${newAgent.name}, their communication style is  ${newAgent.role}. 
                      Their personality can be described as ${newAgent.personality}. 
                      Style: high quality, detailed anime art, character portrait`;
 
@@ -286,6 +286,7 @@ const AgentGallery: React.FC = () => {
                     generateRandomAgent={generateRandomAgent}
                     isLoadedAgent={true}
                     onRegenerate={handleSingleAgentRegeneration}
+                    isLoading={agent.isLoading}
                   />
                 ))}
               </div>

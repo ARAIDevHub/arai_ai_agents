@@ -53,7 +53,7 @@ function App() {
           >
             Create Agent
           </Link>
-          <Link
+          {/* <Link
             to="/agent-studio"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
               ${isActive('/agent-studio') 
@@ -61,7 +61,7 @@ function App() {
                 : 'text-gray-300 hover:text-cyan-400'}`}
           >
             Agent Studio
-          </Link>
+          </Link> */}
           <Link
             to="/agent-gallery"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
