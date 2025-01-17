@@ -20,6 +20,7 @@ import os
 import yaml
 import json
 import sys
+import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -103,33 +104,37 @@ def step_3(ai_model, master_file_path, number_of_posts):
             "post_length": 277
         }
 
-        # step 3.11: Run the prompt 
-        posts_data = manager.run_prompt(
-            # prompt_key="prompt_1 (Character Creation)",
-            prompt_key="prompt_3 (Episode Posts Creation)",
-            template_vars=prompt_3_vars, 
-            ai_model=ai_model,
-        )
+        # Constants for retry configuration
+        max_retries = 3
+        delay = 2  # seconds between retries
 
-        # # step 3.12: Add the season data to the season template
-        # episode_template = manager.add_data_to_template(
-        #     current_data=episode_data,
-        #     new_data=episode_data, 
-        # )
-
-        # # step 3.13: create the file path
-        # episode_file_path = manager.create_filepath(
-        #     agent_name=agent_json["name"],
-        #     season_number=season_details["season_number"],
-        #     episode_number=episode_data["episode_number"],
-        #     template_type=TemplateType.EPISODE
-        # )
-
-        # # step 3.14: Save the season data to a file
-        # manager.save_yaml_file(
-        #     save_path=episode_file_path,
-        #     yaml_data=episode_template
-        # )
+        # step 3.11: Run the prompt with retry logic for LLM failures
+        success = False
+        for attempt in range(max_retries):
+            try:
+                posts_data = manager.run_prompt(
+                    prompt_key="prompt_3 (Episode Posts Creation)",
+                    template_vars=prompt_3_vars, 
+                    ai_model=ai_model,
+                )
+                
+                # Validate that posts_data is valid JSON and has expected structure
+                if isinstance(posts_data, dict) and 'posts' in posts_data:
+                    success = True
+                    break
+                else:
+                    print(f"Invalid response format. Attempt {attempt + 1}/{max_retries}")
+                    
+            except (json.JSONDecodeError, Exception) as e:
+                print(f"Error on attempt {attempt + 1}/{max_retries}: {str(e)}")
+                if attempt < max_retries - 1:
+                    print(f"Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                continue
+        
+        if not success:
+            print("Max retries reached. Failed to get valid response from LLM.")
+            return None
 
         print("Appending the episode data to the master data")
         agent_master_json = manager.append_episodes(
@@ -141,8 +146,6 @@ def step_3(ai_model, master_file_path, number_of_posts):
 
         # step 2.9: save the master data to a file
         print("Saving the master data to a file")
-        #print(f"saving agent json to: {master_file_path}")
-        #print(f"agent data is: {agent_json}")
         manager.save_json_file(
             save_path=master_file_path,
             json_data=agent_master_json
@@ -154,5 +157,5 @@ def step_3(ai_model, master_file_path, number_of_posts):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_3(ai_model, "configs/Zorp/Zorp_master.json", 6)
+    step_3(ai_model, "configs/Pixelina/Pixelina_master.json", 6)
 

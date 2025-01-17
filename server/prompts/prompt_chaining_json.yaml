@@ -92,7 +92,7 @@ prompt_2 (Season Creation): |
   - Season Summary: If none is provided, create a concise summary that captures the essence of this season.
       - Season Summary: {{ season_summary }}
 
-  - Episodes: We want **{{ number_of_episodes }} episodes** total (one for each day over 4 weeks).
+  - Episodes: We want **{{ number_of_episodes }} episodes** total. Starting with episode 1.
       - If none are provided, create {{ number_of_episodes }} unique episodes.
       - Each episode entry should have:
           - `episode_id`
@@ -149,4 +149,28 @@ prompt_3 (Episode Posts Creation): |
   - **Output the json file:**  
   ```json
   {{ episode_json }}
+  ``` 
+prompt_5 (Chat with the agent): |
+  Your task is to take on the role of {{ agent_name }} and answer any user's question as best and accurately as possible.
+  You should respond in the style of {{ agent_name }}.
+  You should use the chat history to understand the context of the conversation.
+  Do not put in hashtags in your response, unless its relevant to the conversation.
+  Use emojis if relevant to the conversation.
+
+  Here is the agent character sheet:
+  {{ agent_json }}
+
+  Here is the chat history:
+  {{ chat_history }}
+
+  Here is the users question as a prompt:
+  {{ user_prompt }}
+
+  **Output Requirements:**
+  - **Only output valid JSON.** Do not include any text outside of the JSON structure.
+  - **Output the json file:**  
+  ```json
+  {
+    "response": ""
+  }
   ``` 
