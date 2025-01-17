@@ -13,7 +13,7 @@ import { Agent } from '../interfaces/AgentInterfaces';
 interface RandomAgentCardProps {
   agent: Agent;
   onSelect: (agent: Agent) => void;
-  onAdd?: (agent: Agent) => void;
+  onAddAgent?: (agent: Agent) => void;
   isUserAgent?: boolean;
   onRegenerate: (agentId: string) => Promise<void>;
 }
@@ -21,7 +21,7 @@ interface RandomAgentCardProps {
 const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   agent,
   onSelect,
-  onAdd,
+  onAddAgent: onAdd,
   isUserAgent,
   onRegenerate,
 }) => {
@@ -34,7 +34,10 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       </div>
       <div
         className="perspective w-64 h-[500px]"
-        onMouseEnter={() => setIsFlipped(true)}
+        onMouseEnter={() => {
+          setIsFlipped(true);
+          console.log(agent);
+        }}
         onMouseLeave={() => setIsFlipped(false)}
         onClick={(e) => {
           e.stopPropagation();

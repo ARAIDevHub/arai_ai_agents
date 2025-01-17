@@ -299,7 +299,6 @@ const AgentCreator: React.FC = () => {
           };
         });
 
-        console.log('Processed characters:', processed);
         setCharacters(processed as Agent[]);
       } catch (error) {
         console.error('Error loading characters:', error);

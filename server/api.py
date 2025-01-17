@@ -41,6 +41,9 @@ def create_agent():
     if not character_name:
         return jsonify({"error": "Character name is required"}), 400
 
+    # Replace spaces with underscores in the character name
+    character_name = character_name.replace(' ', '_')
+
     # Create a directory for the character
     character_dir = os.path.join('configs', character_name)
     os.makedirs(character_dir, exist_ok=True)
