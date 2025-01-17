@@ -1,425 +1,269 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Heart,
-  MessageCircle,
-  Sparkles,
-  PlusCircle,
-  CheckCircle,
   RefreshCcw,
 } from 'lucide-react';
-import image1 from '../assets/agent-images/agent1.jpg';
-import image2 from '../assets/agent-images/agent2.jpg';
-import image3 from '../assets/agent-images/agent3.jpg';
-import image4 from '../assets/agent-images/agent4.jpg';
-import agentsData from '../assets/agents.json'; // Import the JSON file
+import { Agent } from '../interfaces/AgentInterfaces';
+import useCharacters from '../hooks/useCharacters';
+import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
+import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
+import { generateSingleImage } from '../api/leonardoApi';
+import { createBlankAgent } from '../utils/agentUtils';
+import { createAgent } from '../api/agentsAPI';
+// Import the JSON files
+import names from '../assets/generate-random-agents/names.json';
+import personalities from '../assets/generate-random-agents/personalities.json';
+import communicationStyles from '../assets/generate-random-agents/communicationStyles.json';
+import emojis from '../assets/generate-random-agents/emojis.json';
+import hashtags from '../assets/generate-random-agents/hashtags.json';
 
-// Define the Agent type
-interface Agent {
-  id: number;
-  name: string;
-  avatar: string;
-  role: string;
-  shortDescription?: string; // Optional property
-  tags: string[];
-  personality: string;
-  communicationStyle: string;
-  abilities: string[];
-  placeholder?: boolean; // Add optional placeholder property
-}
 
-// Define the props for AgentCard
-interface AgentCardProps {
-  agent: Agent;
-  onSelect: (agent: Agent) => void;
-  onAdd?: (agent: Agent) => void; // Optional onAdd prop for random agents
-  isUserAgent?: boolean; // Flag to indicate if it's a user agent
-  setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>; // Add setRandomAgents prop
-  generateRandomAgent: () => Agent; // Add generateRandomAgent prop
-}
 
-// Regenerate Button Component
-interface RegenerateButtonProps {
-  onRegenerate: () => void;
-}
-
-const RegenerateButton: React.FC<RegenerateButtonProps> = ({
-  onRegenerate,
-}) => {
-  return (
-    <button
-      className="w-full mt-2 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
-      onClick={(e) => {
-        e.stopPropagation();
-        onRegenerate();
-      }}
-    >
-      <RefreshCcw className="w-4 h-4" />
-      Regenerate
-    </button>
-  );
-};
-
-const AgentCard: React.FC<AgentCardProps> = ({
-  agent,
-  onSelect,
-  onAdd,
-  isUserAgent,
-  setRandomAgents,
-  generateRandomAgent,
-}) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [isRegenerating, setIsRegenerating] = useState(false); // State to track regeneration
-
-  const handleRegenerate = () => {
-    setIsRegenerating(true); // Show placeholder
-
-    // Simulate regeneration delay (remove in actual implementation)
-    setTimeout(() => {
-      setRandomAgents((prevAgents: Agent[]) =>
-        prevAgents.map((a: Agent) =>
-          a.id === agent.id ? generateRandomAgent() : a
-        )
-      );
-      setIsRegenerating(false); // Hide placeholder
-    }, 500); // Adjust delay as needed
-  };
-
-  return (
-    <div className="relative">
-      {agent.placeholder ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800/75">
-          <p className="text-white">Regenerating...</p>
-        </div>
-      ) : (
-        <div
-          className="perspective w-64 h-[500px]"
-          onMouseEnter={() => setIsFlipped(true)}
-          onMouseLeave={() => setIsFlipped(false)}
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(agent);
-          }}
-        >
-          <div
-            className={`relative w-full h-full duration-500 preserve-3d ${
-              isFlipped ? 'rotate-y-180' : ''
-            }`}
-          >
-            {/* Front of card */}
-            <div className="absolute w-full h-full backface-hidden">
-              <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-purple-500/30">
-                {/* Image container - 80% of card height */}
-                <div className="relative h-[400px]">
-                  <img
-                    src={agent.avatar}
-                    alt={agent.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
-                </div>
-
-                {/* Title area - 20% of card height */}
-                <div className="h-[100px] p-4 bg-gray-800/95">
-                  <h3 className="text-xl font-bold text-gray-100 mb-1">
-                    {agent.name}
-                  </h3>
-                  <p className="text-purple-300 text-sm">{agent.role}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Back of card */}
-            <div className="absolute w-full h-full backface-hidden rotate-y-180">
-              <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-purple-500/30">
-                {/* Header with small image */}
-                <div className="flex gap-4 mb-4">
-                  <img
-                    src={agent.avatar}
-                    alt={agent.name}
-                    className="w-20 h-20 rounded-lg object-cover"
-                  />
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-100">
-                      {agent.name}
-                    </h3>
-                    <p className="text-purple-400 text-sm">{agent.role}</p>
-                  </div>
-                </div>
-
-                {/* Content sections */}
-                <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
-                  <div>
-                    <div className="flex items-center gap-2 text-gray-300 mb-1">
-                      <Heart className="w-4 h-4 text-purple-400" />
-                      <span className="font-medium">Personality</span>
-                    </div>
-                    <p className="text-gray-400 text-sm">{agent.personality}</p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 text-gray-300 mb-1">
-                      <MessageCircle className="w-4 h-4 text-purple-400" />
-                      <span className="font-medium">Communication</span>
-                    </div>
-                    <p className="text-gray-400 text-sm">
-                      {agent.communicationStyle}
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 text-gray-300 mb-1">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      <span className="font-medium">Abilities</span>
-                    </div>
-                    <ul className="text-gray-400 text-sm pl-4 list-disc space-y-1">
-                      {agent.abilities.map((ability, index) => (
-                        <li key={index}>{ability}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Tags at bottom */}
-                <div className="absolute bottom-12 left-4 right-4">
-                  <div className="flex gap-2 flex-wrap">
-                    {agent.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-purple-900/50 rounded-full text-xs text-purple-300"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Action button at bottom */}
-                <div className="absolute bottom-2 left-4 right-4">
-                  {isUserAgent ? (
-                    <button
-                      className="w-full px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelect(agent);
-                      }}
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Select Agent
-                    </button>
-                  ) : (
-                    <button
-                      className="w-full px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAdd && onAdd(agent);
-                      }}
-                    >
-                      <PlusCircle className="w-4 h-4" />
-                      Add Agent
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Regenerate button below the card */}
-      {!isUserAgent && (
-        <div className="mt-2 w-64 mx-auto">
-          <RegenerateButton onRegenerate={handleRegenerate} />
-        </div>
-      )}
-
-      {/* Placeholder while regenerating */}
-      {isRegenerating && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800/75">
-          <p className="text-white">Regenerating...</p>
-        </div>
-      )}
-    </div>
-  );
+// Add a utility function to handle image loading
+const loadImageWithFallback = async (url: string): Promise<string> => {
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit', // Don't send cookies
+      headers: {
+        'Accept': 'image/*'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Image failed to load');
+    }
+    
+    return url;
+  } catch (error) {
+    console.error('[AgentGallery] Error loading image:', error);
+    return 'https://via.placeholder.com/400x400?text=Image+Load+Failed';
+  }
 };
 
 const AgentGallery: React.FC = () => {
+  const { characters: loadedAgents, loading, error } = useCharacters();
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const [yourAgents, setYourAgents] = useState<Agent[]>([]);
-
-  const agentImages = [image1, image2, image3, image4];
-
+  const [isGenerating, setIsGenerating] = useState<boolean>(true);
+  const initialMount = useRef(true);
+ 
   // Define generateRandomAgent inside AgentGallery so it's accessible to child components
   const generateRandomAgent = (): Agent => {
-    const names = [
-      'Empress',
-      'Lovers',
-      'Magician',
-      'Hermit',
-      'Hierophant',
-      'The Chariot',
-      'Strength',
-      'The Wheel',
-      'Justice',
-      'The Hanged Man',
-    ];
-    const roles = [
-      "Nature's Guardian",
-      'Harmony Weaver',
-      'Mystic Seer',
-      'Wise Wanderer',
-      'Spiritual Guide',
-      'Divine Messenger',
-      'Inner Power',
-      'The Wheel',
-      'Justice',
-      'The Hanged Man',
-    ];
-    const personalities = [
-      'Warm, nurturing',
-      'Balanced, intuitive',
-      'Mysterious, insightful',
-      'Solitary, contemplative',
-      'Traditional, knowledgeable',
-      'Dynamic, purposeful',
-      'Courageous, determined',
-      'Cyclical, transformative',
-      'Fair, objective',
-      'Sacrificial, enlightened',
-    ];
-    const communicationStyles = [
-      'Speaks with gentle wisdom',
-      'Communicates through heart-centered wisdom',
-      'Speaks in riddles and metaphors',
-      'Shares wisdom through silence and observation',
-      'Conveys knowledge through teachings and rituals',
-      'Speaks with clarity and direction',
-      'Expresses with passion and conviction',
-      'Communicates through symbols and omens',
-      'Speaks with truth and integrity',
-      'Shares insights from higher realms',
-    ];
-    const abilities = [
-      ['Nature attunement', 'Growth facilitation', 'Abundance manifestation'],
-      ['Relationship guidance', 'Choice illumination', 'Soul connection'],
-      ['Divination', 'Energy manipulation', 'Reality crafting'],
-      ['Introspection', 'Spiritual insight', 'Pathfinding'],
-      ['Sacred knowledge', 'Ritual mastery', 'Blessing bestowal'],
-      ['Guidance', 'Protection', 'Swift action'],
-      ['Inner strength', 'Courage', 'Resilience'],
-      ['Fate reading', 'Destiny shaping', 'Karma balancing'],
-      ['Truth seeking', 'Equilibrium restoration', 'Moral compass'],
-      ['Spiritual awakening', 'Letting go', 'Higher perspective'],
-    ];
-    const tags = [
-      ['#nature', '#nurture', '#abundance'],
-      ['#harmony', '#choice', '#connection'],
-      ['#mystic', '#insight', '#manifestation'],
-      ['#wisdom', '#solitude', '#enlightenment'],
-      ['#spirituality', '#tradition', '#guidance'],
-      ['#divine', '#purpose', '#action'],
-      ['#strength', '#courage', '#innerpower'],
-      ['#karma', '#destiny', '#transformation'],
-      ['#justice', '#balance', '#truth'],
-      ['#surrender', '#awakening', '#higherconsciousness'],
-    ];
 
-    const randomIndex = Math.floor(Math.random() * names.length);
+    const randomIndexTo100 = Math.floor(Math.random() * 99);
+    const randomIndexTo500 = Math.floor(Math.random() * 499);
 
     return {
-      id: Date.now(), // Unique ID for each random agent
-      name: names[randomIndex],
-      avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
-      role: roles[randomIndex],
+      id: Math.floor(Math.random() * 1000000), // Generate a random number for the ID
+      name: names[randomIndexTo500],
+      avatar: '', // Start with empty avatar, will be filled by generateSingleImage
       shortDescription: '...', // You can add short descriptions if needed
-      tags: tags[randomIndex],
-      personality: personalities[randomIndex],
-      communicationStyle: communicationStyles[randomIndex],
-      abilities: abilities[randomIndex],
+      tags: hashtags[randomIndexTo100],
+      personality: personalities[randomIndexTo100],
+      communicationStyle: communicationStyles[randomIndexTo100],
+      emojis: emojis[randomIndexTo100],
     };
   };
 
-  const handleAddAgent = (agent: Agent) => {
+  const handleAddAgent = (agent: Agent, leonardoResponse: any) => {
+    // Step 1 Create a new blank agent
+    const newAgent = createBlankAgent();
+    console.log("[handleAddAgent] - Creating a new blank agent to populate the agent details", newAgent);
+    console.log("[handleAddAgent] - Creating a new agent with the following details", agent);
+    console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse); // Log the full response object
+
+    // Step 2 Populate the new agent with the details from the leonardo response
+    // populate our concept
+    newAgent.concept = agent.concept;
+
+    // populate our agent details
+    newAgent.agent.agent_details.name = agent?.name || '';
+    newAgent.agent.agent_details.personality = agent?.personality || [];
+    newAgent.agent.agent_details.communication_style = agent?.communicationStyle || [];
+    newAgent.agent.agent_details.emojis = agent?.emojis || [];
+    newAgent.agent.agent_details.hashtags = agent?.hashtags || [];
+    newAgent.agent.agent_details.universe = agent?.universe || '';
+    newAgent.agent.agent_details.topic_expertise = agent.agent_details?.topicExpertise || []; // Need to randomly generate this
+    newAgent.agent.agent_details.backstory = agent?.backstory || ''; // Need to randomly generate this
+
+    // Populate the image data
+    console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse);
+    const generation_by_pk = leonardoResponse.generations_by_pk;
+    newAgent.agent.profile_image_options[0].generations_by_pk = generation_by_pk;
+    // Break down the generation_by_pk object for details to populate the Profile Image 
+    newAgent.agent.profile_image.details.url = generation_by_pk.generated_images[0].url;
+    newAgent.agent.profile_image.details.image_id = generation_by_pk.generated_images[0].id;
+    newAgent.agent.profile_image.details.generationId = generation_by_pk.id;
+
+    console.log("[handleAddAgent] - New agent with image data:", newAgent);
+
+    // Call our api to save the new agent
+    const newAgentResponse = createAgent(newAgent);
+    console.log("[handleAddAgent] - New agent response:", newAgentResponse);
+
     setYourAgents((prevAgents) => [...prevAgents, agent]);
-    setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
+    // setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
   };
 
-  const handleRegenerateAll = () => {
-    // Set all random agents to a placeholder state
-    setRandomAgents(randomAgents.map(agent => ({
-      ...agent,
-      placeholder: true
-    })));
+  const generateNewAgent = async () => {
+    setIsGenerating(true);
+    
+    try {
+      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
+      const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+      const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+      
+      setRandomAgents(newAgents.map(agent => ({ ...agent, avatar: '', isLoading: true })));
 
-    // Simulate regeneration delay (remove in actual implementation)
-    setTimeout(() => {
-      const newRandomAgents = [...Array(3)].map(() => generateRandomAgent());
-      setRandomAgents(newRandomAgents);
-    }, 500); // Adjust delay as needed
+      const imagePromises = newAgents.map(async (agent) => {
+        const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
+                     Their personality can be described as ${agent.personality}. 
+                     Style: high quality, detailed anime art, character portrait`;
+
+        const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
+        if (!imageResponse?.generations_by_pk?.generated_images?.[0]) {
+          throw new Error('No image data received');
+        }
+        
+        const imageObject = imageResponse.generations_by_pk.generated_images[0];
+        const loadedImageUrl = await loadImageWithFallback(imageObject.url);
+        
+        return { 
+          ...agent, 
+          avatar: loadedImageUrl, 
+          leonardoImage: imageObject, // Pass the entire image object
+          leonardoResponse: imageResponse, // Capture the full response
+          isLoading: false 
+        };
+      });
+
+      const completedAgents = await Promise.all(imagePromises);
+      setRandomAgents(completedAgents);
+
+    } catch (error) {
+      console.error('[AgentGallery] Error generating agents:', error);
+      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
+      setRandomAgents(newAgents.map(agent => ({
+        ...agent,
+        avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
+        isLoading: false
+      })));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Add this function to handle single agent regeneration
+  const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
+    const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+    const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+    
+    try {
+      const currentAgent = randomAgents.find(agent => agent.id === agentId);
+      if (!currentAgent) return;
+
+      const newAgentData = generateRandomAgent();
+      const newAgent = {
+        ...newAgentData,
+        id: currentAgent.id // Preserve the original ID
+      };
+
+      setRandomAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === agentId 
+            ? { ...newAgent, avatar: '', isLoading: true }
+            : agent
+        )
+      );
+
+      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
+                     Their personality can be described as ${newAgent.personality}. 
+                     Style: high quality, detailed anime art, character portrait`;
+
+      const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
+      if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+        throw new Error('No image URL received');
+      }
+
+      const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
+      const loadedImageUrl = await loadImageWithFallback(imageUrl);
+
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? { ...newAgent, avatar: loadedImageUrl, isLoading: false }
+            : agent
+        )
+      );
+
+    } catch (error) {
+      console.error('[AgentGallery] Error regenerating single agent:', error);
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? {
+                ...agent,
+                avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
+                isLoading: false
+              }
+            : agent
+        )
+      );
+    }
   };
 
   useEffect(() => {
-    // Load agents from JSON
-    const randomAgents = [...Array(3)].map(() => {
-      const randomIndex = Math.floor(Math.random() * agentsData.length);
-      const agent = agentsData[randomIndex];
-      return {
-        ...agent,
-        id: Date.now() + randomIndex,
-        avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
-      }; // Ensure unique IDs
-    });
-
-    const yourAgents = [...Array(5)].map((_, index) => {
-      const agent = agentsData[index % agentsData.length]; // Cycle through agents
-      return {
-        ...agent,
-        id: Date.now() + index + 1000,
-        avatar: agentImages[Math.floor(Math.random() * agentImages.length)],
-      }; // Ensure unique IDs
-    });
-
-    setRandomAgents(randomAgents);
-    setYourAgents(yourAgents);
+    if (initialMount.current) {
+      initialMount.current = false;
+      generateNewAgent();
+    }
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50 p-6">
       <div className="max-w-7xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div className="flex gap-4">
             <button
-              className={`px-4 py-2 rounded-md ${
-                filter === 'all' ? 'bg-purple-600' : 'bg-gray-700'
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
+                filter === 'all' 
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+                  : 'text-gray-300 hover:text-cyan-400'
               }`}
               onClick={() => setFilter('all')}
             >
               All
             </button>
             <button
-              className={`px-4 py-2 rounded-md ${
-                filter === 'random' ? 'bg-purple-600' : 'bg-gray-700'
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
+                filter === 'random' 
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+                  : 'text-gray-300 hover:text-cyan-400'
               }`}
               onClick={() => setFilter('random')}
             >
               Random
             </button>
             <button
-              className={`px-4 py-2 rounded-md ${
-                filter === 'yourAgents' ? 'bg-purple-600' : 'bg-gray-700'
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
+                filter === 'yourAgents' 
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+                  : 'text-gray-300 hover:text-cyan-400'
               }`}
               onClick={() => setFilter('yourAgents')}
             >
               Your Agents
             </button>
           </div>
-          <h1 className="text-2xl font-bold text-center flex-grow">Mystic Agents Gallery</h1>
+          {/* <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1> */}
           {(filter === 'all' || filter === 'random') && (
             <button
-              className="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700"
-              onClick={handleRegenerateAll}
+              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md text-white flex items-center gap-2"
+              onClick={generateNewAgent}
             >
+              <RefreshCcw className="w-4 h-4" />
               Regenerate All
             </button>
           )}
@@ -427,74 +271,52 @@ const AgentGallery: React.FC = () => {
 
         {/* Agents Section */}
         <div>
-          {/* All Agents */}
+          {(filter === 'all' || filter === 'random') && (
+            <>
+              <h2 className="text-xl font-semibold mb-4 text-white">Random Agents</h2>
+              <div className="flex flex-wrap gap-6 justify-center">
+                {randomAgents.map((agent) => (
+                  <RandomAgentCard
+                    key={agent.id}
+                    agent={agent}
+                    onSelect={setSelectedAgent}
+                    onAddAgent={(agent) => handleAddAgent(agent, agent.leonardoResponse)}
+                    isUserAgent={false}
+                    setRandomAgents={setRandomAgents}
+                    generateRandomAgent={generateRandomAgent}
+                    isLoadedAgent={true}
+                    onRegenerate={handleSingleAgentRegeneration}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
           {filter === 'all' && (
             <>
-              <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
+              <h2 className="text-xl font-semibold mt-8 mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
-                {randomAgents.map((agent) => (
-                  <AgentCard
+                {loadedAgents.map((agent) => (
+                  <LoadedAgentCard
                     key={agent.id}
                     agent={agent}
                     onSelect={setSelectedAgent}
-                    onAdd={handleAddAgent}
-                    isUserAgent={false}
-                    setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
-                  />
-                ))}
-              </div>
-              <h2 className="text-xl font-semibold mt-8 mb-4">Your Agents</h2>
-              <div className="flex flex-wrap gap-6 justify-center">
-                {yourAgents.map((agent) => (
-                  <AgentCard
-                    key={agent.id}
-                    agent={agent}
-                    onSelect={setSelectedAgent}
-                    onAdd={handleAddAgent}
-                    isUserAgent={true}
-                    setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
                   />
                 ))}
               </div>
             </>
           )}
-
-          {/* Random Agents */}
-          {filter === 'random' && (
-            <>
-              <h2 className="text-xl font-semibold mb-4">Random Agents</h2>
-              <div className="flex flex-wrap gap-6 justify-center">
-                {randomAgents.map((agent) => (
-                  <AgentCard
-                    key={agent.id}
-                    agent={agent}
-                    onSelect={setSelectedAgent}
-                    onAdd={handleAddAgent}
-                    isUserAgent={false}
-                    setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Your Agents */}
+          
+          {/* Your Agents filter section */}
           {filter === 'yourAgents' && (
             <>
-              <h2 className="text-xl font-semibold mb-4">Your Agents</h2>
+              <h2 className="text-xl font-semibold mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
-                {yourAgents.map((agent) => (
-                  <AgentCard
+                {loadedAgents.map((agent) => (
+                  <LoadedAgentCard
                     key={agent.id}
                     agent={agent}
                     onSelect={setSelectedAgent}
-                    onAdd={handleAddAgent}
-                    isUserAgent={true}
-                    setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
                   />
                 ))}
               </div>
@@ -502,13 +324,6 @@ const AgentGallery: React.FC = () => {
           )}
         </div>
 
-        {/* Display the selected agent's name */}
-        {selectedAgent && (
-          <div className="mt-8 text-center">
-            <h2 className="text-xl font-semibold">Selected Agent:</h2>
-            <p>{selectedAgent.name}</p>
-          </div>
-        )}
       </div>
     </div>
   );

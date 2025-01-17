@@ -11,6 +11,13 @@ export async function getAgents() {
 
 // Function to create a new agent
 export async function createAgent(agentData: any) {
+  // console.log('[Client - agentsApi] - agentData', agentData);
+  // If the agentData comes in as an Agent object, we need to drill down into the agent one level
+  // This allows us to process both Agent and non-agent type objects
+  if (agentData.agent) {
+    agentData = agentData.agent;
+  }
+  
   const response = await fetch(`${BASE_URL}/agents`, {
     method: 'POST',
     headers: {

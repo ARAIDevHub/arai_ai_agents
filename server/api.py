@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 import os
 import json
 import glob
+from pprint import pprint
 
 load_dotenv()
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB
 
 # Configure CORS for your frontend origin
 CORS(app, resources={r"/api/*": {
@@ -32,17 +34,19 @@ def get_agents():
 @app.route('/api/agents', methods=['POST'])
 def create_agent():
     data = request.get_json()
-
     print(f"[create_agent] - Received data: {data}")
 
-    # Extract character name from the data
-    character_name = data.get('name')
+    # Extract character name from the agent_details
+    character_name = data.get('agent_details', {}).get('name')
     if not character_name:
         return jsonify({"error": "Character name is required"}), 400
 
+    # Replace spaces with underscores in the character name
+    character_name = character_name.replace(' ', '_')
+
     # Create a directory for the character
     character_dir = os.path.join('configs', character_name)
-    os.makedirs(character_dir, exist_ok=True)  # Create the directory if it doesn't exist
+    os.makedirs(character_dir, exist_ok=True)
 
     # Generate filename
     base_filename = f"{character_name}_master"
@@ -54,45 +58,51 @@ def create_agent():
         filename = f"{base_filename}_{counter}.json"
         counter += 1
 
-    # Create the new character structure based on master.json
+    # Create the new character structure based on the incoming data structure
     new_character_data = {
         "agent": {
             "agent_details": {
                 "name": character_name,
-                "personality": data.get("personality", []),
-                "communication_style": data.get("communication_style", []),
-                "backstory": data.get("backstory", ""),
-                "universe": data.get("universe", ""),
-                "topic_expertise": data.get("topic_expertise", []),
-                "hashtags": data.get("hashtags", []),
-                "emojis": data.get("emojis", [])
+                "personality": data.get('agent_details', {}).get('personality', []),
+                "communication_style": data.get('agent_details', {}).get('communication_style', []),
+                "backstory": data.get('agent_details', {}).get('backstory', ''),
+                "universe": data.get('agent_details', {}).get('universe', ''),
+                "topic_expertise": data.get('agent_details', {}).get('topic_expertise', []),
+                "hashtags": data.get('agent_details', {}).get('hashtags', []),
+                "emojis": data.get('agent_details', {}).get('emojis', []),
+                "concept": data.get('agent_details', {}).get('concept', '')
             },
             "ai_model": {
-                "model_type": data.get("model_type", ""),
-                "model_name": data.get("model_name", ""),
-                "memory_store": data.get("memory_store", "")
+                "model_type": "",
+                "model_name": "",
+                "memory_store": ""
             },
             "connectors": {
-                "twitter": data.get("twitter", False),
-                "telegram": data.get("telegram", False),
-                "discord": data.get("discord", False)
+                "twitter": False,
+                "telegram": False,
+                "discord": False
             },
+            "profile_image": data.get('profile_image', []),
+            "profile_image_options": data.get('profile_image_options', []),
             "tracker": {
                 "current_season_number": 0,
                 "current_episode_number": 0,
                 "current_post_number": 0,
                 "post_every_x_minutes": 0
             },
-            "seasons": data.get("seasons",[])  # Initialize with an empty list or populate as needed
+            "seasons": data.get('seasons', [])
         },
-        "concept": data.get("concept", "")
+        "concept": data.get('agent_details', {}).get('concept', '')
     }
 
     # Write data to the new JSON file within the character's directory
     with open(os.path.join(character_dir, filename), 'w', encoding='utf-8') as f:
         json.dump(new_character_data, f, ensure_ascii=False, indent=4)
 
-    return jsonify(data), 201
+    return jsonify(new_character_data), 201
+
+
+
 
 @app.route('/api/characters', methods=['GET'])
 def get_characters():
