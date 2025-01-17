@@ -26,6 +26,12 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   onRegenerate,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const agentName = agent.name || 'Unknown Agent';
+  const agentPersonality = agent.personality || [];
+  const agentCommunicationStyle = agent.communicationStyle || [];
+  const agentEmojis = Array.isArray(agent.emojis) ? agent.emojis : [];
+  const agentTags = Array.isArray(agent.tags) ? agent.tags : [];
+  const profileImageUrl = agent.avatar || "";
 
   return (
     <div className="relative">
@@ -34,10 +40,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       </div>
       <div
         className="perspective w-64 h-[500px]"
-        onMouseEnter={() => {
-          setIsFlipped(true);
-          console.log(agent);
-        }}
+        onMouseEnter={() => setIsFlipped(true)}
         onMouseLeave={() => setIsFlipped(false)}
         onClick={(e) => {
           e.stopPropagation();
@@ -54,15 +57,15 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
             <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
                 <img
-                  src={agent.avatar}
-                  alt={agent.name}
+                  src={profileImageUrl}
+                  alt={agentName}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
               </div>
               <div className="h-[100px] p-4 bg-gray-800/95">
                 <h3 className="text-xl font-bold text-gray-100 mb-1">
-                  {agent.name}
+                  {agentName}
                 </h3>
                 <p className="text-orange-300 text-sm">{agent.role}</p>
               </div>
@@ -75,13 +78,13 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
               {/* Header with small image */}
               <div className="flex gap-4 mb-4">
                 <img
-                  src={agent.avatar}
-                  alt={agent.name}
+                  src={profileImageUrl}
+                  alt={agentName}
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div>
                   <h3 className="text-xl font-bold text-gray-100">
-                    {agent.name}
+                    {agentName}
                   </h3>
                   <p className="text-orange-400 text-sm">{agent.role}</p>
                 </div>
@@ -94,7 +97,9 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <Heart className="w-4 h-4 text-orange-400" />
                     <span className="font-medium">Personality</span>
                   </div>
-                  <p className="text-gray-400 text-sm">{agent.personality}</p>
+                  <p className="text-gray-400 text-sm">
+                    {Array.isArray(agentPersonality) ? agentPersonality.join(', ') : agentPersonality}
+                  </p>
                 </div>
 
                 <div>
@@ -103,7 +108,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <span className="font-medium">Communication Style</span>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    {agent.communicationStyle}
+                    {Array.isArray(agentCommunicationStyle) ? agentCommunicationStyle.join(', ') : agentCommunicationStyle}
                   </p>
                 </div>
 
@@ -113,15 +118,15 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <span className="font-medium">Emojis</span>
                   </div>
                   <p className="text-gray-400 text-sm line-clamp-2 mb-4">
-                    {Array.isArray(agent.emojis) ? agent.emojis.join(' ') : ''}
+                    {agentEmojis.join(' ')}
                   </p>
                 </div>
               </div>
 
               {/* Tags at bottom */}
-              <div className="absolute bottom-12 left-4 right-4">
+              <div className="relative">
                 <div className="flex gap-2 flex-wrap">
-                  {agent.tags.map((tag, index) => (
+                  {agentTags.map((tag, index) => (
                     <span
                       key={index}
                       className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300"

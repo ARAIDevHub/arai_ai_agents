@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   RefreshCcw,
 } from 'lucide-react';
-import agentsData from '../assets/agents.json'; // Import the JSON file
 import { Agent } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
@@ -10,6 +9,15 @@ import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new c
 import { generateSingleImage } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
+// Import the JSON files
+import names from '../assets/generate-random-agents/names.json';
+import personalities from '../assets/generate-random-agents/personalities.json';
+import communicationStyles from '../assets/generate-random-agents/communicationStyles.json';
+import emojis from '../assets/generate-random-agents/emojis.json';
+import hashtags from '../assets/generate-random-agents/hashtags.json';
+
+
+
 // Add a utility function to handle image loading
 const loadImageWithFallback = async (url: string): Promise<string> => {
   try {
@@ -43,91 +51,70 @@ const AgentGallery: React.FC = () => {
  
   // Define generateRandomAgent inside AgentGallery so it's accessible to child components
   const generateRandomAgent = (): Agent => {
-    const names = [
-      'Empress',
-      'Lovers',
-      'Magician',
-      'Hermit',
-      'Hierophant',
-      'The Chariot',
-      'Strength',
-      'The Wheel',
-      'Justice',
-      'The Hanged Man',
-    ];
-    const roles = [
-      "Nature's Guardian",
-      'Harmony Weaver',
-      'Mystic Seer',
-      'Wise Wanderer',
-      'Spiritual Guide',
-      'Divine Messenger',
-      'Inner Power',
-      'The Wheel',
-      'Justice',
-      'The Hanged Man',
-    ];
-    const personalities = [
-      ['Warm', 'nurturing'],
-      ['Balanced', 'intuitive'],
-      ['Mysterious', 'insightful'],
-      ['Solitary', 'contemplative'],
-      ['Traditional', 'knowledgeable'],
-      ['Dynamic', 'purposeful'],
-      ['Courageous', 'determined'],
-      ['Cyclical', 'transformative'],
-      ['Fair', 'objective'],
-      ['Sacrificial', 'enlightened'],
-    ];
-    const communicationStyles = [
-      ['Gentle', 'Wise'],
-      ['Heart-centered', 'Compassionate'],
-      ['Riddles', 'Metaphorical'],
-      ['Silent', 'Observant'],
-      ['Knowledgeable', 'Ritualistic'],
-      ['Clear', 'Direct'],
-      ['Passionate', 'Convicted'],
-      ['Symbolic', 'Ominous'],
-      ['Truthful', 'Integrity'],
-      ['Insightful', 'Transcendent'],
-    ];
-    const emojis = [
-      ['🌱', '🌿', '✨'],
-      ['💝', '🔮', '💫'],
-      ['🎯', '⚡', '🌟'],
-      ['🍃', '🌸', '💫'],
-      ['📚', '🕯️', '🙏'],
-      ['🛡️', '⚔️', '🏃'],
-      ['💪', '🦁', '🎯'],
-      ['🎲', '🌟', '⚖️'],
-      ['⚖️', '🔍', '🧭'],
-      ['🦋', '🌙', '👁️'],
-    ];
-    const tags = [
-      ['#nature', '#nurture', '#abundance'],
-      ['#harmony', '#choice', '#connection'],
-      ['#mystic', '#insight', '#manifestation'],
-      ['#wisdom', '#solitude', '#enlightenment'],
-      ['#spirituality', '#tradition', '#guidance'],
-      ['#divine', '#purpose', '#action'],
-      ['#strength', '#courage', '#innerpower'],
-      ['#karma', '#destiny', '#transformation'],
-      ['#justice', '#balance', '#truth'],
-      ['#surrender', '#awakening', '#higherconsciousness'],
-    ];
 
-    const randomIndex = Math.floor(Math.random() * names.length);
+    // const personalities = [
+    //   ['Warm', 'nurturing'],
+    //   ['Balanced', 'intuitive'],
+    //   ['Mysterious', 'insightful'],
+    //   ['Solitary', 'contemplative'],
+    //   ['Traditional', 'knowledgeable'],
+    //   ['Dynamic', 'purposeful'],
+    //   ['Courageous', 'determined'],
+    //   ['Cyclical', 'transformative'],
+    //   ['Fair', 'objective'],
+    //   ['Sacrificial', 'enlightened'],
+    // ];
+    // const communicationStyles = [
+    //   ['Gentle', 'Wise'],
+    //   ['Heart-centered', 'Compassionate'],
+    //   ['Riddles', 'Metaphorical'],
+    //   ['Silent', 'Observant'],
+    //   ['Knowledgeable', 'Ritualistic'],
+    //   ['Clear', 'Direct'],
+    //   ['Passionate', 'Convicted'],
+    //   ['Symbolic', 'Ominous'],
+    //   ['Truthful', 'Integrity'],
+    //   ['Insightful', 'Transcendent'],
+    // ];
+    // const emojis = [
+    //   ['🌱', '🌿', '✨'],
+    //   ['💝', '🔮', '💫'],
+    //   ['🎯', '⚡', '🌟'],
+    //   ['🍃', '🌸', '💫'],
+    //   ['📚', '🕯️', '🙏'],
+    //   ['🛡️', '⚔️', '🏃'],
+    //   ['💪', '🦁', '🎯'],
+    //   ['🎲', '🌟', '⚖️'],
+    //   ['⚖️', '🔍', '🧭'],
+    //   ['🦋', '🌙', '👁️'],
+    // ];
+    // const hashtags = [
+    //   ['#nature', '#nurture', '#abundance'],
+    //   ['#harmony', '#choice', '#connection'],
+    //   ['#mystic', '#insight', '#manifestation'],
+    //   ['#wisdom', '#solitude', '#enlightenment'],
+    //   ['#spirituality', '#tradition', '#guidance'],
+    //   ['#divine', '#purpose', '#action'],
+    //   ['#strength', '#courage', '#innerpower'],
+    //   ['#karma', '#destiny', '#transformation'],
+    //   ['#justice', '#balance', '#truth'],
+    //   ['#surrender', '#awakening', '#higherconsciousness'],
+    // ];
+
+    const randomIndexTo100 = Math.floor(Math.random() * 99);
+    const randomIndexTo500 = Math.floor(Math.random() * 499);
+
+
 
     return {
       id: Math.floor(Math.random() * 1000000), // Generate a random number for the ID
-      name: names[randomIndex],
+      name: names[randomIndexTo500],
       avatar: '', // Start with empty avatar, will be filled by generateSingleImage
-      role: roles[randomIndex],
       shortDescription: '...', // You can add short descriptions if needed
-      tags: tags[randomIndex],
-      personality: personalities[randomIndex],
-      communicationStyle: communicationStyles[randomIndex],
-      emojis: emojis[randomIndex],
+      tags: hashtags[randomIndexTo100],
+      personality: personalities[randomIndexTo100],
+      communicationStyle: communicationStyles[randomIndexTo100],
+      emojis: emojis[randomIndexTo100],
     };
   };
 
