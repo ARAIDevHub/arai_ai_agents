@@ -2,10 +2,9 @@ import { Agent } from '../interfaces/AgentInterfaces';
 import { Season } from '../interfaces/SeasonInterfaces';
 
 interface ProfileImageDetails {
-  url?: string;
-  image_id?: string;
-  generationId?: string;
-  [key: string]: any; // Allows additional fields
+  url: string;
+  image_id: string;
+  generationId: string;
 }
 
 export function createBlankAgent(): Agent {
@@ -19,7 +18,7 @@ export function createBlankAgent(): Agent {
         hashtags: [],
         name: '',
         personality: [],
-        selectedImage: undefined,  // Optional field
+        // selectedImage: undefined,  // Optional field
         topic_expertise: [],
         universe: ''
       },
@@ -34,6 +33,8 @@ export function createBlankAgent(): Agent {
         twitter: false
       },
       tracker: {
+        messages_sent: 0,
+        total_interactions: 0,
         current_episode_number: 0,
         current_post_number: 0,
         current_season_number: 0,
@@ -41,8 +42,11 @@ export function createBlankAgent(): Agent {
       },
       seasons: [] as Season[],
       profile_image: {
-        details: {} as ProfileImageDetails,
-        payload: {}
+        details: {
+          url: '',
+          image_id: '',
+          generationId: ''
+        }
       },
       profile_image_options: [{
         generations_by_pk: {

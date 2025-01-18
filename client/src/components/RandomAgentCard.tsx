@@ -185,7 +185,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
             className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
             onClick={(e) => {
               e.stopPropagation();
-              onRegenerate(agent.id);
+              onRegenerate(agent.id.toString());
             }}
           >
             <RefreshCcw className="w-4 h-4" />

@@ -41,7 +41,7 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
 };
 
 const AgentGallery: React.FC = () => {
-  const { characters: loadedAgents, loading, error } = useCharacters();
+  const { characters: loadedAgents } = useCharacters();
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
@@ -70,6 +70,11 @@ const AgentGallery: React.FC = () => {
   const handleAddAgent = (agent: Agent, leonardoResponse: any) => {
     // Step 1 Create a new blank agent
     const newAgent = createBlankAgent();
+    if (!newAgent.agent) {
+        console.error("Failed to create agent - agent property is undefined");
+        return;
+    }
+
     console.log("[handleAddAgent] - Creating a new blank agent to populate the agent details", newAgent);
     console.log("[handleAddAgent] - Creating a new agent with the following details", agent);
     console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse); // Log the full response object
@@ -85,7 +90,7 @@ const AgentGallery: React.FC = () => {
     newAgent.agent.agent_details.emojis = agent?.emojis || [];
     newAgent.agent.agent_details.hashtags = agent?.hashtags || [];
     newAgent.agent.agent_details.universe = agent?.universe || '';
-    newAgent.agent.agent_details.topic_expertise = agent.agent_details?.topicExpertise || []; // Need to randomly generate this
+    newAgent.agent.agent_details.topic_expertise = agent?.topicExpertise || []; // Need to randomly generate this
     newAgent.agent.agent_details.backstory = agent?.backstory || ''; // Need to randomly generate this
 
     // Populate the image data
@@ -314,7 +319,7 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.id}
+                    // key={agent.id}
                     agent={agent}
                     onSelect={setSelectedAgent}
                   />

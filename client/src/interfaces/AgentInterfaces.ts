@@ -1,13 +1,12 @@
 export interface AgentDetails {
-  backstory: string;
-  communication_style: string[];
-  emojis: string[];
-  hashtags: string[];
   name: string;
   personality: string[];
-  selectedImage?: number;  // Added for image selection
-  topic_expertise: string[];
+  communication_style: string[];
+  backstory: string;
   universe: string;
+  topic_expertise: string[];
+  hashtags: string[];
+  emojis: string[];
 }
 
 export interface ProfileImage {
@@ -16,11 +15,27 @@ export interface ProfileImage {
     image_id: string;
     generationId: string;
   };
-  payload: any;
+  [key: string]: unknown;
 }
 
 export interface Agent {
-  agent: {
+  id: string | number;
+  name: string;
+  avatar: string;
+  shortDescription?: string;
+  tags?: string[];
+  personality?: string[];
+  communicationStyle?: string[];
+  emojis?: string[];
+  hashtags?: string[];
+  universe?: string;
+  backstory?: string;
+  concept?: string;
+  role?: string;
+  isLoading?: boolean;
+  leonardoResponse?: any;
+  leonardoImage?: any;
+  agent?: {
     concept: string;
     agent_details: AgentDetails;
     ai_model: {
@@ -34,18 +49,20 @@ export interface Agent {
       twitter: boolean;
     };
     tracker: {
+      messages_sent: number;
+      total_interactions: number;
       current_episode_number: number;
       current_post_number: number;
       current_season_number: number;
       post_every_x_minutes: number;
     };
     seasons: any[];
-    profile_image: Record<string, any>;
+    profile_image: ProfileImage;
     profile_image_options: any[];
   };
 }
 
-function createBlankAgent(): Agent {
+export function createBlankAgent(): Agent {
   return {
     agent: {
       concept: '',
@@ -71,13 +88,21 @@ function createBlankAgent(): Agent {
         twitter: false
       },
       tracker: {
+        messages_sent: 0,
+        total_interactions: 0,
         current_episode_number: 0,
         current_post_number: 0,
         current_season_number: 0,
         post_every_x_minutes: 0
       },
       seasons: [],
-      profile_image: {},
+      profile_image: {
+        details: {
+          url: '',
+          image_id: '',
+          generationId: ''
+        }
+      },
       profile_image_options: []
     }
   };
