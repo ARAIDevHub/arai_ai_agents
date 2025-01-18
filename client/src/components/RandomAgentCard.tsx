@@ -28,8 +28,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const agentName = agent.name || 'Unknown Agent';
-  const agentPersonality = agent.personality || [];
-  const agentCommunicationStyle = agent.communicationStyle || [];
+  const agentPersonality = Array.isArray(agent.personality) ? agent.personality : [];
+  const agentCommunicationStyle = Array.isArray(agent.communicationStyle) ? agent.communicationStyle : [];
   const agentEmojis = Array.isArray(agent.emojis) ? agent.emojis : [];
   const agentTags = Array.isArray(agent.tags) ? agent.tags : [];
   const profileImageUrl = agent.avatar || "";
@@ -107,7 +107,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <span className="font-medium">Personality</span>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    {Array.isArray(agentPersonality) ? agentPersonality.join(', ') : agentPersonality}
+                    {agentPersonality.join(', ')}
                   </p>
                 </div>
 
@@ -117,7 +117,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <span className="font-medium">Communication Style</span>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    {Array.isArray(agentCommunicationStyle) ? agentCommunicationStyle.join(', ') : agentCommunicationStyle}
+                    {agentCommunicationStyle.join(', ')}
                   </p>
                 </div>
 

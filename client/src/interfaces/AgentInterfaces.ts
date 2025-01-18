@@ -18,10 +18,33 @@ export interface ProfileImage {
   [key: string]: unknown;
 }
 
+export interface GeneratedImage {
+  url: string;
+  id: string;
+  generationId: string;
+}
+
+export interface GenerationsByPk {
+  generated_images: GeneratedImage[];
+  concept: string;
+  modelId: string;
+  guidanceScale: string;
+  createdAt: string;
+  presetStyle: string;
+  prompt: string;
+  scheduler: string;
+  seed: string;
+  id: string;
+}
+
+export interface ProfileImageOption {
+  generations_by_pk: GenerationsByPk;
+}
+
 export interface Agent {
-  id: string | number;
-  name: string;
-  avatar: string;
+  id?: string | number;
+  name?: string;
+  avatar?: string;
   shortDescription?: string;
   tags?: string[];
   personality?: string[];
@@ -35,6 +58,7 @@ export interface Agent {
   isLoading?: boolean;
   leonardoResponse?: any;
   leonardoImage?: any;
+  topic_expertise?: string[];
   agent?: {
     concept: string;
     agent_details: AgentDetails;
@@ -58,12 +82,15 @@ export interface Agent {
     };
     seasons: any[];
     profile_image: ProfileImage;
-    profile_image_options: any[];
+    profile_image_options: ProfileImageOption[];
   };
 }
 
 export function createBlankAgent(): Agent {
   return {
+    id: '',
+    name: '',
+    avatar: '',
     agent: {
       concept: '',
       agent_details: {
@@ -73,7 +100,6 @@ export function createBlankAgent(): Agent {
         hashtags: [],
         name: '',
         personality: [],
-        selectedImage: undefined,  // Optional field
         topic_expertise: [],
         universe: ''
       },
@@ -103,7 +129,7 @@ export function createBlankAgent(): Agent {
           generationId: ''
         }
       },
-      profile_image_options: []
+      profile_image_options: [] as ProfileImageOption[]
     }
   };
 } 

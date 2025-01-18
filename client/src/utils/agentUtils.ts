@@ -1,12 +1,6 @@
 import { Agent } from '../interfaces/AgentInterfaces';
 import { Season } from '../interfaces/SeasonInterfaces';
-
-interface ProfileImageDetails {
-  url: string;
-  image_id: string;
-  generationId: string;
-}
-
+import { ProfileImageOption } from '../interfaces/AgentInterfaces';
 export function createBlankAgent(): Agent {
   return {
     agent: {
@@ -18,7 +12,6 @@ export function createBlankAgent(): Agent {
         hashtags: [],
         name: '',
         personality: [],
-        // selectedImage: undefined,  // Optional field
         topic_expertise: [],
         universe: ''
       },
@@ -48,10 +41,7 @@ export function createBlankAgent(): Agent {
           generationId: ''
         }
       },
-      profile_image_options: [{
-        generations_by_pk: {
-        }
-      }]
+      profile_image_options: [] as ProfileImageOption[]
     }
   };
 } 

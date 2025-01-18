@@ -12,7 +12,7 @@ import {
   RefreshCcw,
 } from 'lucide-react';
 import { createAgent, getCharacters } from '../api/agentsAPI';
-import { AgentDetails, Agent } from '../interfaces/AgentInterfaces';
+import { AgentDetails, Agent, GeneratedImage } from '../interfaces/AgentInterfaces';
 import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
 import useCharacters from '../hooks/useCharacters';
 
@@ -39,9 +39,15 @@ const AgentCreator: React.FC = () => {
       emojis: [],
       concept: '',
     },
-    profile_image: [],
-    profile_image_options: [],
-    selectedImage: undefined,
+    profile_image: {
+      details: {
+        url: '',
+        image_id: '',
+        generationId: ''
+      }
+    },
+    profile_image_options: [] as ProfileImageOption[],
+    selectedImage: undefined as number | undefined,
     seasons: [],
   });
   console.log('[AgentCreator] Current agent:', agent);
@@ -180,7 +186,9 @@ const AgentCreator: React.FC = () => {
         ...prev,
         agent_details: {
           ...prev.agent_details,
-          [field]: prev.agent_details[field].filter((trait: string) => trait !== value)
+          [field]: Array.isArray(prev.agent_details[field]) 
+            ? prev.agent_details[field].filter((trait: string) => trait !== value)
+            : prev.agent_details[field]
         }
       };
       console.log('Updated agent after deletion:', updatedAgent);
@@ -213,7 +221,13 @@ const AgentCreator: React.FC = () => {
           emojis: [],
           concept: '',
         },
-        profile_image: [],
+        profile_image: {
+          details: {
+            url: '',
+            image_id: '',
+            generationId: ''
+          }
+        },
         profile_image_options: [],
         selectedImage: undefined,
         seasons: [],
@@ -299,7 +313,7 @@ const AgentCreator: React.FC = () => {
           };
         });
 
-        setCharacters(processed as Agent[]);
+        console.log('Processed characters:', processed);
       } catch (error) {
         console.error('Error loading characters:', error);
       }
@@ -401,7 +415,7 @@ const AgentCreator: React.FC = () => {
               step2: agent.profile_image_options?.[0],
               step3: agent.profile_image_options?.[0]?.generations_by_pk,
             })}
-            {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map((image, index) => (
+            {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map((image: GeneratedImage, index: number) => (
               <div
                 key={index}
                 className={`aspect-square bg-gradient-to-br from-slate-900/80 
