@@ -5,7 +5,7 @@ import os
 import json
 import glob
 from pprint import pprint
-from prompt_chaining.step_1_json import step_1
+from prompt_chaining.step_1_json import step_1 as generateAgent
 from models.gemini_model import GeminiModel
 
 
@@ -28,12 +28,30 @@ def create_random_agent():
     ai_model = GeminiModel()
     print("[create_random_agent] - Creating a random agent")
     
-    # Call the step_1 function with no prompt to create a random agent
-    result = step_1(ai_model, "")
-    print(f"[create_random_agent] - Result from step_1: {result}")
+    # Call the generateAgent function with no prompt to create a random agent
+    generated_master_file_path = generateAgent(ai_model, "")
+    print(f"[create_random_agent] - generatedMasterFilePath for generatedAgent: {generated_master_file_path}")
 
-    # Return the result as a JSON response
-    return jsonify(result), 200
+    # Assuming result contains the file path, read the JSON data from the file
+    try:
+        # Use glob to find the file if the exact path is not known
+        file_pattern = os.path.join(os.path.dirname(generated_master_file_path), '*.json')
+        matching_files = glob.glob(file_pattern)
+        
+        if not matching_files:
+            print(f"[create_random_agent] - No matching files found for pattern: {file_pattern}")
+            return jsonify({"error": "No matching agent data files found"}), 404
+        
+        # Assuming the first match is the desired file
+        with open(matching_files[0], 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        print(f"[create_random_agent] - Loaded data from file: {data}")
+    except Exception as e:
+        print(f"[create_random_agent] - Error reading file {matching_files[0]}: {str(e)}")
+        return jsonify({"error": "Failed to load agent data"}), 500
+
+    # Return the data as a JSON response
+    return jsonify(data), 200
 
 @app.before_request
 def handle_preflight():

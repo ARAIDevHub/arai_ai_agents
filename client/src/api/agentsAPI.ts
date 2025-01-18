@@ -45,4 +45,18 @@ export async function getCharacters() {
   return data; // Returns an array of the characters
 }
 
+// Function to create a random agent
+export async function createRandomAgent() {
+  const response = await fetch(`${BASE_URL}/agents/random`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
 // ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent) 
