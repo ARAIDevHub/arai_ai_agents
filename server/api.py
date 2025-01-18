@@ -5,6 +5,9 @@ import os
 import json
 import glob
 from pprint import pprint
+from prompt_chaining.step_1_json import step_1
+from models.gemini_model import GeminiModel
+
 
 load_dotenv()
 
@@ -17,6 +20,20 @@ CORS(app, resources={r"/api/*": {
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type"]
 }})
+
+# Post reques to create a random agent with no prompt
+@app.route('/api/agents/random', methods=['POST'])
+def create_random_agent():
+    # Instantiate your AI model
+    ai_model = GeminiModel()
+    print("[create_random_agent] - Creating a random agent")
+    
+    # Call the step_1 function with no prompt to create a random agent
+    result = step_1(ai_model, "")
+    print(f"[create_random_agent] - Result from step_1: {result}")
+
+    # Return the result as a JSON response
+    return jsonify(result), 200
 
 @app.before_request
 def handle_preflight():
