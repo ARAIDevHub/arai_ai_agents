@@ -26,32 +26,45 @@ CORS(app, resources={r"/api/*": {
 def create_random_agent():
     # Instantiate your AI model
     ai_model = GeminiModel()
+    print("Gemini Model instantiated", ai_model)
     print("[create_random_agent] - Creating a random agent")
     
     # Call the generateAgent function with no prompt to create a random agent
     generated_master_file_path = generateAgent(ai_model, "")
     print(f"[create_random_agent] - generatedMasterFilePath for generatedAgent: {generated_master_file_path}")
 
-    # Assuming result contains the file path, read the JSON data from the file
     try:
-        # Use glob to find the file if the exact path is not known
-        file_pattern = os.path.join(os.path.dirname(generated_master_file_path), '*.json')
-        matching_files = glob.glob(file_pattern)
+        if not generated_master_file_path:
+            return jsonify({"error": "No file path generated"}), 500
+
+        # Get the directory and base filename
+        directory = os.path.dirname(generated_master_file_path)
+        base_filename = os.path.basename(generated_master_file_path)
+        name_without_ext = os.path.splitext(base_filename)[0]
         
-        if not matching_files:
-            print(f"[create_random_agent] - No matching files found for pattern: {file_pattern}")
-            return jsonify({"error": "No matching agent data files found"}), 404
+        # Generate unique filename
+        counter = 1
+        final_path = generated_master_file_path
+        while os.path.exists(final_path):
+            filename = f"{name_without_ext}_{counter}.json"
+            final_path = os.path.join(directory, filename)
+            counter += 1
+
+        # Move/rename the generated file to the new path if needed
+        if final_path != generated_master_file_path:
+            os.rename(generated_master_file_path, final_path)
+            print(f"[create_random_agent] - Renamed file to: {final_path}")
         
-        # Assuming the first match is the desired file
-        with open(matching_files[0], 'r', encoding='utf-8') as f:
+        # Read the JSON data from the file
+        with open(final_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         print(f"[create_random_agent] - Loaded data from file: {data}")
-    except Exception as e:
-        print(f"[create_random_agent] - Error reading file {matching_files[0]}: {str(e)}")
-        return jsonify({"error": "Failed to load agent data"}), 500
+        
+        return jsonify(data), 200
 
-    # Return the data as a JSON response
-    return jsonify(data), 200
+    except Exception as e:
+        print(f"[create_random_agent] - Error: {str(e)}")
+        return jsonify({"error": "Failed to load agent data"}), 500
 
 @app.before_request
 def handle_preflight():

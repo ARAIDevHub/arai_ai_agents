@@ -10,35 +10,13 @@ import { generateSingleImage } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
 // Import the JSON files
-import namesJson from '../assets/generate-random-agents/names.json';
-const names = Object.values(namesJson).flat() as string[];
-import personalitiesJson from '../assets/generate-random-agents/personalities.json';
-import communicationStylesJson from '../assets/generate-random-agents/communicationStyles.json';
-import emojisJson from '../assets/generate-random-agents/emojis.json';
-import hashtagsJson from '../assets/generate-random-agents/hashtags.json';
+import names from '../assets/generate-random-agents/names.json';
+import personalities from '../assets/generate-random-agents/personalities.json';
+import communicationStyles from '../assets/generate-random-agents/communicationStyles.json';
+import emojis from '../assets/generate-random-agents/emojis.json';
+import hashtags from '../assets/generate-random-agents/hashtags.json';
 
-// Log the imported JSON data to verify it's being imported correctly
-console.log('Personalities:', personalitiesJson);
-console.log('Communication Styles:', communicationStylesJson);
-console.log('Emojis:', emojisJson);
-console.log('Hashtags:', hashtagsJson);
 
-const personalities = Object.values(personalitiesJson).flat() as string[];
-const communicationStyles = Object.values(communicationStylesJson).flat() as string[];
-const emojis = Object.values(emojisJson).flat() as string[];
-const hashtags = Object.values(hashtagsJson).flat() as string[];
-
-interface RandomAgent {
-  id: number;
-  name: string;
-  avatar: string;
-  shortDescription: string;
-  tags: string;
-  personality: string;
-  communicationStyle: string;
-  emojis: string;
-  // Add any other properties that are specific to RandomAgent
-}
 
 // Add a utility function to handle image loading
 const loadImageWithFallback = async (url: string): Promise<string> => {
@@ -63,7 +41,7 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
 };
 
 const AgentGallery: React.FC = () => {
-  const { characters: loadedAgents } = useCharacters();
+  const { characters: loadedAgents, loading, error } = useCharacters();
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
@@ -72,7 +50,8 @@ const AgentGallery: React.FC = () => {
   const initialMount = useRef(true);
  
   // Define generateRandomAgent inside AgentGallery so it's accessible to child components
-  const generateRandomAgent = (): RandomAgent => {
+  const generateRandomAgent = (): Agent => {
+
     const randomIndexTo100 = Math.floor(Math.random() * 99);
     const randomIndexTo500 = Math.floor(Math.random() * 499);
 
@@ -91,11 +70,6 @@ const AgentGallery: React.FC = () => {
   const handleAddAgent = (agent: Agent, leonardoResponse: any) => {
     // Step 1 Create a new blank agent
     const newAgent = createBlankAgent();
-    if (!newAgent.agent) {
-        console.error("Failed to create agent - agent property is undefined");
-        return;
-    }
-
     console.log("[handleAddAgent] - Creating a new blank agent to populate the agent details", newAgent);
     console.log("[handleAddAgent] - Creating a new agent with the following details", agent);
     console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse); // Log the full response object
@@ -111,7 +85,7 @@ const AgentGallery: React.FC = () => {
     newAgent.agent.agent_details.emojis = agent?.emojis || [];
     newAgent.agent.agent_details.hashtags = agent?.hashtags || [];
     newAgent.agent.agent_details.universe = agent?.universe || '';
-    newAgent.agent.agent_details.topic_expertise = agent?.topic_expertise || []; // Need to randomly generate this
+    newAgent.agent.agent_details.topic_expertise = agent.agent_details?.topicExpertise || []; // Need to randomly generate this
     newAgent.agent.agent_details.backstory = agent?.backstory || ''; // Need to randomly generate this
 
     // Populate the image data
@@ -144,9 +118,9 @@ const AgentGallery: React.FC = () => {
       setRandomAgents(newAgents.map(agent => ({ ...agent, avatar: '', isLoading: true })));
 
       const imagePromises = newAgents.map(async (agent) => {
-        const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
-                     Their personality can be described as ${agent.personality}. 
-                     Style: high quality, detailed anime art, character portrait`;
+        const prompt = `Generate a character portrait of ${agent.name}. 
+                     Their personality can be described as ${agent.personality} and their communication style is ${agent.communicationStyle}. Make sure to create an image with only one character.`;
+        console.log("Leonardo Image Prompt", prompt)
 
         const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
         if (!imageResponse?.generations_by_pk?.generated_images?.[0]) {
@@ -204,7 +178,7 @@ const AgentGallery: React.FC = () => {
         )
       );
 
-      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
+      const prompt = `Generate an anime character portrait of ${newAgent.name}, their communication style is  ${newAgent.role}. 
                      Their personality can be described as ${newAgent.personality}. 
                      Style: high quality, detailed anime art, character portrait`;
 
@@ -312,6 +286,7 @@ const AgentGallery: React.FC = () => {
                     generateRandomAgent={generateRandomAgent}
                     isLoadedAgent={true}
                     onRegenerate={handleSingleAgentRegeneration}
+                    isLoading={agent.isLoading}
                   />
                 ))}
               </div>
@@ -322,10 +297,10 @@ const AgentGallery: React.FC = () => {
             <>
               <h2 className="text-xl font-semibold mt-8 mb-4 text-white">Your Agents</h2>
               <div className="flex flex-wrap gap-6 justify-center">
-                {loadedAgents.map((loadedAgent) => (
+                {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={loadedAgent.agent?.agent_details?.name}
-                    agent={loadedAgent}
+                    key={agent.id}
+                    agent={agent}
                     onSelect={setSelectedAgent}
                   />
                 ))}
@@ -340,7 +315,7 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    // key={agent.id}
+                    key={agent.id}
                     agent={agent}
                     onSelect={setSelectedAgent}
                   />
