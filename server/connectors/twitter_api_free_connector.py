@@ -38,45 +38,6 @@ def login_and_save_state(username, password, phone_or_username, storage_path="st
         # page.click('div:has-text("Log in")')
         page.keyboard.press("Enter")
 
-        # handle unusual activity, enter phone number or username
-        # got_password_screen = False
-        # try:
-        #     page.wait_for_selector('input[name="password"]', timeout=5000)
-        #     got_password_screen = True
-        # except TimeoutError:
-        #     pass
-
-        # if got_password_screen:
-        #     # 3A) Fill the password and attempt to log in
-        #     page.fill('input[name="password"]', password)
-        #     page.click('div:has-text("Log in")')
-        # else:
-        #     # 3B) No password field => check if it's the unusual-activity prompt
-        #     try:
-        #         page.wait_for_selector('input[autocomplete="on"]', timeout=5000)
-        #         print("[INFO] Suspicious login activity prompt found.")
-        #         page.fill('input[autocomplete="on"]', phone_or_username)
-        #         page.wait_for_timeout(1000)  # Wait 1 second
-        #         #page.click('div[role="button"]:has-text("Next")')
-        #         page.keyboard.press("Enter")
-
-        #     except TimeoutError:
-        #         # If we fail here too, it might be a new or different flow,
-        #         # or the page took longer to load than 5s. Adjust as needed.
-        #         print("[WARN] Neither password field nor challenge prompt found.")
-        #         browser.close()
-        #         return
-
-        #     # After challenge, we might see the password screen or go straight to home
-        #     try:
-        #         page.wait_for_selector('input[name="password"]', timeout=5000)
-        #         # If we do see a password field after the challenge:
-        #         page.fill('input[name="password"]', password)
-        #         page.click('div:has-text("Log in")')
-        #     except TimeoutError:
-        #         print("[INFO] No password field after challenge - might be logged in already.")
-
-
         # 3) Wait until the user is on the home feed
         page.wait_for_url(lambda url: "home" in url, timeout=15000)
         print("[INFO] Logged in successfully (assuming no extra checks).")
