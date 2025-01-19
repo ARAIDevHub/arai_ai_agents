@@ -4,16 +4,20 @@ prompt_1 (Character Sheet Creation): |
   Agent Development Task
   Generate a comprehensive JSON file that defines this new agent, including their name, personality, communication style, topic of expertise, backstory, universe, relevant hashtags, and emojis.
   Use the following concept if its not empty, otherwise create one.
-  - concept: {{ concept }}
+  - concept: {{ concept }} 
+  - seed_number: {{ seed_number }}
 
   Specific Instructions:
 
     1.  Invent a Creative Name:
         - If no specific name is provided, create a unique and fitting name for the agent based on the concept of the agent. The name should be suitable for a Twitter handle.
+        - Don't have the word agent in the agents name or the @ symbol in the agents name.
+        - The name can be made up of one or two words. If it is two words, it can be a first and last name, or something fun and creative.
+        - The name should be unique.
         - Agent Name: {{ agent_name }}
 
     2.  Define the Topic:
-        - If no specific topic is provided, default to "Crypto" or invent a creative topic that lends itself to episodic storytelling.
+        - If no specific topic is provided invent a creative topic that lends itself to episodic storytelling.
         - Topic: {{ topic }}
 
     3.  Develop Personality and Style:

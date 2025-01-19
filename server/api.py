@@ -21,12 +21,14 @@ CORS(app, resources={r"/api/*": {
     "allow_headers": ["Content-Type"]
 }})
 
+# Create a single global instance of GeminiModel
+ai_model = GeminiModel()
+
 # Post reques to create a random agent with no prompt
 @app.route('/api/agents/random', methods=['POST'])
 def create_random_agent():
-    # Instantiate your AI model
-    ai_model = GeminiModel()
-    print("Gemini Model instantiated", ai_model)
+    # Remove the local instantiation and use global ai_model
+    print("Using global Gemini Model instance", ai_model)
     print("[create_random_agent] - Creating a random agent")
     
     # Create RandomAgents directory if it doesn't exist

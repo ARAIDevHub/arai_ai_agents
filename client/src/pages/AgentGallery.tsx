@@ -75,34 +75,65 @@ const AgentGallery: React.FC = () => {
   };
 
   const handleAddAgent = (agent: Agent, leonardoResponse: any) => {
-    // Step 1 Create a new blank agent
+    // Create a new blank agent with proper initialization
     const newAgent = createBlankAgent();
-    console.log("[handleAddAgent] - Creating a new blank agent to populate the agent details", newAgent);
-    console.log("[handleAddAgent] - Creating a new agent with the following details", agent);
-    console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse); // Log the full response object
+    
+    if (!newAgent.agent) {
+        console.error("[handleAddAgent] - New agent object is not properly initialized");
+        return;
+    }
 
-    // Step 2 Populate the new agent with the details from the leonardo response
+    // Ensure agent.agent_details exists before accessing
+    if (!newAgent.agent.agent_details) {
+        console.error("[handleAddAgent] - Agent details are not properly initialized");
+        return;
+    }
+
     // populate our concept
-    newAgent.concept = agent.concept;
+    newAgent.agent.concept = agent.concept || '';
 
     // populate our agent details
-    newAgent.agent.agent_details.name = agent?.name || '';
-    newAgent.agent.agent_details.personality = agent?.personality || [];
-    newAgent.agent.agent_details.communication_style = agent?.communicationStyle || [];
-    newAgent.agent.agent_details.emojis = agent?.emojis || [];
-    newAgent.agent.agent_details.hashtags = agent?.hashtags || [];
-    newAgent.agent.agent_details.universe = agent?.universe || '';
-    newAgent.agent.agent_details.topic_expertise = agent.agent_details?.topicExpertise || []; // Need to randomly generate this
-    newAgent.agent.agent_details.backstory = agent?.backstory || ''; // Need to randomly generate this
+    const agentDetails = newAgent.agent.agent_details;
+    agentDetails.name = agent?.name || '';
+    agentDetails.personality = agent?.personality || [];
+    agentDetails.communication_style = agent?.communicationStyle || [];
+    agentDetails.emojis = agent?.emojis || [];
+    agentDetails.hashtags = agent?.hashtags || [];
+    agentDetails.universe = agent?.universe || '';
+    agentDetails.topic_expertise = agent?.topic_expertise || [];
+    agentDetails.backstory = agent?.backstory || '';
+
+    // Ensure profile_image_options array exists and has at least one element
+    if (!newAgent.agent.profile_image_options) {
+        newAgent.agent.profile_image_options = [];
+    }
+    if (newAgent.agent.profile_image_options.length === 0) {
+        newAgent.agent.profile_image_options.push({ generations_by_pk: {} as GenerationsByPk });
+    }
+
+    // Ensure profile_image exists and has details
+    if (!newAgent.agent.profile_image) {
+        newAgent.agent.profile_image = {
+            details: {
+                url: '',
+                image_id: '',
+                generationId: ''
+            }
+        };
+    }
 
     // Populate the image data
-    console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse);
-    const generation_by_pk = leonardoResponse.generations_by_pk;
-    newAgent.agent.profile_image_options[0].generations_by_pk = generation_by_pk;
-    // Break down the generation_by_pk object for details to populate the Profile Image 
-    newAgent.agent.profile_image.details.url = generation_by_pk.generated_images[0].url;
-    newAgent.agent.profile_image.details.image_id = generation_by_pk.generated_images[0].id;
-    newAgent.agent.profile_image.details.generationId = generation_by_pk.id;
+    if (leonardoResponse?.generations_by_pk) {
+        const generation_by_pk = leonardoResponse.generations_by_pk;
+        newAgent.agent.profile_image_options[0].generations_by_pk = generation_by_pk;
+
+        if (generation_by_pk.generated_images?.[0]) {
+            const imageDetails = newAgent.agent.profile_image.details;
+            imageDetails.url = generation_by_pk.generated_images[0].url;
+            imageDetails.image_id = generation_by_pk.generated_images[0].id;
+            imageDetails.generationId = generation_by_pk.id;
+        }
+    }
 
     console.log("[handleAddAgent] - New agent with image data:", newAgent);
 
@@ -111,15 +142,14 @@ const AgentGallery: React.FC = () => {
     console.log("[handleAddAgent] - New agent response:", newAgentResponse);
 
     setYourAgents((prevAgents) => [...prevAgents, agent]);
-    // setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
   };
 
   const generateNewAgent = async () => {
     setIsGenerating(true);
     
     try {
-      // Show initial loading state before any operations start
-      setRandomAgents([{
+      // Show initial loading state for 3 agents
+      const loadingAgents = Array(1).fill(null).map(() => ({
         id: Math.floor(Math.random() * 1000000),
         name: 'Generating Agent...',
         avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
@@ -129,66 +159,76 @@ const AgentGallery: React.FC = () => {
         communicationStyle: [],
         emojis: [],
         isLoading: true
-      } as Agent]);
+      } as Agent));
 
-      // Get the agent data first
-      const newAgent = await generateRandomAgentData();
-      
-      // Update loading state to show we're generating the image
-      setRandomAgents([{ 
-        ...newAgent, 
-        avatar: 'https://via.placeholder.com/400x400?text=Generating+Image',
-        isLoading: true 
-      }]);
+      setRandomAgents(loadingAgents);
 
-      // Now run both image generations concurrently
-      const [mainImage, alternateImage] = await Promise.all([
-        // Main character image
-        (async () => {
-          const prompt = `Generate a character portrait of ${newAgent.name}. 
-                         Their personality can be described as ${newAgent.personality.join(', ')} 
-                         and their communication style is ${newAgent.communicationStyle.join(', ')}. 
-                         Make sure to create an image with only one character.`;
-          
-          return generateSingleImage(
-            prompt,
-            "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
-            "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
-          );
-        })(),
+      // Generate 3 agents concurrently
+      const agentPromises = loadingAgents.map(async (loadingAgent) => {
+        // Get the agent data first
+        const newAgent = await generateRandomAgentData();
         
-        // Optional: Generate an alternate image concurrently
-        (async () => {
-          const alternatePrompt = `Alternative portrait of ${newAgent.name} in a different style.`;
-          return generateSingleImage(
-            alternatePrompt,
-            "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
-            "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
-          );
-        })()
-      ]);
+        // Update loading state to show we're generating the image
+        setRandomAgents(prevAgents => 
+          prevAgents.map(agent => 
+            agent.id === loadingAgent.id 
+              ? { ...newAgent, id: loadingAgent.id, avatar: 'https://via.placeholder.com/400x400?text=Generating+Image', isLoading: true }
+              : agent
+          )
+        );
 
-      if (!mainImage?.generations_by_pk?.generated_images?.[0]) {
-        throw new Error('No image data received');
-      }
-      
-      const imageObject = mainImage.generations_by_pk.generated_images[0];
-      const loadedImageUrl = await loadImageWithFallback(imageObject.url);
-      
-      const completedAgent = { 
-        ...newAgent, 
-        avatar: loadedImageUrl, 
-        leonardoImage: imageObject,
-        leonardoResponse: mainImage,
-        alternateImage: alternateImage?.generations_by_pk?.generated_images?.[0]?.url,
-        isLoading: false 
-      };
+        // Generate images for each agent
+        const [mainImage, alternateImage] = await Promise.all([
+          // Main character image
+          (async () => {
+            const prompt = `Generate a character portrait of ${newAgent.name}. 
+                           Their personality can be described as ${newAgent.personality.join(', ')} 
+                           and their communication style is ${newAgent.communicationStyle.join(', ')}. 
+                           Make sure to create an image with only one character.`;
+            
+            return generateSingleImage(
+              prompt,
+              "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
+              "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
+            );
+          })(),
+          
+          // Optional: Generate an alternate image concurrently
+          (async () => {
+            const alternatePrompt = `Alternative portrait of ${newAgent.name} in a different style.`;
+            return generateSingleImage(
+              alternatePrompt,
+              "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
+              "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
+            );
+          })()
+        ]);
 
-      setRandomAgents([completedAgent]);
+        if (!mainImage?.generations_by_pk?.generated_images?.[0]) {
+          throw new Error('No image data received');
+        }
+        
+        const imageObject = mainImage.generations_by_pk.generated_images[0];
+        const loadedImageUrl = await loadImageWithFallback(imageObject.url);
+        
+        return { 
+          ...newAgent,
+          id: loadingAgent.id,
+          avatar: loadedImageUrl, 
+          leonardoImage: imageObject,
+          leonardoResponse: mainImage,
+          alternateImage: alternateImage?.generations_by_pk?.generated_images?.[0]?.url,
+          isLoading: false 
+        };
+      });
+
+      // Wait for all agents to be generated
+      const completedAgents = await Promise.all(agentPromises);
+      setRandomAgents(completedAgents);
 
     } catch (error) {
       console.error('[AgentGallery] Error generating agents:', error);
-      setRandomAgents([{
+      const errorAgents = Array(3).fill(null).map(() => ({
         id: Math.floor(Math.random() * 1000000),
         name: 'Error',
         avatar: 'https://via.placeholder.com/400x400?text=Generation+Failed',
@@ -198,14 +238,15 @@ const AgentGallery: React.FC = () => {
         communicationStyle: [],
         emojis: [],
         isLoading: false
-      } as Agent]);
+      } as Agent));
+      setRandomAgents(errorAgents);
     } finally {
       setIsGenerating(false);
     }
   };
 
   // Add this function to handle single agent regeneration
-  const handleSingleAgentRegeneration = async (agentId: number): Promise<void> => {
+  const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
     const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
     const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
     
@@ -348,7 +389,7 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.id}
+                    key={agent.agent?.id || Math.random().toString()}
                     agent={agent}
                     onSelect={setSelectedAgent}
                   />
@@ -364,7 +405,7 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.id}
+                    key={agent.agent?.id || Math.random().toString()}
                     agent={agent}
                     onSelect={setSelectedAgent}
                   />
