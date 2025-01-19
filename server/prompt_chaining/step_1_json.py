@@ -21,7 +21,6 @@ import json
 import sys
 import os
 import time
-import random
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
@@ -67,8 +66,7 @@ def step_1(ai_model, concept: str):
         # "communication_style": "",
         # "topic": "",
         "concept": concept,
-        "agent_json": json.dumps(agent_template),
-        "seed_number": random.randint(1,1000000000)     
+        "agent_json": json.dumps(agent_template)        
     }
 
      # Constants for retry configuration
@@ -138,7 +136,7 @@ def step_1(ai_model, concept: str):
 
 
 import models.gemini_model as gemini_model
-
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_1(ai_model, "")
+    step_1(ai_model,  "time-traveling historian documenting the evolution of human technology through the ages")
+

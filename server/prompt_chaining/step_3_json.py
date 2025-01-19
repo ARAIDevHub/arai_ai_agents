@@ -158,3 +158,4 @@ import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
     step_3(ai_model, "configs/Pixelina/Pixelina_master.json", 6)
+

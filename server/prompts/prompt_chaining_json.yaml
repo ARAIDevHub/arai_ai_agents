@@ -5,7 +5,6 @@ prompt_1 (Character Sheet Creation): |
   Generate a comprehensive JSON file that defines this new agent, including their name, personality, communication style, topic of expertise, backstory, universe, relevant hashtags, and emojis.
   Use the following concept if its not empty, otherwise create one.
   - concept: {{ concept }} 
-  - seed_number: {{ seed_number }}
 
   Specific Instructions:
 
