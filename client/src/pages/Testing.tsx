@@ -2,9 +2,13 @@ import { generateRandomAgent } from '../utils/generateRandomAgent';
 
 export default function Testing() {
 
-    const handleButtonClick = () => {
-        const randomAgent = generateRandomAgent();
-        console.log(randomAgent); // You can replace this with any action you want to perform with the random agent
+    const handleButtonClick = async () => {
+        const randomAgent = await generateRandomAgent();
+        console.log("randomAgent1: Testing async function. This should not show until the agent is generated.", randomAgent)
+
+        // const randomAgent2 = await generateRandomAgent();
+        // console.log("randomAgent2: Testing async function. This should not show until the agent is generated.", randomAgent2)
+
     };
 
     return (

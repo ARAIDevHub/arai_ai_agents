@@ -16,6 +16,7 @@ import communicationStyles from '../assets/generate-random-agents/communicationS
 import emojis from '../assets/generate-random-agents/emojis.json';
 import hashtags from '../assets/generate-random-agents/hashtags.json';
 
+import { generateRandomAgent } from '../utils/generateRandomAgent';
 
 
 // Add a utility function to handle image loading
@@ -49,11 +50,13 @@ const AgentGallery: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(true);
   const initialMount = useRef(true);
  
-  // Define generateRandomAgent inside AgentGallery so it's accessible to child components
-  const generateRandomAgent = (): Agent => {
+  // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
+  const generateRandomAgentData = async (): Promise<Agent> => {
 
     const randomIndexTo100 = Math.floor(Math.random() * 99);
     const randomIndexTo500 = Math.floor(Math.random() * 499);
+    const newGeneratedRandomAgent = await generateRandomAgent();
+    console.log("[generateRandomAgentData] - New generated random agent:", newGeneratedRandomAgent);
 
     return {
       id: Math.floor(Math.random() * 1000000), // Generate a random number for the ID
@@ -111,7 +114,7 @@ const AgentGallery: React.FC = () => {
     setIsGenerating(true);
     
     try {
-      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
+      const newAgents = Array(1).fill(null).map(() => generateRandomAgentData());
       const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
       const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
       
@@ -144,7 +147,7 @@ const AgentGallery: React.FC = () => {
 
     } catch (error) {
       console.error('[AgentGallery] Error generating agents:', error);
-      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
+      const newAgents = Array(3).fill(null).map(() => generateRandomAgentData());
       setRandomAgents(newAgents.map(agent => ({
         ...agent,
         avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
@@ -164,7 +167,7 @@ const AgentGallery: React.FC = () => {
       const currentAgent = randomAgents.find(agent => agent.id === agentId);
       if (!currentAgent) return;
 
-      const newAgentData = generateRandomAgent();
+      const newAgentData = generateRandomAgentData();
       const newAgent = {
         ...newAgentData,
         id: currentAgent.id // Preserve the original ID
@@ -283,7 +286,7 @@ const AgentGallery: React.FC = () => {
                     onAddAgent={(agent) => handleAddAgent(agent, agent.leonardoResponse)}
                     isUserAgent={false}
                     setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
+                    generateRandomAgentData={generateRandomAgentData}
                     isLoadedAgent={true}
                     onRegenerate={handleSingleAgentRegeneration}
                     isLoading={agent.isLoading}

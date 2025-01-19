@@ -29,6 +29,10 @@ def create_random_agent():
     print("Gemini Model instantiated", ai_model)
     print("[create_random_agent] - Creating a random agent")
     
+    # Create RandomAgents directory if it doesn't exist
+    random_agents_dir = os.path.join('configs', 'RandomAgents')
+    os.makedirs(random_agents_dir, exist_ok=True)
+    
     # Call the generateAgent function with no prompt to create a random agent
     generated_master_file_path = generateAgent(ai_model, "")
     print(f"[create_random_agent] - generatedMasterFilePath for generatedAgent: {generated_master_file_path}")
@@ -37,23 +41,30 @@ def create_random_agent():
         if not generated_master_file_path:
             return jsonify({"error": "No file path generated"}), 500
 
-        # Get the directory and base filename
-        directory = os.path.dirname(generated_master_file_path)
+        # Get just the filename without path and extension
         base_filename = os.path.basename(generated_master_file_path)
         name_without_ext = os.path.splitext(base_filename)[0]
         
-        # Generate unique filename
+        # Replace _master with _random in the filename
+        name_without_ext = name_without_ext.replace('_master', '_random')
+        
+        # Generate unique filename in the RandomAgents directory
         counter = 1
-        final_path = generated_master_file_path
+        final_path = os.path.join(random_agents_dir, f"{name_without_ext}.json")
         while os.path.exists(final_path):
             filename = f"{name_without_ext}_{counter}.json"
-            final_path = os.path.join(directory, filename)
+            final_path = os.path.join(random_agents_dir, filename)
             counter += 1
 
-        # Move/rename the generated file to the new path if needed
-        if final_path != generated_master_file_path:
+        # Move the generated file to the RandomAgents directory
+        if os.path.exists(generated_master_file_path):
             os.rename(generated_master_file_path, final_path)
-            print(f"[create_random_agent] - Renamed file to: {final_path}")
+            print(f"[create_random_agent] - Moved file to: {final_path}")
+            
+            # Clean up any empty character directory that might have been created
+            char_dir = os.path.dirname(generated_master_file_path)
+            if os.path.exists(char_dir) and not os.listdir(char_dir):
+                os.rmdir(char_dir)
         
         # Read the JSON data from the file
         with open(final_path, 'r', encoding='utf-8') as f:
