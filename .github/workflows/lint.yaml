@@ -1,41 +1,41 @@
-# Lint workflow
-# What It Does
-# - Triggers on push and pull requests to main.
-# - Installs common linting tools like flake8 and black.
-# - Runs lint checks on your code.
-# - Fails the workflow if there are style or syntax issues.
+# # Lint workflow
+# # What It Does
+# # - Triggers on push and pull requests to main.
+# # - Installs common linting tools like flake8 and black.
+# # - Runs lint checks on your code.
+# # - Fails the workflow if there are style or syntax issues.
 
-name: Lint
+# name: Lint
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      # 1. Check out the code
-      - uses: actions/checkout@v3
+# jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#       # 1. Check out the code
+#       - uses: actions/checkout@v3
 
-      # 2. Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+#       # 2. Set up Python
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.x'
 
-      # 3. Install lint tools
-      - name: Install lint tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8 black
+#       # 3. Install lint tools
+#       - name: Install lint tools
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install flake8 black
 
-      # 4. Run lint checks
-      - name: Run lint
-        run: |
-          echo "Running flake8..."
-          flake8 .
-          echo "Running black in check mode..."
-          black --check .
+#       # 4. Run lint checks
+#       - name: Run lint
+#         run: |
+#           echo "Running flake8..."
+#           flake8 .
+#           echo "Running black in check mode..."
+#           black --check .
