@@ -41,3 +41,5 @@ configs/
 
 #working files
 to_delete/
+
+**state.json
