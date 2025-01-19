@@ -4,25 +4,21 @@ import { Agent } from '../interfaces/AgentInterfaces';
 
 // Define the props for AgentCard
 interface AgentCardProps {
-  agent : object, // TODO: change to Agent
-  // onSelect: (agent: Agent) => void;
-  onSelect: (agent: object) => void;
-
+  agent: Agent,
+  onSelect: (agent: Agent) => void;
 }
 
 const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
-  agent = agent.agent
+  const agentData = agent.agent;
   // console.log('[LoadedAgentCard] - agent.agent_details.name:', agent.agent_details.name);
   const [isFlipped, setIsFlipped] = useState(false);
-  const agentName = agent.agent_details?.name || 'Unknown Agent';
-  const agentPersonality = agent.agent_details?.personality || [];
-  const agentCommunicationStyle = agent.agent_details?.communication_style || [];
-  const agentBackstory = agent.agent_details?.backstory || 'No backstory available';
-  const agentHashtags = agent.agent_details?.hashtags || [];
-  const agentEmojis = agent.agent_details?.emojis || [];
-  const agentTopicExpertise = agent.agent_details?.topic_expertise || [];
-  const concept = agent.agent_details?.concept || 'No concept available';
-  const profileImageUrl = agent.profile_image?.details?.url || "";
+  const agentName = agentData?.agent_details?.name || 'Unknown Agent';
+  const agentPersonality = agentData?.agent_details?.personality || [];
+  const agentCommunicationStyle = agentData?.agent_details?.communication_style || [];
+  const agentHashtags = agentData?.agent_details?.hashtags || [];
+  const agentEmojis = agentData?.agent_details?.emojis || [];
+  const agentTopicExpertise = agentData?.agent_details?.topic_expertise || [];
+  const profileImageUrl = agentData?.profile_image?.details?.url || "";
 
     return (
     <div className="relative">

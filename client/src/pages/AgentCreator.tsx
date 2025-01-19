@@ -12,21 +12,36 @@ import {
   RefreshCcw,
 } from 'lucide-react';
 import { createAgent, getCharacters } from '../api/agentsAPI';
-import { AgentDetails, Agent } from '../interfaces/AgentInterfaces';
+import { GeneratedImage, ProfileImageOption } from '../interfaces/AgentInterfaces';
 import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
 import useCharacters from '../hooks/useCharacters';
 
+/**
+ * AgentCreator Component
+ * A form-based interface for creating and editing AI agents with various attributes
+ * including personality traits, communication style, and profile images.
+ */
 const AgentCreator: React.FC = () => {
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 1) States
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
+  /**
+   * Main UI state management
+   * activeTab controls which section of the form is visible:
+   * - basic: name, universe, expertise
+   * - personality: personality traits, backstory
+   * - style: communication style, hashtags, emojis
+   */
   const [activeTab, setActiveTab] =
     useState<'basic' | 'personality' | 'style'>('basic');
 
-  // The main agent object
+  /**
+   * Core agent state
+   * Maintains the complete agent object including:
+   * - agent_details: main characteristics and traits
+   * - profile_image: currently selected image
+   * - profile_image_options: available image choices
+   * - selectedImage: index of chosen image
+   * - seasons: associated seasons/episodes
+   */
   const [agent, setAgent] = useState({
     agent_details: {
       name: '',
@@ -39,9 +54,15 @@ const AgentCreator: React.FC = () => {
       emojis: [],
       concept: '',
     },
-    profile_image: [],
-    profile_image_options: [],
-    selectedImage: undefined,
+    profile_image: {
+      details: {
+        url: '',
+        image_id: '',
+        generationId: ''
+      }
+    },
+    profile_image_options: [] as ProfileImageOption[],
+    selectedImage: undefined as number | undefined,
     seasons: [],
   });
   console.log('[AgentCreator] Current agent:', agent);
@@ -49,18 +70,22 @@ const AgentCreator: React.FC = () => {
   // The fetched characters
   const { characters, loading, error } = useCharacters();
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 2) Local Drafts for “normal” fields (name, universe, backstory)
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
+  /**
+   * Draft field management
+   * Maintains temporary states for text fields before they're committed to the main agent state
+   * Prevents immediate updates and allows for Enter-to-commit functionality
+   */
   const [draftFields, setDraftFields] = useState({
     name: '',
     universe: '',
     backstory: '',
   });
 
-  // Keep them in sync if agent changes
+  /**
+   * Synchronization Effects
+   * Keep draft states in sync with the main agent state
+   * Ensures drafts are updated when agent data changes
+   */
   useEffect(() => {
     setDraftFields({
       name: agent.agent_details.name || '',
@@ -69,15 +94,11 @@ const AgentCreator: React.FC = () => {
     });
   }, [agent]);
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 3) Local Drafts for trait fields => single “draftTraits” object
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
-  // We'll unify the logic for topic_expertise, personality, communication_style,
-  // hashtags, and emojis. We'll store them all as strings. On Enter, we'll parse
-  // them into arrays and commit to agent.
-  //
+  /**
+   * Draft traits management
+   * Handles temporary states for array-based fields (traits, hashtags, etc.)
+   * Stores them as comma-separated strings until committed
+   */
   const [draftTraits, setDraftTraits] = useState<{
     topic_expertise: string;
     personality: string;
@@ -92,7 +113,11 @@ const AgentCreator: React.FC = () => {
     emojis: '',
   });
 
-  // Whenever agent changes, rebuild the draft strings
+  /**
+   * Synchronization Effects
+   * Keep draft states in sync with the main agent state
+   * Ensures drafts are updated when agent data changes
+   */
   useEffect(() => {
     setDraftTraits({
       topic_expertise: agent.agent_details.topic_expertise.join(', '),
@@ -103,13 +128,49 @@ const AgentCreator: React.FC = () => {
     });
   }, [agent]);
 
+  /**
+   * Profile Image Management
+   * Handles initialization and updates of the agent's profile image
+   * Sets default placeholder if no images are available
+   */
+  useEffect(() => {
+    if (agent.profile_image_options.length > 0) {
+      const firstImage = agent.profile_image_options[0]?.generations_by_pk?.generated_images?.[0] ?? {
+        url: 'https://via.placeholder.com/400x400?text=Brain+Placeholder',
+        id: '',
+        generationId: ''
+      } as GeneratedImage;
+      
+      setAgent(prev => ({
+        ...prev,
+        selectedImage: prev.selectedImage !== undefined ? prev.selectedImage : 0,
+        profile_image: {
+          details: {
+            url: firstImage.url,
+            image_id: firstImage.id,
+            generationId: firstImage.generationId,
+          }
+        }
+      }));
+    } else {
+      setAgent(prev => ({
+        ...prev,
+        profile_image: {
+          details: {
+            url: 'https://via.placeholder.com/400x400?text=Brain+Placeholder',
+            image_id: '',
+            generationId: '',
+          }
+        }
+      }));
+    }
+  }, [agent.profile_image_options]);
 
-
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 5) “Normal” fields => commit on Enter
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
+  /**
+   * Field Update Handlers
+   * Manages updates to regular text fields (name, universe, backstory)
+   * Commits changes when Enter is pressed
+   */
   const handleDraftChange =
     (field: keyof typeof draftFields) =>
     (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -135,11 +196,11 @@ const AgentCreator: React.FC = () => {
       }
     };
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 6) Trait fields => single “draftTraits” + commit on Enter
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
+  /**
+   * Trait Field Handlers
+   * Manages updates to array-based fields (personality, hashtags, etc.)
+   * Splits input by commas (or spaces for emojis) and commits on Enter
+   */
   const handleTraitDraftChange =
     (field: keyof typeof draftTraits) =>
     (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -173,26 +234,27 @@ const AgentCreator: React.FC = () => {
     };
 
   // Deleting a single trait
-  const handleDeleteTrait = (field: keyof AgentDetails, value: string) => {
+  type TraitField = 'personality' | 'communication_style' | 'topic_expertise' | 'hashtags' | 'emojis';
+
+  const handleDeleteTrait = (field: TraitField, value: string) => {
     console.log('[handleDeleteTrait - Called] Field:', field, 'Value:', value);
-    setAgent(prev => {
-      const updatedAgent = {
-        ...prev,
-        agent_details: {
-          ...prev.agent_details,
-          [field]: prev.agent_details[field].filter((trait: string) => trait !== value)
-        }
-      };
-      console.log('Updated agent after deletion:', updatedAgent);
-      return updatedAgent;
-    });
+    setAgent(prev => ({
+      ...prev,
+      agent_details: {
+        ...prev.agent_details,
+        [field]: prev.agent_details[field].filter((trait: string) => trait !== value)
+      }
+    }));
   };
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 7) Submit
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
+  // State to manage the visibility of the success message
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  /**
+   * Form Submission Handler
+   * Processes the final agent data and sends it to the server
+   * Shows success message on completion
+   */
   const handleSubmitCreateAgent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log('[handleSubmit] Submitting agent:', agent);
@@ -200,34 +262,12 @@ const AgentCreator: React.FC = () => {
       const newAgent = await createAgent(agent);
       console.log('Agent created:', newAgent);
 
-      // Reset agent
-      setAgent({
-        agent_details: {
-          name: '',
-          personality: [],
-          communication_style: [],
-          backstory: '',
-          universe: '',
-          topic_expertise: [],
-          hashtags: [],
-          emojis: [],
-          concept: '',
-        },
-        profile_image: [],
-        profile_image_options: [],
-        selectedImage: undefined,
-        seasons: [],
-      });
+      // Show success message
+      setShowSuccessMessage(true);
 
-      // Reset local fields
-      setDraftFields({ name: '', universe: '', backstory: '' });
-      setDraftTraits({
-        topic_expertise: '',
-        personality: '',
-        communication_style: '',
-        hashtags: '',
-        emojis: '',
-      });
+      // Hide the message after a few seconds
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+
     } catch (error) {
       console.error('Error creating agent:', error);
     }
@@ -299,7 +339,7 @@ const AgentCreator: React.FC = () => {
           };
         });
 
-        setCharacters(processed as Agent[]);
+        console.log('Processed characters:', processed);
       } catch (error) {
         console.error('Error loading characters:', error);
       }
@@ -308,11 +348,11 @@ const AgentCreator: React.FC = () => {
     loadCharacters();
   }, []);
 
-  //
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 9) Select a character
-  // ──────────────────────────────────────────────────────────────────────────────
-  //
+  /**
+   * Character Selection Handler
+   * Populates the form with data from an existing character
+   * Updates both main agent state and draft states
+   */
   const handleCharacterSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     const char = characters.find(c => c.agent?.agent_details?.name === e.target.value);
     if (!char?.agent?.agent_details) return;
@@ -333,7 +373,7 @@ const AgentCreator: React.FC = () => {
       },
       profile_image: char.agent?.profile_image_options || [],
       profile_image_options: char.agent?.profile_image_options || [],
-      selectedImage: 0,
+      selectedImage: char.agent?.profile_image_options?.[0]?.generations_by_pk?.generated_images?.length ? 0 : undefined,
       seasons: char.agent?.seasons || [],
     });
 
@@ -360,6 +400,15 @@ const AgentCreator: React.FC = () => {
   //
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3 rounded-md shadow-lg">
+            Agent successfully saved!
+          </div>
+        </div>
+      )}
+
       {/* Left Panel */}
       <div className="w-1/2 p-6 border-r border-orange-500/20">
         <div className="h-full flex flex-col space-y-6">
@@ -395,16 +444,10 @@ const AgentCreator: React.FC = () => {
 
           {/* Image Selection Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {console.log('Image options path:', {
-              full_path: agent.profile_image_options?.[0]?.generations_by_pk?.generated_images,
-              step1: agent.profile_image_options,
-              step2: agent.profile_image_options?.[0],
-              step3: agent.profile_image_options?.[0]?.generations_by_pk,
-            })}
-            {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map((image, index) => (
+            {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map((image: GeneratedImage, index: number) => (
               <div
                 key={index}
-                className={`aspect-square bg-gradient-to-br from-slate-900/80 
+                className={`relative aspect-square bg-gradient-to-br from-slate-900/80 
                             via-cyan-900/20 to-orange-900/20 rounded-lg cursor-pointer 
                             ${agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
                 onClick={() => {
@@ -416,29 +459,21 @@ const AgentCreator: React.FC = () => {
                   });
                   
                   setAgent((prev) => {
-                    const selectedImageData = prev.profile_image_options[0]?.generations_by_pk?.generated_images[index];
-                    const profile_image_options = prev.profile_image_options[0]?.generations_by_pk;
-                    console.log('[ImageSelection] Profile Image Options:', profile_image_options);
+                    const selectedImageData = prev.profile_image_options[0]?.generations_by_pk?.generated_images?.[index] ?? {
+                      url: 'https://via.placeholder.com/400x400?text=Brain+Placeholder',
+                      id: '',
+                      generationId: ''
+                    };
                     return { 
                       ...prev, 
                       selectedImage: index,
-                      profile_image: selectedImageData ? {
+                      profile_image: {
                         details: {
-                          url: selectedImageData.url || '',
-                          image_id: selectedImageData.id || '',
-                          generationId: selectedImageData.generationId || '',
-                          selectedArrayIndex: index || 0,
-                          concept: profile_image_options.concept || '',
-                          modelId: profile_image_options.modelId || '',
-                          guidanceScale: profile_image_options.guidanceScale || '',
-                          createdAt: profile_image_options.createdAt || '',
-                          presetStyle: profile_image_options.presetStyle || '',
-                          prompt: profile_image_options.prompt || '',
-                          scheduler: profile_image_options.scheduler || '',
-                          seed: profile_image_options.seed || '',
-                          id: profile_image_options.id || '',
+                          url: selectedImageData.url,
+                          image_id: selectedImageData.id,
+                          generationId: selectedImageData.generationId,
                         }
-                      } : null
+                      }
                     };
                   });
                 }}
@@ -447,7 +482,26 @@ const AgentCreator: React.FC = () => {
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}
-              />
+              >
+                {agent.selectedImage === index && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 

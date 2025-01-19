@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import useCharacters from '../hooks/useCharacters';
 import { MessageSquare, Heart } from 'lucide-react';
-import { Episode, Season } from '../interfaces/SeasonsEpisodesInterface';
-import { Post } from '../interfaces/PostsInterface';
+import { Post, Episode, Season } from '../interfaces/PostsInterface';
 
 
 const SocialFeed: React.FC = () => {

@@ -138,5 +138,5 @@ def step_1(ai_model, concept: str):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_1(ai_model, "alien drone pilot who is a sarcastic asshole visiting earth to report back his findings to his home planet")
+    step_1(ai_model,  "time-traveling historian documenting the evolution of human technology through the ages")
 
