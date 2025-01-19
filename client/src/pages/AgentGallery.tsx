@@ -10,13 +10,17 @@ import { generateSingleImage } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
 // Import the JSON files
-import names from '../assets/generate-random-agents/names.json';
-import personalities from '../assets/generate-random-agents/personalities.json';
-import communicationStyles from '../assets/generate-random-agents/communicationStyles.json';
-import emojis from '../assets/generate-random-agents/emojis.json';
-import hashtags from '../assets/generate-random-agents/hashtags.json';
-import { generateRandomAgent } from '../utils/generateRandomAgent';
 
+import { generateRandomAgent } from '../utils/generateRandomAgent';
+import imageTraits from '../assets/generate-random-agents/imageTraits.json';
+
+// Helper function to get random trait
+const getRandomTrait = (traitArray: string[]): string => {
+  return traitArray[Math.floor(Math.random() * traitArray.length)];
+};
+
+const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
 // Add a utility function to handle image loading
 const loadImageWithFallback = async (url: string): Promise<string> => {
@@ -57,7 +61,7 @@ const AgentGallery: React.FC = () => {
       const agentDetails = agentObject.agent_details;
 
       return {
-        id: Math.floor(Math.random() * 1000000),
+        id: Math.floor(Math.random() * 1000000).toString(),
         name: agentDetails.name || '',
         avatar: '',
         shortDescription: '...',
@@ -149,8 +153,8 @@ const AgentGallery: React.FC = () => {
     
     try {
       // Show initial loading state for 3 agents
-      const loadingAgents = Array(1).fill(null).map(() => ({
-        id: Math.floor(Math.random() * 1000000),
+      const loadingAgents = Array(3).fill(null).map(() => ({
+        id: Math.floor(Math.random() * 1000000).toString(),
         name: 'Generating Agent...',
         avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
         shortDescription: 'Loading...',
@@ -181,15 +185,13 @@ const AgentGallery: React.FC = () => {
         const [mainImage, alternateImage] = await Promise.all([
           // Main character image
           (async () => {
-            const prompt = `Generate a character portrait of ${newAgent.name}. 
-                           Their personality can be described as ${newAgent.personality.join(', ')} 
-                           and their communication style is ${newAgent.communicationStyle.join(', ')}. 
-                           Make sure to create an image with only one character.`;
+            const prompt = `Generate a character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'} and their communication style is ${newAgent.communicationStyle?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Make sure to create an image with only one character.`;
+            console.log("[generateNewAgent] - Prompt:", prompt);
             
             return generateSingleImage(
               prompt,
-              "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
-              "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
+              modelId,
+              styleUUID
             );
           })(),
           
@@ -229,7 +231,7 @@ const AgentGallery: React.FC = () => {
     } catch (error) {
       console.error('[AgentGallery] Error generating agents:', error);
       const errorAgents = Array(3).fill(null).map(() => ({
-        id: Math.floor(Math.random() * 1000000),
+        id: Math.floor(Math.random() * 1000000).toString(),
         name: 'Error',
         avatar: 'https://via.placeholder.com/400x400?text=Generation+Failed',
         shortDescription: 'Failed to generate agent',
@@ -245,32 +247,54 @@ const AgentGallery: React.FC = () => {
     }
   };
 
-  // Add this function to handle single agent regeneration
+  // Update the handleSingleAgentRegeneration function
   const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
     const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
     const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
     
     try {
+      // Show loading state immediately with loading name
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? { 
+                ...agent, 
+                name: 'Loading Agent...', // Add loading name
+                isLoading: true, 
+                avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
+                personality: [],
+                communicationStyle: [],
+                emojis: [],
+                hashtags: []
+              }
+            : agent
+        )
+      );
+
       const currentAgent = randomAgents.find(agent => agent.id === agentId);
       if (!currentAgent) return;
 
-      const newAgentData = await generateRandomAgentData(); // Await the Promise
+      // Generate new agent data
+      const newAgentData = await generateRandomAgentData();
       const newAgent = {
         ...newAgentData,
         id: currentAgent.id
       };
 
+      // Update UI to show we're now generating the image
       setRandomAgents(prevAgents => 
         prevAgents.map(agent => 
           agent.id === agentId 
-            ? { ...newAgent, avatar: '', isLoading: true }
+            ? { 
+                ...newAgent, 
+                avatar: 'https://via.placeholder.com/400x400?text=Generating+Image', 
+                isLoading: true 
+              }
             : agent
         )
       );
 
-      const prompt = `Generate an anime character portrait of ${newAgent.name}. 
-                     Their personality can be described as ${newAgent.personality.join(', ')}. 
-                     Style: high quality, detailed anime art, character portrait`;
+      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait`;
 
       const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
       if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
@@ -280,10 +304,17 @@ const AgentGallery: React.FC = () => {
       const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
       const loadedImageUrl = await loadImageWithFallback(imageUrl);
 
+      // Update with all necessary data for saving
       setRandomAgents(prevAgents =>
         prevAgents.map(agent =>
           agent.id === agentId
-            ? { ...newAgent, avatar: loadedImageUrl, isLoading: false }
+            ? { 
+                ...newAgent, 
+                avatar: loadedImageUrl, 
+                isLoading: false,
+                leonardoResponse: imageResponse,  // Add the full Leonardo response
+                leonardoImage: imageResponse.generations_by_pk.generated_images[0] // Add the image data
+              }
             : agent
         )
       );

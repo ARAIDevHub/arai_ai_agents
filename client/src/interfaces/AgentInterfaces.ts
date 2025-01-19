@@ -25,16 +25,11 @@ export interface GeneratedImage {
 }
 
 export interface GenerationsByPk {
-  generated_images: GeneratedImage[];
-  concept: string;
-  modelId: string;
-  guidanceScale: string;
-  createdAt: string;
-  presetStyle: string;
-  prompt: string;
-  scheduler: string;
-  seed: string;
-  id: string;
+  generated_images?: {
+    url: string;
+    id: string;
+  }[];
+  id?: string;
 }
 
 export interface ProfileImageOption {
@@ -132,4 +127,16 @@ export function createBlankAgent(): Agent {
       profile_image_options: [] as ProfileImageOption[]
     }
   };
+}
+
+export interface RandomAgentCardProps {
+  agent: Agent;
+  onSelect: (agent: Agent | null) => void;
+  onAddAgent: (agent: Agent) => void;
+  isUserAgent: boolean;
+  setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>;
+  generateRandomAgentData: () => Promise<Agent>;
+  isLoadedAgent: boolean;
+  onRegenerate: (agentId: string) => Promise<void>;
+  isLoading?: boolean;
 } 
