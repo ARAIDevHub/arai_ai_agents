@@ -46,12 +46,13 @@ export async function getCharacters() {
 }
 
 // Function to create a random agent
-export async function createRandomAgent() {
+export async function createRandomAgent(concept?: string) {
   const response = await fetch(`${BASE_URL}/agents/random`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ concept }),
   });
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);

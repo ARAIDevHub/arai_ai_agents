@@ -2,17 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   RefreshCcw,
 } from 'lucide-react';
-import { Agent } from '../interfaces/AgentInterfaces';
+import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
 import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
 import { generateSingleImage } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
-// Import the JSON files
-
 import { generateRandomAgent } from '../utils/generateRandomAgent';
 import imageTraits from '../assets/generate-random-agents/imageTraits.json';
+import characterConcepts from '../assets/generate-random-agents/characterConcepts.json';
 
 // Helper function to get random trait
 const getRandomTrait = (traitArray: string[]): string => {
@@ -44,6 +43,34 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
   }
 };
 
+// Add this helper function near the top with other utility functions
+const generateCharacterConcept = (): string => {
+  const profession = getRandomTrait(characterConcepts.professions);
+  const personality = getRandomTrait(characterConcepts.personalities);
+  const origin = getRandomTrait(characterConcepts.origins);
+  const power = getRandomTrait(characterConcepts.specialPowers);
+  const goal = getRandomTrait(characterConcepts.goals);
+
+  // Randomly choose between different concept formats
+  const conceptFormats = [
+    `A ${personality} ${profession} who ${power} and is ${origin}`,
+    `${profession} ${origin}, who ${power} while ${goal}`,
+    `A ${personality} individual ${origin} working as a ${profession}, with the ability to ${power}`,
+    `An extraordinary ${profession} ${origin} on a mission of ${goal}`,
+    `A remarkable ${personality} being who ${power}, working as a ${profession} while ${goal}`,
+    `Create a name and try to incorporate the ${profession} into the name. For example,
+    if the profession was a Dr. then the name could be Dr. Name`
+  ];
+  const conceptFormat2 = [
+    `Create a meme of someone well known and famous. It could be a president like Trump or Biden, or a celebrity like Beyonce or Elon Musk. The meme should be a funny and clever meme that captures the essence of the person and the profession. For example, if the person was a president then the meme could be a picture of the president with the caption "I'm the president and I'm here to help you"
+     This famous person could also be a historical figure like Cleopatra or Genghis Khan. Or a famous artist like Michelangelo or Van Gogh. Or a famous scientist like Einstein or Tesla. Or a famous athlete like Michael Jordan or Serena Williams.
+    `
+  ];
+
+  // 80% chance of conceptFormat1, 20% chance of conceptFormat2
+  return Math.random() < 0.7 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+};
+
 const AgentGallery: React.FC = () => {
   const { characters: loadedAgents, loading, error } = useCharacters();
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -56,7 +83,10 @@ const AgentGallery: React.FC = () => {
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {
     try {
-      const newRandomAgentData = await generateRandomAgent();
+      const concept = generateCharacterConcept();
+      console.log("[generateRandomAgentData] Generated concept:", concept);
+
+      const newRandomAgentData = await generateRandomAgent(concept);
       const agentObject = newRandomAgentData.agent;
       const agentDetails = agentObject.agent_details;
 
@@ -71,6 +101,8 @@ const AgentGallery: React.FC = () => {
         emojis: agentDetails.emojis || [],
         universe: agentDetails.universe || '',
         backstory: agentDetails.backstory || '',
+        concept: concept,
+        topic_expertise: agentDetails.topic_expertise || []
       };
     } catch (error) {
       console.error("[generateRandomAgentData] Error:", error);
@@ -93,8 +125,13 @@ const AgentGallery: React.FC = () => {
         return;
     }
 
+    // Log the concept being saved
+    console.log("[handleAddAgent] - Saving agent with concept:", agent.concept);
+
     // populate our concept
     newAgent.agent.concept = agent.concept || '';
+    console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
+    console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:",  newAgent.agent.concept);
 
     // populate our agent details
     const agentDetails = newAgent.agent.agent_details;
@@ -276,6 +313,8 @@ const AgentGallery: React.FC = () => {
 
       // Generate new agent data
       const newAgentData = await generateRandomAgentData();
+      console.log("[handleSingleAgentRegeneration] New agent concept:", newAgentData.concept);
+
       const newAgent = {
         ...newAgentData,
         id: currentAgent.id

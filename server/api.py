@@ -27,16 +27,21 @@ ai_model = GeminiModel()
 # Post reques to create a random agent with no prompt
 @app.route('/api/agents/random', methods=['POST'])
 def create_random_agent():
+    # Get concept from request body if provided
+    data = request.get_json() if request.is_json else {}
+    concept = data.get('concept', '')  # Default to empty string if no concept provided
+    
+    print("[create_random_agent] - Creating a random agent", f"concept: {concept}" if concept else "")
+    
     # Remove the local instantiation and use global ai_model
     print("Using global Gemini Model instance", ai_model)
-    print("[create_random_agent] - Creating a random agent")
     
     # Create RandomAgents directory if it doesn't exist
     random_agents_dir = os.path.join('configs', 'RandomAgents')
     os.makedirs(random_agents_dir, exist_ok=True)
     
-    # Call the generateAgent function with no prompt to create a random agent
-    generated_master_file_path = generateAgent(ai_model, "")
+    # Call the generateAgent function with the concept
+    generated_master_file_path = generateAgent(ai_model, concept)
     print(f"[create_random_agent] - generatedMasterFilePath for generatedAgent: {generated_master_file_path}")
 
     try:
@@ -121,6 +126,7 @@ def create_agent():
 
     # Create the new character structure based on the incoming data structure
     new_character_data = {
+        "concept": data.get('concept', ''),
         "agent": {
             "agent_details": {
                 "name": character_name,
@@ -131,7 +137,7 @@ def create_agent():
                 "topic_expertise": data.get('agent_details', {}).get('topic_expertise', []),
                 "hashtags": data.get('agent_details', {}).get('hashtags', []),
                 "emojis": data.get('agent_details', {}).get('emojis', []),
-                "concept": data.get('agent_details', {}).get('concept', '')
+                "concept": data.get('concept', '')
             },
             "ai_model": {
                 "model_type": "",
@@ -152,8 +158,7 @@ def create_agent():
                 "post_every_x_minutes": 0
             },
             "seasons": data.get('seasons', [])
-        },
-        "concept": data.get('agent_details', {}).get('concept', '')
+        }
     }
 
     # Write data to the new JSON file within the character's directory
