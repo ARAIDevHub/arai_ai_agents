@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  RefreshCcw,
-} from 'lucide-react';
 import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
@@ -12,6 +9,7 @@ import { createAgent } from '../api/agentsAPI';
 import { generateRandomAgent } from '../utils/generateRandomAgent';
 import imageTraits from '../assets/generate-random-agents/imageTraits.json';
 import characterConcepts from '../assets/generate-random-agents/characterConcepts.json';
+import famousFigures from '../assets/generate-random-agents/famousFigures.json';
 
 // Helper function to get random trait
 const getRandomTrait = (traitArray: string[]): string => {
@@ -64,22 +62,25 @@ const generateCharacterConcept = (): string => {
     I want the name to start with the letter ${nameStartCharacter} `
   ];
   const conceptFormat2 = [
-    `Create a meme of someone well known and famous. It could be a president like Trump or Biden, or a celebrity like Beyonce or Elon Musk. The meme should be a funny and clever meme that captures the essence of the person and the profession. For example, if the person was a president then the meme could be a picture of the president with the caption "I'm the president and I'm here to help you"
-     This famous person could also be a historical figure like Cleopatra or Genghis Khan. Or a famous artist like Michelangelo or Van Gogh. Or a famous scientist like Einstein or Tesla. Or a famous athlete like Michael Jordan or Serena Williams.
-    `
+    `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.`
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
   return Math.random() < 0.7 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
+// Add this helper function near other utility functions
+const getRandomFamousPerson = (): string => {
+  const categories = Object.keys(famousFigures);
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  const figures = famousFigures[randomCategory as keyof typeof famousFigures];
+  return figures[Math.floor(Math.random() * figures.length)];
+};
+
 const AgentGallery: React.FC = () => {
-  const { characters: loadedAgents, loading, error } = useCharacters();
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
-  const [yourAgents, setYourAgents] = useState<Agent[]>([]);
-  const [isGenerating, setIsGenerating] = useState<boolean>(true);
   const initialMount = useRef(true);
  
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
@@ -183,13 +184,9 @@ const AgentGallery: React.FC = () => {
     // Call our api to save the new agent
     const newAgentResponse = createAgent(newAgent);
     console.log("[handleAddAgent] - New agent response:", newAgentResponse);
-
-    setYourAgents((prevAgents) => [...prevAgents, agent]);
   };
 
   const generateNewAgent = async () => {
-    setIsGenerating(true);
-    
     try {
       // Show initial loading state for 3 agents
       const loadingAgents = Array(3).fill(null).map(() => ({
@@ -221,26 +218,19 @@ const AgentGallery: React.FC = () => {
         );
 
         // Generate images for each agent
-        const [mainImage, alternateImage] = await Promise.all([
+        const [mainImage] = await Promise.all([
           // Main character image
           (async () => {
             const prompt = `Generate a character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'} and their communication style is ${newAgent.communicationStyle?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Make sure to create an image with only one character.`;
             console.log("[generateNewAgent] - Prompt:", prompt);
+            // Combine our newAgent concept with the prompt
+            const combinedPrompt = `${newAgent.concept} ${prompt}`;
+            console.log("[generateNewAgent] - Combined prompt for leonardo:", combinedPrompt);
             
             return generateSingleImage(
-              prompt,
+              combinedPrompt,
               modelId,
               styleUUID
-            );
-          })(),
-          
-          // Optional: Generate an alternate image concurrently
-          (async () => {
-            const alternatePrompt = `Alternative portrait of ${newAgent.name} in a different style.`;
-            return generateSingleImage(
-              alternatePrompt,
-              "e71a1c2f-4f80-4800-934f-2c68979d8cc8",
-              "b2a54a51-230b-4d4f-ad4e-8409bf58645f"
             );
           })()
         ]);
@@ -258,7 +248,6 @@ const AgentGallery: React.FC = () => {
           avatar: loadedImageUrl, 
           leonardoImage: imageObject,
           leonardoResponse: mainImage,
-          alternateImage: alternateImage?.generations_by_pk?.generated_images?.[0]?.url,
           isLoading: false 
         };
       });
@@ -271,7 +260,7 @@ const AgentGallery: React.FC = () => {
       console.error('[AgentGallery] Error generating agents:', error);
       const errorAgents = Array(3).fill(null).map(() => ({
         id: Math.floor(Math.random() * 1000000).toString(),
-        name: 'Error',
+        name: 'API Error',
         avatar: 'https://via.placeholder.com/400x400?text=Generation+Failed',
         shortDescription: 'Failed to generate agent',
         tags: [],
@@ -281,8 +270,6 @@ const AgentGallery: React.FC = () => {
         isLoading: false
       } as Agent));
       setRandomAgents(errorAgents);
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -419,16 +406,7 @@ const AgentGallery: React.FC = () => {
               Your Agents
             </button>
           </div>
-          {/* <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1> */}
-          {(filter === 'all' || filter === 'random') && (
-            <button
-              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md text-white flex items-center gap-2"
-              onClick={generateNewAgent}
-            >
-              <RefreshCcw className="w-4 h-4" />
-              Regenerate All
-            </button>
-          )}
+
         </header>
 
         {/* Agents Section */}
@@ -441,7 +419,7 @@ const AgentGallery: React.FC = () => {
                   <RandomAgentCard
                     key={agent.id}
                     agent={agent}
-                    onSelect={setSelectedAgent}
+                    onSelect={() => {}}
                     onAddAgent={(agent) => handleAddAgent(agent, agent.leonardoResponse)}
                     isUserAgent={false}
                     setRandomAgents={setRandomAgents}
@@ -461,9 +439,9 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={ Math.random().toString()}
+                    key={Math.random().toString()}
                     agent={agent}
-                    onSelect={setSelectedAgent}
+                    onSelect={() => {}}
                   />
                 ))}
               </div>
@@ -479,7 +457,7 @@ const AgentGallery: React.FC = () => {
                   <LoadedAgentCard
                     key={Math.random().toString()}
                     agent={agent}
-                    onSelect={setSelectedAgent}
+                    onSelect={() => {}}
                   />
                 ))}
               </div>

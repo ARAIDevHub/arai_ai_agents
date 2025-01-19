@@ -28,11 +28,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   onSelect,
   onAddAgent,
   isUserAgent,
-  setRandomAgents,
-  generateRandomAgentData,
-  isLoadedAgent,
   onRegenerate,
-  isLoading,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const agentName = agent.name || 'Unknown Agent';
@@ -91,7 +87,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-orange-500/30">
+            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col">
               {/* Header with small image */}
               <div className="flex gap-4 mb-4">
                 <img
@@ -107,41 +103,39 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                 </div>
               </div>
 
-              {/* Content sections */}
-              <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
+              {/* Content sections - now with better spacing */}
+              <div className="space-y-4 overflow-y-auto flex-grow mb-16"> {/* Added mb-16 for button space */}
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <Heart className="w-4 h-4 text-orange-400" />
+                    <Heart className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Personality</span>
                   </div>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-400 text-sm break-words">
                     {agentPersonality.join(', ')}
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <MessageCircle className="w-4 h-4 text-orange-400" />
+                    <MessageCircle className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Communication Style</span>
                   </div>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-400 text-sm break-words">
                     {agentCommunicationStyle.join(', ')}
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <Sparkles className="w-4 h-4 text-orange-400" />
+                    <Sparkles className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Emojis</span>
                   </div>
-                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">
+                  <p className="text-gray-400 text-sm break-words">
                     {agentEmojis.join(' ')}
                   </p>
                 </div>
-              </div>
 
-              {/* Tags at bottom */}
-              <div className="relative">
+                {/* Tags */}
                 <div className="flex gap-2 flex-wrap">
                   {agentTags.map((tag, index) => (
                     <span
@@ -154,8 +148,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                 </div>
               </div>
 
-              {/* Action button at bottom */}
-              <div className="absolute bottom-2 left-4 right-4">
+              {/* Action button - now positioned absolutely at bottom */}
+              <div className="absolute bottom-4 left-4 right-4">
                 {isUserAgent ? (
                   <button
                     className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
