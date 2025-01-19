@@ -15,7 +15,6 @@ import personalities from '../assets/generate-random-agents/personalities.json';
 import communicationStyles from '../assets/generate-random-agents/communicationStyles.json';
 import emojis from '../assets/generate-random-agents/emojis.json';
 import hashtags from '../assets/generate-random-agents/hashtags.json';
-
 import { generateRandomAgent } from '../utils/generateRandomAgent';
 
 
@@ -52,6 +51,21 @@ const AgentGallery: React.FC = () => {
  
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {
+
+    const newRandomAgentData = await generateRandomAgent();
+    console.log("[generateRandomAgentData] - New generated random agent:", newRandomAgentData);
+    const agentObject = newRandomAgentData.agent;
+    console.log("[generateRandomAgentData] - New generated random agentObject", agentObject);
+    const agentDetails = agentObject.agent_details;
+    console.log("[generateRandomAgentData] - New generated random agentDetails", agentDetails);
+    const name = agentDetails.name;
+    console.log("[generateRandomAgentData] - New generated random agent name", name);
+    const personality = agentDetails.personality;
+    console.log("[generateRandomAgentData] - New generated random agent personality", personality);
+    const communicationStyle = agentDetails.communication_style;
+    console.log("[generateRandomAgentData] - New generated random agent communicationStyle", communicationStyle);
+    const emojis = agentDetails.emojis;
+    console.log("[generateRandomAgentData] - New generated random agent emojis", emojis);
 
     const randomIndexTo100 = Math.floor(Math.random() * 99);
     const randomIndexTo500 = Math.floor(Math.random() * 499);
