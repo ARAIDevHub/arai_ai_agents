@@ -1,4 +1,5 @@
 export interface AgentDetails {
+  id?: string | number;
   name: string;
   personality: string[];
   communication_style: string[];
@@ -28,6 +29,7 @@ export interface GenerationsByPk {
   generated_images?: {
     url: string;
     id: string;
+    generationId: string;
   }[];
   id?: string;
 }

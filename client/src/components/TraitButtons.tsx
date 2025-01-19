@@ -3,9 +3,9 @@ import { Sparkles } from 'lucide-react';
 import { AgentDetails } from '../interfaces/AgentInterfaces'; // Adjust the import path as necessary
 
 interface TraitButtonsProps {
-  field: keyof AgentDetails;
+  field: 'personality' | 'communication_style' | 'topic_expertise' | 'hashtags' | 'emojis';
   options: string[];
-  onTraitButtonClick: (field: keyof AgentDetails, value: string) => void; // Pass the click handler as a prop
+  onTraitButtonClick: (field: typeof field, value: string) => void;
 }
 
 // Component to render suggestion chips for a given field with provided options

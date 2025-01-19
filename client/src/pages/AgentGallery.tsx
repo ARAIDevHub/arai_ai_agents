@@ -50,6 +50,7 @@ const generateCharacterConcept = (): string => {
   const origin = getRandomTrait(characterConcepts.origins);
   const power = getRandomTrait(characterConcepts.specialPowers);
   const goal = getRandomTrait(characterConcepts.goals);
+  const nameStartCharacter = getRandomTrait(characterConcepts.alphabet);
 
   // Randomly choose between different concept formats
   const conceptFormats = [
@@ -59,7 +60,8 @@ const generateCharacterConcept = (): string => {
     `An extraordinary ${profession} ${origin} on a mission of ${goal}`,
     `A remarkable ${personality} being who ${power}, working as a ${profession} while ${goal}`,
     `Create a name and try to incorporate the ${profession} into the name. For example,
-    if the profession was a Dr. then the name could be Dr. Name`
+    if the profession was a Dr. then the name could be Dr. Name
+    I want the name to start with the letter ${nameStartCharacter} `
   ];
   const conceptFormat2 = [
     `Create a meme of someone well known and famous. It could be a president like Trump or Biden, or a celebrity like Beyonce or Elon Musk. The meme should be a funny and clever meme that captures the essence of the person and the profession. For example, if the person was a president then the meme could be a picture of the president with the caption "I'm the president and I'm here to help you"
@@ -459,7 +461,7 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.agent?.id || Math.random().toString()}
+                    key={ Math.random().toString()}
                     agent={agent}
                     onSelect={setSelectedAgent}
                   />
@@ -475,7 +477,7 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.agent?.id || Math.random().toString()}
+                    key={Math.random().toString()}
                     agent={agent}
                     onSelect={setSelectedAgent}
                   />

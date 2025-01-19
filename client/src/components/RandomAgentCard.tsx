@@ -13,18 +13,26 @@ import LoadingBar from './LoadingBar';
 // Define the props for AgentCard
 interface RandomAgentCardProps {
   agent: Agent;
-  onSelect: (agent: Agent) => void;
-  onAddAgent?: (agent: Agent) => void;
-  isUserAgent?: boolean;
+  onSelect: (agent: Agent | null) => void;
+  onAddAgent: (agent: Agent) => void;
+  isUserAgent: boolean;
+  setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>;
+  generateRandomAgentData: () => Promise<Agent>;
+  isLoadedAgent: boolean;
   onRegenerate: (agentId: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
 const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   agent,
   onSelect,
-  onAddAgent: onAdd,
+  onAddAgent,
   isUserAgent,
+  setRandomAgents,
+  generateRandomAgentData,
+  isLoadedAgent,
   onRegenerate,
+  isLoading,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const agentName = agent.name || 'Unknown Agent';
@@ -164,7 +172,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onAdd && onAdd(agent);
+                      onAddAgent(agent);
                     }}
                   >
                     <PlusCircle className="w-4 h-4" />
@@ -185,7 +193,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
             className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
             onClick={(e) => {
               e.stopPropagation();
-              onRegenerate(agent.id.toString());
+              onRegenerate(agent.id?.toString() || Math.random().toString());
             }}
           >
             <RefreshCcw className="w-4 h-4" />
