@@ -1,0 +1,32 @@
+{
+  "hairColors": [
+    "platinum blonde", "golden blonde", "ash blonde", "strawberry blonde",
+    "light brown", "chocolate brown", "dark brown", "black",
+    "midnight blue", "purple", "pink", "silver",
+    "white", "red", "auburn", "copper"
+  ],
+  "hairStyles": [
+    "long flowing", "short messy", "medium wavy", "pixie cut",
+    "shoulder-length", "braided", "ponytail", "twin tails",
+    "spiky", "curly", "straight", "asymmetrical",
+    "bob cut", "layered", "side-swept", "mohawk"
+  ],
+  "eyeColors": [
+    "deep blue", "ice blue", "emerald green", "forest green",
+    "amber", "golden", "chocolate brown", "hazel",
+    "violet", "ruby red", "silver", "heterochromatic blue and gold",
+    "lavender", "teal", "grey", "aqua"
+  ],
+  "clothingStyles": [
+    "elegant Victorian", "modern casual", "cyberpunk", "steampunk",
+    "high fantasy", "military uniform", "academy uniform", "traditional Japanese",
+    "futuristic", "medieval", "business formal", "street fashion",
+    "gothic", "bohemian", "sporty", "royal attire"
+  ],
+  "backgrounds": [
+    "cherry blossom garden", "futuristic cityscape", "mystical forest",
+    "ancient temple", "starry night sky", "crystal cave", "floating islands",
+    "underwater palace", "desert oasis", "snowy mountains", "autumn forest",
+    "space station", "magical library", "neon city", "peaceful meadow", "sunset beach"
+  ]
+} 
