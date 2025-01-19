@@ -5,8 +5,9 @@ import AgentCreator from './pages/AgentCreator';
 // import NodeCreator from './pages/NodeCreator'; // Removed NodeCreator import
 import ChatInterface from './pages/ChatInterface';
 import SocialFeed from './pages/SocialFeed';
-import AgentStudio from './pages/AgentStudio';
+// import AgentStudio from './pages/AgentStudio';
 import AgentGallery from './pages/AgentGallery';
+import Testing from './pages/Testing';
 import './App.css';
 
 // Components
@@ -53,7 +54,7 @@ function App() {
           >
             Create Agent
           </Link>
-          <Link
+          {/* <Link
             to="/agent-studio"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
               ${isActive('/agent-studio') 
@@ -61,7 +62,7 @@ function App() {
                 : 'text-gray-300 hover:text-cyan-400'}`}
           >
             Agent Studio
-          </Link>
+          </Link> */}
           <Link
             to="/agent-gallery"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
@@ -80,6 +81,7 @@ function App() {
           >
             Social Feed
           </Link>
+          
           <Link
             to="/chat"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
@@ -98,10 +100,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/agent-creator" element={<AgentCreator />} />
-          <Route path="/agent-studio" element={<AgentStudio />} />
+          {/* <Route path="/agent-studio" element={<AgentStudio />} /> */}
           <Route path="/agent-gallery" element={<AgentGallery />} />
           <Route path="/social-feed" element={<SocialFeed />} />
           <Route path="/chat" element={<ChatInterface />} />
+          <Route path="/testing" element={<Testing />} />
 
         </Routes>
       </main>

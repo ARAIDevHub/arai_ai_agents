@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  RefreshCcw,
-} from 'lucide-react';
-import { Agent } from '../interfaces/AgentInterfaces';
+import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
 import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
 import { generateSingleImage } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
-// Import the JSON files
-import names from '../assets/generate-random-agents/names.json';
-import personalities from '../assets/generate-random-agents/personalities.json';
-import communicationStyles from '../assets/generate-random-agents/communicationStyles.json';
-import emojis from '../assets/generate-random-agents/emojis.json';
-import hashtags from '../assets/generate-random-agents/hashtags.json';
+import { generateRandomAgent } from '../utils/generateRandomAgent';
+import imageTraits from '../assets/generate-random-agents/imageTraits.json';
+import characterConcepts from '../assets/generate-random-agents/characterConcepts.json';
+import famousFigures from '../assets/generate-random-agents/famousFigures.json';
 
+// Helper function to get random trait
+const getRandomTrait = (traitArray: string[]): string => {
+  return traitArray[Math.floor(Math.random() * traitArray.length)];
+};
 
+const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
 // Add a utility function to handle image loading
 const loadImageWithFallback = async (url: string): Promise<string> => {
@@ -40,147 +41,288 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
   }
 };
 
+// Add this helper function near the top with other utility functions
+const generateCharacterConcept = (): string => {
+  const profession = getRandomTrait(characterConcepts.professions);
+  const personality = getRandomTrait(characterConcepts.personalities);
+  const origin = getRandomTrait(characterConcepts.origins);
+  const power = getRandomTrait(characterConcepts.specialPowers);
+  const goal = getRandomTrait(characterConcepts.goals);
+  const nameStartCharacter = getRandomTrait(characterConcepts.alphabet);
+
+  // Randomly choose between different concept formats
+  const conceptFormats = [
+    `A ${personality} ${profession} who ${power} and is ${origin}`,
+    `${profession} ${origin}, who ${power} while ${goal}`,
+    `A ${personality} individual ${origin} working as a ${profession}, with the ability to ${power}`,
+    `An extraordinary ${profession} ${origin} on a mission of ${goal}`,
+    `A remarkable ${personality} being who ${power}, working as a ${profession} while ${goal}`,
+    `Create a name and try to incorporate the ${profession} into the name. For example,
+    if the profession was a Dr. then the name could be Dr. Name
+    I want the name to start with the letter ${nameStartCharacter} `
+  ];
+  const conceptFormat2 = [
+    `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.`
+  ];
+
+  // 80% chance of conceptFormat1, 20% chance of conceptFormat2
+  return Math.random() < 0.7 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+};
+
+// Add this helper function near other utility functions
+const getRandomFamousPerson = (): string => {
+  const categories = Object.keys(famousFigures);
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  const figures = famousFigures[randomCategory as keyof typeof famousFigures];
+  return figures[Math.floor(Math.random() * figures.length)];
+};
+
 const AgentGallery: React.FC = () => {
-  const { characters: loadedAgents, loading, error } = useCharacters();
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
-  const [yourAgents, setYourAgents] = useState<Agent[]>([]);
-  const [isGenerating, setIsGenerating] = useState<boolean>(true);
   const initialMount = useRef(true);
  
-  // Define generateRandomAgent inside AgentGallery so it's accessible to child components
-  const generateRandomAgent = (): Agent => {
+  // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
+  const generateRandomAgentData = async (): Promise<Agent> => {
+    try {
+      const concept = generateCharacterConcept();
+      console.log("[generateRandomAgentData] Generated concept:", concept);
 
-    const randomIndexTo100 = Math.floor(Math.random() * 99);
-    const randomIndexTo500 = Math.floor(Math.random() * 499);
+      const newRandomAgentData = await generateRandomAgent(concept);
+      const agentObject = newRandomAgentData.agent;
+      const agentDetails = agentObject.agent_details;
 
-    return {
-      id: Math.floor(Math.random() * 1000000), // Generate a random number for the ID
-      name: names[randomIndexTo500],
-      avatar: '', // Start with empty avatar, will be filled by generateSingleImage
-      shortDescription: '...', // You can add short descriptions if needed
-      tags: hashtags[randomIndexTo100],
-      personality: personalities[randomIndexTo100],
-      communicationStyle: communicationStyles[randomIndexTo100],
-      emojis: emojis[randomIndexTo100],
-    };
+      return {
+        id: Math.floor(Math.random() * 1000000).toString(),
+        name: agentDetails.name || '',
+        avatar: '',
+        shortDescription: '...',
+        tags: agentDetails.hashtags || [],
+        personality: agentDetails.personality || [],
+        communicationStyle: agentDetails.communication_style || [],
+        emojis: agentDetails.emojis || [],
+        universe: agentDetails.universe || '',
+        backstory: agentDetails.backstory || '',
+        concept: concept,
+        topic_expertise: agentDetails.topic_expertise || []
+      };
+    } catch (error) {
+      console.error("[generateRandomAgentData] Error:", error);
+      throw error;
+    }
   };
 
   const handleAddAgent = (agent: Agent, leonardoResponse: any) => {
-    // Step 1 Create a new blank agent
+    // Create a new blank agent with proper initialization
     const newAgent = createBlankAgent();
-    console.log("[handleAddAgent] - Creating a new blank agent to populate the agent details", newAgent);
-    console.log("[handleAddAgent] - Creating a new agent with the following details", agent);
-    console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse); // Log the full response object
+    
+    if (!newAgent.agent) {
+        console.error("[handleAddAgent] - New agent object is not properly initialized");
+        return;
+    }
 
-    // Step 2 Populate the new agent with the details from the leonardo response
+    // Ensure agent.agent_details exists before accessing
+    if (!newAgent.agent.agent_details) {
+        console.error("[handleAddAgent] - Agent details are not properly initialized");
+        return;
+    }
+
+    // Log the concept being saved
+    console.log("[handleAddAgent] - Saving agent with concept:", agent.concept);
+
     // populate our concept
-    newAgent.concept = agent.concept;
+    newAgent.agent.concept = agent.concept || '';
+    console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
+    console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:",  newAgent.agent.concept);
 
     // populate our agent details
-    newAgent.agent.agent_details.name = agent?.name || '';
-    newAgent.agent.agent_details.personality = agent?.personality || [];
-    newAgent.agent.agent_details.communication_style = agent?.communicationStyle || [];
-    newAgent.agent.agent_details.emojis = agent?.emojis || [];
-    newAgent.agent.agent_details.hashtags = agent?.hashtags || [];
-    newAgent.agent.agent_details.universe = agent?.universe || '';
-    newAgent.agent.agent_details.topic_expertise = agent.agent_details?.topicExpertise || []; // Need to randomly generate this
-    newAgent.agent.agent_details.backstory = agent?.backstory || ''; // Need to randomly generate this
+    const agentDetails = newAgent.agent.agent_details;
+    agentDetails.name = agent?.name || '';
+    agentDetails.personality = agent?.personality || [];
+    agentDetails.communication_style = agent?.communicationStyle || [];
+    agentDetails.emojis = agent?.emojis || [];
+    agentDetails.hashtags = agent?.hashtags || [];
+    agentDetails.universe = agent?.universe || '';
+    agentDetails.topic_expertise = agent?.topic_expertise || [];
+    agentDetails.backstory = agent?.backstory || '';
+
+    // Ensure profile_image_options array exists and has at least one element
+    if (!newAgent.agent.profile_image_options) {
+        newAgent.agent.profile_image_options = [];
+    }
+    if (newAgent.agent.profile_image_options.length === 0) {
+        newAgent.agent.profile_image_options.push({ generations_by_pk: {} as GenerationsByPk });
+    }
+
+    // Ensure profile_image exists and has details
+    if (!newAgent.agent.profile_image) {
+        newAgent.agent.profile_image = {
+            details: {
+                url: '',
+                image_id: '',
+                generationId: ''
+            }
+        };
+    }
 
     // Populate the image data
-    console.log("[handleAddAgent] - Leonardo response object:", leonardoResponse);
-    const generation_by_pk = leonardoResponse.generations_by_pk;
-    newAgent.agent.profile_image_options[0].generations_by_pk = generation_by_pk;
-    // Break down the generation_by_pk object for details to populate the Profile Image 
-    newAgent.agent.profile_image.details.url = generation_by_pk.generated_images[0].url;
-    newAgent.agent.profile_image.details.image_id = generation_by_pk.generated_images[0].id;
-    newAgent.agent.profile_image.details.generationId = generation_by_pk.id;
+    if (leonardoResponse?.generations_by_pk) {
+        const generation_by_pk = leonardoResponse.generations_by_pk;
+        newAgent.agent.profile_image_options[0].generations_by_pk = generation_by_pk;
+
+        if (generation_by_pk.generated_images?.[0]) {
+            const imageDetails = newAgent.agent.profile_image.details;
+            imageDetails.url = generation_by_pk.generated_images[0].url;
+            imageDetails.image_id = generation_by_pk.generated_images[0].id;
+            imageDetails.generationId = generation_by_pk.id;
+        }
+    }
 
     console.log("[handleAddAgent] - New agent with image data:", newAgent);
 
     // Call our api to save the new agent
     const newAgentResponse = createAgent(newAgent);
     console.log("[handleAddAgent] - New agent response:", newAgentResponse);
-
-    setYourAgents((prevAgents) => [...prevAgents, agent]);
-    // setRandomAgents((prevAgents) => prevAgents.filter((a) => a.id !== agent.id));
   };
 
   const generateNewAgent = async () => {
-    setIsGenerating(true);
-    
     try {
-      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
-      const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-      const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
-      
-      setRandomAgents(newAgents.map(agent => ({ ...agent, avatar: '', isLoading: true })));
+      // Show initial loading state for 3 agents
+      const loadingAgents = Array(3).fill(null).map(() => ({
+        id: Math.floor(Math.random() * 1000000).toString(),
+        name: 'Generating Agent...',
+        avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
+        shortDescription: 'Loading...',
+        tags: [],
+        personality: [],
+        communicationStyle: [],
+        emojis: [],
+        isLoading: true
+      } as Agent));
 
-      const imagePromises = newAgents.map(async (agent) => {
-        const prompt = `Generate an anime character portrait of ${agent.name}, who is a ${agent.role}. 
-                     Their personality can be described as ${agent.personality}. 
-                     Style: high quality, detailed anime art, character portrait`;
+      setRandomAgents(loadingAgents);
 
-        const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
-        if (!imageResponse?.generations_by_pk?.generated_images?.[0]) {
+      // Generate 3 agents concurrently
+      const agentPromises = loadingAgents.map(async (loadingAgent) => {
+        // Get the agent data first
+        const newAgent = await generateRandomAgentData();
+        
+        // Update loading state to show we're generating the image
+        setRandomAgents(prevAgents => 
+          prevAgents.map(agent => 
+            agent.id === loadingAgent.id 
+              ? { ...newAgent, id: loadingAgent.id, avatar: 'https://via.placeholder.com/400x400?text=Generating+Image', isLoading: true }
+              : agent
+          )
+        );
+
+        // Generate images for each agent
+        const [mainImage] = await Promise.all([
+          // Main character image
+          (async () => {
+            const prompt = `Generate a character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'} and their communication style is ${newAgent.communicationStyle?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Make sure to create an image with only one character.`;
+            console.log("[generateNewAgent] - Prompt:", prompt);
+            // Combine our newAgent concept with the prompt
+            const combinedPrompt = `${newAgent.concept} ${prompt}`;
+            console.log("[generateNewAgent] - Combined prompt for leonardo:", combinedPrompt);
+            
+            return generateSingleImage(
+              combinedPrompt,
+              modelId,
+              styleUUID
+            );
+          })()
+        ]);
+
+        if (!mainImage?.generations_by_pk?.generated_images?.[0]) {
           throw new Error('No image data received');
         }
         
-        const imageObject = imageResponse.generations_by_pk.generated_images[0];
+        const imageObject = mainImage.generations_by_pk.generated_images[0];
         const loadedImageUrl = await loadImageWithFallback(imageObject.url);
         
         return { 
-          ...agent, 
+          ...newAgent,
+          id: loadingAgent.id,
           avatar: loadedImageUrl, 
-          leonardoImage: imageObject, // Pass the entire image object
-          leonardoResponse: imageResponse, // Capture the full response
+          leonardoImage: imageObject,
+          leonardoResponse: mainImage,
           isLoading: false 
         };
       });
 
-      const completedAgents = await Promise.all(imagePromises);
+      // Wait for all agents to be generated
+      const completedAgents = await Promise.all(agentPromises);
       setRandomAgents(completedAgents);
 
     } catch (error) {
       console.error('[AgentGallery] Error generating agents:', error);
-      const newAgents = Array(3).fill(null).map(() => generateRandomAgent());
-      setRandomAgents(newAgents.map(agent => ({
-        ...agent,
-        avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
+      const errorAgents = Array(3).fill(null).map(() => ({
+        id: Math.floor(Math.random() * 1000000).toString(),
+        name: 'API Error',
+        avatar: 'https://via.placeholder.com/400x400?text=Generation+Failed',
+        shortDescription: 'Failed to generate agent',
+        tags: [],
+        personality: [],
+        communicationStyle: [],
+        emojis: [],
         isLoading: false
-      })));
-    } finally {
-      setIsGenerating(false);
+      } as Agent));
+      setRandomAgents(errorAgents);
     }
   };
 
-  // Add this function to handle single agent regeneration
+  // Update the handleSingleAgentRegeneration function
   const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
     const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
     const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
     
     try {
-      const currentAgent = randomAgents.find(agent => agent.id === agentId);
-      if (!currentAgent) return;
-
-      const newAgentData = generateRandomAgent();
-      const newAgent = {
-        ...newAgentData,
-        id: currentAgent.id // Preserve the original ID
-      };
-
-      setRandomAgents(prevAgents => 
-        prevAgents.map(agent => 
-          agent.id === agentId 
-            ? { ...newAgent, avatar: '', isLoading: true }
+      // Show loading state immediately with loading name
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? { 
+                ...agent, 
+                name: 'Loading Agent...', // Add loading name
+                isLoading: true, 
+                avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
+                personality: [],
+                communicationStyle: [],
+                emojis: [],
+                hashtags: []
+              }
             : agent
         )
       );
 
-      const prompt = `Generate an anime character portrait of ${newAgent.name}, who is a ${newAgent.role}. 
-                     Their personality can be described as ${newAgent.personality}. 
-                     Style: high quality, detailed anime art, character portrait`;
+      const currentAgent = randomAgents.find(agent => agent.id === agentId);
+      if (!currentAgent) return;
+
+      // Generate new agent data
+      const newAgentData = await generateRandomAgentData();
+      console.log("[handleSingleAgentRegeneration] New agent concept:", newAgentData.concept);
+
+      const newAgent = {
+        ...newAgentData,
+        id: currentAgent.id
+      };
+
+      // Update UI to show we're now generating the image
+      setRandomAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === agentId 
+            ? { 
+                ...newAgent, 
+                avatar: 'https://via.placeholder.com/400x400?text=Generating+Image', 
+                isLoading: true 
+              }
+            : agent
+        )
+      );
+
+      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait`;
 
       const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
       if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
@@ -190,10 +332,17 @@ const AgentGallery: React.FC = () => {
       const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
       const loadedImageUrl = await loadImageWithFallback(imageUrl);
 
+      // Update with all necessary data for saving
       setRandomAgents(prevAgents =>
         prevAgents.map(agent =>
           agent.id === agentId
-            ? { ...newAgent, avatar: loadedImageUrl, isLoading: false }
+            ? { 
+                ...newAgent, 
+                avatar: loadedImageUrl, 
+                isLoading: false,
+                leonardoResponse: imageResponse,  // Add the full Leonardo response
+                leonardoImage: imageResponse.generations_by_pk.generated_images[0] // Add the image data
+              }
             : agent
         )
       );
@@ -257,16 +406,7 @@ const AgentGallery: React.FC = () => {
               Your Agents
             </button>
           </div>
-          {/* <h1 className="text-2xl font-bold text-center flex-grow text-white">ARAI AI Agents Gallery</h1> */}
-          {(filter === 'all' || filter === 'random') && (
-            <button
-              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 rounded-md text-white flex items-center gap-2"
-              onClick={generateNewAgent}
-            >
-              <RefreshCcw className="w-4 h-4" />
-              Regenerate All
-            </button>
-          )}
+
         </header>
 
         {/* Agents Section */}
@@ -279,13 +419,14 @@ const AgentGallery: React.FC = () => {
                   <RandomAgentCard
                     key={agent.id}
                     agent={agent}
-                    onSelect={setSelectedAgent}
+                    onSelect={() => {}}
                     onAddAgent={(agent) => handleAddAgent(agent, agent.leonardoResponse)}
                     isUserAgent={false}
                     setRandomAgents={setRandomAgents}
-                    generateRandomAgent={generateRandomAgent}
+                    generateRandomAgentData={generateRandomAgentData}
                     isLoadedAgent={true}
                     onRegenerate={handleSingleAgentRegeneration}
+                    isLoading={agent.isLoading}
                   />
                 ))}
               </div>
@@ -298,9 +439,9 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.id}
+                    key={Math.random().toString()}
                     agent={agent}
-                    onSelect={setSelectedAgent}
+                    onSelect={() => {}}
                   />
                 ))}
               </div>
@@ -314,9 +455,9 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    key={agent.id}
+                    key={Math.random().toString()}
                     agent={agent}
-                    onSelect={setSelectedAgent}
+                    onSelect={() => {}}
                   />
                 ))}
               </div>
