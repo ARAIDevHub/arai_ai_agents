@@ -25,7 +25,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
-from utils.content_generator_json import ContentGenerator
+from utils.content_generator import ContentGenerator
 from utils.template_types import TemplateType
 import asset_generation.images_leonardo as images_leonardo
 from models.gemini_model import GeminiModel

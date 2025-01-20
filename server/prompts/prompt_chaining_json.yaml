@@ -11,8 +11,9 @@ prompt_1 (Character Sheet Creation): |
     1.  Invent a Creative Name:
         - If no specific name is provided, create a unique and fitting name for the agent based on the concept of the agent. The name should be suitable for a Twitter handle.
         - Don't have the word agent in the agents name or the @ symbol in the agents name.
-        - The name can be made up of one or two words. If it is two words, it can be a first and last name, or something fun and creative.
+        - The name must be made up of two words. A first and last name, or something fun and creative.
         - Agent Name: {{ agent_name }}
+        - Do not use any names that have already been previously used from {{ agent_names_blacklist }}
 
     2.  Define the Topic:
         - If no specific topic is provided invent a creative topic that lends itself to episodic storytelling.
@@ -132,9 +133,8 @@ prompt_3 (Episode Posts Creation): |
   *   Incorporate Episode Context: Align with the season overview and specific episode overview provided in the season JSON.
   *   Highlight Observations: Center around misunderstandings, comedic observations, or serious reflections relevant to the episode's theme.
   *   Consider Emojis: Optionally use emojis from this set: {{ agent_json }} or use any emojis that are relevant to the episode's theme.
-  *   Consider Hashtags: Optionally use hashtags from this set: {{ agent_json }} or use any hashtags that are relevant to the episode's theme.
+  *   Make sure there are no hashtags in the post. We want only text and emojis.
   *   Length Constraint: Each post must be under {{ post_length }} characters.
-  *   Sign-Off: End each post with the sign-off: "#{{ agent_name }}"
 
   **JSON Output Format:**
 
