@@ -5,7 +5,7 @@ import os
 import json
 import glob
 from pprint import pprint
-from prompt_chaining.step_1_json import step_1 as generateAgent
+from prompt_chaining.step_1_create_agent import create_agent as generateAgent
 from models.gemini_model import GeminiModel
 
 

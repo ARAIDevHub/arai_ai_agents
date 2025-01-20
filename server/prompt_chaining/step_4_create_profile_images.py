@@ -33,7 +33,7 @@ dotenv.load_dotenv()
 #--------------------------------
 # Step 4: Generate a number of images for profile image
 #--------------------------------
-def step_4(prompt, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5):
+def create_profile_images(prompt, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5):
     
     # step 4.1: load existing profile image options from templates directory
     manager = ContentGenerator()
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     num_images = 4
 
     # Generate the image
-    step_4(prompt, "configs/Aiko_The_Chain/Aiko_The_Chain_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
+    create_profile_images(prompt, "configs/Aiko_The_Chain/Aiko_The_Chain_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
 
 
     
