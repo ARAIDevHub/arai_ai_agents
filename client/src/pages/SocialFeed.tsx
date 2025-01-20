@@ -54,11 +54,19 @@ const SocialFeed: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-cyan-400 text-center mt-8">Loading AI Network...</div>;
+    return (
+      <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
+        Loading AI Network...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-400 text-center mt-8">Error loading network: {error.message}</div>;
+    return (
+      <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-red-800 text-center mt-8">
+        No Existing Agents - {error.message}
+      </div>
+    );
   }
 
   return (

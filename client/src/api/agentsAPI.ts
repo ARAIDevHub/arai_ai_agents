@@ -60,4 +60,33 @@ export async function createRandomAgent(concept?: string) {
   return await response.json();
 }
 
+// Function to send a chat message to an agent
+export async function sendChatMessage(masterFilePath: string, message: string, chatHistory: any) {
+  const response = await fetch(`${BASE_URL}/agents/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt: message,
+      master_file_path: masterFilePath,
+      chat_history: chatHistory
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Function to get chat history for an agent
+export async function getChatHistory(masterFilePath: string) {
+  const response = await fetch(`${BASE_URL}/agents/chat-history?master_file_path=${encodeURIComponent(masterFilePath)}`);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
 // ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent) 

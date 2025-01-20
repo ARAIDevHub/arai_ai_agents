@@ -57,7 +57,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     }
 
     # get the agent's response
-    print("Sending prompt to AI to chat with the agent")
+    print("Sending prompt to AI to chat with history", chat_history)
     agent_response = manager.run_prompt(
         prompt_key="prompt_5 (Chat with the agent)",
         template_vars=prompt_5_vars, 
@@ -101,6 +101,8 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
             save_path=agent_chat_file_path,
             json_data=chat_history
         )
+
+        print(f"[Step 5 - agent_chat] - agent_chat_file_path: {agent_chat_file_path}")
 
     return agent_response, chat_history
 

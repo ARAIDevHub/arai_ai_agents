@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import AgentCreator from './pages/AgentCreator';
 // import NodeCreator from './pages/NodeCreator'; // Removed NodeCreator import
 import ChatInterface from './pages/ChatInterface';
+import ChatToAgent from './pages/ChatToAgent';
 import SocialFeed from './pages/SocialFeed';
 // import AgentStudio from './pages/AgentStudio';
 import AgentGallery from './pages/AgentGallery';
@@ -92,6 +93,16 @@ function App() {
             Chat
           </Link>
 
+          <Link
+            to="/chat-to-agent"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${isActive('/chat-to-agent') 
+                ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
+                : 'text-gray-300 hover:text-cyan-400'}`}
+          >
+            Chat to Agent
+          </Link>
+
         </div>
       </nav>
 
@@ -105,7 +116,7 @@ function App() {
           <Route path="/social-feed" element={<SocialFeed />} />
           <Route path="/chat" element={<ChatInterface />} />
           <Route path="/testing" element={<Testing />} />
-
+          <Route path="/chat-to-agent" element={<ChatToAgent />} />
         </Routes>
       </main>
 

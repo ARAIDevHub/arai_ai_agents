@@ -32,6 +32,7 @@ const useProcessCharacters = (characters: any[]) => {
           connectors: agent?.connectors || {},
           seasons: agent?.seasons || [],
           tracker: agent?.tracker || {},
+          master_file_path: agent?.master_file_path || '',
         }
       };
     });

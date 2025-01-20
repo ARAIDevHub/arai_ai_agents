@@ -7,6 +7,7 @@ import glob
 from pprint import pprint
 from prompt_chaining.step_1_create_agent import create_agent as generateAgent
 from models.gemini_model import GeminiModel
+from prompt_chaining.step_5_agent_chat import agent_chat
 
 
 load_dotenv()
@@ -201,6 +202,70 @@ def get_characters():
     except Exception as e:
         print(f"[get_characters] - Unexpected error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/chat', methods=['POST'])
+def chat_with_agent():
+    data = request.get_json()
+    prompt = data.get('prompt')
+
+    master_file_path = data.get('master_file_path')
+    print(f"[chat_with_agent] - master_file_path: {master_file_path}")
+    
+    chat_history = data.get('chat_history', {'chat_history': []})
+    print(f"[chat_with_agent] - chat_history: {chat_history}")
+    
+    
+    if not master_file_path:
+        return jsonify({"error": "Master file path is required"}), 400
+    
+    if not os.path.exists(master_file_path):
+        return jsonify({"error": "Agent master file not found"}), 404
+        
+    try:
+        # Initialize AI model
+        ai_model = GeminiModel()
+        
+        # Call the agent_chat function from step_5
+        agent_response, updated_chat_history = agent_chat(
+            ai_model=ai_model,
+            master_file_path=master_file_path,
+            prompt=prompt,
+            chat_history=chat_history
+        )
+        
+        return jsonify({
+            "response": agent_response,
+            "chat_history": updated_chat_history
+        })
+    except Exception as e:
+        print(f"Error in chat_with_agent: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/chat-history', methods=['GET'])
+def get_chat_history():
+    master_file_path = request.args.get('master_file_path')
+    print(f"[get_chat_history] - master_file_path: {master_file_path}")
+    if not master_file_path:
+        return jsonify({"error": "Master file path is required"}), 400
+    
+    # Extract agent name from master file path
+    agent_name = os.path.basename(master_file_path).replace('_master.json', '')
+    
+    # Create the chat history file path using the same format as in step_5_agent_chat.py
+    chat_file_path = os.path.join(os.path.dirname(master_file_path), f"{agent_name}_chat_log.json")
+    print(f"[get_chat_history] - chat_file_path: {chat_file_path}")
+    # If chat history doesn't exist, return empty history with agent name
+    if not os.path.exists(chat_file_path):
+        return jsonify({
+            "agent_name": agent_name,
+            "chat_history": []
+        })
+    
+    # Load and return the chat history
+    with open(chat_file_path, 'r', encoding='utf-8') as file:
+        chat_history = json.load(file)
+    
+    return jsonify(chat_history)
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")
