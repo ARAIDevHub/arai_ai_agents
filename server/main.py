@@ -26,7 +26,7 @@ import argparse
 
 # custom ARAI imports
 from models.gemini_model import GeminiModel
-import utils.post_manager_json as twitter_manager
+import utils.post_manager as twitter_manager
 import prompt_chaining.step_1_create_agent as step_1
 import prompt_chaining.step_2_create_content as step_2
 import prompt_chaining.step_3_create_posts as step_3
