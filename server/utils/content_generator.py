@@ -652,3 +652,7 @@ class ContentGenerator:
             
         #print(f"result is: {result}")            
         return result
+
+    def get_agent_names_blacklist(self):
+        """Get a list of agent names based on folder names in config folder."""
+        return [name for name in os.listdir(self.agents_config_dir) if os.path.isdir(os.path.join(self.agents_config_dir, name))]
