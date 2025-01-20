@@ -206,19 +206,25 @@ prompt_6 (Create Social Media Image Post): |
   You are tasked with developing a series of visual descriptions that will be used to create artwork for a character social media posts.
   These image descriptions will be used to create images based on the agents current episode. 
   These will be posted to twitter as a series of posts.
-  
+  The style will be instagram style were it does not include the character in the photos but what the character is doing and seeing.
+    
   Here is the agent's JSON:
   {{ agent_json }}
 
-  Here is the episode JSON:
+  Here is the episode JSON with details on the episode and posts:
   {{ episode_json }}
 
-  Here are the episode posts:
-  {{ episode_posts }}
-
-  Make {{ number_of_images }} that support the narrative of the episode posts being sent to twitter.
+  Make {{ number_of_images }} of image descriptions that support the narrative of the episode posts being sent to twitter.
+  Keep the descriptions short and to the point.
   Mark were abouts in the order of the posts the image post should be tweeted.
   Example, post this image after post 1, post this image after post 4, etc.
+  Determine which posts best benefit from an image directly after them.
+  Mark sure to spread out the image post among the text posts.
+
+  Example:
+  - Image of pina calada drink at a beach resort
+  - Image traditional japanese breakfast food
+  - Image out an apartment window on a summers day.
 
   Output Requirements:
   - Only output valid JSON. Do not include any text outside of the JSON structure.
@@ -236,13 +242,23 @@ prompt_6 (Create Social Media Image Post): |
   ```
 
 prompt 7 (Create Social Media Image Post): |
+    You are an expert in character design, and visual storytelling. Your task is to generate an illustration. 
+
+
 
 prompt 8 (Profile Image Editor): |
-  You are an expert in creative writing, character design, and visual storytelling. Your task is to generate a detailed description for creating a character illustration. The description will include all relevant physical features, clothing, style, and the character's overall aesthetic. Use the placeholders provided below to dynamically incorporate details into the description.
+  You are an expert in character design, and visual storytelling. Your task is to generate a character illustration. 
+  The illustration will include all relevant physical features, clothing, style, and the character's overall aesthetic. 
+  Use the placeholders provided below to dynamically incorporate details into the description.
 
   Character Illustration Prompt
   Generate a descriptive prompt for an artist or an AI to create an image of the character. The prompt should be vivid, imaginative, and comprehensive, capturing the essence of the character. Use the following placeholders to define the details of the character:
 
+  About the character:
+  - agent name {{ agent_name }}
+  - agent personality {{ personality }}  
+  - agent backstory {{ backstory }}
+  
   Specific Instructions:
     1. Character Profile:
        - Gender/Body Type: {{ genderBodyType }}
@@ -293,3 +309,8 @@ prompt 9 (Create Character Image): |
   Their personality can be described as {{ personality }} and their communication style is 
   {{ communication_style }}. Scene: {{ background }}. 
   Make sure to create an image with only one character.
+
+
+  "{{ genderBodyType }} character, {{ age }} with {{ ethnicitySkinTone }} skin, 
+  a {{ faceShape }} face, {{ hair.length }} {{ hair.style }} hair in {{ hair.color }}, 
+  wearing {{ outfitStyle }} clothing, accessorized with {{ accessories }}, set in a {{ background }}."
