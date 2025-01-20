@@ -66,7 +66,7 @@ def image_post_description(ai_model, master_file_path, num_images):
 #--------------------------------
 # Step 4: Generate a number of images for profile image
 #--------------------------------
-def step_4(prompt, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5):
+def create_profile_images(prompt, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5):
     
     # step 4.1: load existing profile image options from templates directory
     manager = ContentGenerator()
@@ -150,6 +150,14 @@ if __name__ == "__main__":
     ai_model = GeminiModel()
     master_file_path = "configs/LamboLara/LamboLara_master.json"
 
+    #--------------------------------
+    # Step 4.0: Create multiple profile images via a single prompt using inconsistent images
+    #--------------------------------
+    # create_profile_images(prompt, "configs/Aiko_The_Chain/Aiko_The_Chain_master.json", model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
+
+    #--------------------------------
+    # Step 4.1: Create multiple profile images via multiple prompts using consistent images
+    #--------------------------------
     image_descriptions = image_post_description(ai_model, master_file_path, num_images)
 
     print("\n\n")    
@@ -161,6 +169,7 @@ if __name__ == "__main__":
         print(image_description["description"] + "\n")
         # Generate the image
         # step_4(image_description, master_file_path, model_id, style_uuid, num_images, consistent=False, max_retries=10, delay=5)
+    # Generate the image
 
 
     
