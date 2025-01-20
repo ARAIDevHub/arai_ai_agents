@@ -59,7 +59,10 @@ def create_agent(ai_model, concept: str):
 
     # Gather a list of agent names based on folder names in config folder
     agent_names_blacklist = manager.get_agent_names_blacklist()
-    print(f"agent_names_blacklist: {agent_names_blacklist}")
+    # remove _ from names
+    # print(f"agent_names_blacklist: {agent_names_blacklist}")    
+    # agent_names_blacklist = [name.replace("_", " ") for name in agent_names_blacklist]
+    print(f"agent_names_blacklist: {agent_names_blacklist}")    
 
     # step 1.2: Generate a new agent name, topic, personality, and communication style with the prompt_1 template
     # prompt 1 Character Creation:
