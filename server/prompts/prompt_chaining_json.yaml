@@ -237,3 +237,59 @@ prompt_6 (Create Social Media Image Post): |
 
 prompt 7 (Create Social Media Image Post): |
 
+prompt 8 (Profile Image Editor): |
+  You are an expert in creative writing, character design, and visual storytelling. Your task is to generate a detailed description for creating a character illustration. The description will include all relevant physical features, clothing, style, and the character's overall aesthetic. Use the placeholders provided below to dynamically incorporate details into the description.
+
+  Character Illustration Prompt
+  Generate a descriptive prompt for an artist or an AI to create an image of the character. The prompt should be vivid, imaginative, and comprehensive, capturing the essence of the character. Use the following placeholders to define the details of the character:
+
+  Specific Instructions:
+    1. Character Profile:
+       - Gender/Body Type: {{ genderBodyType }}
+       - Age: {{ age }}
+       - Ethnicity/Skin Tone: {{ ethnicitySkinTone }}
+       - Height/Build: {{ heightBuild }}
+
+    2. Face & Head Details:
+       - Face Shape: {{ faceShape }}
+       - Eye Color: {{ eyes.color }}
+       - Eye Shape: {{ eyes.shape }}
+       - Eyebrow Style: {{ eyes.eyebrowStyle }}
+       - Nose Shape: {{ nose }}
+       - Mouth/Lip Style: {{ mouthLips }}
+       - Facial Hair (if applicable): {{ facialHair }}
+       - Hair Length: {{ hair.length }}
+       - Hair Style: {{ hair.style }}
+       - Hair Color: {{ hair.color }}
+
+    3. Body & Clothing:
+       - Body Shape: {{ bodyShape }}
+       - Outfit Style: {{ outfitStyle }}
+       - Specific Garments: {{ specificGarments }}
+       - Color Palette: {{ colorPalette }}
+       - Accessories: {{ accessories }}
+       - Armor or Weapons: {{ armorOrWeapons }}
+
+    4. Style & Aesthetic:
+       - Art Style: {{ artStyle }}
+       - Mood/Expression: {{ moodExpression }}
+       - Lighting or Color Mood: {{ lightingOrColorMood }}
+       - Background Setting: {{ background }}
+
+  Output Requirements:
+  - Generate a complete and vivid description of the character using the placeholders provided.
+  - The output should be a natural language paragraph formatted for readability.
+  - Ensure the description flows smoothly and vividly combines all selected traits into a cohesive vision.
+  - Example:
+    "{{ genderBodyType }} character, {{ age }} with {{ ethnicitySkinTone }} skin, a {{ faceShape }} face, {{ hair.length }} {{ hair.style }} hair in {{ hair.color }}, wearing {{ outfitStyle }} clothing, accessorized with {{ accessories }}, set in a {{ background }}."
+
+  Final Output:
+  - Description: {{ character_description }}
+            
+
+prompt 9 (Create Character Image): |
+  Generate a character portrait of {{ agent_name }} with {{ hair_style }} {{ hair_color }} hair, 
+  {{ eye_color }} eyes, wearing {{ clothing_style }} style clothing. 
+  Their personality can be described as {{ personality }} and their communication style is 
+  {{ communication_style }}. Scene: {{ background }}. 
+  Make sure to create an image with only one character.
