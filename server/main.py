@@ -30,7 +30,7 @@ import utils.post_manager as twitter_manager
 import prompt_chaining.step_1_create_agent as step_1
 import prompt_chaining.step_2_create_content as step_2
 import prompt_chaining.step_3_create_posts as step_3
-# import prompt_chaining.step_4_create_profile_images as step_4
+import prompt_chaining.step_4_create_profile_images as step_4
 # import prompt_chaining.step_5_agent_chat as step_5
 
 def list_available_seasons(agent_name):
@@ -199,6 +199,8 @@ if __name__ == "__main__":
                 print("Creating the new season posts...")
                 step_3.create_episode_posts(ai_model, agent_file_path, 6)                
                 print(f"\nCreated new agent: {agent_file_path}")
+                print("Creating the new profile images...")
+                step_4.create_profile_images(ai_model, agent_file_path, 4)
 
             except Exception as e:
                 print(f"Error creating agent: {str(e)}")
