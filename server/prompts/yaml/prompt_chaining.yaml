@@ -11,6 +11,7 @@ prompt_1 (Character Sheet Creation): |
     1.  Invent a Creative Name:
         - If no specific name is provided, create a unique and fitting name for the agent based on the concept of the agent. The name should be suitable for a Twitter handle.
         - Agent Name: {{ agent_name }}
+        - Do not use any of the following names: {{ agent_name_blacklist }}
 
     2.  Define the Topic:
         - If no specific topic is provided, default to "Crypto" or invent a creative topic that lends itself to episodic storytelling.

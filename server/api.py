@@ -210,9 +210,9 @@ def chat_with_agent():
 
     master_file_path = data.get('master_file_path')
     print(f"[chat_with_agent] - master_file_path: {master_file_path}")
+    print("\n\n\n")
     
     chat_history = data.get('chat_history', {'chat_history': []})
-    print(f"[chat_with_agent] - chat_history: {chat_history}")
     
     
     if not master_file_path:
@@ -254,6 +254,7 @@ def get_chat_history():
     # Create the chat history file path using the same format as in step_5_agent_chat.py
     chat_file_path = os.path.join(os.path.dirname(master_file_path), f"{agent_name}_chat_log.json")
     print(f"[get_chat_history] - chat_file_path: {chat_file_path}")
+    print("\n\n\n")
     # If chat history doesn't exist, return empty history with agent name
     if not os.path.exists(chat_file_path):
         return jsonify({

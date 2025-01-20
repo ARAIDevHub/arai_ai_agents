@@ -30,6 +30,7 @@ from utils.content_generator_json import TemplateType
 def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     # Step 5.1: Create a new content manager that will send off the prompt to the AI model
     manager = content_generator.ContentGenerator()
+    print("agent_chat - master_file_path", master_file_path)
 
     # step 5.2: load the agent json file
     agent_master_json = None    
@@ -57,7 +58,6 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     }
 
     # get the agent's response
-    print("Sending prompt to AI to chat with history", chat_history)
     agent_response = manager.run_prompt(
         prompt_key="prompt_5 (Chat with the agent)",
         template_vars=prompt_5_vars, 

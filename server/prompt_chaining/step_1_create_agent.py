@@ -57,6 +57,9 @@ def create_agent(ai_model, concept: str):
     agent_template = manager.create_new_template_json(TemplateType.AGENT)
     agent_master_template = manager.create_new_template_json(TemplateType.MASTER)
 
+    # Get list of all the names from the config directory
+    agent_name_blacklist = manager.get_agent_name_blacklist()
+
     # step 1.2: Generate a new agent name, topic, personality, and communication style with the prompt_1 template
     # prompt 1 Character Creation:
     print("Crafting prompt for AI to create a new agent")
