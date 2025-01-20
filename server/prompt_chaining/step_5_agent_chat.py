@@ -41,7 +41,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
 
     # Initialize chat history if None
     if chat_history is None:
-        chat_history = []
+        chat_history = manager.create_new_template_json(TemplateType.CHAT)
         
     # step 5.4: Set up chat variables
     agent_response = None
