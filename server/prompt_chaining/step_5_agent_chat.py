@@ -42,7 +42,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
 
     # Initialize chat history if None
     if chat_history is None:
-        chat_history = []
+        chat_history = {"chat_history": []}  # Initialize with proper structure
         
     # step 5.4: Set up chat variables
     agent_response = None
@@ -65,6 +65,12 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     )
     
     if agent_response:  # Add error checking
+        # Initialize chat_history if None or empty
+        if chat_history is None or not chat_history:
+            chat_history = {"chat_history": []}
+        elif "chat_history" not in chat_history:
+            chat_history["chat_history"] = []
+            
         # add the user's prompt to the history log with label
         chat_history['chat_history'].append({
             "role": "user",
