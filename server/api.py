@@ -1,3 +1,16 @@
+"""
+API Server Module
+
+This module implements the Flask REST API server that handles agent creation,
+chat interactions, content generation and other core functionality.
+
+Key Features:
+- Agent creation and management 
+- Chat interactions with agents
+- Season and episode content generation
+- Chat history tracking
+"""
+
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -11,25 +24,36 @@ from prompt_chaining.step_5_agent_chat import agent_chat
 from prompt_chaining.step_2_create_content import create_seasons_and_episodes
 from prompt_chaining.step_3_create_posts import create_episode_posts
 
-
+# Load environment variables
 load_dotenv()
 
+# Initialize Flask app with 20MB max content size
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB
 
-# Configure CORS for your frontend origin
+# Configure CORS for frontend origin
 CORS(app, resources={r"/api/*": {
     "origins": ["http://localhost:5173"],
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type"]
 }})
 
-# Create a single global instance of GeminiModel
+# Create global AI model instance
 ai_model = GeminiModel()
 
 # Post reques to create a random agent with no prompt
 @app.route('/api/agents/random', methods=['POST'])
 def create_random_agent():
+    """
+    Creates a new random agent with optional concept.
+    
+    Request Body:
+        concept (str, optional): Initial concept for the agent
+        
+    Returns:
+        JSON: Generated agent data
+        int: HTTP status code
+    """
     # Get concept from request body if provided
     data = request.get_json() if request.is_json else {}
     concept = data.get('concept', '')  # Default to empty string if no concept provided
@@ -89,6 +113,12 @@ def create_random_agent():
 
 @app.before_request
 def handle_preflight():
+    """
+    Handles CORS preflight requests by adding required headers.
+    
+    Returns:
+        Response: Flask response with CORS headers
+    """
     if request.method == "OPTIONS":
         response = make_response()
         response.headers.add("Access-Control-Allow-Headers", "*")
@@ -98,10 +128,27 @@ def handle_preflight():
 # Your existing routes...
 @app.route('/api/agents', methods=['GET'])
 def get_agents():
+    """
+    Retrieves list of all agents.
+    
+    Returns:
+        JSON: List of agent data
+    """
     return jsonify(agents)
 
 @app.route('/api/agents', methods=['POST'])
 def create_agent():
+    """
+    Creates a new agent from provided configuration.
+    
+    Request Body:
+        agent_details (dict): Agent configuration including name, personality, etc.
+        concept (str): Initial concept for the agent
+        
+    Returns:
+        JSON: Created agent data
+        int: HTTP status code
+    """
     data = request.get_json()
     print(f"[create_agent] - Received data: {data}")
 
@@ -170,11 +217,15 @@ def create_agent():
 
     return jsonify(new_character_data), 201
 
-
-
-
 @app.route('/api/characters', methods=['GET'])
 def get_characters():
+    """
+    Retrieves all character configurations from the configs directory.
+    
+    Returns:
+        JSON: List of character configurations
+        int: HTTP status code
+    """
     try:
         # Use os.path.join for cross-platform path handling
         config_dir = 'configs'
@@ -207,6 +258,18 @@ def get_characters():
 
 @app.route('/api/agents/chat', methods=['POST'])
 def chat_with_agent():
+    """
+    Handles chat interactions with an agent.
+    
+    Request Body:
+        prompt (str): User message to the agent
+        master_file_path (str): Path to agent's master configuration file
+        chat_history (dict): Previous chat history
+        
+    Returns:
+        JSON: Agent response and updated chat history
+        int: HTTP status code
+    """
     data = request.get_json()
     prompt = data.get('prompt')
 
@@ -245,6 +308,16 @@ def chat_with_agent():
 
 @app.route('/api/agents/chat-history', methods=['GET'])
 def get_chat_history():
+    """
+    Retrieves chat history for a specific agent.
+    
+    Query Parameters:
+        master_file_path (str): Path to agent's master configuration file
+        
+    Returns:
+        JSON: Agent's chat history
+        int: HTTP status code
+    """
     master_file_path = request.args.get('master_file_path')
     print(f"[get_chat_history] - master_file_path: {master_file_path}")
     if not master_file_path:
@@ -272,6 +345,17 @@ def get_chat_history():
 
 @app.route('/api/agents/seasons', methods=['POST'])
 def create_season():
+    """
+    Generates a new season of content for an agent.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        number_of_episodes (int): Number of episodes to generate
+        
+    Returns:
+        JSON: Updated agent data with new season
+        int: HTTP status code
+    """
     try:
         data = request.get_json()
         master_file_path = data.get('master_file_path')
@@ -299,6 +383,17 @@ def create_season():
 
 @app.route('/api/agents/episodes/posts', methods=['POST'])
 def create_episode_content():
+    """
+    Generates posts for an agent's episodes.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        number_of_posts (int): Number of posts to generate per episode
+        
+    Returns:
+        JSON: Updated agent data with new posts
+        int: HTTP status code
+    """
     try:
         data = request.get_json()
         master_file_path = data.get('master_file_path')
