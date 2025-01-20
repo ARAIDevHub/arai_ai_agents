@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import useCharacters from '../hooks/useCharacters';
 import { MessageSquare, Heart } from 'lucide-react';
 import { Post, Episode, Season } from '../interfaces/PostsInterface';
+import { createSeason, createEpisodePosts } from '../api/agentsAPI';
+import { Button } from '../components/ui/button';
 
 
 const SocialFeed: React.FC = () => {
@@ -53,6 +55,31 @@ const SocialFeed: React.FC = () => {
     console.log('Selected character posts:', posts);
   };
 
+  const handleGenerateContent = async () => {
+    if (!selectedCharacter) return;
+    
+    try {
+      // Extract the master file path from the character
+      const masterFilePath = `configs/${selectedCharacter.agent.agent_details.name}/${selectedCharacter.agent.agent_details.name}_master.json`;
+      
+      // First create new season
+      const updatedAgentWithSeason = await createSeason(masterFilePath);
+      
+      // Then create posts for episodes
+      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath);
+      
+      // Update the selected character with final data
+      setSelectedCharacter(updatedAgentWithPosts);
+      
+      // Update posts
+      const posts = getCharacterPosts(updatedAgentWithPosts);
+      setCharacterPosts(posts);
+    } catch (error) {
+      console.error('Error generating content:', error);
+      // Handle error (show notification, etc.)
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
@@ -90,6 +117,17 @@ const SocialFeed: React.FC = () => {
           ))}
         </select>
       </div>
+
+      {selectedCharacter && (
+        <div className="flex gap-4 mb-4">
+          <Button 
+            onClick={handleGenerateContent}
+            className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700"
+          >
+            Generate Seasons & Posts
+          </Button>
+        </div>
+      )}
 
       {/* Feed Header */}
       <div className="mb-8">

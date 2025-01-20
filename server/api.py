@@ -8,6 +8,8 @@ from pprint import pprint
 from prompt_chaining.step_1_create_agent import create_agent as generateAgent
 from models.gemini_model import GeminiModel
 from prompt_chaining.step_5_agent_chat import agent_chat
+from prompt_chaining.step_2_create_content import create_seasons_and_episodes
+from prompt_chaining.step_3_create_posts import create_episode_posts
 
 
 load_dotenv()
@@ -267,6 +269,60 @@ def get_chat_history():
         chat_history = json.load(file)
     
     return jsonify(chat_history)
+
+@app.route('/api/agents/seasons', methods=['POST'])
+def create_season():
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        number_of_episodes = data.get('number_of_episodes', 3)  # Default to 3 episodes
+
+        if not master_file_path:
+            return jsonify({"error": "Master file path is required"}), 400
+
+        # Create a new season using the global AI model
+        result = create_seasons_and_episodes(
+            ai_model=ai_model,
+            master_file_path=master_file_path,
+            number_of_episodes=number_of_episodes
+        )
+
+        # Load and return the updated agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            updated_agent = json.load(f)
+            
+        return jsonify(updated_agent), 200
+
+    except Exception as e:
+        print(f"Error creating season: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/episodes/posts', methods=['POST'])
+def create_episode_content():
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        number_of_posts = data.get('number_of_posts', 6)  # Default to 6 posts
+
+        if not master_file_path:
+            return jsonify({"error": "Master file path is required"}), 400
+
+        # Create posts for the episodes using the global AI model
+        result = create_episode_posts(
+            ai_model=ai_model,
+            master_file_path=master_file_path,
+            number_of_posts=number_of_posts
+        )
+
+        # Load and return the updated agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            updated_agent = json.load(f)
+            
+        return jsonify(updated_agent), 200
+
+    except Exception as e:
+        print(f"Error creating episode posts: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")

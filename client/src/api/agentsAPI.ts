@@ -89,4 +89,42 @@ export async function getChatHistory(masterFilePath: string) {
   return await response.json();
 }
 
+// Function to create a new season
+export async function createSeason(masterFilePath: string, numberOfEpisodes: number = 3) {
+  const response = await fetch(`${BASE_URL}/agents/seasons`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      master_file_path: masterFilePath,
+      number_of_episodes: numberOfEpisodes,
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Function to create posts for episodes
+export async function createEpisodePosts(masterFilePath: string, numberOfPosts: number = 6) {
+  const response = await fetch(`${BASE_URL}/agents/episodes/posts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      master_file_path: masterFilePath,
+      number_of_posts: numberOfPosts,
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
 // ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent) 

@@ -30,7 +30,6 @@ from utils.template_types import TemplateType
 def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     # Step 5.1: Create a new content manager that will send off the prompt to the AI model
     manager = content_generator.ContentGenerator()
-    print("agent_chat - master_file_path", master_file_path)
 
     # step 5.2: load the agent json file
     agent_master_json = None    
@@ -42,7 +41,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
 
     # Initialize chat history if None
     if chat_history is None:
-        chat_history = {"chat_history": []}  # Initialize with proper structure
+        chat_history = manager.create_new_template_json(TemplateType.CHAT)
         
     # step 5.4: Set up chat variables
     agent_response = None
@@ -58,6 +57,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     }
 
     # get the agent's response
+    print("Sending prompt to AI to chat with the agent")
     agent_response = manager.run_prompt(
         prompt_key="prompt_5 (Chat with the agent)",
         template_vars=prompt_5_vars, 
@@ -65,12 +65,6 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     )
     
     if agent_response:  # Add error checking
-        # Initialize chat_history if None or empty
-        if chat_history is None or not chat_history:
-            chat_history = {"chat_history": []}
-        elif "chat_history" not in chat_history:
-            chat_history["chat_history"] = []
-            
         # add the user's prompt to the history log with label
         chat_history['chat_history'].append({
             "role": "user",
@@ -107,8 +101,6 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
             save_path=agent_chat_file_path,
             json_data=chat_history
         )
-
-        print(f"[Step 5 - agent_chat] - agent_chat_file_path: {agent_chat_file_path}")
 
     return agent_response, chat_history
 
