@@ -27,7 +27,7 @@ from utils.content_generator_json import TemplateType
 # -------------------------------------------------------------------
 # Step 5: Chat with the agent
 # -------------------------------------------------------------------
-def step_5(ai_model, master_file_path: str, prompt: str, chat_history):
+def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
     # Step 5.1: Create a new content manager that will send off the prompt to the AI model
     manager = content_generator.ContentGenerator()
 
@@ -113,18 +113,18 @@ if __name__ == "__main__":
     chat_history = manager.create_new_template_json(TemplateType.CHAT)
 
     user_prompt = "What is your name?"
-    agent_response, chat_history = step_5(ai_model, master_file_path, user_prompt, chat_history)
+    agent_response, chat_history = agent_chat(ai_model, master_file_path, user_prompt, chat_history)
     print(f"Response: {agent_response['response']}")
     # print(f"Chat history: {chat_history}")
     user_prompt = "What is your favorite color?"
-    agent_response, chat_history = step_5(ai_model, master_file_path, user_prompt, chat_history)
+    agent_response, chat_history = agent_chat(ai_model, master_file_path, user_prompt, chat_history)
     print(f"Response: {agent_response['response']}")
     # print(f"Chat history: {chat_history}")
     user_prompt = "What is your favorite food?"
-    agent_response, chat_history = step_5(ai_model, master_file_path, user_prompt, chat_history)
+    agent_response, chat_history = agent_chat(ai_model, master_file_path, user_prompt, chat_history)
     print(f"Response: {agent_response['response']}")
     # print(f"Chat history: {chat_history}")
     user_prompt = "What was the first question I asked you?"
-    agent_response, chat_history = step_5(ai_model, master_file_path, user_prompt, chat_history)
+    agent_response, chat_history = agent_chat(ai_model, master_file_path, user_prompt, chat_history)
     print(f"Response: {agent_response['response']}")
     # print(f"Chat history: {chat_history}")

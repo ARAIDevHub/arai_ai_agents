@@ -28,7 +28,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.content_generator_json import ContentGenerator
 from utils.template_types import TemplateType
 
-def step_3(ai_model, master_file_path, number_of_posts):
+def create_episode_posts(ai_model, master_file_path, number_of_posts):
     '''
     Description:
         Create a new episode posts for the agent
@@ -157,5 +157,5 @@ def step_3(ai_model, master_file_path, number_of_posts):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_3(ai_model, "configs/Pixelina/Pixelina_master.json", 6)
+    create_episode_posts(ai_model, "configs/Pixelina/Pixelina_master.json", 6)
 

@@ -25,13 +25,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
 from utils.content_generator_json import ContentGenerator
-import prompt_chaining.step_2_json as next_step
+import prompt_chaining.step_2_create_content as next_step
 from utils.template_types import TemplateType
 
 # -------------------------------------------------------------------
 # Step 1: Create a new agent
 # -------------------------------------------------------------------
-def step_1(ai_model, concept: str):
+def create_agent(ai_model, concept: str):
     '''
     Description:
         Create a new agent
@@ -138,5 +138,5 @@ def step_1(ai_model, concept: str):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_1(ai_model,  "time-traveling historian documenting the evolution of human technology through the ages")
+    create_agent(ai_model,  "time-traveling historian documenting the evolution of human technology through the ages")
 
