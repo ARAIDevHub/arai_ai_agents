@@ -212,7 +212,7 @@ if __name__ == "__main__":
                     print("Creating a new season...")
                     step_2.create_seasons_and_episodes(ai_model, agent_file_path, 3)
                 except Exception as e:
-                    print(f"Error creating season: {str(e)}")
+                    print(f"[main] - Error creating season: {str(e)}")
 
         elif choice == '4':
             if not current_agent:
@@ -228,7 +228,7 @@ if __name__ == "__main__":
                     print("Creating a new season posts...")
                     step_3.create_episode_posts(ai_model, agent_file_path, 6)
                 except Exception as e:
-                    print(f"Error creating season posts: {str(e)}")
+                    print(f"[main] - Error creating season posts: {str(e)}")
 
         elif choice == '5':
             if not current_agent:

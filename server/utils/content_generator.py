@@ -143,7 +143,8 @@ class ContentGenerator:
 
         # 2. response = self.save_processed_response(response, debug)
         save_path = self.create_json_from_response(response)       
-        print(f"save_path is: {save_path}")
+        print(f"[process_and_save_agent_response - Processed] - save_path is: {save_path}")
+        print(f"[process_and_save_agent_response - Processed] - response is: {response}")
 
         # 3. load the yaml file into a dict
         with open(save_path, "r", encoding="utf-8") as f:

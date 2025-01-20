@@ -66,13 +66,18 @@ def create_seasons_and_episodes(ai_model, master_file_path, number_of_episodes):
     print(f"Extracting agent details from master json")
     agent_details = agent_master_json['agent']['agent_details']
 
+    
+    # if the seasons array is empty or None, we need to initialize it
+    if not agent_master_json['agent']['seasons'] or agent_master_json['agent']['seasons'] == []:
+        agent_master_json['agent']['seasons'] = season_template['seasons']
+    
     # step 2.3: find the previous season 
     # get last season file 
     previous_season = None    
     # Get the last season from the seasons array if it exists
     seasons = agent_master_json['agent']['seasons']
     previous_season = seasons[-1] if seasons else None
-    
+
     if previous_season:
         print(f"Found previous season: {previous_season['season_number']}")
     else:
