@@ -27,9 +27,9 @@ import argparse
 # custom ARAI imports
 from models.gemini_model import GeminiModel
 import utils.post_manager as twitter_manager
-import prompt_chaining.step_1_json as step_1
-import prompt_chaining.step_2_json as step_2
-import prompt_chaining.step_3_json as step_3
+import prompt_chaining.step_1_create_agent as step_1
+import prompt_chaining.step_2_create_content as step_2
+import prompt_chaining.step_3_create_posts as step_3
 
 def list_available_seasons(agent_name):
     """List all available seasons for an agent
@@ -181,14 +181,14 @@ if __name__ == "__main__":
                 
                 # Create the new agent using the prompt chaining
                 print("Creating the new agent...")
-                agent_file_path = step_1.step_1(ai_model, agent_concept)
+                agent_file_path = step_1.create_agent(ai_model, agent_concept)
                 print("New agent created at: ", agent_file_path)                
                 new_agent_dir = os.path.dirname(agent_file_path)
                 print("All agent files will go into: ", new_agent_dir)             
                 print("Creating the new season...")
-                step_2.step_2(ai_model, agent_file_path, 3)
+                step_2.create_seasons_and_episodes(ai_model, agent_file_path, 3)
                 print("Creating the new season posts...")
-                step_3.step_3(ai_model, agent_file_path, 6)                
+                step_3.create_episode_posts(ai_model, agent_file_path, 6)                
                 print(f"\nCreated new agent: {agent_file_path}")
 
             except Exception as e:
@@ -201,7 +201,7 @@ if __name__ == "__main__":
             else:
                 try:
                     print("Creating a new season...")
-                    step_2.step_2(ai_model, agent_file_path)
+                    step_2.create_seasons_and_episodes(ai_model, agent_file_path)
                 except Exception as e:
                     print(f"Error creating season: {str(e)}")
 
@@ -224,7 +224,7 @@ if __name__ == "__main__":
                     if 0 <= season_idx < len(seasons):
                         current_season = seasons[season_idx]
                         season_file_path = os.path.join("configs", current_agent, current_season, f"{current_season}.yaml")
-                        step_3.step_3(ai_model, agent_file_path, season_file_path)
+                        step_3.create_episode_posts(ai_model, agent_file_path, season_file_path)
                         print(f"\nSelected season: {current_season}")
                     else:
                         print("Invalid selection!")

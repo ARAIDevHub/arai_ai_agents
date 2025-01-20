@@ -26,9 +26,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # custom ARAI imports
 from utils.content_generator_json import ContentGenerator
 from utils.template_types import TemplateType
-import prompt_chaining.step_3_json as next_step
+import prompt_chaining.step_3_create_posts as next_step
 
-def step_2(ai_model, master_file_path, number_of_episodes):
+def create_seasons_and_episodes(ai_model, master_file_path, number_of_episodes):
     '''
     Description:
         Create a new season for the agent
@@ -154,4 +154,4 @@ def step_2(ai_model, master_file_path, number_of_episodes):
 import models.gemini_model as gemini_model
 if __name__ == "__main__":
     ai_model = gemini_model.GeminiModel()
-    step_2(ai_model, "configs/CipherCat/CipherCat_master.json", 3)
+    create_seasons_and_episodes(ai_model, "configs/CipherCat/CipherCat_master.json", 3)
