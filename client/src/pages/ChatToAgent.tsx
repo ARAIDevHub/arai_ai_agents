@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getCharacters, sendChatMessage, getChatHistory } from '../api/agentsAPI';
+import { sendChatMessage, getChatHistory } from '../api/agentsAPI';
 import { Agent } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
+import { User } from 'lucide-react';
 
 interface Message {
   role: string;
@@ -17,7 +18,7 @@ interface ChatHistory {
 
 const ChatToAgent: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const { characters, loading, error } = useCharacters();
+  const { characters } = useCharacters();
   const [input, setInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatHistory>({ 
     agent_name: '',
@@ -62,26 +63,35 @@ const ChatToAgent: React.FC = () => {
     e.preventDefault();
     if (!input.trim() || !selectedAgent) return;
 
+    const userMessage = {
+      role: 'user',
+      message: input,
+      message_id: Date.now() // Generate temporary message ID
+    };
+
+    // Immediately show user message
+    setDisplayChatHistory(prev => [...prev, userMessage]);
+    setInput('');
+    
     setIsLoading(true);
     try {
-      const agentName = selectedAgent.agent.agent_details.name;
-      const masterFilePath = selectedAgent.agent.master_file_path || 
+      const agentName = selectedAgent?.agent?.agent_details?.name || '';
+      const masterFilePath = selectedAgent?.agent?.master_file_path || 
         `configs/${agentName}/${agentName}_master.json`;
 
-        console.log("[ChatToAgent - masterFilePath] - handleSubmit - masterFilePath", masterFilePath);
+      console.log("[ChatToAgent - masterFilePath] - handleSubmit - masterFilePath", masterFilePath);
       
       const response = await sendChatMessage(
         masterFilePath,
-        input,
+        userMessage.message,
         chatHistory
       );
       
       if (response.chat_history) {
         setChatHistory(response.chat_history);
         const newMessages = response.chat_history.chat_history.slice(chatHistory.chat_history.length);
-        setDisplayChatHistory(prev => [...prev, ...newMessages]);
+        setDisplayChatHistory(prev => [...prev.slice(0, -1), ...newMessages]); // Replace temp message with actual one
       }
-      setInput('');
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -116,69 +126,126 @@ const ChatToAgent: React.FC = () => {
       </div>
 
       {/* Chat Interface */}
-      <div className="flex flex-col h-[70vh]">
-        {/* Messages */}
-        <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-4 bg-slate-900/30 rounded-lg">
-          {displayChatHistory.map((message) => (
-            <div
-              key={message.message_id}
-              className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
+      <div 
+        className="flex flex-col h-[70vh] relative"
+        style={{
+          backgroundImage: selectedAgent?.agent?.profile_image?.details?.url 
+            ? `url(${selectedAgent?.agent?.profile_image?.details?.url})` 
+            : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Add an overlay div for opacity */}
+        <div className="absolute inset-0 bg-slate-900/80" />
+        
+        {/* Wrap content in relative div to appear above overlay */}
+        <div className="relative z-10 flex flex-col h-full">
+          {/* Messages */}
+          <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-4 bg-slate-900/30 rounded-lg">
+            {displayChatHistory.map((message) => (
               <div
-                className={`max-w-[80%] p-4 rounded-lg ${
-                  message.role === 'user'
-                    ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
-                    : 'bg-slate-900/60 border border-cyan-900/50 text-gray-300'
+                key={message.message_id}
+                className={`flex ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                <p>{message.message || message.response}</p>
-              </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-slate-900/60 border border-cyan-900/50 p-4 rounded-lg">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" />
-                  <div
-                    className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
-                    style={{ animationDelay: '0.2s' }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
-                    style={{ animationDelay: '0.4s' }}
-                  />
+                <div className="flex items-center max-w-[80%] space-x-4">
+                  {message.role !== 'user' && (
+                    <div 
+                      className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600 flex-shrink-0 self-center"
+                      style={{
+                        backgroundImage: selectedAgent?.agent?.profile_image?.details?.url 
+                          ? `url(${selectedAgent?.agent?.profile_image?.details?.url})` 
+                          : undefined,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    />
+                  )}
+                  
+                  <div className="flex flex-col">
+                    <span className="text-sm text-cyan-400 mb-1">
+                      {message.role === 'user' ? 'User' : selectedAgent?.agent?.agent_details?.name}
+                    </span>
+                    <div
+                      className={`p-4 rounded-lg ${
+                        message.role === 'user'
+                          ? 'bg-gradient-to-r from-cyan-600/90 to-orange-600/90 text-white'
+                          : 'bg-slate-900/90 border border-cyan-900/75 text-gray-300'
+                      }`}
+                    >
+                      <p>{message.message || message.response}</p>
+                    </div>
+                  </div>
+
+                  {message.role === 'user' && (
+                    <div 
+                      className="w-10 h-10 rounded-full bg-slate-800 border border-cyan-800/75 flex items-center justify-center flex-shrink-0 self-center"
+                    >
+                      <User className="w-6 h-6 text-cyan-400" />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex items-center space-x-4">
+                  <div 
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600 flex-shrink-0 self-center"
+                    style={{
+                      backgroundImage: selectedAgent?.agent?.profile_image?.details?.url 
+                        ? `url(${selectedAgent?.agent?.profile_image?.details?.url})` 
+                        : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  />
+                  <div className="bg-slate-900/60 border border-cyan-900/50 p-4 rounded-lg">
+                    <div className="flex space-x-2">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" />
+                      <div
+                        className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '0.2s' }}
+                      />
+                      <div
+                        className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '0.4s' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="flex gap-4">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              selectedAgent
-                ? 'Type your message...'
-                : 'Please select an agent first...'
-            }
-            disabled={!selectedAgent || isLoading}
-            className="flex-grow px-4 py-2 rounded-lg bg-slate-900/50 border border-orange-500/20 text-white"
-          />
-          <button
-            type="submit"
-            disabled={!selectedAgent || isLoading}
-            className="px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-orange-600 text-white disabled:opacity-50"
-          >
-            Send
-          </button>
-        </form>
+          {/* Input Form */}
+          <form onSubmit={handleSubmit} className="flex gap-4">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={
+                selectedAgent
+                  ? 'Type your message...'
+                  : 'Please select an agent first...'
+              }
+              disabled={!selectedAgent || isLoading}
+              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/90 border border-orange-500/20 text-white placeholder-gray-400"
+            />
+            <button
+              type="submit"
+              disabled={!selectedAgent || isLoading}
+              className="px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-orange-600 text-white disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

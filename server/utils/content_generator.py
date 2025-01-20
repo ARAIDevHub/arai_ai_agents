@@ -148,8 +148,12 @@ class ContentGenerator:
         # 3. load the yaml file into a dict
         with open(save_path, "r", encoding="utf-8") as f:
             try:
+                print(f"[content_generator] - process_and_save_agent_response - response is: {response}")
                 # 3.1 load the yaml file into a dict
-                response = json.load(f)                               
+                print("\n")
+                response = json.load(f)
+                print("\n")
+                               
             except Exception as e:
                 print(f"process_and_save_agent_response. Error loading json file: {str(e)}")                
                 return None        
