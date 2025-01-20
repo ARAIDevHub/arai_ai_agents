@@ -241,6 +241,85 @@ prompt_6 (Create Social Media Image Post): |
   }
   ```
 
+prompt_6.1 (Create Social Media Image Post): |
+  You are tasked with developing visual descriptions for {{ number_of_images }} images that will be used to create artwork for a character social media posts.
+  These image descriptions will be based on an agents current episode and posts it contains. 
+  These will be posted to twitter as a series of posts.
+  The style will be instagram style were it does not include the character in the photos but what the character is doing and seeing.
+    
+  Keep it short and to the point.
+  It should be Image of OBJECT ACTION ENVIRONMENT
+  Example:
+    - Image of pina calada drink at a beach resort
+    - Image traditional japanese breakfast food
+    - Image out an apartment window on a summers day.
+
+  Here is the agent's JSON for context:
+  {{ agent_json }}
+
+  Here is the episode JSON with details on the episode and posts:
+  {{ episode_json }}
+
+  Mark were abouts in the order of the posts the image post should be tweeted.
+  Example, post this image after post 1, post this image after post 4, etc.
+  Determine which posts best benefit from an image directly after them.
+  Mark sure to spread out the image post among the text posts.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "image_post_descriptions": [
+      {
+        "image_description": "",
+        "post_after": 
+      }
+    ]
+  }
+  ```
+
+prompt_6.2 (Create Social Media Image Post): |
+  You are tasked with developing visual descriptions for {{ number_of_images }} images that will be used to create artwork for a character social media posts.
+  These image descriptions will be based on an agents current episode and posts it contains. 
+  These will be posted to twitter as a series of posts.
+  The style will be instagram style were it does not include any characters in the photos but what the character is doing and seeing.
+    
+  Keep it short and to the point, and avoid any descriptiosn that could be used to generate a character image.
+  It should be Image of OBJECT ACTION ENVIRONMENT
+  Example:
+    - Image of pina calada drink at a beach resort
+    - Image traditional japanese breakfast food
+    - Image out an apartment window on a summers day.
+
+  Here is the agent's JSON for context:
+  {{ agent_json }}
+
+  Here is the episode JSON with details on the episode and posts:
+  {{ episode_json }}
+
+  Mark were abouts in the order of the posts the image post should be tweeted.
+  Example, post this image after post 1, post this image after post 4, etc.
+  Determine which posts best benefit from an image directly after them.
+  Mark sure to spread out the image post among the text posts but keep context, so an image should have at least a number of posts before it. This is dependent on the number of posts in the current episode.
+  If an image appears after a post, it should be relevant to the post.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "image_post_descriptions": [
+      {
+        "image_description": "",
+        "post_after": 
+      }
+    ]
+  }
+  ```
+
 prompt 7 (Create Social Media Image Post): |
     You are an expert in character design, and visual storytelling. Your task is to generate an illustration. 
 
@@ -314,3 +393,4 @@ prompt 9 (Create Character Image): |
   "{{ genderBodyType }} character, {{ age }} with {{ ethnicitySkinTone }} skin, 
   a {{ faceShape }} face, {{ hair.length }} {{ hair.style }} hair in {{ hair.color }}, 
   wearing {{ outfitStyle }} clothing, accessorized with {{ accessories }}, set in a {{ background }}."
+
