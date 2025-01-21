@@ -82,6 +82,7 @@ export interface Agent {
     profile_image_options: ProfileImageOption[];
     master_file_path?: string;
   };
+  isExample?: boolean;
 }
 
 export function createBlankAgent(): Agent {

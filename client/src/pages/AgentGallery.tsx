@@ -10,14 +10,14 @@ import { generateRandomAgent } from '../utils/generateRandomAgent';
 import imageTraits from '../assets/generate-random-agents/imageTraits.json';
 import characterConcepts from '../assets/generate-random-agents/characterConcepts.json';
 import famousFigures from '../assets/generate-random-agents/famousFigures.json';
+import LunaQuantumchef from '../assets/example-agents/Luna_Quantumchef_master.json';
+import CosmicCurator from '../assets/example-agents/Cosmic_Curator_master.json';
+import GavelGlitch from '../assets/example-agents/Gavel_Glitch_master.json';
 
 // Helper function to get random trait
 const getRandomTrait = (traitArray: string[]): string => {
   return traitArray[Math.floor(Math.random() * traitArray.length)];
 };
-
-const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
 // Add a utility function to handle image loading
 const loadImageWithFallback = async (url: string): Promise<string> => {
@@ -75,6 +75,24 @@ const getRandomFamousPerson = (): string => {
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
   const figures = famousFigures[randomCategory as keyof typeof famousFigures];
   return figures[Math.floor(Math.random() * figures.length)];
+};
+
+// Add this function to convert master JSON to Agent type
+const convertMasterJsonToAgent = (masterJson: any): Agent => {
+  return {
+    id: Math.floor(Math.random() * 1000000).toString(),
+    name: masterJson.agent.agent_details.name || '',
+    avatar: masterJson.agent.profile_image?.details?.url || '',
+    shortDescription: masterJson.agent.agent_details.backstory || '',
+    tags: masterJson.agent.agent_details.hashtags || [],
+    personality: masterJson.agent.agent_details.personality || [],
+    communicationStyle: masterJson.agent.agent_details.communication_style || [],
+    emojis: masterJson.agent.agent_details.emojis || [],
+    universe: masterJson.agent.agent_details.universe || '',
+    backstory: masterJson.agent.agent_details.backstory || '',
+    topic_expertise: masterJson.agent.agent_details.topic_expertise || [],
+    isExample: true // Add this flag to identify example agents
+  };
 };
 
 const AgentGallery: React.FC = () => {
@@ -186,93 +204,6 @@ const AgentGallery: React.FC = () => {
     console.log("[handleAddAgent] - New agent response:", newAgentResponse);
   };
 
-  const generateNewAgent = async () => {
-    try {
-      // Show initial loading state for 3 agents
-      const loadingAgents = Array(3).fill(null).map(() => ({
-        id: Math.floor(Math.random() * 1000000).toString(),
-        name: 'Generating Agent...',
-        avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
-        shortDescription: 'Loading...',
-        tags: [],
-        personality: [],
-        communicationStyle: [],
-        emojis: [],
-        isLoading: true
-      } as Agent));
-
-      setRandomAgents(loadingAgents);
-
-      // Generate 3 agents concurrently
-      const agentPromises = loadingAgents.map(async (loadingAgent) => {
-        // Get the agent data first
-        const newAgent = await generateRandomAgentData();
-        
-        // Update loading state to show we're generating the image
-        setRandomAgents(prevAgents => 
-          prevAgents.map(agent => 
-            agent.id === loadingAgent.id 
-              ? { ...newAgent, id: loadingAgent.id, avatar: 'https://via.placeholder.com/400x400?text=Generating+Image', isLoading: true }
-              : agent
-          )
-        );
-
-        // Generate images for each agent
-        const [mainImage] = await Promise.all([
-          // Main character image
-          (async () => {
-            const prompt = `Generate a character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'} and their communication style is ${newAgent.communicationStyle?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Make sure to create an image with only one character.`;
-            console.log("[generateNewAgent] - Prompt:", prompt);
-            // Combine our newAgent concept with the prompt
-            const combinedPrompt = `${newAgent.concept} ${prompt}`;
-            console.log("[generateNewAgent] - Combined prompt for leonardo:", combinedPrompt);
-            
-            return generateSingleImage(
-              combinedPrompt,
-              modelId,
-              styleUUID
-            );
-          })()
-        ]);
-
-        if (!mainImage?.generations_by_pk?.generated_images?.[0]) {
-          throw new Error('No image data received');
-        }
-        
-        const imageObject = mainImage.generations_by_pk.generated_images[0];
-        const loadedImageUrl = await loadImageWithFallback(imageObject.url);
-        
-        return { 
-          ...newAgent,
-          id: loadingAgent.id,
-          avatar: loadedImageUrl, 
-          leonardoImage: imageObject,
-          leonardoResponse: mainImage,
-          isLoading: false 
-        };
-      });
-
-      // Wait for all agents to be generated
-      const completedAgents = await Promise.all(agentPromises);
-      setRandomAgents(completedAgents);
-
-    } catch (error) {
-      console.error('[AgentGallery] Error generating agents:', error);
-      const errorAgents = Array(3).fill(null).map(() => ({
-        id: Math.floor(Math.random() * 1000000).toString(),
-        name: 'API Error',
-        avatar: 'https://via.placeholder.com/400x400?text=Generation+Failed',
-        shortDescription: 'Failed to generate agent',
-        tags: [],
-        personality: [],
-        communicationStyle: [],
-        emojis: [],
-        isLoading: false
-      } as Agent));
-      setRandomAgents(errorAgents);
-    }
-  };
-
   // Update the handleSingleAgentRegeneration function
   const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
     const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
@@ -285,7 +216,7 @@ const AgentGallery: React.FC = () => {
           agent.id === agentId
             ? { 
                 ...agent, 
-                name: 'Loading Agent...', // Add loading name
+                name: 'Generating Agent...', // Add loading name
                 isLoading: true, 
                 avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
                 personality: [],
@@ -366,7 +297,13 @@ const AgentGallery: React.FC = () => {
   useEffect(() => {
     if (initialMount.current) {
       initialMount.current = false;
-      generateNewAgent();
+      // Load example agents instead of generating new ones
+      const exampleAgents = [
+        convertMasterJsonToAgent(LunaQuantumchef),
+        convertMasterJsonToAgent(CosmicCurator),
+        convertMasterJsonToAgent(GavelGlitch)
+      ];
+      setRandomAgents(exampleAgents);
     }
   }, []);
 
@@ -427,6 +364,7 @@ const AgentGallery: React.FC = () => {
                     isLoadedAgent={true}
                     onRegenerate={handleSingleAgentRegeneration}
                     isLoading={agent.isLoading}
+                    isExample={agent.isExample}
                   />
                 ))}
               </div>

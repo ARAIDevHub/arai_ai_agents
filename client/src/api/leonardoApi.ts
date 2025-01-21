@@ -1,3 +1,5 @@
+import { defaultGenerationConfig, consistentGenerationConfig } from './leonardoApiConfig';
+
 // Common headers for all API requests
 const headers = {
   "Content-Type": "application/json",
@@ -16,20 +18,11 @@ export async function generateImageInconsistent(
 ): Promise<any> {
   const url = "https://cloud.leonardo.ai/api/rest/v1/generations";
   const payload = {
+    ...defaultGenerationConfig,
     modelId,
-    presetStyle: "DYNAMIC",
-    scheduler: "LEONARDO",
-    sd_version: "SDXL_LIGHTNING",
-    contrast: 1.3,
     prompt,
     num_images: numImages,
-    width: 1024,
-    height: 1024,
-    alchemy: true,
     styleUUID,
-    enhancePrompt: false,
-    nsfw: true,
-    public: false,
   };
 
   try {
@@ -56,20 +49,11 @@ export async function generateSingleImage(
   console.log("[LeonardoApi] Generating single image...");
   const url = "https://cloud.leonardo.ai/api/rest/v1/generations";
   const payload = {
+    ...defaultGenerationConfig,
     modelId,
-    presetStyle: "DYNAMIC",
-    scheduler: "LEONARDO",
-    sd_version: "SDXL_LIGHTNING",
-    contrast: 1.3,
     prompt,
     num_images: 1,
-    width: 1024,
-    height: 1024,
-    alchemy: true,
     styleUUID,
-    enhancePrompt: false,
-    nsfw: true,
-    public: false,
   };
 
   try {
@@ -132,22 +116,11 @@ export async function generateImageConsistent(
 ): Promise<any> {
   const url = "https://cloud.leonardo.ai/api/rest/v1/generations";
   const payload = {
+    ...consistentGenerationConfig,
     modelId,
-    presetStyle: "DYNAMIC",
-    scheduler: "LEONARDO",
-    sd_version: "SDXL_LIGHTNING",
-    contrast: 1.3,
     prompt,
     num_images: numImages,
-    width: 1024,
-    height: 1024,
-    alchemy: true,
     styleUUID,
-    enhancePrompt: false,
-    nsfw: true,
-    public: false,
-    num_inference_steps: 10,
-    guidance_scale: 7,
   };
 
   try {

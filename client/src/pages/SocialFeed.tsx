@@ -3,13 +3,14 @@ import useCharacters from '../hooks/useCharacters';
 import { MessageSquare, Heart } from 'lucide-react';
 import { Post, Episode, Season } from '../interfaces/PostsInterface';
 import { createSeason, createEpisodePosts } from '../api/agentsAPI';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/button';
 
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const getCharacterPosts = (character: any) => {
     if (!character?.agent?.seasons) return [];
@@ -56,14 +57,15 @@ const SocialFeed: React.FC = () => {
   };
 
   const handleGenerateContent = async () => {
-    if (!selectedCharacter) return;
+    if (!selectedCharacter || isGenerating) return;
     
+    setIsGenerating(true);
     try {
       // Extract the master file path from the character
       const masterFilePath = `configs/${selectedCharacter.agent.agent_details.name}/${selectedCharacter.agent.agent_details.name}_master.json`;
       
       // First create new season
-      const updatedAgentWithSeason = await createSeason(masterFilePath);
+      await createSeason(masterFilePath);
       
       // Then create posts for episodes
       const updatedAgentWithPosts = await createEpisodePosts(masterFilePath);
@@ -77,6 +79,8 @@ const SocialFeed: React.FC = () => {
     } catch (error) {
       console.error('Error generating content:', error);
       // Handle error (show notification, etc.)
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -122,9 +126,10 @@ const SocialFeed: React.FC = () => {
         <div className="flex gap-4 mb-4">
           <Button 
             onClick={handleGenerateContent}
-            className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700"
+            disabled={isGenerating}
+            className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Generate Seasons & Posts
+            {isGenerating ? 'Generating...' : 'Generate Seasons & Posts'}
           </Button>
         </div>
       )}

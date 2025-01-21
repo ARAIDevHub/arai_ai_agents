@@ -3,18 +3,7 @@ import { sendChatMessage, getChatHistory } from '../api/agentsAPI';
 import { Agent } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import { User } from 'lucide-react';
-
-interface Message {
-  role: string;
-  message?: string;
-  response?: string;
-  message_id: number;
-}
-
-interface ChatHistory {
-  agent_name: string;
-  chat_history: Message[];
-}
+import { Message, ChatHistory } from '../interfaces/ChatInterfaces';
 
 const ChatToAgent: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -66,7 +55,7 @@ const ChatToAgent: React.FC = () => {
     const userMessage = {
       role: 'user',
       message: input,
-      message_id: Date.now() // Generate temporary message ID
+      message_id: Date.now()
     };
 
     // Immediately show user message
