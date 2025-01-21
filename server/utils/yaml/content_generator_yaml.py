@@ -126,9 +126,11 @@ class ContentGenerator:
         
         # 1. response = self.fix_yaml_from_response(response, debug)
         raw_save_path = self.save_raw_response(response)
+        print(f"raw_save_path is: {raw_save_path}")
 
         # 2. response = self.save_processed_response(response, debug)
         save_path = self.create_yaml_from_response(response)       
+        print(f"save_path is: {save_path}")
 
         # 3. load the yaml file into a dict
         with open(save_path, "r", encoding="utf-8") as f:
@@ -390,6 +392,7 @@ class ContentGenerator:
                 # Others will get unicodes instead of the emojis
                 yaml_string = yaml.dump(yaml_data, allow_unicode=True, default_flow_style=False)
                 f.write(yaml_string)
+                print(f"save_path is: {save_path}")
                 return save_path
             except Exception as e:
                 print(f"Error saving response to file: {str(e)}")

@@ -393,4 +393,3 @@ prompt 9 (Create Character Image): |
   "{{ genderBodyType }} character, {{ age }} with {{ ethnicitySkinTone }} skin, 
   a {{ faceShape }} face, {{ hair.length }} {{ hair.style }} hair in {{ hair.color }}, 
   wearing {{ outfitStyle }} clothing, accessorized with {{ accessories }}, set in a {{ background }}."
-
