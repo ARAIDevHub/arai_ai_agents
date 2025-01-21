@@ -25,7 +25,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
-from utils.content_generator_json import ContentGenerator
+from utils.content_generator import ContentGenerator
 from utils.template_types import TemplateType
 
 dotenv.load_dotenv()
@@ -44,8 +44,8 @@ def generated_image_inconsistent(prompt, model_id, style_uuid, num_images):
       "contrast": 1.3,
       "prompt": prompt,
       "num_images": num_images,
-      "width": 1024,
-      "height": 1024,
+      "width": 512,
+      "height": 512,
       "alchemy": True,
       "styleUUID": style_uuid,
       "enhancePrompt": False,

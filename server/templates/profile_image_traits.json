@@ -1,0 +1,121 @@
+{
+    "characterTraits": [
+      {
+        "category": "Character Profile",
+        "traits": [
+          {
+            "traitName": "genderBodyType",
+            "options": ["Male", "Female", "Androgynous", "Child-like", "Non-binary"]
+          },
+          {
+            "traitName": "age",
+            "options": ["Teen", "Young Adult", "Adult", "Middle-aged", "Elderly"]
+          },
+          {
+            "traitName": "ethnicitySkinTone",
+            "options": ["Light", "Medium", "Dark", "Olive", "Fantasy (e.g. green, blue)"]
+          },
+          {
+            "traitName": "heightBuild",
+            "options": ["Short", "Tall", "Slim", "Athletic", "Muscular", "Heavy-set"]
+          }
+        ]
+      },
+      {
+        "category": "Face & Head Details",
+        "traits": [
+          {
+            "traitName": "faceShape",
+            "options": ["Round", "Oval", "Square", "Heart-shaped", "Angular"]
+          },
+          {
+            "traitName": "eyes.color",
+            "options": ["Brown", "Blue", "Green", "Amber", "Gray", "Fantasy (e.g. purple, red)"]
+          },
+          {
+            "traitName": "eyes.shape",
+            "options": ["Large and round", "Narrow", "Slanted", "Almond-shaped"]
+          },
+          {
+            "traitName": "eyes.eyebrowStyle",
+            "options": ["Arched", "Bushy", "Thin", "Straight"]
+          },
+          {
+            "traitName": "nose",
+            "options": ["Small and pointed", "Broad", "Straight", "Hawk-like", "Button"]
+          },
+          {
+            "traitName": "mouthLips",
+            "options": ["Thin lips", "Full lips", "Wide mouth", "Subtle smile", "Neutral"]
+          },
+          {
+            "traitName": "facialHair",
+            "options": ["Clean-shaven", "Stubble", "Goatee", "Full beard", "Moustache"]
+          },
+          {
+            "traitName": "hair.length",
+            "options": ["Short", "Medium", "Long", "Bald"]
+          },
+          {
+            "traitName": "hair.style",
+            "options": ["Straight", "Wavy", "Curly", "Braided", "Dreads", "Ponytail", "Mohawk"]
+          },
+          {
+            "traitName": "hair.color",
+            "options": ["Black", "Brown", "Blonde", "Red", "Gray", "Fantasy (e.g. neon pink, silver)"]
+          }
+        ]
+      },
+      {
+        "category": "Body & Clothing",
+        "traits": [
+          {
+            "traitName": "bodyShape",
+            "options": ["Proportional", "Long-legged", "Broad-shouldered", "Pear-shaped", "Stocky"]
+          },
+          {
+            "traitName": "outfitStyle",
+            "options": ["Medieval fantasy", "Futuristic", "Pirate", "Steampunk", "Military", "Casual modern", "High-tech soldier"]
+          },
+          {
+            "traitName": "specificGarments",
+            "options": ["Armor", "Robe", "Jacket", "Dress", "Tunic", "Bodysuit"]
+          },
+          {
+            "traitName": "colorPalette",
+            "options": ["Neutral browns", "Bright primary", "Dark & edgy", "Pastel", "Neon/cyberpunk"]
+          },
+          {
+            "traitName": "accessories",
+            "options": ["Earrings", "Necklace", "Headband", "Goggles", "Gloves", "Hat", "Belts or pouches"]
+          },
+          {
+            "traitName": "armorOrWeapons",
+            "options": ["Leather armor", "Plate mail", "Energy shield", "Katana", "Magic staff"]
+          }
+        ]
+      },
+      {
+        "category": "Style & Aesthetic",
+        "traits": [
+          {
+            "traitName": "artStyle",
+            "options": ["Semi-realistic", "Cartoon", "Anime", "Stylized", "Pixel Art", "Cel-shaded"]
+          },
+          {
+            "traitName": "moodExpression",
+            "options": ["Confident", "Friendly smile", "Serious and determined", "Mischievous grin", "Angry snarl"]
+          },
+          {
+            "traitName": "lightingOrColorMood",
+            "options": ["Bright and vibrant", "Dark and gothic", "Pastel", "Neon/cyberpunk", "Cinematic lighting"]
+          },
+          {
+            "traitName": "background",
+            "options": ["Transparent", "Simple gradient", "Forest", "Sci-fi cityscape", "Ancient ruins", "Cyberpunk skyline"]
+          }
+        ]
+      }
+    ]
+  }
+  

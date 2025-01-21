@@ -25,7 +25,7 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # custom ARAI imports
-from utils.content_generator_json import ContentGenerator
+from utils.content_generator import ContentGenerator
 from utils.template_types import TemplateType
 
 def create_episode_posts(ai_model, master_file_path, number_of_posts):
