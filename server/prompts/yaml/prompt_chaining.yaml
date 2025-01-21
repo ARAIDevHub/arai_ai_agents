@@ -2,75 +2,50 @@ prompt_1 (Character Sheet Creation): |
   You are an expert in creative writing, character design, world-building, and marketing. You are tasked with developing a complete character profile for a new agent who will be featured in stories for a Twitter bot. These stories will be broken down into seasons, episodes, and individual tweets (scenes/posts).
 
   Agent Development Task
-  Generate a comprehensive YAML file that defines this new agent, including their name, personality, communication style, topic of expertise, backstory, universe, relevant hashtags, and emojis.
+  Generate a comprehensive JSON file that defines this new agent, including their name, personality, communication style, topic of expertise, backstory, universe, relevant hashtags, and emojis.
   Use the following concept if its not empty, otherwise create one.
-  - concept: {{ concept }}
+  - concept: {{ concept }} 
 
   Specific Instructions:
 
     1.  Invent a Creative Name:
         - If no specific name is provided, create a unique and fitting name for the agent based on the concept of the agent. The name should be suitable for a Twitter handle.
+        - Don't have the word agent in the agents name or the @ symbol in the agents name.
+        - The name must be made up of two words. A first and last name, or something fun and creative.
         - Agent Name: {{ agent_name }}
-        - Do not use any of the following names: {{ agent_name_blacklist }}
+        - Do not use any names that have already been previously used from {{ agent_names_blacklist }}
 
     2.  Define the Topic:
-        - If no specific topic is provided, default to "Crypto" or invent a creative topic that lends itself to episodic storytelling.
+        - If no specific topic is provided invent a creative topic that lends itself to episodic storytelling.
         - Topic: {{ topic }}
 
     3.  Develop Personality and Style:
         - Create a detailed personality for the agent.
         - Define a clear communication style for the agent.
-        - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
-        - Example:
-          ```yaml
-          personality: |
-            This is a multi-line
-            description of the agent's
-            personality.
-          ```
+        - Create a list of keywords.
         - Personality: {{ personality }}
         - Communication Style: {{ style }}
 
     4.  Craft a Backstory:
         - Invent a compelling and original backstory for the agent that explains their motivations, skills, and current situation. This backstory should be suitable for unfolding gradually over multiple story arcs.
-        - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
-        - Example:
-          ```yaml
-          backstory: |
-            This is a longer, multi-line
-            backstory for the agent.
-            It can span several lines.
-          ```
         - Backstory: {{ backstory }}
 
     5.  Describe the Universe:
         - Detail the world(s) or setting where the agent operates. Consider the current state of technology, the social and political landscape, major organizations or factions, and any unique elements relevant to the chosen topic.
-        - Use a narrative or bullet-point format within the YAML.
-        - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
-        - Example:
-          ```yaml
-          universe: |
-            This is a description
-            of the agent's universe.
-            It can have multiple lines
-            and paragraphs.
-          ```
         - Universe: {{ universe }}
 
     6.  Generate Marketing Elements:
         - Create a list of relevant hashtags that will be used for social media promotion. Include hashtags related to the agent's name, topic, and genre.
-        - Important: Output the hashtags as a YAML array using block style. This means each hashtag should be on a new line, preceded by a hyphen and a space and placed inside double quotes.
         - Example:
-          ```yaml
+          ```json
           hashtags:
             - "#example1"
             - "#example2"
             - "#longerExampleHashtag"
           ```
         - Create a list of relevant emojis that can be used in tweets to add visual interest and convey meaning.
-        - Important: Output the emojis as a YAML array using block style. Each emoji should be on a new line, preceded by a hyphen and a space and placed inside double quotes.
         - Example:
-          ```yaml
+          ```json
           emojis:
             - "🐳"
             - "🌊"
@@ -80,20 +55,20 @@ prompt_1 (Character Sheet Creation): |
         - Emojis: {{ emojis }}
 
   Output Requirements:
-  - Only output valid YAML. Do not include any text outside of the YAML structure.
-  - Output a single, complete YAML file that includes all the fields mentioned above (name, personality, communication_style, topic, backstory, universe, hashtags, emojis).
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+  - Output a single, complete JSON file that includes all the fields mentioned above (name, personality, communication_style, topic, backstory, universe, hashtags, emojis).
   - Adhere to the specified answer lengths for each field (short for personality and communication style, long for backstory and universe).
 
-  Output exactly as the yaml file:
-  ```yaml
-  {{ agent_yaml }}
+  Output exactly as the json file:
+  ```json
+  {{ agent_json }}
   ```
 
 prompt_2 (Season Creation): |
   You are an expert in creative writing, season/episode design, and structured storytelling.
-  Your goal is to create a new season for {{ agent_name }}, who was previously defined in the following agent YAML:
+  Your goal is to create a new season for {{ agent_name }}, who was previously defined in the following agent JSON:
 
-  {{ agent_yaml }}
+  {{ agent_json }}
 
   Previous season:
   - This provides the previous season details, including description and highlights for the season. Ignore if none is provided as this means we are creating season 1, so there is no previous season.
@@ -102,81 +77,319 @@ prompt_2 (Season Creation): |
   ---
   ## Task: Season Creation
 
-  Generate a single valid YAML file that defines a new season for this agent. The season should include:
+  Generate a single valid JSON file that defines a new season for this agent. The season should include:
 
-  - Season Name: If none is provided, create a unique and fitting name based on {{ agent_name }} and the agent’s YAML.
+  - Season Name: If none is provided, create a unique and fitting name based on {{ agent_name }} and the agent’s JSON.
       - Use something that can also work as a Twitter hashtag.
       - Season Name: {{ season_name }}
 
   - Season Number: If none is provided, default to 1.
       - Season Number: {{ season_number }}
 
-  - Season Description: If none is provided, create a unique description based on {{ agent_name }}’s YAML.
-      - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
+  - Season Description: If none is provided, create a unique description based on {{ agent_name }}’s JSON.
       - Season Description: {{ season_description }}
 
   - Season Highlights: If none is provided, invent highlights relevant to the agent’s concept or storyline.
-      - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
       - Season Highlights: {{ season_highlights }}
 
   - Season Summary: If none is provided, create a concise summary that captures the essence of this season.
-      - Important: Use the YAML block scalar style with the `|` character to preserve newlines and formatting.
       - Season Summary: {{ season_summary }}
 
-  - Episodes: We want **28 episodes** total (one for each day over 4 weeks).
-      - If none are provided, create 28 unique episodes.
+  - Episodes: We want **{{ number_of_episodes }} episodes** total. Starting with episode 1.
+      - If none are provided, create {{ number_of_episodes }} unique episodes.
       - Each episode entry should have:
           - `episode_id`
           - `episode_name`
           - `episode_number`
-          - `episode_description`  (Use `|` for multi-line)
-          - `episode_highlights` (Use `|` for multi-line)
+          - `episode_description`  
+          - `episode_highlights` 
           - `episode_posted` (default `False`)
-          - `episode_summary` (Use `|` for multi-line)
+          - `episode_summary` 
 
   Output Requirements:
-  - Only output valid YAML. Do not include any text outside of the YAML structure.
-  - Output a single, complete YAML file that includes all the fields mentioned above (season_name, season_number, season_description, season_highlights, season_summary, episodes).
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+  - Output a single, complete JSON file in a seasons array that includes all the fields mentioned above (season_name, season_number, season_description, season_highlights, season_summary, episodes).
 
-  Output exactly as the yaml file:
-  ```yaml
-  {{ season_yaml }}
+  Output exactly as the json file:
+  ```json
+  {{ season_json }}
+  ```
 
 prompt_3 (Episode Posts Creation): |
   You are an expert in creative writing, social media engagement, and character voice development. Your task is to generate {{ number_of_posts }} short "updates" (tweets/posts) for the agent {{ agent_name }} in the style of Twitter posts. These posts are for season {{ season_number }}, episode {{ episode_number }}.
 
   Agent and Context:
 
-  *   Agent YAML: {{ agent_yaml }} (This provides the agent's personality, backstory, etc.)
-  *   Season YAML: {{ season_yaml }} (This provides the season details, including description and highlights for the season)
-  *   Episode YAML: {{ episode_yaml }} (This provides the episode details, including description and highlights for the episode)
-  *   Previous Episode YAML: {{ previous_episode }} (This provides the previous episode details, including description and highlights for the episode. Ignore if none is provided as this means we are creating episode 1, so there is no previous episode)
+  *   Agent JSON: {{ agent_json }} (This provides the agent's personality, backstory, etc.)
+  *   Season JSON: {{ season_json }} (This provides the season details, including description and highlights for the season)
+  *   Episode JSON: {{ episode_json }} (This provides the episode details, including description and highlights for the episode)
+  *   Previous Episode JSON: {{ previous_episode }} (This provides the previous episode details, including description and highlights for the episode. Ignore if none is provided as this means we are creating episode 1, so there is no previous episode)
   **Post Requirements:**
 
   Each post should:
 
-  *   Reflect Agent's Personality: Be consistent with {{ agent_name }}'s personality, tone, and communication style as defined in the agent YAML.
-  *   Relate to Setting/Technology:  Reference elements of the setting, technology, or other relevant details from the agent's universe as defined in the agent YAML.
-  *   Incorporate Episode Context: Align with the season overview and specific episode overview provided in the season YAML.
+  *   Reflect Agent's Personality: Be consistent with {{ agent_name }}'s personality, tone, and communication style as defined in the agent JSON.
+  *   Relate to Setting/Technology:  Reference elements of the setting, technology, or other relevant details from the agent's universe as defined in the agent JSON.
+  *   Incorporate Episode Context: Align with the season overview and specific episode overview provided in the season JSON.
   *   Highlight Observations: Center around misunderstandings, comedic observations, or serious reflections relevant to the episode's theme.
-  *   Consider Emojis: Optionally use emojis from this set: {{ agent_yaml }} or use any emojis that are relevant to the episode's theme.
-  *   Consider Hashtags: Optionally use hashtags from this set: {{ agent_yaml }} or use any hashtags that are relevant to the episode's theme.
+  *   Consider Emojis: Optionally use emojis from this set: {{ agent_json }} or use any emojis that are relevant to the episode's theme.
+  *   Make sure there are no hashtags in the post. We want only text and emojis.
   *   Length Constraint: Each post must be under {{ post_length }} characters.
-  *   Sign-Off: End each post with the sign-off: "#{{ agent_name }}"
 
-  **YAML Output Format:**
+  **JSON Output Format:**
 
-  Output a valid YAML file containing a list of posts under the `posts` key. Each post should be a separate entry in the list and include the following:
+  Output a valid JSON file containing a list of posts under the `posts` key. Each post should be a separate entry in the list and include the following:
 
   *   `post_id`: A unique identifier for the post (e.g., s1\_e1\_post1, s1\_e1\_post2).
   *   `post_number`: The ordinal number of the post within the episode (e.g., 1, 2, 3).
-  *   `post_content`: The actual text of the post, formatted using the YAML block scalar style (`|`) to preserve newlines, do not use '-' for the first line.
-  *   `post_highlights`: A brief, one-sentence description of the key takeaway or event in the post (using `|` for multi-line), do not use '-' for the first line.
+  *   `post_content`: The actual text of the post.
+  *   `post_highlights`: A brief, one-sentence description of the key takeaway or event in the post.
   *   `post_posted`:  Set to `False` by default.
 
   **Output Requirements:**
-  - **Only output valid YAML.** Do not include any text outside of the YAML structure.
-  - **Output the yaml file:**  
-  ```yaml
-  {{ episode_yaml }}
+  - **Only output valid JSON.** Do not include any text outside of the JSON structure.
+  - **Output the json file:**  
+  ```json
+  {{ episode_json }}
   ``` 
+prompt_4 (Agent Profile Image): |
+  You are an expert in creative writing, character design, world-building, and marketing. 
+  You are tasked with developing a visual description for a character profile for social media.
+  This profile image is for a new agent named {{ agent_name }} who will be featured in stories for a Twitter bot. 
+  
+  Based on the agent's JSON, create a visual description for the agent's profile image.
+  {{ agent_json }}
+
+  Make {{ number_of_images }} image description variations.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "profile_image_descriptions": [
+    {
+      "id": 1,
+      "description": ""
+    }]
+  }
+  ```
+
+prompt_5 (Chat with the agent): |
+  Your task is to take on the role of {{ agent_name }} and answer any user's question as best and accurately as possible.
+  You should respond in the style of {{ agent_name }}.
+  You should use the chat history to understand the context of the conversation.
+  Do not put in hashtags in your response, unless its relevant to the conversation.
+  Use emojis if relevant to the conversation.
+
+  Here is the agent character sheet:
+  {{ agent_json }}
+
+  Here is the chat history:
+  {{ chat_history }}
+
+  Here is the users question as a prompt:
+  {{ user_prompt }}
+
+  **Output Requirements:**
+  - **Only output valid JSON.** Do not include any text outside of the JSON structure.
+  - **Output the json file:**  
+  ```json
+  {
+    "response": ""
+  }
+  ``` 
+  
+prompt_6 (Create Social Media Image Post): |
+  You are an expert in creative writing, character design, world-building, and marketing. 
+  You are tasked with developing a series of visual descriptions that will be used to create artwork for a character social media posts.
+  These image descriptions will be used to create images based on the agents current episode. 
+  These will be posted to twitter as a series of posts.
+  The style will be instagram style were it does not include the character in the photos but what the character is doing and seeing.
+    
+  Here is the agent's JSON:
+  {{ agent_json }}
+
+  Here is the episode JSON with details on the episode and posts:
+  {{ episode_json }}
+
+  Make {{ number_of_images }} of image descriptions that support the narrative of the episode posts being sent to twitter.
+  Keep the descriptions short and to the point.
+  Mark were abouts in the order of the posts the image post should be tweeted.
+  Example, post this image after post 1, post this image after post 4, etc.
+  Determine which posts best benefit from an image directly after them.
+  Mark sure to spread out the image post among the text posts.
+
+  Example:
+  - Image of pina calada drink at a beach resort
+  - Image traditional japanese breakfast food
+  - Image out an apartment window on a summers day.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "image_post_descriptions": [
+      {
+        "image_description": "",
+        "post_after": 
+      }
+    ]
+  }
+  ```
+
+prompt_6.1 (Create Social Media Image Post): |
+  You are tasked with developing visual descriptions for {{ number_of_images }} images that will be used to create artwork for a character social media posts.
+  These image descriptions will be based on an agents current episode and posts it contains. 
+  These will be posted to twitter as a series of posts.
+  The style will be instagram style were it does not include the character in the photos but what the character is doing and seeing.
+    
+  Keep it short and to the point.
+  It should be Image of OBJECT ACTION ENVIRONMENT
+  Example:
+    - Image of pina calada drink at a beach resort
+    - Image traditional japanese breakfast food
+    - Image out an apartment window on a summers day.
+
+  Here is the agent's JSON for context:
+  {{ agent_json }}
+
+  Here is the episode JSON with details on the episode and posts:
+  {{ episode_json }}
+
+  Mark were abouts in the order of the posts the image post should be tweeted.
+  Example, post this image after post 1, post this image after post 4, etc.
+  Determine which posts best benefit from an image directly after them.
+  Mark sure to spread out the image post among the text posts.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "image_post_descriptions": [
+      {
+        "image_description": "",
+        "post_after": 
+      }
+    ]
+  }
+  ```
+
+prompt_6.2 (Create Social Media Image Post): |
+  You are tasked with developing visual descriptions for {{ number_of_images }} images that will be used to create artwork for a character social media posts.
+  These image descriptions will be based on an agents current episode and posts it contains. 
+  These will be posted to twitter as a series of posts.
+  The style will be instagram style were it does not include any characters in the photos but what the character is doing and seeing.
+    
+  Keep it short and to the point, and avoid any descriptiosn that could be used to generate a character image.
+  It should be Image of OBJECT ACTION ENVIRONMENT
+  Example:
+    - Image of pina calada drink at a beach resort
+    - Image traditional japanese breakfast food
+    - Image out an apartment window on a summers day.
+
+  Here is the agent's JSON for context:
+  {{ agent_json }}
+
+  Here is the episode JSON with details on the episode and posts:
+  {{ episode_json }}
+
+  Mark were abouts in the order of the posts the image post should be tweeted.
+  Example, post this image after post 1, post this image after post 4, etc.
+  Determine which posts best benefit from an image directly after them.
+  Mark sure to spread out the image post among the text posts but keep context, so an image should have at least a number of posts before it. This is dependent on the number of posts in the current episode.
+  If an image appears after a post, it should be relevant to the post.
+
+  Output Requirements:
+  - Only output valid JSON. Do not include any text outside of the JSON structure.
+
+  Output exactly as the json file:
+  ```json
+  {
+    "image_post_descriptions": [
+      {
+        "image_description": "",
+        "post_after": 
+      }
+    ]
+  }
+  ```
+
+prompt 7 (Create Social Media Image Post): |
+    You are an expert in character design, and visual storytelling. Your task is to generate an illustration. 
+
+
+
+prompt 8 (Profile Image Editor): |
+  You are an expert in character design, and visual storytelling. Your task is to generate a character illustration. 
+  The illustration will include all relevant physical features, clothing, style, and the character's overall aesthetic. 
+  Use the placeholders provided below to dynamically incorporate details into the description.
+
+  Character Illustration Prompt
+  Generate a descriptive prompt for an artist or an AI to create an image of the character. The prompt should be vivid, imaginative, and comprehensive, capturing the essence of the character. Use the following placeholders to define the details of the character:
+
+  About the character:
+  - agent name {{ agent_name }}
+  - agent personality {{ personality }}  
+  - agent backstory {{ backstory }}
+  
+  Specific Instructions:
+    1. Character Profile:
+       - Gender/Body Type: {{ genderBodyType }}
+       - Age: {{ age }}
+       - Ethnicity/Skin Tone: {{ ethnicitySkinTone }}
+       - Height/Build: {{ heightBuild }}
+
+    2. Face & Head Details:
+       - Face Shape: {{ faceShape }}
+       - Eye Color: {{ eyes.color }}
+       - Eye Shape: {{ eyes.shape }}
+       - Eyebrow Style: {{ eyes.eyebrowStyle }}
+       - Nose Shape: {{ nose }}
+       - Mouth/Lip Style: {{ mouthLips }}
+       - Facial Hair (if applicable): {{ facialHair }}
+       - Hair Length: {{ hair.length }}
+       - Hair Style: {{ hair.style }}
+       - Hair Color: {{ hair.color }}
+
+    3. Body & Clothing:
+       - Body Shape: {{ bodyShape }}
+       - Outfit Style: {{ outfitStyle }}
+       - Specific Garments: {{ specificGarments }}
+       - Color Palette: {{ colorPalette }}
+       - Accessories: {{ accessories }}
+       - Armor or Weapons: {{ armorOrWeapons }}
+
+    4. Style & Aesthetic:
+       - Art Style: {{ artStyle }}
+       - Mood/Expression: {{ moodExpression }}
+       - Lighting or Color Mood: {{ lightingOrColorMood }}
+       - Background Setting: {{ background }}
+
+  Output Requirements:
+  - Generate a complete and vivid description of the character using the placeholders provided.
+  - The output should be a natural language paragraph formatted for readability.
+  - Ensure the description flows smoothly and vividly combines all selected traits into a cohesive vision.
+  - Example:
+    "{{ genderBodyType }} character, {{ age }} with {{ ethnicitySkinTone }} skin, a {{ faceShape }} face, {{ hair.length }} {{ hair.style }} hair in {{ hair.color }}, wearing {{ outfitStyle }} clothing, accessorized with {{ accessories }}, set in a {{ background }}."
+
+  Final Output:
+  - Description: {{ character_description }}
+            
+
+prompt 9 (Create Character Image): |
+  Generate a character portrait of {{ agent_name }} with {{ hair_style }} {{ hair_color }} hair, 
+  {{ eye_color }} eyes, wearing {{ clothing_style }} style clothing. 
+  Their personality can be described as {{ personality }} and their communication style is 
+  {{ communication_style }}. Scene: {{ background }}. 
+  Make sure to create an image with only one character.
+
+
+  "{{ genderBodyType }} character, {{ age }} with {{ ethnicitySkinTone }} skin, 
+  a {{ faceShape }} face, {{ hair.length }} {{ hair.style }} hair in {{ hair.color }}, 
+  wearing {{ outfitStyle }} clothing, accessorized with {{ accessories }}, set in a {{ background }}."
