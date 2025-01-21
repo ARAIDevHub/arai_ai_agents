@@ -200,7 +200,7 @@ if __name__ == "__main__":
                 step_3.create_episode_posts(ai_model, agent_file_path, 6)                
                 print(f"\nCreated new agent: {agent_file_path}")
                 print("Creating the new profile images...")
-                step_4.create_profile_images(ai_model, agent_file_path, 4)
+                step_4.create_image(ai_model, agent_file_path, 4)
 
             except Exception as e:
                 print(f"Error creating agent: {str(e)}")
