@@ -1,3 +1,16 @@
+"""
+API Server Module
+
+This module implements the Flask REST API server that handles agent creation,
+chat interactions, content generation and other core functionality.
+
+Key Features:
+- Agent creation and management 
+- Chat interactions with agents
+- Season and episode content generation
+- Chat history tracking
+"""
+
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -7,26 +20,40 @@ import glob
 from pprint import pprint
 from prompt_chaining.step_1_create_agent import create_agent as generateAgent
 from models.gemini_model import GeminiModel
+from prompt_chaining.step_5_agent_chat import agent_chat
+from prompt_chaining.step_2_create_content import create_seasons_and_episodes
+from prompt_chaining.step_3_create_posts import create_episode_posts
 
-
+# Load environment variables
 load_dotenv()
 
+# Initialize Flask app with 20MB max content size
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB
 
-# Configure CORS for your frontend origin
+# Configure CORS for frontend origin
 CORS(app, resources={r"/api/*": {
     "origins": ["http://localhost:5173"],
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type"]
 }})
 
-# Create a single global instance of GeminiModel
+# Create global AI model instance
 ai_model = GeminiModel()
 
 # Post reques to create a random agent with no prompt
 @app.route('/api/agents/random', methods=['POST'])
 def create_random_agent():
+    """
+    Creates a new random agent with optional concept.
+    
+    Request Body:
+        concept (str, optional): Initial concept for the agent
+        
+    Returns:
+        JSON: Generated agent data
+        int: HTTP status code
+    """
     # Get concept from request body if provided
     data = request.get_json() if request.is_json else {}
     concept = data.get('concept', '')  # Default to empty string if no concept provided
@@ -86,6 +113,12 @@ def create_random_agent():
 
 @app.before_request
 def handle_preflight():
+    """
+    Handles CORS preflight requests by adding required headers.
+    
+    Returns:
+        Response: Flask response with CORS headers
+    """
     if request.method == "OPTIONS":
         response = make_response()
         response.headers.add("Access-Control-Allow-Headers", "*")
@@ -95,10 +128,27 @@ def handle_preflight():
 # Your existing routes...
 @app.route('/api/agents', methods=['GET'])
 def get_agents():
+    """
+    Retrieves list of all agents.
+    
+    Returns:
+        JSON: List of agent data
+    """
     return jsonify(agents)
 
 @app.route('/api/agents', methods=['POST'])
 def create_agent():
+    """
+    Creates a new agent from provided configuration.
+    
+    Request Body:
+        agent_details (dict): Agent configuration including name, personality, etc.
+        concept (str): Initial concept for the agent
+        
+    Returns:
+        JSON: Created agent data
+        int: HTTP status code
+    """
     data = request.get_json()
     print(f"[create_agent] - Received data: {data}")
 
@@ -167,11 +217,15 @@ def create_agent():
 
     return jsonify(new_character_data), 201
 
-
-
-
 @app.route('/api/characters', methods=['GET'])
 def get_characters():
+    """
+    Retrieves all character configurations from the configs directory.
+    
+    Returns:
+        JSON: List of character configurations
+        int: HTTP status code
+    """
     try:
         # Use os.path.join for cross-platform path handling
         config_dir = 'configs'
@@ -200,6 +254,169 @@ def get_characters():
 
     except Exception as e:
         print(f"[get_characters] - Unexpected error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/chat', methods=['POST'])
+def chat_with_agent():
+    """
+    Handles chat interactions with an agent.
+    
+    Request Body:
+        prompt (str): User message to the agent
+        master_file_path (str): Path to agent's master configuration file
+        chat_history (dict): Previous chat history
+        
+    Returns:
+        JSON: Agent response and updated chat history
+        int: HTTP status code
+    """
+    data = request.get_json()
+    prompt = data.get('prompt')
+
+    master_file_path = data.get('master_file_path')
+    print(f"[chat_with_agent] - master_file_path: {master_file_path}")
+    print("\n\n\n")
+    
+    chat_history = data.get('chat_history', {'chat_history': []})
+    
+    
+    if not master_file_path:
+        return jsonify({"error": "Master file path is required"}), 400
+    
+    if not os.path.exists(master_file_path):
+        return jsonify({"error": "Agent master file not found"}), 404
+        
+    try:
+        # Initialize AI model
+        ai_model = GeminiModel()
+        
+        # Call the agent_chat function from step_5
+        agent_response, updated_chat_history = agent_chat(
+            ai_model=ai_model,
+            master_file_path=master_file_path,
+            prompt=prompt,
+            chat_history=chat_history
+        )
+        
+        return jsonify({
+            "response": agent_response,
+            "chat_history": updated_chat_history
+        })
+    except Exception as e:
+        print(f"Error in chat_with_agent: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/chat-history', methods=['GET'])
+def get_chat_history():
+    """
+    Retrieves chat history for a specific agent.
+    
+    Query Parameters:
+        master_file_path (str): Path to agent's master configuration file
+        
+    Returns:
+        JSON: Agent's chat history
+        int: HTTP status code
+    """
+    master_file_path = request.args.get('master_file_path')
+    print(f"[get_chat_history] - master_file_path: {master_file_path}")
+    if not master_file_path:
+        return jsonify({"error": "Master file path is required"}), 400
+    
+    # Extract agent name from master file path
+    agent_name = os.path.basename(master_file_path).replace('_master.json', '')
+    
+    # Create the chat history file path using the same format as in step_5_agent_chat.py
+    chat_file_path = os.path.join(os.path.dirname(master_file_path), f"{agent_name}_chat_log.json")
+    print(f"[get_chat_history] - chat_file_path: {chat_file_path}")
+    print("\n\n\n")
+    # If chat history doesn't exist, return empty history with agent name
+    if not os.path.exists(chat_file_path):
+        return jsonify({
+            "agent_name": agent_name,
+            "chat_history": []
+        })
+    
+    # Load and return the chat history
+    with open(chat_file_path, 'r', encoding='utf-8') as file:
+        chat_history = json.load(file)
+    
+    return jsonify(chat_history)
+
+@app.route('/api/agents/seasons', methods=['POST'])
+def create_season():
+    """
+    Generates a new season of content for an agent.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        number_of_episodes (int): Number of episodes to generate
+        
+    Returns:
+        JSON: Updated agent data with new season
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        number_of_episodes = data.get('number_of_episodes', 3)  # Default to 3 episodes
+
+        if not master_file_path:
+            return jsonify({"error": "Master file path is required"}), 400
+
+        # Create a new season using the global AI model
+        result = create_seasons_and_episodes(
+            ai_model=ai_model,
+            master_file_path=master_file_path,
+            number_of_episodes=number_of_episodes
+        )
+
+        # Load and return the updated agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            updated_agent = json.load(f)
+            
+        return jsonify(updated_agent), 200
+
+    except Exception as e:
+        print(f"Error creating season: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/episodes/posts', methods=['POST'])
+def create_episode_content():
+    """
+    Generates posts for an agent's episodes.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        number_of_posts (int): Number of posts to generate per episode
+        
+    Returns:
+        JSON: Updated agent data with new posts
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        number_of_posts = data.get('number_of_posts', 6)  # Default to 6 posts
+
+        if not master_file_path:
+            return jsonify({"error": "Master file path is required"}), 400
+
+        # Create posts for the episodes using the global AI model
+        result = create_episode_posts(
+            ai_model=ai_model,
+            master_file_path=master_file_path,
+            number_of_posts=number_of_posts
+        )
+
+        # Load and return the updated agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            updated_agent = json.load(f)
+            
+        return jsonify(updated_agent), 200
+
+    except Exception as e:
+        print(f"Error creating episode posts: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

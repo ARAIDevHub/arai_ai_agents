@@ -729,7 +729,7 @@ const AgentCreator: React.FC = () => {
           {loading ? (
             <div className="text-cyan-400">Loading characters...</div>
           ) : error ? (
-            <div className="text-red-400">Error loading characters: {error.message}</div>
+            <div className="text-red-400">No Existing Agents - {error.message}</div>
           ) : (
             <select 
               className="w-full px-3 py-2 rounded-md bg-slate-900/50 border 

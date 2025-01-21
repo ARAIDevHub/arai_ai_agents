@@ -1,18 +1,15 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
-// import CharacterScreen from './pages/CharacterScreen'; // Possibly update to AgentCreator
 import AgentCreator from './pages/AgentCreator';
 // import NodeCreator from './pages/NodeCreator'; // Removed NodeCreator import
-import ChatInterface from './pages/ChatInterface';
+import ChatToAgent from './pages/ChatToAgent';
 import SocialFeed from './pages/SocialFeed';
 // import AgentStudio from './pages/AgentStudio';
 import AgentGallery from './pages/AgentGallery';
-import Testing from './pages/Testing';
 import './App.css';
 
 // Components
 // import Header from './components/Header';
-
 
 function App() {
   const location = useLocation();
@@ -81,15 +78,14 @@ function App() {
           >
             Social Feed
           </Link>
-          
           <Link
-            to="/chat"
+            to="/chat-to-agent"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-              ${isActive('/chat') 
+              ${isActive('/chat-to-agent') 
                 ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
                 : 'text-gray-300 hover:text-cyan-400'}`}
           >
-            Chat
+            Chat to Agent
           </Link>
 
         </div>
@@ -103,9 +99,7 @@ function App() {
           {/* <Route path="/agent-studio" element={<AgentStudio />} /> */}
           <Route path="/agent-gallery" element={<AgentGallery />} />
           <Route path="/social-feed" element={<SocialFeed />} />
-          <Route path="/chat" element={<ChatInterface />} />
-          <Route path="/testing" element={<Testing />} />
-
+          <Route path="/chat-to-agent" element={<ChatToAgent />} />
         </Routes>
       </main>
 
