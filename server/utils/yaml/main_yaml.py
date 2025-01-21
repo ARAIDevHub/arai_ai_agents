@@ -203,7 +203,6 @@ if __name__ == "__main__":
                     print("Creating a new season...")
                     step_2.create_seasons_and_episodes(ai_model, agent_file_path)
                 except Exception as e:
-                    print(f"[main_yaml] - Error creating season: {str(e)}")
 
         elif choice == '4':
             if not current_agent:
