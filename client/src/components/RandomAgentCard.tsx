@@ -3,7 +3,6 @@ import {
   Heart,
   MessageCircle,
   Sparkles,
-  PlusCircle,
   CheckCircle,
   RefreshCcw,
 } from 'lucide-react';
@@ -21,6 +20,7 @@ interface RandomAgentCardProps {
   isLoadedAgent: boolean;
   onRegenerate: (agentId: string) => Promise<void>;
   isLoading?: boolean;
+  isExample?: boolean;
 }
 
 const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
@@ -37,6 +37,26 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const agentEmojis = Array.isArray(agent.emojis) ? agent.emojis : [];
   const agentTags = Array.isArray(agent.tags) ? agent.tags : [];
   const profileImageUrl = agent.avatar || "";
+
+  const addButton = agent.isExample ? (
+    <button
+      className="opacity-50 cursor-not-allowed bg-gray-500 text-white px-4 py-2 rounded"
+      disabled
+      title="Example agents cannot be added"
+    >
+      Example Agent
+    </button>
+  ) : (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onAddAgent(agent);
+      }}
+      className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white px-4 py-2 rounded"
+    >
+      Add Agent
+    </button>
+  );
 
   return (
     <div className="relative">
@@ -162,16 +182,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     Select Agent
                   </button>
                 ) : (
-                  <button
-                    className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddAgent(agent);
-                    }}
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    Add Agent
-                  </button>
+                  addButton
                 )}
               </div>
             </div>

@@ -80,7 +80,9 @@ export interface Agent {
     seasons: any[];
     profile_image: ProfileImage;
     profile_image_options: ProfileImageOption[];
+    master_file_path?: string;
   };
+  isExample?: boolean;
 }
 
 export function createBlankAgent(): Agent {

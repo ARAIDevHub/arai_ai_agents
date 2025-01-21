@@ -117,7 +117,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                   ))}
                 </div>
               </div>
-              {/* Action button */}
+              {/* Action button  - Update once we have a global Store and s*/}
               <div className="absolute bottom-2 left-4 right-4">
                 <button
                   className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
