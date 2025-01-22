@@ -21,7 +21,7 @@ class TwitterClient:
         os.makedirs(self.states_dir, exist_ok=True)
         
         # Define state file path
-        self.state_path = os.path.join(self.states_dir, './states/login_state.json')
+        self.state_path = os.path.join(self.states_dir, 'login_state.json')
         print(f"[TwitterClient] - State path: {self.state_path}")
 
     def login(self):

@@ -1,6 +1,9 @@
 from playwright.sync_api import sync_playwright
+import json
+import os
+from dotenv import load_dotenv
 
-def login_and_save_state(username, password, phone_or_username, storage_path="./states/login_state.json"):
+def login_and_save_state(username, password, phone_or_username, storage_path):
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False, slow_mo=1000)
@@ -44,11 +47,17 @@ def login_and_save_state(username, password, phone_or_username, storage_path="./
 
             # 6) Save the state
             try:
-                # Create directory if it doesn't exist
+                # Ensure the directory exists
                 os.makedirs(os.path.dirname(storage_path), exist_ok=True)
                 
-                context.storage_state(path=storage_path)
-                print(f"[INFO] Storage state saved to {storage_path}")
+                # Get the state as a dictionary
+                state_dict = context.storage_state()
+                
+                # Save it with pretty formatting
+                with open(storage_path, 'w', encoding='utf-8') as f:
+                    json.dump(state_dict, f, indent=2, ensure_ascii=False)
+                
+                print(f"[INFO] Prettified state saved to {storage_path}")
             except Exception as e:
                 print(f"[ERROR] Failed to save state: {e}")
                 raise
@@ -60,7 +69,7 @@ def login_and_save_state(username, password, phone_or_username, storage_path="./
         print(f"[ERROR] Login process failed: {e}")
         raise
 
-def post_tweet_with_saved_state(tweet_text, storage_path="./states/login_state.json"):
+def post_tweet_with_saved_state(tweet_text, storage_path):
     with sync_playwright() as p:
         # Create a new context with the previously saved state
         browser = p.chromium.launch(headless=False)
@@ -90,9 +99,6 @@ def post_tweet_with_saved_state(tweet_text, storage_path="./states/login_state.j
 
         browser.close()
 
-import os
-from dotenv import load_dotenv
-
 load_dotenv()
 
 if __name__ == "__main__":
@@ -105,19 +111,19 @@ if __name__ == "__main__":
     X_POST_TEXT = "Hello"
 
     # check if state.json exist
-    if os.path.exists("./states/login_state.json"):
-        print("[INFO] ./states/login_state.json exists. Using existing state.")
+    if os.path.exists("states/login_state.json"):
+        print("[INFO] states/login_state.json exists. Using existing state.")
     else:
-        print("[INFO] ./states/login_state.json does not exist. Logging in and saving state.")
+        print("[INFO] states/login_state.json does not exist. Logging in and saving state.")
 
         login_and_save_state(
             username=os.getenv("X_USERNAME"),
             password=os.getenv("X_PASSWORD"),
             phone_or_username=os.getenv("X_PHONE_OR_USERNAME"),
-            storage_path="./states/login_state.json"
+            storage_path="states/login_state.json"
         )
 
     post_tweet_with_saved_state(
         tweet_text=X_POST_TEXT,
-        storage_path="./states/login_state.json"
+        storage_path="states/login_state.json"
     )
