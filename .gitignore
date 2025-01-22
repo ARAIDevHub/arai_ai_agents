@@ -43,3 +43,7 @@ configs/
 to_delete/
 
 **state.json
+
+# Twitter playwright states
+packages/twitter_playwright/.states/
+packagesTest/twitter_playwright/.states/
