@@ -31,7 +31,7 @@ import prompt_chaining.step_1_create_agent as step_1
 import prompt_chaining.step_2_create_content as step_2
 import prompt_chaining.step_3_create_posts as step_3
 import prompt_chaining.step_4_create_profile_images as step_4
-# import prompt_chaining.step_5_agent_chat as step_5
+import prompt_chaining.step_5_agent_chat as step_5
 
 def list_available_seasons(agent_name):
     """List all available seasons for an agent
@@ -79,6 +79,30 @@ def load_agent_tracker_config(agent_name):
     config_path = os.path.join("configs", agent_name, f"{agent_name}_master.json")
     with open(config_path, 'r', encoding='utf-8') as f:
         return json.load(f)["agent"]["tracker"]
+
+def handle_chat_with_agent(ai_model, current_agent, agent_file_path):
+    """Handle chatting with an agent
+    
+    Args:
+        ai_model: The AI model to use
+        current_agent (str): The name of the current agent
+        agent_file_path (str): Path to the agent's master file
+    """
+    if not current_agent:
+        print("No agent selected. Please select an agent first.")
+        return
+        
+    print(f"\nStarting chat with {current_agent}...")
+    chat_history = None
+    
+    while True:
+        prompt = input("\nEnter your message (or 'exit' to end chat): ")
+        if prompt.lower() == 'exit':
+            break
+            
+        response, chat_history = step_5.agent_chat(ai_model, agent_file_path, prompt, chat_history)
+        if response:
+            print(f"\nAgent: {response}")
 
 # run the scheduler
 def run_scheduler():
@@ -147,10 +171,13 @@ if __name__ == "__main__":
         print("7. Force post now")
         print("8. Pause/Resume posting")
         
+        print("\n= Chat with Agent =")
+        print("9. Chat with Agent")
+        
         print("\n= Miscellaneous =")
-        print("9. Exit")
+        print("10. Exit")
 
-        choice = input("\nEnter your choice (1-9): ")
+        choice = input("\nEnter your choice (1-10): ")
         
         if choice == '1':
             agents = list_available_agents()
@@ -200,7 +227,7 @@ if __name__ == "__main__":
                 step_3.create_episode_posts(ai_model, agent_file_path, 6)                
                 print(f"\nCreated new agent: {agent_file_path}")
                 print("Creating the new profile images...")
-                step_4.create_profile_images(ai_model, agent_file_path, 4)
+                step_4.create_images(ai_model, agent_file_path, 4)
 
             except Exception as e:
                 print(f"Error creating agent: {str(e)}")
@@ -279,6 +306,9 @@ if __name__ == "__main__":
                     print("Posting has been resumed.")
 
         elif choice == '9':
+            handle_chat_with_agent(ai_model, current_agent, agent_file_path)
+
+        elif choice == '10':
             print("Shutting down...")
             scheduler_running = False  # Stop the scheduler loop
             pause_event.set()  # Ensure the thread doesn't hang if paused
