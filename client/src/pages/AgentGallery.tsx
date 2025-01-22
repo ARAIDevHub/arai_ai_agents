@@ -96,8 +96,10 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
 };
 
 const AgentGallery: React.FC = () => {
+  // Add selected agent state
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const { characters: loadedAgents } = useCharacters();
-  const [filter, setFilter] = useState('all'); // 'all', 'random', or 'yourAgents'
+  const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const initialMount = useRef(true);
  
@@ -131,77 +133,84 @@ const AgentGallery: React.FC = () => {
     }
   };
 
-  const handleAddAgent = (agent: Agent, leonardoResponse: any) => {
-    // Create a new blank agent with proper initialization
-    const newAgent = createBlankAgent();
-    
-    if (!newAgent.agent) {
+  const handleAddAgent = async (agent: Agent, leonardoResponse: any) => {
+    try {
+      // Create a new blank agent with proper initialization
+      const newAgent = createBlankAgent();
+      
+      if (!newAgent.agent) {
         console.error("[handleAddAgent] - New agent object is not properly initialized");
         return;
-    }
+      }
 
-    // Ensure agent.agent_details exists before accessing
-    if (!newAgent.agent.agent_details) {
+      // Ensure agent.agent_details exists before accessing
+      if (!newAgent.agent.agent_details) {
         console.error("[handleAddAgent] - Agent details are not properly initialized");
         return;
-    }
+      }
 
-    // Log the concept being saved
-    console.log("[handleAddAgent] - Saving agent with concept:", agent.concept);
+      // Log the concept being saved
+      console.log("[handleAddAgent] - Saving agent with concept:", agent.concept);
 
-    // populate our concept
-    newAgent.agent.concept = agent.concept || '';
-    console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
-    console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:",  newAgent.agent.concept);
+      // populate our concept
+      newAgent.agent.concept = agent.concept || '';
+      console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
+      console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:",  newAgent.agent.concept);
 
-    // populate our agent details
-    const agentDetails = newAgent.agent.agent_details;
-    agentDetails.name = agent?.name || '';
-    agentDetails.personality = agent?.personality || [];
-    agentDetails.communication_style = agent?.communicationStyle || [];
-    agentDetails.emojis = agent?.emojis || [];
-    agentDetails.hashtags = agent?.hashtags || [];
-    agentDetails.universe = agent?.universe || '';
-    agentDetails.topic_expertise = agent?.topic_expertise || [];
-    agentDetails.backstory = agent?.backstory || '';
+      // populate our agent details
+      const agentDetails = newAgent.agent.agent_details;
+      agentDetails.name = agent?.name || '';
+      agentDetails.personality = agent?.personality || [];
+      agentDetails.communication_style = agent?.communicationStyle || [];
+      agentDetails.emojis = agent?.emojis || [];
+      agentDetails.hashtags = agent?.hashtags || [];
+      agentDetails.universe = agent?.universe || '';
+      agentDetails.topic_expertise = agent?.topic_expertise || [];
+      agentDetails.backstory = agent?.backstory || '';
 
-    // Ensure profile_image_options array exists and has at least one element
-    if (!newAgent.agent.profile_image_options) {
+      // Ensure profile_image_options array exists and has at least one element
+      if (!newAgent.agent.profile_image_options) {
         newAgent.agent.profile_image_options = [];
-    }
-    if (newAgent.agent.profile_image_options.length === 0) {
+      }
+      if (newAgent.agent.profile_image_options.length === 0) {
         newAgent.agent.profile_image_options.push({ generations_by_pk: {} as GenerationsByPk });
-    }
+      }
 
-    // Ensure profile_image exists and has details
-    if (!newAgent.agent.profile_image) {
+      // Ensure profile_image exists and has details
+      if (!newAgent.agent.profile_image) {
         newAgent.agent.profile_image = {
-            details: {
-                url: '',
-                image_id: '',
-                generationId: ''
-            }
+          details: {
+            url: '',
+            image_id: '',
+            generationId: ''
+          }
         };
-    }
+      }
 
-    // Populate the image data
-    if (leonardoResponse?.generations_by_pk) {
+      // Populate the image data
+      if (leonardoResponse?.generations_by_pk) {
         const generation_by_pk = leonardoResponse.generations_by_pk;
         newAgent.agent.profile_image_options[0].generations_by_pk = generation_by_pk;
 
         if (generation_by_pk.generated_images?.[0]) {
-            const imageDetails = newAgent.agent.profile_image.details;
-            imageDetails.url = generation_by_pk.generated_images[0].url;
-            imageDetails.image_id = generation_by_pk.generated_images[0].id;
-            imageDetails.generationId = generation_by_pk.id;
+          const imageDetails = newAgent.agent.profile_image.details;
+          imageDetails.url = generation_by_pk.generated_images[0].url;
+          imageDetails.image_id = generation_by_pk.generated_images[0].id;
+          imageDetails.generationId = generation_by_pk.id;
         }
+      }
+
+      console.log("[handleAddAgent] - New agent with image data:", newAgent);
+
+      // Call our api to save the new agent
+      const newAgentResponse = await createAgent(newAgent);
+      console.log("[handleAddAgent] - New agent response:", newAgentResponse);
+      
+      return newAgentResponse;
+    } catch (error) {
+      console.error("[handleAddAgent] Error:", error);
+      throw error;
     }
-
-    console.log("[handleAddAgent] - New agent with image data:", newAgent);
-
-    // Call our api to save the new agent
-    const newAgentResponse = createAgent(newAgent);
-    console.log("[handleAddAgent] - New agent response:", newAgentResponse);
   };
 
   // Update the handleSingleAgentRegeneration function
@@ -294,6 +303,29 @@ const AgentGallery: React.FC = () => {
     }
   };
 
+  // Add handleSelectAgent function
+  const handleSelectAgent = async (agent: Agent) => {
+    try {
+      console.log('[handleSelectAgent] Selected agent:', agent);
+      
+      // Add a small delay to show the loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setSelectedAgent(agent);
+      
+      // You can add additional logic here, like:
+      // - Navigate to a chat page
+      // - Open a modal
+      // - Update global state
+      // - Make API calls
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('[handleSelectAgent] Error:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     if (initialMount.current) {
       initialMount.current = false;
@@ -356,8 +388,8 @@ const AgentGallery: React.FC = () => {
                   <RandomAgentCard
                     key={agent.id}
                     agent={agent}
-                    onSelect={() => {}}
-                    onAddAgent={(agent) => handleAddAgent(agent, agent.leonardoResponse)}
+                    onSelect={handleSelectAgent}
+                    onAddAgent={async (agent) => await handleAddAgent(agent, agent.leonardoResponse)}
                     isUserAgent={false}
                     setRandomAgents={setRandomAgents}
                     generateRandomAgentData={generateRandomAgentData}
@@ -379,7 +411,7 @@ const AgentGallery: React.FC = () => {
                   <LoadedAgentCard
                     key={Math.random().toString()}
                     agent={agent}
-                    onSelect={() => {}}
+                    onSelect={handleSelectAgent}
                   />
                 ))}
               </div>
@@ -395,7 +427,7 @@ const AgentGallery: React.FC = () => {
                   <LoadedAgentCard
                     key={Math.random().toString()}
                     agent={agent}
-                    onSelect={() => {}}
+                    onSelect={handleSelectAgent}
                   />
                 ))}
               </div>
@@ -403,6 +435,12 @@ const AgentGallery: React.FC = () => {
           )}
         </div>
 
+        {/* Optionally add a visual indicator for selected agent */}
+        {selectedAgent && (
+          <div className="fixed bottom-4 right-4 bg-gradient-to-r from-cyan-600 to-orange-600 text-white px-6 py-3 rounded-md shadow-lg">
+            Selected: {selectedAgent.agent?.agent_details?.name || selectedAgent.name}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import LoadingBar from './LoadingBar';
 // Define the props for AgentCard
 interface RandomAgentCardProps {
   agent: Agent;
-  onSelect: (agent: Agent | null) => void;
+  onSelect: (agent: Agent) => Promise<void>;
   onAddAgent: (agent: Agent) => void;
   isUserAgent: boolean;
   setRandomAgents: React.Dispatch<React.SetStateAction<Agent[]>>;
@@ -31,6 +31,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   onRegenerate,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
   const agentName = agent.name || 'Unknown Agent';
   const agentPersonality = Array.isArray(agent.personality) ? agent.personality : [];
   const agentCommunicationStyle = Array.isArray(agent.communicationStyle) ? agent.communicationStyle : [];
@@ -48,13 +50,43 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
     </button>
   ) : (
     <button
-      onClick={(e) => {
+      onClick={async (e) => {
         e.stopPropagation();
-        onAddAgent(agent);
+        if (isRegenerating) return;
+        setIsRegenerating(true);
+        try {
+          await onAddAgent(agent);
+        } finally {
+          setIsRegenerating(false);
+        }
       }}
-      className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white px-4 py-2 rounded"
+      disabled={isRegenerating}
+      className={`bg-gradient-to-r from-cyan-600 to-orange-600 text-white px-4 py-2 rounded
+                  ${isRegenerating ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
     >
-      Add Agent
+      {isRegenerating ? 'Adding...' : 'Add Agent'}
+    </button>
+  );
+
+  const selectButton = (
+    <button
+      className={`w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
+                  flex items-center justify-center gap-2 text-white
+                  ${isSelecting ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
+      onClick={async (e) => {
+        e.stopPropagation();
+        if (isSelecting) return;
+        setIsSelecting(true);
+        try {
+          await onSelect(agent);
+        } finally {
+          setIsSelecting(false);
+        }
+      }}
+      disabled={isSelecting}
+    >
+      <CheckCircle className={`w-4 h-4 ${isSelecting ? 'animate-spin' : ''}`} />
+      {isSelecting ? 'Selecting...' : 'Select Agent'}
     </button>
   );
 
@@ -170,20 +202,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 
               {/* Action button - now positioned absolutely at bottom */}
               <div className="absolute bottom-4 left-4 right-4">
-                {isUserAgent ? (
-                  <button
-                    className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelect(agent);
-                    }}
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Select Agent
-                  </button>
-                ) : (
-                  addButton
-                )}
+                {isUserAgent ? selectButton : addButton}
               </div>
             </div>
           </div>
@@ -195,14 +214,23 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
         <div className="mt-2 w-64 mx-auto">
           <button
             data-agent-id={agent.id}
-            className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
-            onClick={(e) => {
+            className={`w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
+                        flex items-center justify-center gap-2 text-white
+                        ${isRegenerating ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
+            onClick={async (e) => {
               e.stopPropagation();
-              onRegenerate(agent.id?.toString() || Math.random().toString());
+              if (isRegenerating) return;
+              setIsRegenerating(true);
+              try {
+                await onRegenerate(agent.id?.toString() || Math.random().toString());
+              } finally {
+                setIsRegenerating(false);
+              }
             }}
+            disabled={isRegenerating}
           >
-            <RefreshCcw className="w-4 h-4" />
-            Regenerate
+            <RefreshCcw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+            {isRegenerating ? 'Regenerating...' : 'Regenerate'}
           </button>
         </div>
       )}

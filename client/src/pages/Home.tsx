@@ -25,7 +25,7 @@ const Home = () => {
             ARAI AI AGENTS
           </h1>
           <p className="text-lg sm:text-xl lg:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto">
-            Create and customize your own AI agents in an immersive cyberpunk world
+            Create and customize you own AI Agents with ARAI AI
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -37,7 +37,7 @@ const Home = () => {
               <Brain className="w-5 h-5 mr-2" />
               Create Agent
             </Link>
-            <Link
+            {/* <Link
               to="/node-creator"
               className="inline-flex items-center justify-center rounded-lg bg-slate-900/50 
                         px-6 py-3 text-lg font-semibold text-white border border-orange-500/20 
@@ -45,7 +45,7 @@ const Home = () => {
             >
               <Sparkles className="w-5 h-5 mr-2" />
               Node Creator
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>

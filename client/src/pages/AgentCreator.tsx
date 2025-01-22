@@ -46,7 +46,29 @@ const AgentCreator: React.FC = () => {
    * - selectedImage: index of chosen image
    * - seasons: associated seasons/episodes
    */
-  const [agent, setAgent] = useState({
+  const [agent, setAgent] = useState<{
+    agent_details: {
+      name: string;
+      personality: string[];
+      communication_style: string[];
+      backstory: string;
+      universe: string;
+      topic_expertise: string[];
+      hashtags: string[];
+      emojis: string[];
+      concept: string;
+    };
+    profile_image: {
+      details: {
+        url: string;
+        image_id: string;
+        generationId: string;
+      }
+    };
+    profile_image_options: ProfileImageOption[];
+    selectedImage: number | undefined;
+    seasons: any[];
+  }>({
     agent_details: {
       name: '',
       personality: [],
@@ -65,8 +87,8 @@ const AgentCreator: React.FC = () => {
         generationId: ''
       }
     },
-    profile_image_options: [] as ProfileImageOption[],
-    selectedImage: undefined as number | undefined,
+    profile_image_options: [],
+    selectedImage: undefined,
     seasons: [],
   });
   console.log('[AgentCreator] Current agent:', agent);
@@ -275,25 +297,28 @@ const AgentCreator: React.FC = () => {
   // Add state for loading progress near other state declarations
   const [loadingProgress, setLoadingProgress] = useState(0);
 
+  // Add a new state for tracking image generation
+  const [isGenerating, setIsGenerating] = useState(false);
+
   /**
    * Form Submission Handler
    * Processes the final agent data and sends it to the server
    * Shows success message on completion
    */
-  const handleSubmitCreateAgent = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitCreateAgent = async (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     
-    // First, merge any pending draft changes into the agent state
-    const updatedAgent = {
+    type AgentState = typeof agent;
+    
+    const updatedAgent: AgentState = {
       ...agent,
       agent_details: {
         ...agent.agent_details,
-        // Merge basic draft fields
         name: draftFields.name || agent.agent_details.name,
         universe: draftFields.universe || agent.agent_details.universe,
         backstory: draftFields.backstory || agent.agent_details.backstory,
+        concept: agent.agent_details.concept,
         
-        // Merge trait fields - split by appropriate separator and filter empty values
         personality: draftTraits.personality ? 
           draftTraits.personality.split(',').map(item => item.trim()).filter(Boolean) :
           agent.agent_details.personality,
@@ -314,6 +339,7 @@ const AgentCreator: React.FC = () => {
           draftTraits.emojis.split(' ').filter(Boolean) :
           agent.agent_details.emojis,
       },
+      profile_image: agent.profile_image,
       profile_image_options: agent.profile_image_options.map((option, index) => 
         index === 0 ? {
           ...option,
@@ -322,7 +348,9 @@ const AgentCreator: React.FC = () => {
             prompt: draftFields.imageDescription || option.generations_by_pk?.prompt
           }
         } : option
-      )
+      ),
+      selectedImage: agent.selectedImage,
+      seasons: agent.seasons,
     };
 
     console.log('[handleSubmit] Submitting agent with merged drafts:', updatedAgent);
@@ -331,13 +359,8 @@ const AgentCreator: React.FC = () => {
       const newAgent = await createAgent(updatedAgent);
       console.log('Agent created:', newAgent);
 
-      // Show success message
       setShowSuccessMessage(true);
-
-      // Hide the message after a few seconds
       setTimeout(() => setShowSuccessMessage(false), 3000);
-
-      // Update the main agent state with the merged changes
       setAgent(updatedAgent);
 
     } catch (error) {
@@ -512,16 +535,18 @@ const AgentCreator: React.FC = () => {
               <Brain className="w-32 h-32 text-cyan-400" />
             )}
             <button
-              className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
-                         from-orange-600 to-red-600 text-white flex items-center"
+              className={`absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
+                         from-orange-600 to-red-600 text-white flex items-center
+                         ${isGenerating ? 'opacity-50 cursor-not-allowed' : 'hover:from-orange-700 hover:to-red-700'}`}
               onClick={async () => {
+                if (isGenerating) return; // Prevent multiple clicks while generating
+                
                 console.log('[Generate New] Clicked');
                 try {
-                  const prompt = agent.profile_image_options?.[0]?.generations_by_pk?.prompt || draftFields.imageDescription;
-                  if (!prompt) {
-                    console.error('No prompt available for image generation');
-                    return;
-                  }
+                  setIsGenerating(true);
+                  let prompt = agent.profile_image_options?.[0]?.generations_by_pk?.prompt || 
+                              draftFields.imageDescription || 
+                              '';
 
                   setLoadingProgress(10);
                   const imageResponse = await generateSingleImage(prompt, LEONARDO_MODEL_ID, LEONARDO_STYLE_UUID);
@@ -557,11 +582,14 @@ const AgentCreator: React.FC = () => {
                 } catch (error) {
                   console.error('Error generating new image:', error);
                   setLoadingProgress(0);
+                } finally {
+                  setIsGenerating(false);
                 }
               }}
+              disabled={isGenerating}
             >
-              <RefreshCcw className="w-4 h-4 mr-2" />
-              Generate New
+              <RefreshCcw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+              {isGenerating ? 'Generating...' : 'Generate New'}
             </button>
           </div>
 
@@ -850,7 +878,7 @@ const AgentCreator: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => handleSubmitCreateAgent({ preventDefault: () => {} } as React.FormEvent<HTMLFormElement>)} 
+            onClick={(e) => handleSubmitCreateAgent(e as unknown as React.FormEvent<HTMLFormElement>)}
             className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                        from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
                        text-white transition-all duration-300 flex items-center justify-center"

@@ -5,7 +5,7 @@ import { Agent } from '../interfaces/AgentInterfaces';
 // Define the props for AgentCard
 interface AgentCardProps {
   agent: Agent,
-  onSelect: (agent: Agent) => void;
+  onSelect: (agent: Agent) => Promise<void>;
 }
 
 const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
@@ -19,6 +19,15 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentEmojis = agentData?.agent_details?.emojis || [];
   const agentTopicExpertise = agentData?.agent_details?.topic_expertise || [];
   const profileImageUrl = agentData?.profile_image?.details?.url || "";
+  const [isSelecting, setIsSelecting] = useState(false);
+
+  const handleCardClick = async () => {
+    try {
+      await onSelect(agent);
+    } catch (error) {
+      console.error('[LoadedAgentCard] Error selecting agent:', error);
+    }
+  };
 
     return (
     <div className="relative">
@@ -30,7 +39,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
         className="perspective w-64 h-[500px]"
         onMouseEnter={() => setIsFlipped(true)}
         onMouseLeave={() => setIsFlipped(false)}
-        onClick={() => onSelect(agent)}
+        onClick={handleCardClick}
       >
         <div
           className={`relative w-full h-full duration-500 preserve-3d ${
@@ -120,14 +129,23 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
               {/* Action button  - Update once we have a global Store and s*/}
               <div className="absolute bottom-2 left-4 right-4">
                 <button
-                  className="w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md hover:from-cyan-700 hover:to-orange-700 flex items-center justify-center gap-2 text-white"
-                  onClick={(e) => {
+                  className={`w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
+                              flex items-center justify-center gap-2 text-white
+                              ${isSelecting ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    onSelect(agent);
+                    if (isSelecting) return;
+                    setIsSelecting(true);
+                    try {
+                      await onSelect(agent);
+                    } finally {
+                      setIsSelecting(false);
+                    }
                   }}
+                  disabled={isSelecting}
                 >
-                  <CheckCircle className="w-4 h-4" />
-                  Select Agent
+                  <CheckCircle className={`w-4 h-4 ${isSelecting ? 'animate-spin' : ''}`} />
+                  {isSelecting ? 'Selecting...' : 'Select Agent'}
                 </button>
               </div>
             </div>
