@@ -91,27 +91,31 @@ const ChatToAgent: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Agent Selection */}
-      <div className="mb-6">
-        <label className="text-gray-400 mr-2">Select Character:</label>
-        <select 
-          className="bg-slate-800 text-gray-300 rounded-lg p-2 border border-cyan-800"
-          onChange={(e) => {
-            const char = characters.find(c => c.agent.agent_details.name === e.target.value);
-            if (char) {
-              setSelectedAgent(char);
-              setDisplayChatHistory([]); // Reset display history when switching agents
-            }
-          }}
-          value={selectedAgent?.agent?.agent_details?.name || ""}
-        >
-          <option value="">Select a character</option>
-          {characters.map((char, index) => (
-            <option key={index} value={char.agent.agent_details.name}>
-              {char.agent.agent_details.name}
-              {char.agent.master_file_path?.includes('_1') ? ' (1)' : ''}
-            </option>
-          ))}
-        </select>
+      <div className="mb-6 flex items-center justify-center gap-4">
+        <div className="flex items-center">
+          <label className="text-lg font-semibold text-white mr-2">
+            Select Agent:
+          </label>
+          <select 
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
+            onChange={(e) => {
+              const char = characters.find(c => c.agent.agent_details.name === e.target.value);
+              if (char) {
+                setSelectedAgent(char);
+                setDisplayChatHistory([]);
+              }
+            }}
+            value={selectedAgent?.agent?.agent_details?.name || ""}
+          >
+            <option value="" className="text-white">Select an Agent</option>
+            {characters.map((char, index) => (
+              <option key={index} value={char.agent.agent_details.name}>
+                {char.agent.agent_details.name}
+                {char.agent.master_file_path?.includes('_1') ? ' (1)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Chat Interface */}

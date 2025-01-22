@@ -105,16 +105,18 @@ const SocialFeed: React.FC = () => {
       {/* Agent Selection Row */}
       <div className="mb-6 flex items-center justify-center gap-4">
         <div className="flex items-center">
-          <label className="text-gray-400 mr-2">Select Character:</label>
+          <label className="text-lg font-semibold text-white mr-2">
+            Select Agent:
+          </label>
           <select 
-            className="bg-slate-800 text-gray-300 rounded-lg p-2 border border-cyan-800"
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
             onChange={(e) => {
               const char = characters.find(c => c.agent.agent_details.name === e.target.value);
               if (char) handleCharacterSelect(char);
             }}
             value={selectedCharacter?.agent.agent_details.name || ""}
           >
-            <option value="">Select a character</option>
+            <option value="" className="text-white">Select an Agent</option>
             {characters.map((char, index) => (
               <option key={index} value={char.agent.agent_details.name}>
                 {char.agent.agent_details.name}
