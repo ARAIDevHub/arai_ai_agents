@@ -282,9 +282,53 @@ const AgentCreator: React.FC = () => {
    */
   const handleSubmitCreateAgent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('[handleSubmit] Submitting agent:', agent);
+    
+    // First, merge any pending draft changes into the agent state
+    const updatedAgent = {
+      ...agent,
+      agent_details: {
+        ...agent.agent_details,
+        // Merge basic draft fields
+        name: draftFields.name || agent.agent_details.name,
+        universe: draftFields.universe || agent.agent_details.universe,
+        backstory: draftFields.backstory || agent.agent_details.backstory,
+        
+        // Merge trait fields - split by appropriate separator and filter empty values
+        personality: draftTraits.personality ? 
+          draftTraits.personality.split(',').map(item => item.trim()).filter(Boolean) :
+          agent.agent_details.personality,
+        
+        communication_style: draftTraits.communication_style ?
+          draftTraits.communication_style.split(',').map(item => item.trim()).filter(Boolean) :
+          agent.agent_details.communication_style,
+        
+        topic_expertise: draftTraits.topic_expertise ?
+          draftTraits.topic_expertise.split(',').map(item => item.trim()).filter(Boolean) :
+          agent.agent_details.topic_expertise,
+        
+        hashtags: draftTraits.hashtags ?
+          draftTraits.hashtags.split(',').map(item => item.trim()).filter(Boolean) :
+          agent.agent_details.hashtags,
+        
+        emojis: draftTraits.emojis ?
+          draftTraits.emojis.split(' ').filter(Boolean) :
+          agent.agent_details.emojis,
+      },
+      profile_image_options: agent.profile_image_options.map((option, index) => 
+        index === 0 ? {
+          ...option,
+          generations_by_pk: {
+            ...option.generations_by_pk,
+            prompt: draftFields.imageDescription || option.generations_by_pk?.prompt
+          }
+        } : option
+      )
+    };
+
+    console.log('[handleSubmit] Submitting agent with merged drafts:', updatedAgent);
+    
     try {
-      const newAgent = await createAgent(agent);
+      const newAgent = await createAgent(updatedAgent);
       console.log('Agent created:', newAgent);
 
       // Show success message
@@ -292,6 +336,9 @@ const AgentCreator: React.FC = () => {
 
       // Hide the message after a few seconds
       setTimeout(() => setShowSuccessMessage(false), 3000);
+
+      // Update the main agent state with the merged changes
+      setAgent(updatedAgent);
 
     } catch (error) {
       console.error('Error creating agent:', error);
