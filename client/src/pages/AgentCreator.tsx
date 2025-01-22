@@ -17,6 +17,7 @@ import TraitButtons from '../components/TraitButtons'; // We'll still use your T
 import useCharacters from '../hooks/useCharacters';
 import { generateSingleImage } from '../api/leonardoApi';
 import { loadImageWithFallback } from '../utils/imageUtils'; // You may need to create this utility file
+import LoadingBar from '../components/LoadingBar';
 
 /**
  * AgentCreator Component
@@ -272,6 +273,9 @@ const AgentCreator: React.FC = () => {
   // State to manage the visibility of the success message
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
+  // Add state for loading progress near other state declarations
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
   /**
    * Form Submission Handler
    * Processes the final agent data and sends it to the server
@@ -443,14 +447,22 @@ const AgentCreator: React.FC = () => {
             style={{
               backgroundImage:
                 agent.selectedImage !== undefined && 
-                agent.profile_image?.details?.url
+                agent.profile_image?.details?.url &&
+                loadingProgress === 0
                   ? `url(${agent.profile_image.details.url})`
                   : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
           >
-            {agent.selectedImage === undefined && (
+            {loadingProgress > 0 && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
+                <div className="w-3/4">
+                  <LoadingBar progress={loadingProgress} />
+                </div>
+              </div>
+            )}
+            {agent.selectedImage === undefined && loadingProgress === 0 && (
               <Brain className="w-32 h-32 text-cyan-400" />
             )}
             <button
@@ -459,7 +471,6 @@ const AgentCreator: React.FC = () => {
               onClick={async () => {
                 console.log('[Generate New] Clicked');
                 try {
-                  // Get the current prompt
                   const prompt = agent.profile_image_options?.[0]?.generations_by_pk?.prompt || draftFields.imageDescription;
                   
                   if (!prompt) {
@@ -467,17 +478,8 @@ const AgentCreator: React.FC = () => {
                     return;
                   }
 
-                  // Show loading state
-                  setAgent(prev => ({
-                    ...prev,
-                    profile_image: {
-                      details: {
-                        url: 'https://via.placeholder.com/400x400?text=Generating+Image',
-                        image_id: '',
-                        generationId: ''
-                      }
-                    }
-                  }));
+                  // Start loading
+                  setLoadingProgress(10);
 
                   // Generate new image
                   const imageResponse = await generateSingleImage(prompt, LEONARDO_MODEL_ID, LEONARDO_STYLE_UUID);
@@ -486,15 +488,19 @@ const AgentCreator: React.FC = () => {
                     throw new Error('No image URL received');
                   }
 
+                  setLoadingProgress(50);
+
                   const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
-                  const loadedImageUrl = await loadImageWithFallback(imageUrl);
+                  await loadImageWithFallback(imageUrl);
+
+                  setLoadingProgress(90);
 
                   // Update agent with new image
                   setAgent(prev => ({
                     ...prev,
                     profile_image: {
                       details: {
-                        url: loadedImageUrl,
+                        url: imageUrl,
                         image_id: imageResponse.generations_by_pk.generated_images[0].id,
                         generationId: imageResponse.generations_by_pk.id
                       }
@@ -507,19 +513,12 @@ const AgentCreator: React.FC = () => {
                     }]
                   }));
 
+                  setLoadingProgress(100);
+                  setTimeout(() => setLoadingProgress(0), 500); // Reset after brief delay
+
                 } catch (error) {
                   console.error('Error generating new image:', error);
-                  // Show error state
-                  setAgent(prev => ({
-                    ...prev,
-                    profile_image: {
-                      details: {
-                        url: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
-                        image_id: '',
-                        generationId: ''
-                      }
-                    }
-                  }));
+                  setLoadingProgress(0);
                 }
               }}
             >
@@ -536,32 +535,38 @@ const AgentCreator: React.FC = () => {
                 className={`relative aspect-square bg-gradient-to-br from-slate-900/80 
                             via-cyan-900/20 to-orange-900/20 rounded-lg cursor-pointer 
                             ${agent.selectedImage === index ? 'ring-2 ring-orange-500' : ''}`}
-                onClick={() => {
+                onClick={async () => {
                   console.log('[ImageSelection] Clicked index:', index);
-                  console.log('[ImageSelection] Selected Image Data:', {
-                    fullImageData: image,
-                    imageUrl: image?.url,
-                    currentProfileImage: agent.profile_image
-                  });
                   
-                  setAgent((prev) => {
-                    const selectedImageData = prev.profile_image_options[0]?.generations_by_pk?.generated_images?.[index] ?? {
-                      url: 'https://via.placeholder.com/400x400?text=Brain+Placeholder',
-                      id: '',
-                      generationId: ''
-                    };
-                    return { 
-                      ...prev, 
+                  try {
+                    setLoadingProgress(30);
+                    
+                    const imageUrl = image?.url;
+                    if (imageUrl) {
+                      await loadImageWithFallback(imageUrl);
+                    }
+                    
+                    setLoadingProgress(70);
+                    
+                    setAgent(prev => ({
+                      ...prev,
                       selectedImage: index,
                       profile_image: {
                         details: {
-                          url: selectedImageData.url,
-                          image_id: selectedImageData.id,
-                          generationId: selectedImageData.generationId,
+                          url: image?.url || '',
+                          image_id: image?.id || '',
+                          generationId: image?.generationId || '',
                         }
                       }
-                    };
-                  });
+                    }));
+
+                    setLoadingProgress(100);
+                    setTimeout(() => setLoadingProgress(0), 500);
+                    
+                  } catch (error) {
+                    console.error('Error loading image:', error);
+                    setLoadingProgress(0);
+                  }
                 }}
                 style={{
                   backgroundImage: image?.url ? `url(${image.url})` : 'none',

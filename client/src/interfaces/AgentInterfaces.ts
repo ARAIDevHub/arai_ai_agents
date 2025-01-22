@@ -26,12 +26,9 @@ export interface GeneratedImage {
 }
 
 export interface GenerationsByPk {
-  generated_images?: {
-    url: string;
-    id: string;
-    generationId: string;
-  }[];
-  id?: string;
+  id: string;
+  prompt?: string;
+  generated_images: GeneratedImage[];
 }
 
 export interface ProfileImageOption {
