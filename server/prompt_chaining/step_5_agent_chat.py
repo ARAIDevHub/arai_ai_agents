@@ -24,6 +24,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils.content_generator as content_generator
 from utils.template_types import TemplateType
+import utils.config_utils as config_utils
 # -------------------------------------------------------------------
 # Step 5: Chat with the agent
 # -------------------------------------------------------------------
@@ -41,7 +42,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
 
     # Initialize chat history if None
     if chat_history is None:
-        chat_history = manager.create_new_template_json(TemplateType.CHAT)
+        chat_history = config_utils.load_chat_history(agent_details["name"])  
         
     # step 5.4: Set up chat variables
     agent_response = None
@@ -68,7 +69,7 @@ def agent_chat(ai_model, master_file_path: str, prompt: str, chat_history):
         # add the user's prompt to the history log with label
         chat_history['chat_history'].append({
             "role": "user",
-            "message": prompt,
+            "prompt": prompt,
             "message_id": len(chat_history['chat_history'])
         })
         

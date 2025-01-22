@@ -32,7 +32,7 @@ from models.gemini_model import GeminiModel
 
 dotenv.load_dotenv()
 
-def create_image(ai_model, prompt, master_file_path, num_images):
+def create_images(ai_model, prompt, master_file_path, num_images):
     # 4.1 Setup model details
     model_details = json.loads(open("asset_generation/leonard_anime_styles.json", "r").read())
     model_id = model_details["models"][0]["modelId"]
@@ -128,7 +128,7 @@ def create_profile_images(prompt, master_file_path, model_id, style_uuid, num_im
         response, payload = images_leonardo.generated_image_consistent(prompt, model_id, style_uuid, num_images)
     else:
         response, payload = images_leonardo.generated_image_inconsistent(prompt, model_id, style_uuid, num_images)
-    
+            
     generation_id = response["sdGenerationJob"]["generationId"]
 
     # step 4.5: retry loop to check for image completion
@@ -188,4 +188,4 @@ if __name__ == "__main__":
     prompt = ""
 
     # 4.3 Create profile images
-    create_image(ai_model, prompt, master_file_path, num_images)   
+    create_images(ai_model, prompt, master_file_path, num_images)   
