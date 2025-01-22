@@ -16,7 +16,6 @@ import { GeneratedImage, ProfileImageOption } from '../interfaces/AgentInterface
 import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
 import useCharacters from '../hooks/useCharacters';
 import { generateSingleImage } from '../api/leonardoApi';
-import { loadImageWithFallback } from '../utils/imageUtils'; // You may need to create this utility file
 import LoadingBar from '../components/LoadingBar';
 
 /**
@@ -408,7 +407,7 @@ const AgentCreator: React.FC = () => {
       name: details.name || '',
       universe: details.universe || '',
       backstory: details.backstory || '',
-      imageDescription: details.profile_image_options?.[0]?.generations_by_pk?.prompt || '',
+      imageDescription: char.agent?.profile_image_options?.[0]?.generations_by_pk?.prompt || '',
     });
     
     setDraftTraits({
@@ -472,16 +471,12 @@ const AgentCreator: React.FC = () => {
                 console.log('[Generate New] Clicked');
                 try {
                   const prompt = agent.profile_image_options?.[0]?.generations_by_pk?.prompt || draftFields.imageDescription;
-                  
                   if (!prompt) {
                     console.error('No prompt available for image generation');
                     return;
                   }
 
-                  // Start loading
                   setLoadingProgress(10);
-
-                  // Generate new image
                   const imageResponse = await generateSingleImage(prompt, LEONARDO_MODEL_ID, LEONARDO_STYLE_UUID);
                   
                   if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
@@ -489,13 +484,9 @@ const AgentCreator: React.FC = () => {
                   }
 
                   setLoadingProgress(50);
-
                   const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
-                  await loadImageWithFallback(imageUrl);
 
                   setLoadingProgress(90);
-
-                  // Update agent with new image
                   setAgent(prev => ({
                     ...prev,
                     profile_image: {
@@ -508,13 +499,13 @@ const AgentCreator: React.FC = () => {
                     profile_image_options: [{
                       generations_by_pk: {
                         ...imageResponse.generations_by_pk,
-                        prompt: prompt
+                        prompt
                       }
                     }]
                   }));
 
                   setLoadingProgress(100);
-                  setTimeout(() => setLoadingProgress(0), 500); // Reset after brief delay
+                  setTimeout(() => setLoadingProgress(0), 500);
 
                 } catch (error) {
                   console.error('Error generating new image:', error);
@@ -540,11 +531,6 @@ const AgentCreator: React.FC = () => {
                   
                   try {
                     setLoadingProgress(30);
-                    
-                    const imageUrl = image?.url;
-                    if (imageUrl) {
-                      await loadImageWithFallback(imageUrl);
-                    }
                     
                     setLoadingProgress(70);
                     
