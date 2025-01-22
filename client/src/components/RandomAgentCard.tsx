@@ -92,9 +92,9 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 
   return (
     <div className="relative">
-      <div className="absolute top-2 right-2 bg-gray-700 text-white text-xs rounded px-2">
+      {/* <div className="absolute top-2 right-2 bg-gray-700 text-white text-xs rounded px-2">
         {isUserAgent ? 'Loaded Agent' : 'Randomly Generated'}
-      </div>
+      </div> */}
       <div
         className="perspective w-64 h-[500px]"
         onMouseEnter={() => setIsFlipped(true)}
@@ -129,10 +129,10 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
               </div>
               <div className="h-[100px] p-4 bg-gray-800/95">
-                <h3 className="text-xl font-bold text-gray-100 mb-1">
+                <h3 className="text-xl font-bold text-gray-100 mb-1 truncate">
                   {agentName}
                 </h3>
-                <p className="text-orange-300 text-sm">{agent.role}</p>
+                <p className="text-orange-300 text-sm truncate">{agent.role}</p>
               </div>
             </div>
           </div>
@@ -145,24 +145,24 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                 <img
                   src={profileImageUrl}
                   alt={agentName}
-                  className="w-20 h-20 rounded-lg object-cover"
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                 />
-                <div>
-                  <h3 className="text-xl font-bold text-gray-100">
+                <div className="overflow-hidden">
+                  <h3 className="text-xl font-bold text-gray-100 truncate">
                     {agentName}
                   </h3>
-                  <p className="text-orange-400 text-sm">{agent.role}</p>
+                  <p className="text-orange-400 text-sm truncate">{agent.role}</p>
                 </div>
               </div>
 
-              {/* Content sections - now with better spacing */}
-              <div className="space-y-4 overflow-y-auto flex-grow mb-16"> {/* Added mb-16 for button space */}
+              {/* Content sections with better overflow handling */}
+              <div className="space-y-4 overflow-y-auto flex-grow mb-16 pr-2">
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
                     <Heart className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Personality</span>
                   </div>
-                  <p className="text-gray-400 text-sm break-words">
+                  <p className="text-gray-400 text-sm break-words line-clamp-3">
                     {agentPersonality.join(', ')}
                   </p>
                 </div>
@@ -172,7 +172,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <MessageCircle className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Communication Style</span>
                   </div>
-                  <p className="text-gray-400 text-sm break-words">
+                  <p className="text-gray-400 text-sm break-words line-clamp-3">
                     {agentCommunicationStyle.join(', ')}
                   </p>
                 </div>
@@ -182,7 +182,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                     <Sparkles className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Emojis</span>
                   </div>
-                  <p className="text-gray-400 text-sm break-words">
+                  <p className="text-gray-400 text-sm break-words line-clamp-2">
                     {agentEmojis.join(' ')}
                   </p>
                 </div>
@@ -192,7 +192,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                   {agentTags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300"
+                      className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300 truncate max-w-[150px]"
                     >
                       {tag}
                     </span>

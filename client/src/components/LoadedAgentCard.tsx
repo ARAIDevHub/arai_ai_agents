@@ -31,10 +31,6 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
 
     return (
     <div className="relative">
-      {/* Label to indicate it's a loaded agent */}
-      <div className="absolute top-2 right-2 bg-gray-700 text-white text-xs rounded px-2">
-        Loaded Agent
-      </div>
       <div
         className="perspective w-64 h-[500px]"
         onMouseEnter={() => setIsFlipped(true)}
@@ -74,52 +70,54 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                   <img
                   src={profileImageUrl}
                   alt={agentName}
-                    className="w-20 h-20 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                   />
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-100">
+                  <div className="overflow-hidden">
+                    <h3 className="text-xl font-bold text-gray-100 truncate">
                       {agentName}
                     </h3>
-                    <p className="text-orange-400 text-sm">{Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert</p>
+                    <p className="text-orange-400 text-sm truncate">
+                      {Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert
+                    </p>
                   </div>
                 </div>
-              <div className="space-y-4 overflow-auto max-h-[350px] pr-2">
+              <div className="space-y-4 overflow-y-auto max-h-[350px] pr-2 pb-16">
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <Heart className="w-4 h-4 text-orange-400" />
+                    <Heart className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Personality</span>
                   </div>
-                  <p className="text-gray-400 text-sm line-clamp-3">
+                  <p className="text-gray-400 text-sm break-words line-clamp-3">
                     {Array.isArray(agentPersonality) ? agentPersonality.join(', ') : agentPersonality}
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <MessageCircle className="w-4 h-4 text-orange-400" />
+                    <MessageCircle className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span className="font-medium">Communication Style</span>
                   </div>
-                  <p className="text-gray-400 text-sm line-clamp-3">
+                  <p className="text-gray-400 text-sm break-words line-clamp-3">
                     {Array.isArray(agentCommunicationStyle) ? agentCommunicationStyle.join(', ') : agentCommunicationStyle}
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
-                    <Sparkles className="w-4 h-4 text-orange-400" />
-                    <span className="font-medium mb-2">Emojis</span>
+                    <Sparkles className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                    <span className="font-medium">Emojis</span>
                   </div>
-                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">
+                  <p className="text-gray-400 text-sm break-words line-clamp-2">
                     {Array.isArray(agentEmojis) ? agentEmojis.join(' ') : agentEmojis}
                   </p>
                 </div>
-              </div>
-              {/* Tags */}
-              <div className="relative">
+
+                {/* Tags */}
                 <div className="flex gap-2 flex-wrap">
                   {(Array.isArray(agentHashtags) ? agentHashtags.slice(0, 4) : []).map((hashtag) => (
                     <span
-                      className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300"
+                      key={hashtag}
+                      className="px-2 py-1 bg-orange-900/50 rounded-full text-xs text-orange-300 truncate max-w-[150px]"
                     >
                       {hashtag}
                     </span>

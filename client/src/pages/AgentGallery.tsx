@@ -436,11 +436,11 @@ const AgentGallery: React.FC = () => {
         </div>
 
         {/* Optionally add a visual indicator for selected agent */}
-        {selectedAgent && (
+        {/* {selectedAgent && (
           <div className="fixed bottom-4 right-4 bg-gradient-to-r from-cyan-600 to-orange-600 text-white px-6 py-3 rounded-md shadow-lg">
             Selected: {selectedAgent.agent?.agent_details?.name || selectedAgent.name}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
