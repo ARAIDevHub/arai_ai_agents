@@ -22,6 +22,7 @@ import datetime
 
 # custom ARAI code imports
 import connectors.twitter_connector as twitter
+from packages.twitter_playwright import twitter_api_free_connector as twitter_api_free
 
 class PostManager:
     """Manages posts for an agent using JSON configuration files.
@@ -151,7 +152,12 @@ class PostManager:
         tweet_content = self.next_post_number(self.current_post)
 
         if live_post:
-            tweet_result = self.twitter_connector.post_tweet(tweet_content)
+
+            if (os.getenv("X_API_OFFICIAL") == "True"):
+                tweet_result = self.twitter_connector.post_tweet(tweet_content)
+            else:
+                tweet_result = twitter_api_free.main(tweet_content)
+
             print(tweet_result)
 
             if tweet_result.startswith("Error"):
