@@ -159,14 +159,14 @@ const SocialFeed: React.FC = () => {
                   disabled={isGenerating}
                   className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isGenerating ? 'Generating...' : 'Generate Seasons & Posts'}
+                  {isGenerating ? 'Generating...' : 'Generate Posts Content'}
                 </Button>
 
                 <Button
                   onClick={() => {}}  // Placeholder for future functionality
                   className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
                 >
-                  Deploy to Twitter
+                  Post to Twitter
                 </Button>
               </div>
             )}
