@@ -51,9 +51,6 @@ class TwitterClient:
 
     def run(self):
         """Run the Twitter client to login and post a tweet."""
-        # Test post
-        X_POST_TEXT = "Hello from TwitterClient!"
-
         # check if state file exists
         if os.path.exists(self.state_path):
             print(f"[INFO] State file exists at {self.state_path}. Using existing state.")
@@ -61,12 +58,15 @@ class TwitterClient:
             print(f"[INFO] State file does not exist at {self.state_path}. Logging in and saving state.")
             self.login()
 
-        self.post_tweet(X_POST_TEXT)
-
+        return True  # Return success status
 
 def run_twitter_client():
+    """Main entry point for running the Twitter client"""
     client = TwitterClient()
-    client.run()
+    if client.run():
+        # Test post
+        X_POST_TEXT = "TESTING FROM CLIENT"
+        client.post_tweet(X_POST_TEXT)
 
 
 if __name__ == "__main__":

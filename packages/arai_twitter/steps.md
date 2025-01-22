@@ -77,4 +77,22 @@ twitter [interactions.ts - TwitterInteractionClient.handleTwitterInteractions] -
     - ICacheManager
     - MemoryCacheAdapter 
     - FSCacheAdapter
-    
+
+import {
+    QueryTweetsResponse,
+    Scraper,
+    SearchMode,
+    Tweet,
+} from "agent-twitter-client";
+
+base.ts
+    const homeTimeline =
+        this.twitterConfig.ACTION_TIMELINE_TYPE ===
+        ActionTimelineType.Following
+            ? await this.twitterClient.fetchFollowingTimeline(count, [])
+            : await this.twitterClient.fetchHomeTimeline(count, []);
+post.ts 
+            const timelines = await this.client.fetchTimelineForActions(MAX_TIMELINES_TO_FETCH);
+
+agent-twitter-client
+    - timeline-home.ts
