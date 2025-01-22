@@ -150,6 +150,13 @@ class PostManager:
         """
         tweet_content = self.next_post_number(self.current_post)
 
+
+        if twitter is live, 
+
+        if they have api key, then use twitter connector
+
+
+
         if live_post:
             tweet_result = self.twitter_connector.post_tweet(tweet_content)
             print(tweet_result)

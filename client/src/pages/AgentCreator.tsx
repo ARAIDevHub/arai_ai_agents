@@ -15,6 +15,8 @@ import { createAgent, getCharacters } from '../api/agentsAPI';
 import { GeneratedImage, ProfileImageOption } from '../interfaces/AgentInterfaces';
 import TraitButtons from '../components/TraitButtons'; // We'll still use your TraitButtons
 import useCharacters from '../hooks/useCharacters';
+import { generateSingleImage } from '../api/leonardoApi';
+import { loadImageWithFallback } from '../utils/imageUtils'; // You may need to create this utility file
 
 /**
  * AgentCreator Component
@@ -22,6 +24,8 @@ import useCharacters from '../hooks/useCharacters';
  * including personality traits, communication style, and profile images.
  */
 const AgentCreator: React.FC = () => {
+  const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+  const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
   /**
    * Main UI state management
@@ -79,6 +83,7 @@ const AgentCreator: React.FC = () => {
     name: '',
     universe: '',
     backstory: '',
+    imageDescription: '',
   });
 
   /**
@@ -91,6 +96,7 @@ const AgentCreator: React.FC = () => {
       name: agent.agent_details.name || '',
       universe: agent.agent_details.universe || '',
       backstory: agent.agent_details.backstory || '',
+      imageDescription: agent.profile_image_options?.[0]?.generations_by_pk?.prompt || '',
     });
   }, [agent]);
 
@@ -186,13 +192,29 @@ const AgentCreator: React.FC = () => {
       if (e.key === 'Enter') {
         e.preventDefault();
         console.log(`[handleDraftKeyDown] Committing ${field}:`, draftFields[field]);
-        setAgent(prev => ({
-          ...prev,
-          agent_details: {
-            ...prev.agent_details,
-            [field]: draftFields[field],
-          }
-        }));
+        
+        if (field === 'imageDescription') {
+          setAgent(prev => ({
+            ...prev,
+            profile_image_options: prev.profile_image_options.map((option, index) => 
+              index === 0 ? {
+                ...option,
+                generations_by_pk: {
+                  ...option.generations_by_pk,
+                  prompt: draftFields[field]
+                }
+              } : option
+            )
+          }));
+        } else {
+          setAgent(prev => ({
+            ...prev,
+            agent_details: {
+              ...prev.agent_details,
+              [field]: draftFields[field],
+            }
+          }));
+        }
       }
     };
 
@@ -382,6 +404,7 @@ const AgentCreator: React.FC = () => {
       name: details.name || '',
       universe: details.universe || '',
       backstory: details.backstory || '',
+      imageDescription: details.profile_image_options?.[0]?.generations_by_pk?.prompt || '',
     });
     
     setDraftTraits({
@@ -433,8 +456,71 @@ const AgentCreator: React.FC = () => {
             <button
               className="absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
                          from-orange-600 to-red-600 text-white flex items-center"
-              onClick={() => {
+              onClick={async () => {
                 console.log('[Generate New] Clicked');
+                try {
+                  // Get the current prompt
+                  const prompt = agent.profile_image_options?.[0]?.generations_by_pk?.prompt || draftFields.imageDescription;
+                  
+                  if (!prompt) {
+                    console.error('No prompt available for image generation');
+                    return;
+                  }
+
+                  // Show loading state
+                  setAgent(prev => ({
+                    ...prev,
+                    profile_image: {
+                      details: {
+                        url: 'https://via.placeholder.com/400x400?text=Generating+Image',
+                        image_id: '',
+                        generationId: ''
+                      }
+                    }
+                  }));
+
+                  // Generate new image
+                  const imageResponse = await generateSingleImage(prompt, LEONARDO_MODEL_ID, LEONARDO_STYLE_UUID);
+                  
+                  if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
+                    throw new Error('No image URL received');
+                  }
+
+                  const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
+                  const loadedImageUrl = await loadImageWithFallback(imageUrl);
+
+                  // Update agent with new image
+                  setAgent(prev => ({
+                    ...prev,
+                    profile_image: {
+                      details: {
+                        url: loadedImageUrl,
+                        image_id: imageResponse.generations_by_pk.generated_images[0].id,
+                        generationId: imageResponse.generations_by_pk.id
+                      }
+                    },
+                    profile_image_options: [{
+                      generations_by_pk: {
+                        ...imageResponse.generations_by_pk,
+                        prompt: prompt
+                      }
+                    }]
+                  }));
+
+                } catch (error) {
+                  console.error('Error generating new image:', error);
+                  // Show error state
+                  setAgent(prev => ({
+                    ...prev,
+                    profile_image: {
+                      details: {
+                        url: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
+                        image_id: '',
+                        generationId: ''
+                      }
+                    }
+                  }));
+                }
               }}
             >
               <RefreshCcw className="w-4 h-4 mr-2" />
@@ -506,6 +592,20 @@ const AgentCreator: React.FC = () => {
           </div>
 
           {/* Character Info Card */}
+          <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
+            <div className="mb-4">
+              <div className="text-lg font-semibold text-orange-400">Image Generation Description</div>
+              <textarea
+                value={draftFields.imageDescription}
+                onChange={handleDraftChange('imageDescription')}
+                onKeyDown={handleDraftKeyDown('imageDescription')}
+                placeholder="Enter image generation description (Press Enter to commit)"
+                rows={3}
+                className="w-full px-3 py-2 mt-2 rounded-md bg-slate-900/50 border border-orange-500/20 
+                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+              />
+            </div>
+          </div>
           <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">Agent Name</div>
