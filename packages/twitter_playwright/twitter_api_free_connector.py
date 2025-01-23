@@ -4,7 +4,11 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
-def login_and_save_state(username, password, phone_or_username, storage_path="state.json"):
+# Add this at the top level of the file
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATE_FILE = os.path.join(SCRIPT_DIR, "state.json")
+
+def login_and_save_state(username, password, phone_or_username, storage_path=STATE_FILE):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False, slow_mo=1000) # delay for 1 second for all actions
         context = browser.new_context()
@@ -46,13 +50,13 @@ def login_and_save_state(username, password, phone_or_username, storage_path="st
         page.wait_for_url(lambda url: "home" in url, timeout=15000)
         print("[INFO] Logged in successfully (assuming no extra checks).")
 
-        # 4) Save the current browser context’s storage state to a file
+        # 4) Save the current browser context's storage state to a file
         context.storage_state(path=storage_path)
         print(f"[INFO] Storage state saved to {storage_path}.")
 
         browser.close()
 
-def post_tweet_with_saved_state(tweet_text, storage_path="state.json"):
+def post_tweet_with_saved_state(tweet_text, storage_path=STATE_FILE):
     with sync_playwright() as p:
         # Create a new context with the previously saved state
         browser = p.chromium.launch(headless=False)
@@ -88,22 +92,21 @@ def main(tweet_content):
     X_POST_TEXT = tweet_content
 
     # check if state.json exist
-    # need a timestamp and check if the file is older than 1 hour
-    if os.path.exists("state.json"):
-        print("[INFO] state.json exists. Using existing state.")
+    if os.path.exists(STATE_FILE):
+        print(f"[INFO] state.json exists at {STATE_FILE}. Using existing state.")
     else:
-        print("[INFO] state.json does not exist. Logging in and saving state.")
+        print(f"[INFO] state.json does not exist at {STATE_FILE}. Logging in and saving state.")
 
         login_and_save_state(
             username=os.getenv("X_USERNAME"),
             password=os.getenv("X_PASSWORD"),
             phone_or_username=os.getenv("X_PHONE_OR_USERNAME"),
-            storage_path="state.json"
+            storage_path=STATE_FILE
         )
 
     post_tweet_with_saved_state(
         tweet_text=X_POST_TEXT,
-        storage_path="state.json"
+        storage_path=STATE_FILE
     )
 
 if __name__ == "__main__":

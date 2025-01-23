@@ -21,7 +21,22 @@ def handle_create_agent(ai_model):
     print("\nCreating new agent...")
     agent_file_path = step_1.create_agent(ai_model, agent_concept)
 
+    set_tracker_post_every_x_minutes(agent_file_path, 30)
+
     return agent_file_path
+
+def set_tracker_post_every_x_minutes(agent_file_path, post_every_x_minutes):
+    """Set the tracker post every x minutes for an agent
+    
+    Args:
+        agent_file_path (str): Path to the agent's master file
+        post_every_x_minutes (int): The number of minutes to post every
+    """
+    agent_master_template = config_utils.load_agent_master_template(agent_file_path)
+
+    agent_master_template["tracker"]["post_every_x_minutes"] = post_every_x_minutes
+    
+    config_utils.save_agent_master_template(agent_master_template, agent_file_path)
 
 def handle_select_agent():
     """Handle selecting an agent
@@ -75,7 +90,7 @@ def handle_select_season(current_agent):
             choice = int(input("\nSelect a season (number): "))
             if 1 <= choice <= len(seasons):
                 selected_season = seasons[choice - 1]
-                print(f"Selected season: {selected_season}")
+                print(f"Selected season: {selected_season}")               
                 break
             else:
                 print("Invalid choice. Please try again.")
@@ -168,7 +183,7 @@ def handle_chat_with_agent(ai_model, current_agent, agent_file_path):
             print(f"\n{current_agent}: {response['response']}")
             
 
-def handle_manage_scheduler(scheduler, current_agent):
+def handle_manage_scheduler(scheduler, current_agent, post_manager):
     """Handle scheduler management options
     
     Args:
@@ -190,6 +205,10 @@ def handle_manage_scheduler(scheduler, current_agent):
     if choice == "1":
         if not scheduler.is_running():
             scheduler.start()
+            scheduler.schedule_posts(
+                post_manager=post_manager, 
+                tracker_data=config_utils.load_agent_tracker_config(current_agent), 
+                )
             print("Scheduler started.")
         else:
             print("Scheduler is already running.")

@@ -19,10 +19,16 @@
 import os
 import json
 import datetime
+import os
+from dotenv import load_dotenv
 
 # custom ARAI code imports
 import connectors.twitter_connector as twitter
 from packages.twitter_playwright import twitter_api_free_connector as twitter_api_free
+from handlers import menu_handlers
+
+# Load environment variables
+load_dotenv()
 
 class PostManager:
     """Manages posts for an agent using JSON configuration files.
@@ -91,11 +97,11 @@ class PostManager:
         else:
             print("No more unposted seasons available")
             # Reset to beginning
-            self.current_season = 0
-            self.current_episode = 0
-            self.current_post = 0
+            self.current_season = -1
+            self.current_episode = -1
+            self.current_post = -1
             self._save_master_file()
-            raise ValueError(f"No more content available to post")
+            raise ValueError(f"No more content available to post")            
 
     def change_episode(self, episode_number: int):
         """Change the current episode
@@ -143,7 +149,7 @@ class PostManager:
         
         return post_content
 
-    def post_to_twitter(self, live_post: bool = False):
+    def post_to_twitter(self):
         """Post content to Twitter
 
         Args:
@@ -151,7 +157,7 @@ class PostManager:
         """
         tweet_content = self.next_post_number(self.current_post)
 
-        if live_post:
+        if os.getenv("X_LIVE") == "True":
 
             if (os.getenv("X_API_OFFICIAL") == "True"):
                 tweet_result = self.twitter_connector.post_tweet(tweet_content)
