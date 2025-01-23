@@ -33,6 +33,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
   const agentName = agent.name || 'Unknown Agent';
   const agentPersonality = Array.isArray(agent.personality) ? agent.personality : [];
   const agentCommunicationStyle = Array.isArray(agent.communicationStyle) ? agent.communicationStyle : [];
@@ -48,6 +49,13 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
     >
       Example Agent
     </button>
+  ) : isAdded ? (
+    <button
+      className="opacity-50 cursor-not-allowed bg-green-600 text-white px-4 py-2 rounded"
+      disabled
+    >
+      Added ✓
+    </button>
   ) : (
     <button
       onClick={async (e) => {
@@ -56,6 +64,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
         setIsRegenerating(true);
         try {
           await onAddAgent(agent);
+          setIsAdded(true);
         } finally {
           setIsRegenerating(false);
         }

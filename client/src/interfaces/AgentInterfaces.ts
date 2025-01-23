@@ -26,7 +26,7 @@ export interface GeneratedImage {
 }
 
 export interface GenerationsByPk {
-  id: string;
+  id?: string;
   prompt?: string;
   generated_images: GeneratedImage[];
 }

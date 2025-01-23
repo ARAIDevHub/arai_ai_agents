@@ -216,18 +216,29 @@ const AgentCreator: React.FC = () => {
         console.log(`[handleDraftKeyDown] Committing ${field}:`, draftFields[field]);
         
         if (field === 'imageDescription') {
-          setAgent(prev => ({
-            ...prev,
-            profile_image_options: prev.profile_image_options.map((option, index) => 
-              index === 0 ? {
-                ...option,
-                generations_by_pk: {
-                  ...option.generations_by_pk,
-                  prompt: draftFields[field]
-                }
-              } : option
-            )
-          }));
+          setAgent(prev => {
+            const newImageOption: ProfileImageOption = {
+              generations_by_pk: {
+                prompt: draftFields[field],
+                generated_images: []
+              }
+            };
+
+            return {
+              ...prev,
+              profile_image_options: prev.profile_image_options?.length ? 
+                prev.profile_image_options.map((option, index) => 
+                  index === 0 ? {
+                    ...option,
+                    generations_by_pk: {
+                      ...option.generations_by_pk,
+                      prompt: draftFields[field]
+                    }
+                  } : option
+                ) : 
+                [newImageOption]
+            };
+          });
         } else {
           setAgent(prev => ({
             ...prev,
@@ -662,7 +673,7 @@ const AgentCreator: React.FC = () => {
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">Image Generation Description</div>
               <textarea
-                value={draftFields.imageDescription}
+                value={draftFields.imageDescription || ''}
                 onChange={handleDraftChange('imageDescription')}
                 onKeyDown={handleDraftKeyDown('imageDescription')}
                 placeholder="Enter image generation description (Press Enter to commit)"
