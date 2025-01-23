@@ -23,12 +23,14 @@ import json
 from models.gemini_model import GeminiModel
 from utils.scheduler import AgentScheduler
 from handlers import menu_handlers
+from utils.post_manager import PostManager
 
 def main():
     """Main function for the ARAI Agents application"""
     # Initialize the AI model and scheduler
     ai_model = GeminiModel()
     scheduler = AgentScheduler()
+    post_manager = PostManager()
     
     # Initialize variables
     current_agent = None
@@ -62,6 +64,7 @@ def main():
         elif choice == "2":
             current_agent, agent_file_path = menu_handlers.handle_select_agent()
         elif choice == "3":
+            # update this to social media feed - prints off all the posts for the season
             menu_handlers.handle_select_season(current_agent)
         elif choice == "4":
             menu_handlers.handle_create_content(ai_model, current_agent, agent_file_path)
@@ -70,7 +73,7 @@ def main():
         elif choice == "6":
             menu_handlers.handle_create_profile_images(ai_model, current_agent, agent_file_path)
         elif choice == "7":
-            menu_handlers.handle_manage_scheduler(scheduler, current_agent)
+            menu_handlers.handle_manage_scheduler(scheduler, current_agent, post_manager)
         elif choice == "8":
             menu_handlers.handle_chat_with_agent(ai_model, current_agent, agent_file_path)
         elif choice == "9":
