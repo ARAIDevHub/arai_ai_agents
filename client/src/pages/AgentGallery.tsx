@@ -97,7 +97,7 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
 
 const AgentGallery: React.FC = () => {
   // Add selected agent state
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  // const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
@@ -311,7 +311,7 @@ const AgentGallery: React.FC = () => {
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      setSelectedAgent(agent);
+      // setSelectedAgent(agent);
 
       // You can add additional logic here, like:
       // - Navigate to a chat page
