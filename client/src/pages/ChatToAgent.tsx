@@ -16,6 +16,7 @@ const ChatToAgent: React.FC = () => {
   const [displayChatHistory, setDisplayChatHistory] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedCharacterIndex, setSelectedCharacterIndex] = useState<number>(-1);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,17 +100,20 @@ const ChatToAgent: React.FC = () => {
           <select 
             className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
             onChange={(e) => {
-              const char = characters.find(c => c.agent.agent_details.name === e.target.value);
+              const index = parseInt(e.target.value);
+              const char = characters[index];
               if (char) {
+                
+                setSelectedCharacterIndex(index);
                 setSelectedAgent(char);
                 setDisplayChatHistory([]);
               }
             }}
-            value={selectedAgent?.agent?.agent_details?.name || ""}
+            value={selectedCharacterIndex}
           >
-            <option value="" className="text-white">Select an Agent</option>
+            <option value={-1} className="text-white">Select an Agent</option>
             {characters.map((char, index) => (
-              <option key={index} value={char.agent.agent_details.name}>
+              <option key={index} value={index}>
                 {char.agent.agent_details.name}
                 {char.agent.master_file_path?.includes('_1') ? ' (1)' : ''}
               </option>

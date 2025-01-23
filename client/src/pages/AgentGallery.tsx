@@ -29,11 +29,11 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
         'Accept': 'image/*'
       }
     });
-    
+
     if (!response.ok) {
       throw new Error('Image failed to load');
     }
-    
+
     return url;
   } catch (error) {
     console.error('[AgentGallery] Error loading image:', error);
@@ -102,7 +102,7 @@ const AgentGallery: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const initialMount = useRef(true);
- 
+
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {
     try {
@@ -137,7 +137,7 @@ const AgentGallery: React.FC = () => {
     try {
       // Create a new blank agent with proper initialization
       const newAgent = createBlankAgent();
-      
+
       if (!newAgent.agent) {
         console.error("[handleAddAgent] - New agent object is not properly initialized");
         return;
@@ -155,7 +155,7 @@ const AgentGallery: React.FC = () => {
       // populate our concept
       newAgent.agent.concept = agent.concept || '';
       console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
-      console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:",  newAgent.agent.concept);
+      console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:", newAgent.agent.concept);
 
       // populate our agent details
       const agentDetails = newAgent.agent.agent_details;
@@ -205,7 +205,7 @@ const AgentGallery: React.FC = () => {
       // Call our api to save the new agent
       const newAgentResponse = await createAgent(newAgent);
       console.log("[handleAddAgent] - New agent response:", newAgentResponse);
-      
+
       return newAgentResponse;
     } catch (error) {
       console.error("[handleAddAgent] Error:", error);
@@ -217,22 +217,22 @@ const AgentGallery: React.FC = () => {
   const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
     const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
     const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
-    
+
     try {
       // Show loading state immediately with loading name
       setRandomAgents(prevAgents =>
         prevAgents.map(agent =>
           agent.id === agentId
-            ? { 
-                ...agent, 
-                name: 'Generating Agent...', // Add loading name
-                isLoading: true, 
-                avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
-                personality: [],
-                communicationStyle: [],
-                emojis: [],
-                hashtags: []
-              }
+            ? {
+              ...agent,
+              name: 'Generating Agent...', // Add loading name
+              isLoading: true,
+              avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
+              personality: [],
+              communicationStyle: [],
+              emojis: [],
+              hashtags: []
+            }
             : agent
         )
       );
@@ -250,14 +250,14 @@ const AgentGallery: React.FC = () => {
       };
 
       // Update UI to show we're now generating the image
-      setRandomAgents(prevAgents => 
-        prevAgents.map(agent => 
-          agent.id === agentId 
-            ? { 
-                ...newAgent, 
-                avatar: 'https://via.placeholder.com/400x400?text=Generating+Image', 
-                isLoading: true 
-              }
+      setRandomAgents(prevAgents =>
+        prevAgents.map(agent =>
+          agent.id === agentId
+            ? {
+              ...newAgent,
+              avatar: 'https://via.placeholder.com/400x400?text=Generating+Image',
+              isLoading: true
+            }
             : agent
         )
       );
@@ -276,13 +276,13 @@ const AgentGallery: React.FC = () => {
       setRandomAgents(prevAgents =>
         prevAgents.map(agent =>
           agent.id === agentId
-            ? { 
-                ...newAgent, 
-                avatar: loadedImageUrl, 
-                isLoading: false,
-                leonardoResponse: imageResponse,  // Add the full Leonardo response
-                leonardoImage: imageResponse.generations_by_pk.generated_images[0] // Add the image data
-              }
+            ? {
+              ...newAgent,
+              avatar: loadedImageUrl,
+              isLoading: false,
+              leonardoResponse: imageResponse,  // Add the full Leonardo response
+              leonardoImage: imageResponse.generations_by_pk.generated_images[0] // Add the image data
+            }
             : agent
         )
       );
@@ -293,10 +293,10 @@ const AgentGallery: React.FC = () => {
         prevAgents.map(agent =>
           agent.id === agentId
             ? {
-                ...agent,
-                avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
-                isLoading: false
-              }
+              ...agent,
+              avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
+              isLoading: false
+            }
             : agent
         )
       );
@@ -307,18 +307,18 @@ const AgentGallery: React.FC = () => {
   const handleSelectAgent = async (agent: Agent) => {
     try {
       console.log('[handleSelectAgent] Selected agent:', agent);
-      
+
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setSelectedAgent(agent);
-      
+
       // You can add additional logic here, like:
       // - Navigate to a chat page
       // - Open a modal
       // - Update global state
       // - Make API calls
-      
+
       return Promise.resolve();
     } catch (error) {
       console.error('[handleSelectAgent] Error:', error);
@@ -345,31 +345,28 @@ const AgentGallery: React.FC = () => {
         <header className="flex justify-between items-center mb-8">
           <div className="flex gap-4">
             <button
-              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
-                filter === 'all' 
-                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${filter === 'all'
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700'
                   : 'text-gray-300 hover:text-cyan-400'
-              }`}
+                }`}
               onClick={() => setFilter('all')}
             >
               All
             </button>
             <button
-              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
-                filter === 'random' 
-                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${filter === 'random'
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700'
                   : 'text-gray-300 hover:text-cyan-400'
-              }`}
+                }`}
               onClick={() => setFilter('random')}
             >
               Random
             </button>
             <button
-              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${
-                filter === 'yourAgents' 
-                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700' 
+              className={`text-lg font-semibold px-4 py-2 rounded-md text-white ${filter === 'yourAgents'
+                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700'
                   : 'text-gray-300 hover:text-cyan-400'
-              }`}
+                }`}
               onClick={() => setFilter('yourAgents')}
             >
               Your Agents
@@ -417,7 +414,7 @@ const AgentGallery: React.FC = () => {
               </div>
             </>
           )}
-          
+
           {/* Your Agents filter section */}
           {filter === 'yourAgents' && (
             <>

@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080/api'; // Your Flask API base URL
+const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
 
 // Function to get all agents
 export async function getAgents() {
@@ -17,11 +17,11 @@ export async function createAgent(agentData: any) {
   if (agentData.agent) {
     agentData = agentData.agent;
   }
-  
+
   const response = await fetch(`${BASE_URL}/agents`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(agentData),
   });
@@ -38,9 +38,9 @@ export async function getCharacters() {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const data = await response.json();
-  console.log("[agentsApi] - response", response);  
-  console.log("[agentsApi] - data", data);  
-  
+  console.log("[agentsApi] - response", response);
+  console.log("[agentsApi] - data", data);
+
   // Return the data directly
   return data; // Returns an array of the characters
 }
@@ -48,9 +48,9 @@ export async function getCharacters() {
 // Function to create a random agent
 export async function createRandomAgent(concept?: string) {
   const response = await fetch(`${BASE_URL}/agents/random`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ concept }),
   });
@@ -61,19 +61,23 @@ export async function createRandomAgent(concept?: string) {
 }
 
 // Function to send a chat message to an agent
-export async function sendChatMessage(masterFilePath: string, message: string, chatHistory: any) {
+export async function sendChatMessage(
+  masterFilePath: string,
+  message: string,
+  chatHistory: any
+) {
   const response = await fetch(`${BASE_URL}/agents/chat`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       prompt: message,
       master_file_path: masterFilePath,
-      chat_history: chatHistory
+      chat_history: chatHistory,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -82,7 +86,11 @@ export async function sendChatMessage(masterFilePath: string, message: string, c
 
 // Function to get chat history for an agent
 export async function getChatHistory(masterFilePath: string) {
-  const response = await fetch(`${BASE_URL}/agents/chat-history?master_file_path=${encodeURIComponent(masterFilePath)}`);
+  const response = await fetch(
+    `${BASE_URL}/agents/chat-history?master_file_path=${encodeURIComponent(
+      masterFilePath
+    )}`
+  );
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -90,18 +98,21 @@ export async function getChatHistory(masterFilePath: string) {
 }
 
 // Function to create a new season
-export async function createSeason(masterFilePath: string, numberOfEpisodes: number = 3) {
+export async function createSeason(
+  masterFilePath: string,
+  numberOfEpisodes: number = 3
+) {
   const response = await fetch(`${BASE_URL}/agents/seasons`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       master_file_path: masterFilePath,
       number_of_episodes: numberOfEpisodes,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -109,22 +120,25 @@ export async function createSeason(masterFilePath: string, numberOfEpisodes: num
 }
 
 // Function to create posts for episodes
-export async function createEpisodePosts(masterFilePath: string, numberOfPosts: number = 6) {
+export async function createEpisodePosts(
+  masterFilePath: string,
+  numberOfPosts: number = 6
+) {
   const response = await fetch(`${BASE_URL}/agents/episodes/posts`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       master_file_path: masterFilePath,
       number_of_posts: numberOfPosts,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   return await response.json();
 }
 
-// ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent) 
+// ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent)

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Brain, Sparkles } from 'lucide-react';
+import { Brain } from 'lucide-react';
 
 const Home = () => {
   return (
@@ -7,7 +7,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Hero Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url("/public/arai-hero.jpg")',
@@ -15,7 +15,7 @@ const Home = () => {
             filter: 'brightness(0.8)'
           }}
         />
-        
+
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950" />
 
