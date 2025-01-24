@@ -15,6 +15,11 @@ const SocialFeed: React.FC = () => {
   const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
   const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
 
+  useEffect(() => {
+    // Update timeLeft whenever delayBetweenPosts changes
+    setTimeLeft(delayBetweenPosts * 60);
+  }, [delayBetweenPosts]);
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -142,6 +147,9 @@ const SocialFeed: React.FC = () => {
     const postLoop = async (posts: Post[], delayInMinutes: number) => {
       const delayInMilliseconds = delayInMinutes * 60 * 1000; // Convert minutes to milliseconds
 
+      // Reset the timer at the start of the post loop
+      setTimeLeft(delayInMinutes * 60);
+
       // Create a map of all posts in the fullSeasonsArray
       const fullSeasonsArray = selectedCharacter.agent.seasons;
       const allPostsMap = new Map<string, Post>();
@@ -181,6 +189,9 @@ const SocialFeed: React.FC = () => {
 
         console.log(`Waiting for ${delayInMilliseconds} milliseconds before next post.`);
         await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
+
+        // Reset the timer after each post
+        setTimeLeft(delayInMinutes * 60);
       }
     };
 
@@ -206,7 +217,7 @@ const SocialFeed: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto  max-w-4xl">
       {/* Agent Selection Row */}
       <div className="mb-6 flex items-center justify-center gap-4">
         <div className="flex items-center">
@@ -263,44 +274,44 @@ const SocialFeed: React.FC = () => {
         <div className="absolute inset-0 bg-slate-900/80" />
 
         {/* Wrap content in relative div to appear above overlay */}
-        <div className="relative z-10 flex flex-col h-full">
+        <div className="relative z-10 flex flex-col h-full justify-center items-center">
           {/* Feed Header */}
-          <div className="mb-8 pt-6 px-4 flex justify-between items-center">
-            <div className="flex flex-col items-center flex-grow">
+          <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
+            <div className="flex flex-col items-center w-full text-center">
               <h2 className="text-2xl font-bold text-white">
                 {selectedCharacter
                   ? `${selectedCharacter.agent.agent_details.name}'s Feed`
                   : "Select an Agent"}
               </h2>
-              <p className="text-gray-400 mb-4">
+              <p className="text-gray-400 mb-2">
                 {characterPosts.length} Posts Available
               </p>
             </div>
-            <div className="text-white text-lg">
+            <div className="absolute right-0 text-white text-lg p-3">
               Next post in: {formatTime(timeLeft)}
             </div>
           </div>
 
           {selectedCharacter && (
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center p-3">
               <Button
                 onClick={handleGenerateContent}
                 disabled={isGenerating}
-                className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? "Generating..." : "Generate Posts Content"}
               </Button>
 
               <Button
                 onClick={handleStartPostManager}
-                className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+                className="bg-orange-400 hover:bg-orange-500"
               >
                 Login to Twitter
               </Button>
 
               <Button
                 onClick={handlePostToTwitter}
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                className="bg-orange-500 hover:bg-orange-600"
               >
                 Post to Twitter
               </Button>
