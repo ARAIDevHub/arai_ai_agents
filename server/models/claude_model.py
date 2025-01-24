@@ -3,6 +3,7 @@ import anthropic
 from .base_model import ModelInterface
 from dotenv import load_dotenv
 import sys
+import json
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -15,7 +16,7 @@ class DeepSeekModel(ModelInterface):
         model (str): The name of the DeepSeek model to use.
     """
 
-    def __init__(self, api_key=None, model_name="claude-3-5-sonnet-20241022"):
+    def __init__(self, my_api_key=None, model_name="claude-3-5-sonnet-20241022"):
         """Initialize the DeepSeek model.
 
         Args:
@@ -28,10 +29,15 @@ class DeepSeekModel(ModelInterface):
 
         self.model_name = model_name
 
-        if api_key:
-            self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        if my_api_key:
+            self.client = client = anthropic.Anthropic(
+            # defaults to os.environ.get("ANTHROPIC_API_KEY")
+            api_key=my_api_key,
+            )
         else:
-            self.client = OpenAI(api_key=os.environ.get('DEEPSEEK_API_KEY'), base_url="https://api.deepseek.com")
+            self.client = anthropic.Anthropic(
+            api_key=os.environ.get("ANTHROPIC_API_KEY")
+            )
 
     # -------------------------------------------------------------------
     # Helper to generate a response to a given prompt using the OpenAI API.
@@ -73,11 +79,12 @@ class DeepSeekModel(ModelInterface):
         """
         try:
             response = self.client.messages.create( # Create a chat completion with the OpenAI API
-                model=self.model_name, # Set the model type we want to use
-                messages=prompt # Set the prompt we want to use
+                model=self.model_name, # Set the model type we want to use                
+                messages=prompt, # Set the prompt we want to use
+                max_tokens=1024
             )
 
-            return response.content.strip()
+            return response.content[0].text if isinstance(response.content, list) else response.content
         except Exception as e:
             return f"Error generating response: {str(e)}"
 
@@ -139,11 +146,12 @@ class DeepSeekModel(ModelInterface):
             #     max_tokens=400, # Set the maximum number of tokens to generate
             # )
             response = self.client.messages.create( # Create a chat completion with the OpenAI API
-                model=self.model_name, # Set the model type we want to use
-                messages=messages # Set the prompt we want to use
+                model=self.model_name, # Set the model type we want to use                
+                messages=messages, # Set the prompt we want to use
+                max_tokens=1024
             )
 
-            return response.content.strip()
+            return response.content[0].text if isinstance(response.content, list) else response.content
 
         except Exception as e:
             return f"Error generating response: {str(e)}"
@@ -151,5 +159,13 @@ class DeepSeekModel(ModelInterface):
 
 if __name__ == "__main__":
     deepseek_model = DeepSeekModel()
-    response = deepseek_model.generate_response("Tell me 10 one liners about crypto.")
-    print(response)
+    response = deepseek_model.generate_response("Tell me 10 one liners about crypto. put them as a json object")
+    # Extract just the text content from the response
+    if hasattr(response, 'text'):
+        print("\nClaude's Response:\n")
+        print(response.text)
+        print("\n")
+    else:
+        print("\nClaude's Response:\n")
+        print(response)
+        print("\n")

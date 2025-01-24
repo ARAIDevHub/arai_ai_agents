@@ -10,15 +10,15 @@ class OpenAIModel(ModelInterface): # OpenAIModel inherits from ModelInterface
     OpenAI model implementation.
     '''
 
-    def __init__(self, api_key=None, model_name="gpt-4o"):
+    def __init__(self, my_api_key=None, model_name="gpt-4o"):
         '''
         Initialize the OpenAI model.
         '''
         
         # ai model setup
         self.model_name = model_name # Set the model type we want to use
-        if api_key:
-            self.client = OpenAI(api_key=api_key)
+        if my_api_key:
+            self.client = OpenAI(api_key=my_api_key)
         else:
             self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -140,5 +140,5 @@ class OpenAIModel(ModelInterface): # OpenAIModel inherits from ModelInterface
 
 if __name__ == "__main__":
     openai_model = OpenAIModel()
-    response = openai_model.generate_response("Tell me 10 one liners about crypto.")
+    response = openai_model.generate_response("Tell me 10 one liners about crypto. put them as a json object")
     print(response)

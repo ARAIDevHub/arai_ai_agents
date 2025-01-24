@@ -32,7 +32,7 @@ class GeminiModel(ModelInterface):
         model (str): The name of the Gemini model to use.
     """
 
-    def __init__(self, api_key=None, model_name="gemini-exp-1206"):
+    def __init__(self, my_api_key=None, model_name="gemini-exp-1206"):
         """Initialize the Gemini model.
 
         Args:
@@ -42,8 +42,8 @@ class GeminiModel(ModelInterface):
         Example:
             >>> gemini_model = GeminiModel()
         """
-        if api_key:
-            genai.configure(api_key=api_key)
+        if my_api_key:
+            genai.configure(api_key=my_api_key)
         else:
             genai.configure(api_key=os.environ.get('GOOGLE_GEMINI_API_KEY'))
         self.model = genai.GenerativeModel(model_name)
@@ -148,3 +148,9 @@ class GeminiModel(ModelInterface):
 
         except Exception as e:
             return f"Error generating response: {str(e)}"
+
+if __name__ == "__main__":
+    gemini_model = GeminiModel()
+    response = gemini_model.generate_response("Tell me 10 one liners about crypto. put them as a json object")
+    print(response)
+

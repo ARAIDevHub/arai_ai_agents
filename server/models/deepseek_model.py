@@ -32,7 +32,7 @@ class DeepSeekModel(ModelInterface):
         model (str): The name of the DeepSeek model to use.
     """
 
-    def __init__(self, api_key=None, model_name="deepseek-chat"):
+    def __init__(self, my_api_key=None, model_name="deepseek-chat"):
         """Initialize the DeepSeek model.
 
         Args:
@@ -45,8 +45,8 @@ class DeepSeekModel(ModelInterface):
 
         self.model_name = model_name
 
-        if api_key:
-            self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        if my_api_key:
+            self.client = OpenAI(api_key=my_api_key, base_url="https://api.deepseek.com")
         else:
             self.client = OpenAI(api_key=os.environ.get('DEEPSEEK_API_KEY'), base_url="https://api.deepseek.com")
 
@@ -168,5 +168,5 @@ class DeepSeekModel(ModelInterface):
 
 if __name__ == "__main__":
     deepseek_model = DeepSeekModel()
-    response = deepseek_model.generate_response("Tell me 10 one liners about crypto.")
+    response = deepseek_model.generate_response("Tell me 10 one liners about crypto. put them as a json object")
     print(response)
