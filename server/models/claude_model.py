@@ -1,22 +1,5 @@
-#
-# Module: deepseek_model
-#
-# This module implements the DeepSeekModel class for interacting with the DeepSeek API.
-#
-# Title: DeepSeek Model
-# Summary: DeepSeek model implementation.
-# Authors:
-#     - @TheBlockRhino
-# Created: 2025-01-22
-# Last edited by: @TheBlockRhino
-# Last edited date: 2025-01-22
-# URLs:
-#     - https://arai-ai.io
-#     - https://github.com/ARAI-DevHub/arai-ai-agents
-#     - https://x.com/TheBlockRhino
-
 import os
-from openai import OpenAI # Please install OpenAI SDK first: `pip3 install openai`
+import anthropic
 from .base_model import ModelInterface
 from dotenv import load_dotenv
 import sys
@@ -32,7 +15,7 @@ class DeepSeekModel(ModelInterface):
         model (str): The name of the DeepSeek model to use.
     """
 
-    def __init__(self, api_key=None, model_name="deepseek-chat"):
+    def __init__(self, api_key=None, model_name="claude-3-5-sonnet-20241022"):
         """Initialize the DeepSeek model.
 
         Args:
@@ -89,12 +72,12 @@ class DeepSeekModel(ModelInterface):
             >>> response = deepseek_model.generate_response_dictionary([{"role": "user", "parts": "What is the weather in Tokyo?"}])
         """
         try:
-            response = self.client.chat.completions.create( # Create a chat completion with the OpenAI API
+            response = self.client.messages.create( # Create a chat completion with the OpenAI API
                 model=self.model_name, # Set the model type we want to use
                 messages=prompt # Set the prompt we want to use
             )
 
-            return response.choices[0].message.content.strip()
+            return response.content.strip()
         except Exception as e:
             return f"Error generating response: {str(e)}"
 
@@ -149,18 +132,18 @@ class DeepSeekModel(ModelInterface):
 
             # generate the response
             # generate the response
-            # response = self.client.chat.completions.create( # Create a chat completion with the OpenAI API
+            # response = self.client.messages.create( # Create a chat completion with the OpenAI API
             #     model=self.model_name, # Set the model type we want to use
             #     messages=messages, # Set the prompt we want to use
             #     temperature=0.7, # Set the temperature of the response
             #     max_tokens=400, # Set the maximum number of tokens to generate
             # )
-            response = self.client.chat.completions.create( # Create a chat completion with the OpenAI API
+            response = self.client.messages.create( # Create a chat completion with the OpenAI API
                 model=self.model_name, # Set the model type we want to use
                 messages=messages # Set the prompt we want to use
             )
 
-            return response.choices[0].message.content.strip()
+            return response.content.strip()
 
         except Exception as e:
             return f"Error generating response: {str(e)}"
