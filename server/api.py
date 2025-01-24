@@ -142,7 +142,7 @@ def get_agents():
     """
     return jsonify(agents)
 
-@app.route('/api/agents/?id', methods=['POST'])
+@app.route('/api/agents/', methods=['POST'])
 def create_agent():
     """
     Creates a new agent from provided configuration. If an agent with the same name exists,
@@ -452,7 +452,10 @@ def start_post_manager_twitter():
 @app.route('/api/post-to-twitter', methods=['POST'])
 def post_to_twitter():
     global post_manager_twitter
+    print("\n")
     print("[post_to_twitter] - Starting post to twitter post_manager_twitter", post_manager_twitter)
+    print("\n")
+
     try:
         data = request.json
         print(f"[post_to_twitter] - data: {data}")
@@ -476,6 +479,49 @@ def post_to_twitter():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/agents/update-seasons', methods=['PUT'])
+def update_seasons():
+    """
+    Updates the seasons array for a specific agent using the agent's name.
+    
+    Request Body:
+        agent_name (str): Name of the agent
+        seasons (list): New seasons data to update
+        
+    Returns:
+        JSON: Updated agent data
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        agent_name = data.get('agent_name')
+        new_seasons = data.get('seasons')
+
+        if not agent_name or not new_seasons:
+            return jsonify({"error": "Agent name and seasons data are required"}), 400
+
+        # Construct the master file path using the agent's name
+        master_file_path = os.path.join('configs', agent_name, f"{agent_name}_master.json")
+
+        if not os.path.exists(master_file_path):
+            return jsonify({"error": "Agent master file not found"}), 404
+
+        # Load the existing agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            agent_data = json.load(f)
+
+        # Update the seasons array
+        agent_data['agent']['seasons'] = new_seasons
+
+        # Save the updated agent data back to the file
+        with open(master_file_path, 'w', encoding='utf-8') as f:
+            json.dump(agent_data, f, ensure_ascii=False, indent=4)
+
+        return jsonify(agent_data), 200
+
+    except Exception as e:
+        print(f"Error updating seasons: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")

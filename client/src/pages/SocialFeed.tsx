@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { MessageSquare, Heart } from "lucide-react";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager} from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager, createAgent, updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
 
 const SocialFeed: React.FC = () => {
@@ -12,6 +12,7 @@ const SocialFeed: React.FC = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5000); // Default delay of 5 seconds
 
   const getCharacterPosts = (character: any) => {
     if (!character?.agent?.seasons) return [];
@@ -89,8 +90,6 @@ const SocialFeed: React.FC = () => {
     }
   };
 
-
-
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
 
@@ -106,13 +105,68 @@ const SocialFeed: React.FC = () => {
   const handlePostToTwitter = async () => {
     if (!selectedCharacter) return;
 
-    try {
-      console.log("Posting to Twitter for:", selectedCharacter.agent.agent_details.name);
-      const response = await postToTwitter(selectedCharacter.agent.agent_details.name, "TEST");
-      console.log("Posted to Twitter successfully:", response);
-    } catch (error) {
-      console.error("Error posting to Twitter:", error);
-    }
+    const unpostedPosts = characterPosts.filter(post => !post.post_posted);
+
+    const postContentToTwitter = async (post: Post) => {
+      try {
+        console.log("Posting to Twitter for:", selectedCharacter.agent.agent_details.name);
+        const response = await postToTwitter(selectedCharacter.agent.agent_details.name, post.post_content);
+        console.log("Posted to Twitter successfully:", response);
+
+        post.post_posted = true;
+        setCharacterPosts([...characterPosts]);
+      } catch (error) {
+        console.error("Error posting to Twitter:", error);
+      }
+    };
+
+    const postLoop = async (posts: Post[], delay: number) => {
+      // Create a map for quick access to posts by post_id
+      const postMap = new Map(posts.map(post => [post.post_id, post]));
+
+      // Create a map of all posts in the fullSeasonsArray
+      const fullSeasonsArray = selectedCharacter.agent.seasons;
+      const allPostsMap = new Map<string, Post>();
+
+      fullSeasonsArray.forEach(season => {
+        season.episodes.forEach(episode => {
+          episode.posts.forEach(p => {
+            allPostsMap.set(p.post_id, p);
+          });
+        });
+      });
+
+      for (const post of posts) {
+        await postContentToTwitter(post);
+        post.post_posted = true;
+        setCharacterPosts([...characterPosts]);
+
+        try {
+          let agentName = selectedCharacter.agent.agent_details.name;
+
+          // Update the post_posted status using the allPostsMap
+          if (allPostsMap.has(post.post_id)) {
+            allPostsMap.get(post.post_id)!.post_posted = true;
+          }
+
+          // Attempt to update the agent's master data with the full seasons array
+          console.log("postLoop - Updating agent with full seasons array:", selectedCharacter);
+          await updateSeasons(agentName, fullSeasonsArray);
+          console.log("postLoop - Updating agent with Name:", agentName);
+          console.log("postLoop - Updating agent with Seasons:", fullSeasonsArray);
+
+          console.log("Agent updated successfully.");
+        } catch (error) {
+          console.error("Error updating agent:", error);
+        }
+
+        console.log(`Waiting for ${delay} milliseconds before next post.`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    };
+
+    console.log("Starting post loop with delay:", delayBetweenPosts);
+    postLoop(unpostedPosts, delayBetweenPosts);
   };
 
   if (loading) {
@@ -133,6 +187,21 @@ const SocialFeed: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Timer Input */}
+      <div className="mb-6 flex items-center justify-center gap-4">
+        <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
+          Set Delay Between Posts (ms):
+        </label>
+        <input
+          id="delayInput"
+          type="number"
+          value={delayBetweenPosts}
+          onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
+          min="0"
+          className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
+        />
+      </div>
+
       {/* Agent Selection Row */}
       <div className="mb-6 flex items-center justify-center gap-4">
         <div className="flex items-center">
@@ -224,7 +293,6 @@ const SocialFeed: React.FC = () => {
                 className="relative max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
               >
                 {/* Post Status Label */}
-                {console.log("post.post_posted:", post.post_posted)}
                 <div
                   className={`absolute top-4 right-4 px-2 py-1 rounded text-sm font-semibold ${
                     post.post_posted
@@ -289,12 +357,6 @@ const SocialFeed: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Episode Name */}
-                  {post.episodeName && (
-                    <div className="text-sm text-gray-500 italic">
-                      Episode Name: {post.episodeName}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}

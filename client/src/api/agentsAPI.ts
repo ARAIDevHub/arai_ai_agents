@@ -11,7 +11,7 @@ export async function getAgents() {
 
 // Function to create a new agent
 export async function createAgent(agentData: any) {
-  // console.log('[Client - agentsApi] - agentData', agentData);
+  console.log('[Client - agentsApi] - agentData', agentData);
   // If the agentData comes in as an Agent object, we need to drill down into the agent one level
   // This allows us to process both Agent and non-agent type objects
   if (agentData.agent) {
@@ -166,6 +166,24 @@ export async function postToTwitter(masterData: any, content: string) {
     body: JSON.stringify({
       master_data: masterData,
       content: content
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+export async function updateSeasons(agentName: string, seasons: any[]) {
+  const response = await fetch(`${BASE_URL}/agents/update-seasons`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      agent_name: agentName,
+      seasons: seasons,
     }),
   });
 
