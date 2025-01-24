@@ -23,7 +23,7 @@ def login_and_save_state(username, password, phone_or_email, storage_path=None):
 
         # If we already have a state file, we can return True
         if storage_path.exists():
-            print(f"[login_and_save_state] {storage_path} exists. Using existing state.")
+            print(f"[api_free_connector] - {storage_path} exists. Using existing state.")
             return True
 
         browser = p.chromium.launch(headless=False, slow_mo=1000)
@@ -35,63 +35,54 @@ def login_and_save_state(username, password, phone_or_email, storage_path=None):
         page.wait_for_timeout(1000)
 
         # 2) Fill in username
-        print(f"[login_and_save_state] - filling in username")
         page.wait_for_selector('input[name="text"]', timeout=10000)
         page.fill('input[name="text"]', username)
         page.keyboard.press("Enter")     
 
         try:
             # Attempt normal login flow
-            print(f"[login_and_save_state] - attempting normal login flow")
             page.wait_for_selector('input[name="password"]', timeout=5000)  # reduced from 10000
             page.fill('input[name="password"]', password)
             page.keyboard.press("Enter")
 
             # Wait for successful login
-            print(f"[login_and_save_state] - waiting for home page")
             page.wait_for_url(lambda url: "home" in url, timeout=5000)
-            print("[INFO] Logged in successfully through normal flow.")
+            print("[api_free_connector] - Logged in successfully through normal flow.")
 
         except:
-            print(f"[INFO] Normal login failed: Checking for unusual activity...")
+            print(f"[api_free_connector] - Normal login failed: Checking for unusual activity...")
 
             try:
                 # Check for unusual activity challenge
-                print(f"[login_and_save_state] - looking for unusual activity challenge")
                 page.wait_for_selector('input[data-testid="ocfEnterTextTextInput"]', timeout=3000)
-                print("[INFO] Unusual login activity popup detected.")
 
                 # Fill in phone or username
                 page.fill('input[data-testid="ocfEnterTextTextInput"]', phone_or_email)
                 page.keyboard.press("Enter")
                 page.wait_for_load_state("networkidle")
-                print("[INFO] Challenge response submitted.")
 
                 # Enter password again after challenge
-                print(f"[login_and_save_state] - entering password after challenge")
                 page.wait_for_selector('input[name="password"]', timeout=5000)
                 page.fill('input[name="password"]', password)
                 page.keyboard.press("Enter")
 
                 # Wait for successful login after challenge
-                print(f"[login_and_save_state] - waiting for home page after challenge")
                 page.wait_for_url(lambda url: "home" in url, timeout=5000)
-                print("[INFO] Logged in successfully after challenge.")
+                print("[api_free_connector] -  Logged in successfully after challenge.")
 
             except:
-                print("[ERROR] Login failed - unusual activity flow could not be completed.")
+                print("[api_free_connector] - Error: Login failed - unusual activity flow could not be completed.")
                 browser.close()
                 return False
 
         # Save the current browser context's storage state to a file
         context.storage_state(path=str(storage_path))
-        print(f"[INFO] Storage state saved to {storage_path}.")
+        print(f"[api_free_connector] - Storage state saved to {storage_path}.")
 
         browser.close()
         return True
 
 def post_tweet_with_saved_state(tweet_text, storage_path=None):
-    print(f"[post_tweet_with_saved_state] - tweet_text: {tweet_text}")
     if storage_path is None:
         storage_path = get_state_path()
         
@@ -103,12 +94,6 @@ def post_tweet_with_saved_state(tweet_text, storage_path=None):
 
         # Now page is already logged in if state.json is still valid
         page.goto("https://x.com/home")
-        print(f"[post_tweet_with_saved_state] - page.goto: {page.goto}")
-        # Wait a bit for the home feed to render
-        # page.wait_for_timeout(1000) # optional
-        # page.wait_for_load_state("networkidle")
-        print("[INFO] Checking if we are indeed logged in...")
-
         # Post a tweet
         tweet_box_selector = 'div[data-testid="tweetTextarea_0"]'
         page.wait_for_selector(tweet_box_selector, timeout=10000)
@@ -121,9 +106,10 @@ def post_tweet_with_saved_state(tweet_text, storage_path=None):
         page.wait_for_selector(post_button_selector, timeout=10000)
         page.click(post_button_selector)
         page.wait_for_timeout(3000)
-        print("[INFO] Tweet posted (assuming no errors).")
+        print(f"[Twitter API Free Connector] - Tweet posted: {tweet_text}")
 
         browser.close()
+        return True
 
 if __name__ == "__main__":
     """

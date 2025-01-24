@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { MessageSquare, Heart } from "lucide-react";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
@@ -13,6 +13,13 @@ const SocialFeed: React.FC = () => {
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
+  const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
 
   const getCharacterPosts = (character: any) => {
     if (!character?.agent?.seasons) return [];
@@ -102,6 +109,18 @@ const SocialFeed: React.FC = () => {
     }
   };
 
+  const startCountdown = () => {
+    const interval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  };
+
   const handlePostToTwitter = async () => {
     if (!selectedCharacter) return;
 
@@ -166,6 +185,7 @@ const SocialFeed: React.FC = () => {
     };
 
     console.log("Starting post loop with delay:", delayBetweenPosts, "minutes");
+    startCountdown(); // Start the countdown when posting begins
     postLoop(unpostedPosts, delayBetweenPosts);
   };
 
@@ -187,21 +207,6 @@ const SocialFeed: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Timer Input */}
-      <div className="mb-6 flex items-center justify-center gap-4">
-        <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
-          Set Delay Between Posts (minutes):
-        </label>
-        <input
-          id="delayInput"
-          type="number"
-          value={delayBetweenPosts}
-          onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
-          min="0"
-          className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
-        />
-      </div>
-
       {/* Agent Selection Row */}
       <div className="mb-6 flex items-center justify-center gap-4">
         <div className="flex items-center">
@@ -227,6 +232,19 @@ const SocialFeed: React.FC = () => {
             ))}
           </select>
         </div>
+        <div className="flex items-center">
+          <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
+            Post Delay (min):
+          </label>
+          <input
+            id="delayInput"
+            type="number"
+            value={delayBetweenPosts}
+            onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
+            min="0"
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
+          />
+        </div>
       </div>
 
       {/* Chat Interface */}
@@ -247,43 +265,48 @@ const SocialFeed: React.FC = () => {
         {/* Wrap content in relative div to appear above overlay */}
         <div className="relative z-10 flex flex-col h-full">
           {/* Feed Header */}
-          <div className="mb-8 pt-6 px-4">
-            <h2 className="text-2xl font-bold text-white">
-              {selectedCharacter
-                ? `${selectedCharacter.agent.agent_details.name}'s Feed`
-                : "AI Social Network"}
-            </h2>
-            <p className="text-gray-400 mb-4">
-              {characterPosts.length} Posts Available
-            </p>
-
-            {selectedCharacter && (
-              <div className="flex gap-4 justify-center">
-                <Button
-                  onClick={handleGenerateContent}
-                  disabled={isGenerating}
-                  className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isGenerating ? "Generating..." : "Generate Posts Content"}
-                </Button>
-
-                <Button
-                  onClick={handleStartPostManager}
-                  className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-                >
-                  Login to Twitter
-                </Button>
-
-                <Button
-                  onClick={handlePostToTwitter}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-                >
-                  Post to Twitter
-                </Button>
-
-              </div>
-            )}
+          <div className="mb-8 pt-6 px-4 flex justify-between items-center">
+            <div className="flex flex-col items-center flex-grow">
+              <h2 className="text-2xl font-bold text-white">
+                {selectedCharacter
+                  ? `${selectedCharacter.agent.agent_details.name}'s Feed`
+                  : "Select an Agent"}
+              </h2>
+              <p className="text-gray-400 mb-4">
+                {characterPosts.length} Posts Available
+              </p>
+            </div>
+            <div className="text-white text-lg">
+              Next post in: {formatTime(timeLeft)}
+            </div>
           </div>
+
+          {selectedCharacter && (
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={handleGenerateContent}
+                disabled={isGenerating}
+                className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? "Generating..." : "Generate Posts Content"}
+              </Button>
+
+              <Button
+                onClick={handleStartPostManager}
+                className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+              >
+                Login to Twitter
+              </Button>
+
+              <Button
+                onClick={handlePostToTwitter}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+              >
+                Post to Twitter
+              </Button>
+
+            </div>
+          )}
 
           {/* Posts Feed */}
           <div className="flex-grow overflow-y-auto space-y-4 p-4">

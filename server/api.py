@@ -424,12 +424,11 @@ def create_episode_content():
 @app.route('/api/start-post-manager/twitter', methods=['POST'])
 def start_post_manager_twitter():
     global post_manager_twitter
-    print("[start_post_manager_twitter] - Starting post manager")
 
     data = request.json
     agent_name = data.get('agent_name')
-    print(f"[start_post_manager_twitter] - agent_name: {agent_name}")
     
+    print("\n")
     if not agent_name:
         print("[start_post_manager_twitter] - Agent name is required")
         return jsonify({'error': 'Agent name is required'}), 400
@@ -452,10 +451,8 @@ def start_post_manager_twitter():
 @app.route('/api/post-to-twitter', methods=['POST'])
 def post_to_twitter():
     global post_manager_twitter
+    
     print("\n")
-    print("[post_to_twitter] - Starting post to twitter post_manager_twitter", post_manager_twitter)
-    print("\n")
-
     try:
         data = request.json
         master_data = data.get('master_data')
@@ -465,14 +462,11 @@ def post_to_twitter():
             return jsonify({'error': 'Master data or post content is required'}), 400
 
         if post_manager_twitter:
-            print(f"[post_to_twitter] - post_manager_twitter: {post_manager_twitter}")
-            # Now we have the full master_data object to work with
-            # agent_name = master_data['agent']['agent_details']['name']
-            
-            post_manager_twitter.post_single_tweet(post_content)
-
-            # post_manager_twitter.post_to_twitter(post_content)
-            return jsonify({'success': True}), 200
+            post_success = post_manager_twitter.post_single_tweet(post_content)
+            if post_success:
+                return jsonify({'success': True}), 200
+            else:
+                return jsonify({'error': 'Failed to post to Twitter'}), 500
         else:
             return jsonify({'error': 'Post manager not initialized'}), 500
             
