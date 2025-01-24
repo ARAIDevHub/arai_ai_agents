@@ -34,7 +34,7 @@ def set_tracker_post_every_x_minutes(agent_file_path, post_every_x_minutes):
     """
     agent_master_template = config_utils.load_agent_master_template(agent_file_path)
 
-    agent_master_template["tracker"]["post_every_x_minutes"] = post_every_x_minutes
+    agent_master_template["agent"]["tracker"]["post_every_x_minutes"] = post_every_x_minutes
     
     config_utils.save_agent_master_template(agent_master_template, agent_file_path)
 
@@ -45,6 +45,10 @@ def handle_select_agent():
         tuple: (selected agent name, agent file path)
     """
     agents = config_utils.list_available_agents()
+
+    # Filter out the temporary folder
+    agents = [agent for agent in agents if agent != "temporary"]
+
     if not agents:
         print("No agents found. Please create an agent first.")
         return None, None
@@ -90,12 +94,14 @@ def handle_select_season(current_agent):
             choice = int(input("\nSelect a season (number): "))
             if 1 <= choice <= len(seasons):
                 selected_season = seasons[choice - 1]
-                print(f"Selected season: {selected_season}")               
+                print(f"Selected season: {selected_season}")
+                config_utils.display_season_details(current_agent, choice-1)               
                 break
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:
             print("Please enter a valid number.")
+
 
 def handle_create_content(ai_model, current_agent, agent_file_path):
     """Handle creating content for an agent

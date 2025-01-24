@@ -1,58 +1,60 @@
 #
-# Module: gemini_model
+# Module: deepseek_model
 #
-# This module implements the GeminiModel class for interacting with the Gemini API.
+# This module implements the DeepSeekModel class for interacting with the DeepSeek API.
 #
-# Title: Gemini Model
-# Summary: Gemini model implementation.
+# Title: DeepSeek Model
+# Summary: DeepSeek model implementation.
 # Authors:
 #     - @TheBlockRhino
-# Created: 2024-12-31
+# Created: 2025-01-22
 # Last edited by: @TheBlockRhino
-# Last edited date: 2025-01-04
+# Last edited date: 2025-01-22
 # URLs:
 #     - https://arai-ai.io
 #     - https://github.com/ARAI-DevHub/arai-ai-agents
 #     - https://x.com/TheBlockRhino
+
 import os
-import google.generativeai as genai
+from openai import OpenAI # Please install OpenAI SDK first: `pip3 install openai`
 from .base_model import ModelInterface
 from dotenv import load_dotenv
-import yaml
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 load_dotenv()
 
-class GeminiModel(ModelInterface):
-    """Gemini model implementation.
+class DeepSeekModel(ModelInterface):
+    """DeepSeek model implementation.
 
     Attributes:
-        model (str): The name of the Gemini model to use.
+        model (str): The name of the DeepSeek model to use.
     """
 
-    def __init__(self, my_api_key=None, model_name="gemini-exp-1206"):
-        """Initialize the Gemini model.
+    def __init__(self, my_api_key=None, model_name="deepseek-chat"):
+        """Initialize the DeepSeek model.
 
         Args:
-            api_key (str): The API key to use for the Gemini model.
-            model_name (str): The name of the Gemini model to use.
+            api_key (str): The API key to use for the DeepSeek model.
+            model_name (str): The name of the DeepSeek model to use.
 
         Example:
-            >>> gemini_model = GeminiModel()
+            >>> deepseek_model = DeepSeekModel()
         """
+
+        self.model_name = model_name
+
         if my_api_key:
-            genai.configure(api_key=my_api_key)
+            self.client = OpenAI(api_key=my_api_key, base_url="https://api.deepseek.com")
         else:
-            genai.configure(api_key=os.environ.get('GOOGLE_GEMINI_API_KEY'))
-        self.model = genai.GenerativeModel(model_name)
+            self.client = OpenAI(api_key=os.environ.get('DEEPSEEK_API_KEY'), base_url="https://api.deepseek.com")
 
     # -------------------------------------------------------------------
-    # Helper to generate a response to a given prompt using the Gemini API.
+    # Helper to generate a response to a given prompt using the OpenAI API.
     # -------------------------------------------------------------------
     def generate_response(self, prompt, **kwargs):
-        """Generate a response to a given prompt using the Gemini API.
+        """Generate a response to a given prompt using the DeepSeek API.
 
         Args:
             prompt (str): The prompt to generate a response to.
@@ -62,8 +64,8 @@ class GeminiModel(ModelInterface):
             str: The generated response.
 
         Example:
-            >>> gemini_model = GeminiModel()
-            >>> response = gemini_model.generate_response("What is the weather in Tokyo?")
+            >>> deepseek_model = DeepSeekModel()
+            >>> response = deepseek_model.generate_response("What is the weather in Tokyo?")
         """
         if isinstance(prompt, str):
             return self.generate_response_from_string(prompt, **kwargs)       
@@ -83,14 +85,20 @@ class GeminiModel(ModelInterface):
             str: The generated response.
         
         Example:
-            >>> gemini_model = GeminiModel()
-            >>> response = gemini_model.generate_response_dictionary([{"role": "user", "parts": "What is the weather in Tokyo?"}])
+            >>> deepseek_model = DeepSeekModel()
+            >>> response = deepseek_model.generate_response_dictionary([{"role": "user", "parts": "What is the weather in Tokyo?"}])
         """
         try:
-            response = self.model.generate_content(prompt)
-            return response.text.strip()
+            response = self.client.chat.completions.create( # Create a chat completion with the OpenAI API
+                model=self.model_name, # Set the model type we want to use
+                messages=prompt # Set the prompt we want to use
+            )
+
+            return response.choices[0].message.content.strip()
         except Exception as e:
             return f"Error generating response: {str(e)}"
+
+
 
     # -------------------------------------------------------------------
     # Helper to generate a response to a given prompt using a string
@@ -108,8 +116,8 @@ class GeminiModel(ModelInterface):
             str: The generated response.
 
         Example:
-            >>> gemini_model = GeminiModel()
-            >>> response = gemini_model.generate_response_from_string("What is the weather in Tokyo?")
+            >>> deepseek_model = DeepSeekModel()
+            >>> response = deepseek_model.generate_response_from_string("What is the weather in Tokyo?")
         """
         # Extract personality and style from kwargs, or use defaults from agent_template
         if kwargs:
@@ -127,30 +135,38 @@ class GeminiModel(ModelInterface):
 
             # add personality and style to the instructions
             if personality or communication_style:
-                persona_prompt = f"{personality} {communication_style}"
+                persona_prompt = f"{personality} {communication_style}".strip()
                 messages.append({
-                    "role": "user",
-                    "parts": [persona_prompt]
+                    "role": "system",
+                    "content": persona_prompt
                 })
 
-            # user message
+            # User message
             messages.append({
                 "role": "user",
-                "parts": [prompt]
+                "content": prompt
             })
 
-            # Make sure that what is being sent to the model is correct
-            # print(messages)
-
             # generate the response
-            response = self.model.generate_content(messages)
-            return response.text.strip()
+            # generate the response
+            # response = self.client.chat.completions.create( # Create a chat completion with the OpenAI API
+            #     model=self.model_name, # Set the model type we want to use
+            #     messages=messages, # Set the prompt we want to use
+            #     temperature=0.7, # Set the temperature of the response
+            #     max_tokens=400, # Set the maximum number of tokens to generate
+            # )
+            response = self.client.chat.completions.create( # Create a chat completion with the OpenAI API
+                model=self.model_name, # Set the model type we want to use
+                messages=messages # Set the prompt we want to use
+            )
+
+            return response.choices[0].message.content.strip()
 
         except Exception as e:
             return f"Error generating response: {str(e)}"
 
-if __name__ == "__main__":
-    gemini_model = GeminiModel()
-    response = gemini_model.generate_response("Tell me 10 one liners about crypto. put them as a json object")
-    print(response)
 
+if __name__ == "__main__":
+    deepseek_model = DeepSeekModel()
+    response = deepseek_model.generate_response("Tell me 10 one liners about crypto. put them as a json object")
+    print(response)
