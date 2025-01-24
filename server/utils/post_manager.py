@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 # custom ARAI code imports
 import connectors.twitter_connector as twitter
-from packages.twitter_playwright import twitter_api_free_connector as twitter_api_free
+from connectors.twitter_api_free_connector import (login_and_save_state as twitter_api_free, post_tweet_with_saved_state)
 from handlers import menu_handlers
 
 # Load environment variables
@@ -50,6 +50,7 @@ class PostManager:
         self.agent_name = agent_name
         self.master_file = os.path.join("configs", agent_name, f"{agent_name}_master.json")
         self.twitter_connector = twitter.TwitterConnector()
+        self.twitter_api_free = twitter_api_free.login_and_save_state()
 
         # Load master configuration
         with open(self.master_file, 'r', encoding='utf-8') as f:
@@ -164,7 +165,7 @@ class PostManager:
             else:
                 tweet_result = twitter_api_free.main(tweet_content)
 
-            print(tweet_result)
+            print(f"[Post Manager] Tweet result: {tweet_result}")
 
             if tweet_result.startswith("Error"):
                 self.current_post -= 1

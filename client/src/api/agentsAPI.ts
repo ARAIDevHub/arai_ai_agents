@@ -141,4 +141,70 @@ export async function createEpisodePosts(
   return await response.json();
 }
 
+// Function to start the scheduler
+export async function startScheduler(agentName: string) {
+  const response = await fetch(`${BASE_URL}/scheduler/start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      agent_name: agentName,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Function to stop the scheduler
+export async function stopScheduler(agentName: string) {
+  const response = await fetch(`${BASE_URL}/scheduler/stop`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ agent_name: agentName }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Function to start the post manager
+export async function startPostManager(agentName: string) {
+  const response = await fetch(`${BASE_URL}/start-post-manager`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ agent_name: agentName }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Function to post to Twitter
+export async function postToTwitter(agentName: string) {
+  const response = await fetch(`${BASE_URL}/post-to-twitter`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ agent_name: agentName }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
 // ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent)

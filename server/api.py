@@ -23,6 +23,9 @@ from models.gemini_model import GeminiModel
 from prompt_chaining.step_5_agent_chat import agent_chat
 from prompt_chaining.step_2_create_content import create_seasons_and_episodes
 from prompt_chaining.step_3_create_posts import create_episode_posts
+from utils.post_manager import PostManager
+from utils.scheduler import AgentScheduler
+
 
 # Load environment variables
 load_dotenv()
@@ -413,6 +416,105 @@ def create_episode_content():
     except Exception as e:
         print(f"Error creating episode posts: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+# Twitter Posting 
+@app.route('/api/start-post-manager', methods=['POST'])
+def start_post_manager():
+    data = request.json
+    agent_name = data.get('agent_name')
+    if not agent_name:
+        return jsonify({'error': 'Agent name is required'}), 400
+
+    try:
+        post_manager = PostManager(agent_name)
+        # Assuming you have a method to start the post manager
+        post_manager.start()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/post-to-twitter', methods=['POST'])
+def post_to_twitter():
+    data = request.json
+    agent_name = data.get('agent_name')
+    if not agent_name:
+        return jsonify({'error': 'Agent name is required'}), 400
+
+    try:
+        post_manager = PostManager(agent_name)
+        post_manager.post_to_twitter()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/scheduler/start', methods=['POST'])
+def start_scheduler():
+    """
+    Starts the automated posting scheduler for an agent.
+    
+    Request Body:
+        agent_name (str): Name of the agent to schedule posts for
+        interval_minutes (int): Minutes between posts (optional, default 60)
+        
+    Returns:
+        JSON: Status of scheduler operation
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        agent_name = data.get('agent_name')
+        interval_minutes = data.get('interval_minutes', 60)  # Default to 60 minutes if not specified
+        
+        if not agent_name:
+            return jsonify({"error": "Agent name is required"}), 400
+            
+        # Initialize and start scheduler
+        scheduler = AgentScheduler()
+        scheduler.start()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Scheduler started"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error starting scheduler: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/scheduler/stop', methods=['POST'])
+def stop_scheduler():
+    """
+    Stops the automated posting scheduler for an agent.
+    
+    Request Body:
+        agent_name (str): Name of the agent to stop scheduling for
+        
+    Returns:
+        JSON: Status of scheduler operation
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        agent_name = data.get('agent_name')
+        
+        if not agent_name:
+            return jsonify({"error": "Agent name is required"}), 400
+            
+        # Initialize and stop scheduler
+        scheduler = AgentScheduler()
+        scheduler.stop()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Scheduler stopped for agent {agent_name}"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error stopping scheduler: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")
