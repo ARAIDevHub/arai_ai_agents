@@ -39,6 +39,28 @@ def list_available_agents():
                 agents.append(agent_dir)
     return agents
 
+def load_agent_master_template(agent_file_path):
+    """Load the master template for an agent
+    
+    Args:
+        agent_name (str): The name of the agent to load the master template for
+
+    Returns:
+        dict: The master template for the agent
+    """
+    with open(agent_file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_agent_master_template(agent_master_template, agent_file_path):
+    """Save the master template for an agent
+    
+    Args:
+        agent_master_template (dict): The master template for the agent
+        agent_file_path (str): The path to the agent's master file
+    """
+    with open(agent_file_path, 'w', encoding='utf-8') as f:
+        json.dump(agent_master_template, f, indent=4)
+
 def load_agent_tracker_config(agent_name):
     """Load configuration for the selected agent
     

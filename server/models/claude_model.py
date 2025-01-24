@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 load_dotenv()
 
-class DeepSeekModel(ModelInterface):
+class ClaudeModel(ModelInterface):
     """DeepSeek model implementation.
 
     Attributes:

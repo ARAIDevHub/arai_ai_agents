@@ -21,6 +21,9 @@ import json
 
 # custom ARAI imports
 from models.gemini_model import GeminiModel
+from models.openai_model import OpenAIModel
+from models.claude_model import ClaudeModel
+from models.deepseek_model import DeepSeekModel
 from utils.scheduler import AgentScheduler
 from handlers import menu_handlers
 from utils.post_manager import PostManager
@@ -28,9 +31,13 @@ from utils.post_manager import PostManager
 def main():
     """Main function for the ARAI Agents application"""
     # Initialize the AI model and scheduler
-    ai_model = GeminiModel()
+    # ai_model = GeminiModel()
+    # ai_model = OpenAIModel()
+    ai_model = ClaudeModel()
+    # ai_model = DeepSeekModel()
+
     scheduler = AgentScheduler()
-    post_manager = PostManager()
+    post_manager = None
     
     # Initialize variables
     current_agent = None
@@ -63,6 +70,7 @@ def main():
             agent_file_path = menu_handlers.handle_create_agent(ai_model)
         elif choice == "2":
             current_agent, agent_file_path = menu_handlers.handle_select_agent()
+            post_manager = PostManager(current_agent)
         elif choice == "3":
             # update this to social media feed - prints off all the posts for the season
             menu_handlers.handle_select_season(current_agent)
