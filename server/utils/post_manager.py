@@ -214,3 +214,21 @@ class PostManager:
 
         except Exception as e:
             print(f"Error writing to log file: {e}")
+
+    @classmethod
+    def post_single_tweet(cls, tweet_content: str) -> str:
+        """Class method to post a single tweet without needing to instantiate PostManager
+        
+        Args:
+            tweet_content (str): The content to tweet
+            
+        Returns:
+            str: Result of the tweet operation
+        """
+        print(f"[Post Manager] - post_single_tweet: {tweet_content}")
+        if X_LIVE == "True" and X_DRY_RUN != "True":
+            return post_tweet_with_saved_state(tweet_content)
+        else:
+            print(f"[Post Manager] - Dry run mode, would have posted: {tweet_content}")
+            return "Dry run - tweet not posted"
+

@@ -30,6 +30,9 @@ from utils.scheduler import AgentScheduler
 # Load environment variables
 load_dotenv()
 
+#Global Post Manager - Will be instantiated when a user logs in to Twitter
+global post_manager_twitter
+
 # Initialize Flask app with 20MB max content size
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB
@@ -418,24 +421,25 @@ def create_episode_content():
         return jsonify({"error": str(e)}), 500
 
 # Twitter Posting 
-@app.route('/api/start-post-manager', methods=['POST'])
-def start_post_manager():
-    print("[start_post_manager] - Starting post manager")
+@app.route('/api/start-post-manager/twitter', methods=['POST'])
+def start_post_manager_twitter():
+    global post_manager_twitter
+    print("[start_post_manager_twitter] - Starting post manager")
 
     data = request.json
     agent_name = data.get('agent_name')
-    print(f"[start_post_manager] - agent_name: {agent_name}")
+    print(f"[start_post_manager_twitter] - agent_name: {agent_name}")
     
     if not agent_name:
-        print("[start_post_manager] - Agent name is required")
+        print("[start_post_manager_twitter] - Agent name is required")
         return jsonify({'error': 'Agent name is required'}), 400
 
     try:
         # Create PostManager instance with the agent name
-        post_manager = PostManager(agent_name=agent_name)
-        print(f"[start_post_manager] - post_manager created: {post_manager}")
+        post_manager_twitter = PostManager(agent_name=agent_name)
+        print(f"[start_post_manager_twitter] - post_manager created: {post_manager_twitter}")
 
-        if post_manager:
+        if post_manager_twitter:
             return jsonify({'success': True, 'message': f'Post manager started for {agent_name}'}), 200
         else:
             return jsonify({'error': 'Failed to start post manager'}), 500
@@ -444,87 +448,33 @@ def start_post_manager():
         print(f"[start_post_manager] - Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/api/post-to-twitter', methods=['POST'])
 def post_to_twitter():
-    data = request.json
-    agent_name = data.get('agent_name')
-    if not agent_name:
-        return jsonify({'error': 'Agent name is required'}), 400
-
+    global post_manager_twitter
+    print("[post_to_twitter] - Starting post to twitter post_manager_twitter", post_manager_twitter)
     try:
-        post_manager = PostManager()
-        post_manager.post_to_twitter()
-        return jsonify({'success': True}), 200
+        data = request.json
+        print(f"[post_to_twitter] - data: {data}")
+        master_data = data.get('master_data')
+        post_content = data.get('content')
+        if not master_data or not post_content:
+            return jsonify({'error': 'Master data or post content is required'}), 400
+
+        if post_manager_twitter:
+            print(f"[post_to_twitter] - post_manager_twitter: {post_manager_twitter}")
+            # Now we have the full master_data object to work with
+            # agent_name = master_data['agent']['agent_details']['name']
+            
+            post_manager_twitter.post_single_tweet("TEST")
+
+            # post_manager_twitter.post_to_twitter(post_content)
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'error': 'Post manager not initialized'}), 500
+            
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-@app.route('/api/scheduler/start', methods=['POST'])
-def start_scheduler():
-    """
-    Starts the automated posting scheduler for an agent.
-    
-    Request Body:
-        agent_name (str): Name of the agent to schedule posts for
-        interval_minutes (int): Minutes between posts (optional, default 60)
-        
-    Returns:
-        JSON: Status of scheduler operation
-        int: HTTP status code
-    """
-    try:
-        data = request.get_json()
-        agent_name = data.get('agent_name')
-        interval_minutes = data.get('interval_minutes', 60)  # Default to 60 minutes if not specified
-        
-        if not agent_name:
-            return jsonify({"error": "Agent name is required"}), 400
-            
-        # Initialize and start scheduler
-        scheduler = AgentScheduler()
-        scheduler.start()
-        
-        return jsonify({
-            "success": True,
-            "message": f"Scheduler started"
-        }), 200
-        
-    except Exception as e:
-        print(f"Error starting scheduler: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/scheduler/stop', methods=['POST'])
-def stop_scheduler():
-    """
-    Stops the automated posting scheduler for an agent.
-    
-    Request Body:
-        agent_name (str): Name of the agent to stop scheduling for
-        
-    Returns:
-        JSON: Status of scheduler operation
-        int: HTTP status code
-    """
-    try:
-        data = request.get_json()
-        agent_name = data.get('agent_name')
-        
-        if not agent_name:
-            return jsonify({"error": "Agent name is required"}), 400
-            
-        # Initialize and stop scheduler
-        scheduler = AgentScheduler()
-        scheduler.stop()
-        
-        return jsonify({
-            "success": True,
-            "message": f"Scheduler stopped for agent {agent_name}"
-        }), 200
-        
-    except Exception as e:
-        print(f"Error stopping scheduler: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-
 
 
 if __name__ == '__main__':

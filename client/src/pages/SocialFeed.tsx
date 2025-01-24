@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { MessageSquare, Heart } from "lucide-react";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, startScheduler, stopScheduler, startPostManager, postToTwitter } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager} from "../api/agentsAPI";
 import { Button } from "../components/button";
 
 const SocialFeed: React.FC = () => {
@@ -89,29 +89,8 @@ const SocialFeed: React.FC = () => {
     }
   };
 
-  const handleStartScheduler = async () => {
-    if (!selectedCharacter) return;
 
-    try {
-      console.log("Starting scheduler for:", selectedCharacter.agent.agent_details.name);
-      const response = await startScheduler(selectedCharacter.agent.agent_details.name);
-      console.log("Scheduler started successfully:", response);
-    } catch (error) {
-      console.error("Error starting scheduler:", error);
-    }
-  };
-
-  const handleStopScheduler = async () => {
-    if (!selectedCharacter) return;
-
-    try {
-      console.log("Stopping scheduler for:", selectedCharacter.agent.agent_details.name);
-      const response = await stopScheduler(selectedCharacter.agent.agent_details.name);
-      console.log("Scheduler stopped successfully:", response);
-    } catch (error) {
-      console.error("Error stopping scheduler:", error);
-    }
-  };
+ 
 
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
@@ -130,7 +109,7 @@ const SocialFeed: React.FC = () => {
 
     try {
       console.log("Posting to Twitter for:", selectedCharacter.agent.agent_details.name);
-      const response = await postToTwitter(selectedCharacter.agent.agent_details.name);
+      const response = await postToTwitter(selectedCharacter.agent.agent_details.name, "TEST");
       console.log("Posted to Twitter successfully:", response);
     } catch (error) {
       console.error("Error posting to Twitter:", error);
@@ -221,32 +200,19 @@ const SocialFeed: React.FC = () => {
                 </Button>
 
                 <Button
+                  onClick={handleStartPostManager}
+                  className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+                >
+                  Login to Twitter
+                </Button>
+
+                <Button
                   onClick={handlePostToTwitter}
                   className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
                 >
                   Post to Twitter
                 </Button>
 
-                <Button
-                  onClick={handleStartScheduler}
-                  className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-                >
-                  Start Scheduler
-                </Button>
-
-                <Button
-                  onClick={handleStopScheduler}
-                  className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
-                >
-                  Stop Scheduler
-                </Button>
-
-                <Button
-                  onClick={handleStartPostManager}
-                  className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-                >
-                  Start Post Manager
-                </Button>
               </div>
             )}
           </div>
