@@ -22,7 +22,6 @@ const useCharacters = () => {
     if (!selectedCharacter && processedCharacters.length > 0) {
       handleCharacterSelect(processedCharacters[0]); // Select the first character by default.
     }
-    // console.log('[ProcessedCharacters] - processedCharacters:', processedCharacters);  
   }, [processedCharacters, selectedCharacter, handleCharacterSelect]);
 
   return {

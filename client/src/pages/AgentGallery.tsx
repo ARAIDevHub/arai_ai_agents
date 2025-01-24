@@ -105,7 +105,6 @@ const AgentGallery: React.FC = () => {
   const generateRandomAgentData = async (): Promise<Agent> => {
     try {
       const concept = generateCharacterConcept();
-      console.log("[generateRandomAgentData] Generated concept:", concept);
 
       const newRandomAgentData = await generateRandomAgent(concept);
       const agentObject = newRandomAgentData.agent;
@@ -148,12 +147,9 @@ const AgentGallery: React.FC = () => {
       }
 
       // Log the concept being saved
-      console.log("[handleAddAgent] - Saving agent with concept:", agent.concept);
 
       // populate our concept
       newAgent.agent.concept = agent.concept || '';
-      console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
-      console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:", newAgent.agent.concept);
 
       // populate our agent details
       const agentDetails = newAgent.agent.agent_details;
@@ -198,11 +194,8 @@ const AgentGallery: React.FC = () => {
         }
       }
 
-      console.log("[handleAddAgent] - New agent with image data:", newAgent);
-
       // Call our api to save the new agent
       const newAgentResponse = await createAgent(newAgent);
-      console.log("[handleAddAgent] - New agent response:", newAgentResponse);
 
       return newAgentResponse;
     } catch (error) {
@@ -240,7 +233,6 @@ const AgentGallery: React.FC = () => {
 
       // Generate new agent data
       const newAgentData = await generateRandomAgentData();
-      console.log("[handleSingleAgentRegeneration] New agent concept:", newAgentData.concept);
 
       const newAgent = {
         ...newAgentData,
@@ -304,18 +296,9 @@ const AgentGallery: React.FC = () => {
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
     try {
-      console.log('[handleSelectAgent] Selected agent:', agent);
 
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));
-
-      // setSelectedAgent(agent);
-
-      // You can add additional logic here, like:
-      // - Navigate to a chat page
-      // - Open a modal
-      // - Update global state
-      // - Make API calls
 
       return Promise.resolve();
     } catch (error) {

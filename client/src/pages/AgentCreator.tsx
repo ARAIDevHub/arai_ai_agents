@@ -84,7 +84,6 @@ const AgentCreator: React.FC = () => {
     selectedImage: undefined,
     seasons: [],
   });
-  console.log("[AgentCreator] Current agent:", agent);
 
   // The fetched characters
   const { characters, loading, error } = useCharacters();
@@ -211,10 +210,6 @@ const AgentCreator: React.FC = () => {
     (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        console.log(
-          `[handleDraftKeyDown] Committing ${field}:`,
-          draftFields[field]
-        );
 
         if (field === "imageDescription") {
           setAgent((prev) => {
@@ -273,9 +268,6 @@ const AgentCreator: React.FC = () => {
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        console.log(
-          `[handleTraitDraftKeyDown] Committing trait field: ${field}`
-        );
         // If field is "emojis", we split by space; otherwise, by comma
         const separator = field === "emojis" ? " " : ",";
         const arrayValue = draftTraits[field]
@@ -302,7 +294,6 @@ const AgentCreator: React.FC = () => {
     | "emojis";
 
   const handleDeleteTrait = (field: TraitField, value: string) => {
-    console.log("[handleDeleteTrait - Called] Field:", field, "Value:", value);
     setAgent((prev) => ({
       ...prev,
       agent_details: {
@@ -399,14 +390,9 @@ const AgentCreator: React.FC = () => {
       seasons: agent.seasons,
     };
 
-    console.log(
-      "[handleSubmit] Submitting agent with merged drafts:",
-      updatedAgent
-    );
-
     try {
-      const newAgent = await createAgent(updatedAgent);
-      console.log("Agent created:", newAgent);
+
+      await createAgent(updatedAgent);
 
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
@@ -423,10 +409,8 @@ const AgentCreator: React.FC = () => {
   //
   useEffect(() => {
     const loadCharacters = async () => {
-      console.log("[loadCharacters] Loading characters...");
       try {
         const charactersData = await getCharacters();
-        console.log("Raw characters data:", charactersData);
         if (!Array.isArray(charactersData)) {
           console.error(
             "Expected array of characters, received:",
@@ -437,11 +421,7 @@ const AgentCreator: React.FC = () => {
 
         const processed = charactersData.map((char) => {
           const agentProfileImageOptions = char.agent.profile_image_options;
-          console.log("Agent profile image options:", agentProfileImageOptions);
           const agentConcept = char.concept;
-
-          // console.log("Agent profile image options:", agentProfileImageOptions);
-
           const { agent } = char;
           if (!agent) return { agent: {} };
 
@@ -483,8 +463,7 @@ const AgentCreator: React.FC = () => {
             concept: agentConcept || "",
           };
         });
-
-        console.log("Processed characters:", processed);
+      console.log("Processed characters:", processed);
       } catch (error) {
         console.error("Error loading characters:", error);
       }
@@ -601,7 +580,6 @@ const AgentCreator: React.FC = () => {
               onClick={async () => {
                 if (isGenerating) return; // Prevent multiple clicks while generating
 
-                console.log("[Generate New] Clicked");
                 try {
                   setIsGenerating(true);
                   let prompt =
@@ -682,7 +660,6 @@ const AgentCreator: React.FC = () => {
                                 : ""
                             }`}
                   onClick={async () => {
-                    console.log("[ImageSelection] Clicked index:", index);
 
                     try {
                       setLoadingProgress(30);
@@ -776,7 +753,6 @@ const AgentCreator: React.FC = () => {
             <button
               key={id}
               onClick={() => {
-                console.log("[TabSwitch] to:", id);
                 setActiveTab(id);
               }}
               className={`flex-1 flex items-center justify-center px-4 py-2 

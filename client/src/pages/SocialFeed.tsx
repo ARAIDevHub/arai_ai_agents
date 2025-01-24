@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import useCharacters from "../hooks/useCharacters";
-import { MessageSquare, Heart } from "lucide-react";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
 import { createSeason, createEpisodePosts, postToTwitter, startPostManager,updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
@@ -16,6 +15,7 @@ const SocialFeed: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [isPosting, setIsPosting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     // Update timeLeft whenever delayBetweenPosts changes
@@ -70,11 +70,8 @@ const SocialFeed: React.FC = () => {
     setSelectedCharacter(char);
     const posts = getCharacterPosts(char);
     setCharacterPosts(posts);
-    console.log("Posts loaded:", posts.length);
 
     // Log the current selected agent
-    console.log("Current selected agent:", char);
-
     const unpostedPosts = posts.filter(post => !post.post_posted);
     setUnpostedCount(unpostedPosts.length);
   };
@@ -111,9 +108,9 @@ const SocialFeed: React.FC = () => {
     if (!selectedCharacter) return;
 
     try {
-      console.log("Starting post manager for:", selectedCharacter.agent.agent_details.name);
       const response = await startPostManager(selectedCharacter.agent.agent_details.name);
       console.log("Post manager started successfully:", response);
+      setIsLoggedIn(true);
     } catch (error) {
       console.error("Error starting post manager:", error);
     }
@@ -147,7 +144,6 @@ const SocialFeed: React.FC = () => {
 
     const postContentToTwitter = async (post: Post) => {
       try {
-        console.log("Posting to Twitter for:", selectedCharacter.agent.agent_details.name);
         const response = await postToTwitter(selectedCharacter.agent.agent_details.name, post.post_content);
         console.log("Posted to Twitter successfully:", response);
 
@@ -192,25 +188,18 @@ const SocialFeed: React.FC = () => {
           }
 
           // Attempt to update the agent's master data with the full seasons array
-          console.log("postLoop - Updating agent with full seasons array:", selectedCharacter);
           await updateSeasons(agentName, fullSeasonsArray);
-          console.log("postLoop - Updating agent with Name:", agentName);
-          console.log("postLoop - Updating agent with Seasons:", fullSeasonsArray);
-
           console.log("Agent updated successfully.");
         } catch (error) {
           console.error("Error updating agent:", error);
         }
 
-        console.log(`Waiting for ${delayInMilliseconds} milliseconds before next post.`);
         await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
 
         // Reset the timer after each post
         setTimeLeft(delayInMinutes * 60);
       }
     };
-
-    console.log("Starting post loop with delay:", delayBetweenPosts, "minutes");
     startCountdown(); // Start the countdown when posting begins
     postLoop(unpostedPosts, delayBetweenPosts);
   };
@@ -321,7 +310,7 @@ const SocialFeed: React.FC = () => {
                 onClick={handleStartPostManager}
                 className="bg-orange-400 hover:bg-orange-500"
               >
-                Login to Twitter
+                {isLoggedIn ? "Logged in" : "Login to Twitter"}
               </Button>
 
               <Button
@@ -397,17 +386,6 @@ const SocialFeed: React.FC = () => {
 
                 {/* Post Actions */}
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
-                  <div className="flex space-x-4 text-sm text-gray-400">
-                    <button className="flex items-center space-x-2 hover:text-cyan-400 transition duration-300">
-                      <Heart className="w-4 h-4" />
-                      <span>{Math.floor(Math.random() * 50)}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:text-cyan-400 transition duration-300">
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{Math.floor(Math.random() * 20)}</span>
-                    </button>
-                  </div>
-
                 </div>
               </div>
             ))}

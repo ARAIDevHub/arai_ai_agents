@@ -9,10 +9,8 @@ interface CharacterLoaderProps {
 const CharacterLoader: React.FC<CharacterLoaderProps> = ({ setCharacters }) => {
   useEffect(() => {
     const loadCharacters = async () => {
-      console.log('[loadCharacters] Loading characters...');
       try {
         const charactersData = await getCharacters();
-        console.log('Raw characters data:', charactersData);
         if (!Array.isArray(charactersData)) {
           console.error('Expected array of characters, received:', typeof charactersData);
           return;

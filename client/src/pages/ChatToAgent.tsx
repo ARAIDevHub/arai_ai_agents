@@ -35,7 +35,6 @@ const ChatToAgent: React.FC = () => {
           const masterFilePath = selectedAgent.agent.master_file_path || 
             `configs/${agentName}/${agentName}_master.json`;
           const history = await getChatHistory(masterFilePath);
-          console.log("[ChatToAgent] - loadChatHistory - history", history);
           setChatHistory(history);
         } catch (error) {
           console.error('Error loading chat history:', error);
@@ -69,8 +68,6 @@ const ChatToAgent: React.FC = () => {
       const masterFilePath = selectedAgent?.agent?.master_file_path || 
         `configs/${agentName}/${agentName}_master.json`;
 
-      console.log("[ChatToAgent - masterFilePath] - handleSubmit - masterFilePath", masterFilePath);
-      
       const response = await sendChatMessage(
         masterFilePath,
         userMessage.message,

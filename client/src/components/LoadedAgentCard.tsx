@@ -10,7 +10,6 @@ interface AgentCardProps {
 
 const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentData = agent.agent;
-  // console.log('[LoadedAgentCard] - agent.agent_details.name:', agent.agent_details.name);
   const [isFlipped, setIsFlipped] = useState(false);
   const agentName = agentData?.agent_details?.name || 'Unknown Agent';
   const agentPersonality = agentData?.agent_details?.personality || [];
