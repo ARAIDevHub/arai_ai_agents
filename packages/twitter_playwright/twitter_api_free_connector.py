@@ -24,21 +24,28 @@ def login_and_save_state(username, password, phone_or_username, storage_path=STA
         # page.click('div:has-text("Next")')
         page.keyboard.press("Enter")     
         
-        # Unusal activity
+        # Check for unusual activity or direct password prompt
         try:
-            # Attempt to find the suspicious activity input
-            page.wait_for_selector('input[data-testid="ocfEnterTextTextInput"]', timeout=3000)
-            print("[INFO] Unusual login activity popup detected.")
+            # Wait briefly to see which page we land on
+            page.wait_for_timeout(2000)
+            
+            # Try to detect which input field appears
+            unusual_activity = page.locator('input[data-testid="ocfEnterTextTextInput"]')
+            password_field = page.locator('input[name="password"]')
+            
+            if unusual_activity.is_visible(timeout=3000):
+                print("[INFO] Unusual login activity popup detected.")
+                unusual_activity.fill(phone_or_username)
+                page.keyboard.press("Enter")
+                page.wait_for_load_state("networkidle")
+                print("[INFO] Challenge response submitted.")
+            elif password_field.is_visible(timeout=3000):
+                print("[INFO] Direct password prompt detected.")
+            else:
+                print("[INFO] Unable to detect next step. Please check the page state.")
 
-            # Fill it with phone/username
-            page.fill('input[data-testid="ocfEnterTextTextInput"]', phone_or_username)
-            # page.click('div:has-text("Next")')  # Or the appropriate button text
-            page.keyboard.press("Enter")
-            page.wait_for_load_state("networkidle")
-            print("[INFO] Challenge response submitted.")
-
-        except TimeoutError:
-            print("[INFO] No suspicious login activity popup. Continuing normal flow.")
+        except Exception as e:
+            print(f"[INFO] Exception during flow detection: {str(e)}. Attempting to continue.")
 
         # Password
         page.wait_for_selector('input[name="password"]', timeout=10000)
@@ -98,7 +105,7 @@ def main(tweet_content):
         print(f"[INFO] state.json does not exist at {STATE_FILE}. Logging in and saving state.")
 
         login_and_save_state(
-            username=os.getenv("X_USERNAME"),
+            username=os.getenv("X_EMAIL"),
             password=os.getenv("X_PASSWORD"),
             phone_or_username=os.getenv("X_PHONE_OR_USERNAME"),
             storage_path=STATE_FILE
