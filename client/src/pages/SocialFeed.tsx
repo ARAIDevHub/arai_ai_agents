@@ -90,7 +90,6 @@ const SocialFeed: React.FC = () => {
   };
 
 
- 
 
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
@@ -222,8 +221,20 @@ const SocialFeed: React.FC = () => {
             {characterPosts.map((post) => (
               <div
                 key={post.post_id}
-                className="max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
+                className="relative max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
               >
+                {/* Post Status Label */}
+                {console.log("post.episode_posted:", post.episode_posted)}
+                <div
+                  className={`absolute top-2 right-2 px-2 py-1 rounded text-sm font-semibold ${
+                    post.episode_posted
+                      ? "bg-green-500 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
+                >
+                  {post.episode_posted ? "Posted" : "Not Posted"}
+                </div>
+
                 <div className="flex items-center mb-4">
                   <div
                     className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600"
