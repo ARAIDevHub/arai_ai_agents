@@ -14,6 +14,8 @@ const SocialFeed: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
   const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
+  const [unpostedCount, setUnpostedCount] = useState<number>(0);
+  const [isPosting, setIsPosting] = useState(false);
 
   useEffect(() => {
     // Update timeLeft whenever delayBetweenPosts changes
@@ -72,6 +74,9 @@ const SocialFeed: React.FC = () => {
 
     // Log the current selected agent
     console.log("Current selected agent:", char);
+
+    const unpostedPosts = posts.filter(post => !post.post_posted);
+    setUnpostedCount(unpostedPosts.length);
   };
 
   const handleGenerateContent = async () => {
@@ -129,6 +134,15 @@ const SocialFeed: React.FC = () => {
   const handlePostToTwitter = async () => {
     if (!selectedCharacter) return;
 
+    // Toggle posting state
+    setIsPosting(!isPosting);
+
+    if (isPosting) {
+      // If already posting, stop the process
+      console.log("Stopping post to Twitter.");
+      return;
+    }
+
     const unpostedPosts = characterPosts.filter(post => !post.post_posted);
 
     const postContentToTwitter = async (post: Post) => {
@@ -139,6 +153,7 @@ const SocialFeed: React.FC = () => {
 
         post.post_posted = true;
         setCharacterPosts([...characterPosts]);
+        setUnpostedCount(prevCount => prevCount - 1);
       } catch (error) {
         console.error("Error posting to Twitter:", error);
       }
@@ -219,13 +234,13 @@ const SocialFeed: React.FC = () => {
   return (
     <div className="container mx-auto  max-w-4xl">
       {/* Agent Selection Row */}
-      <div className="mb-6 flex items-center justify-center gap-4">
+      <div className=" flex p-3 items-center justify-center gap-4">
         <div className="flex items-center">
           <label className="text-lg font-semibold text-white mr-2">
             Select Agent:
           </label>
           <select
-            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 "
             onChange={(e) => {
               const index = parseInt(e.target.value);
               const char = characters[index];
@@ -233,7 +248,7 @@ const SocialFeed: React.FC = () => {
             }}
             value={selectedCharacterIndex}
           >
-            <option value={-1} className="text-white">
+            <option value={-1} className="text-white font-semibold">
               Select an Agent
             </option>
             {characters.map((char, index) => (
@@ -253,7 +268,7 @@ const SocialFeed: React.FC = () => {
             value={delayBetweenPosts}
             onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
             min="0"
-            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 font-semibold"
           />
         </div>
       </div>
@@ -278,16 +293,16 @@ const SocialFeed: React.FC = () => {
           {/* Feed Header */}
           <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
             <div className="flex flex-col items-center w-full text-center">
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-white font-semibold">
                 {selectedCharacter
                   ? `${selectedCharacter.agent.agent_details.name}'s Feed`
                   : "Select an Agent"}
               </h2>
-              <p className="text-gray-400 mb-2">
-                {characterPosts.length} Posts Available
+              <p className="text-gray-400 mb-2 font-semibold">
+                {unpostedCount} Posts Remaining
               </p>
             </div>
-            <div className="absolute right-0 text-white text-lg p-3">
+            <div className="absolute right-0 text-white text-lg p-3 font-semibold">
               Next post in: {formatTime(timeLeft)}
             </div>
           </div>
@@ -311,9 +326,11 @@ const SocialFeed: React.FC = () => {
 
               <Button
                 onClick={handlePostToTwitter}
-                className="bg-orange-500 hover:bg-orange-600"
+                className={`${
+                  isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                }`}
               >
-                Post to Twitter
+                {isPosting ? "Posting..." : "Post to Twitter"}
               </Button>
 
             </div>

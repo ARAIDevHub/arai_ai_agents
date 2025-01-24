@@ -48,7 +48,6 @@ const generateCharacterConcept = (): string => {
   const origin = getRandomTrait(characterConcepts.origins);
   const power = getRandomTrait(characterConcepts.specialPowers);
   const goal = getRandomTrait(characterConcepts.goals);
-  const nameStartCharacter = getRandomTrait(characterConcepts.alphabet);
 
   // Randomly choose between different concept formats
   const conceptFormats = [
@@ -58,15 +57,14 @@ const generateCharacterConcept = (): string => {
     `An extraordinary ${profession} ${origin} on a mission of ${goal}`,
     `A remarkable ${personality} being who ${power}, working as a ${profession} while ${goal}`,
     `Create a name and try to incorporate the ${profession} into the name. For example,
-    if the profession was a Dr. then the name could be Dr. Name
-    I want the name to start with the letter ${nameStartCharacter} `
+    if the profession was a Dr. then the name could be Dr.{Name} `
   ];
   const conceptFormat2 = [
     `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.`
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.7 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  return Math.random() < 0.5 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
