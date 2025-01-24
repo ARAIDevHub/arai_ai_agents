@@ -224,15 +224,15 @@ const SocialFeed: React.FC = () => {
                 className="relative max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
               >
                 {/* Post Status Label */}
-                {console.log("post.episode_posted:", post.episode_posted)}
+                {console.log("post.post_posted:", post.post_posted)}
                 <div
-                  className={`absolute top-2 right-2 px-2 py-1 rounded text-sm font-semibold ${
-                    post.episode_posted
+                  className={`absolute top-4 right-4 px-2 py-1 rounded text-sm font-semibold ${
+                    post.post_posted
                       ? "bg-green-500 text-white"
                       : "bg-red-500 text-white"
                   }`}
                 >
-                  {post.episode_posted ? "Posted" : "Not Posted"}
+                  {post.post_posted ? "Posted" : "Not Posted"}
                 </div>
 
                 <div className="flex items-center mb-4">
