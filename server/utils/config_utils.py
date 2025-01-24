@@ -26,6 +26,70 @@ def list_available_seasons(agent_name):
                 seasons.append(season["season_name"])
     return seasons
 
+def load_season_data(agent_name, season_index):
+    """Load detailed information about a season and its episodes
+    
+    Args:
+        agent_name (str): The name of the agent
+        season_index (int or str): The index of the season to display
+    """
+    config_path = os.path.join("configs", agent_name, f"{agent_name}_master.json")
+    with open(config_path, 'r', encoding='utf-8') as f:
+        # Convert season_index to int if it's a string
+        if isinstance(season_index, str):
+            season_index = int(season_index)
+        return json.load(f)["agent"]["seasons"][season_index]
+
+def display_season_details(agent_name, season_index):
+    """Display detailed information about a season and its episodes
+    
+    Args:
+        agent_name (str): The name of the agent
+        season_name (str): The name of the season to display
+    """
+    season_data = load_season_data(agent_name, season_index)
+    
+    print("\n" + "="*50)
+    print("Season Name:")
+    print(season_data.get('season_name', 'No season name available'))
+    print(f"Season Number:")    
+    print(f"{season_data.get('season_number', 'No season number available')}")
+    print(f"Season Posted:")
+    print(f"{season_data.get('season_posted', 'No season posted available')}")
+    print("\nSeason Description:")
+    print(season_data.get('season_description', 'No description available'))
+    print("\nSeason Highlights:")
+    for highlight in season_data.get('season_highlights', []):
+        print(f"- {highlight}")
+    print("\nSeason Summary:")
+    print(season_data.get('season_summary', 'No summary available'))
+    
+    print("="*50)    
+    print("\nEpisodes:")
+    
+    for episode in season_data.get('episodes', []):
+        print("="*50)
+        print(f"\nEpisode: {episode['episode_name']}")
+        print(f"Episode Number: {episode['episode_number']}")
+        print(f"Episode Posted: {episode.get('episode_posted', 'No episode posted available')}")
+        print("-"*30)
+        print("Description:")
+        print(episode.get('episode_description', 'No description available'))
+        print("\nHighlights:")
+        for highlight in episode.get('episode_highlights', []):
+            print(f"- {highlight}")
+        print("\nEpisode Summary:")
+        print(episode.get('episode_summary', 'No summary available'))
+
+        print("\nPosts:")
+        for post in episode.get('posts', []):
+            print("-"*20)
+            print(f"Post Number: {post.get('post_number', 'No post number available')}")
+            print(f"Post Posted: {post.get('post_posted', 'No post posted available')}")
+            print(f"Content: {post.get('post_content', 'No content available')}")
+            print(f"Highlights: {post.get('post_highlights', 'No highlights available')}")
+        print("-"*30)
+
 def list_available_agents():
     """List all available agent configs in the configs folder
     
@@ -38,6 +102,28 @@ def list_available_agents():
             if os.path.isdir(os.path.join("configs", agent_dir)):
                 agents.append(agent_dir)
     return agents
+
+def load_agent_master_template(agent_file_path):
+    """Load the master template for an agent
+    
+    Args:
+        agent_name (str): The name of the agent to load the master template for
+
+    Returns:
+        dict: The master template for the agent
+    """
+    with open(agent_file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_agent_master_template(agent_master_template, agent_file_path):
+    """Save the master template for an agent
+    
+    Args:
+        agent_master_template (dict): The master template for the agent
+        agent_file_path (str): The path to the agent's master file
+    """
+    with open(agent_file_path, 'w', encoding='utf-8') as f:
+        json.dump(agent_master_template, f, indent=4)
 
 def load_agent_tracker_config(agent_name):
     """Load configuration for the selected agent

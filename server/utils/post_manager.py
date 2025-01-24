@@ -19,8 +19,12 @@
 import os
 import json
 import datetime
-import os
 from dotenv import load_dotenv
+import sys
+
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(project_root)
 
 # custom ARAI code imports
 import connectors.twitter_connector as twitter
