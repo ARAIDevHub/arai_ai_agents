@@ -48,7 +48,7 @@ def main():
         print("\n= Agent Management =")
         print("1. Create New Agent")
         print("2. Select Agent")
-        print("3. Select Season")
+        print("3. Social Feed")
         
         print("\n= Content Creation =")
         print("4. Create Content")

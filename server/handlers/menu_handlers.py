@@ -94,12 +94,14 @@ def handle_select_season(current_agent):
             choice = int(input("\nSelect a season (number): "))
             if 1 <= choice <= len(seasons):
                 selected_season = seasons[choice - 1]
-                print(f"Selected season: {selected_season}")               
+                print(f"Selected season: {selected_season}")
+                config_utils.display_season_details(current_agent, choice-1)               
                 break
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:
             print("Please enter a valid number.")
+
 
 def handle_create_content(ai_model, current_agent, agent_file_path):
     """Handle creating content for an agent
