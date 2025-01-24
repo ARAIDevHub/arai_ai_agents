@@ -31,9 +31,9 @@ from utils.post_manager import PostManager
 def main():
     """Main function for the ARAI Agents application"""
     # Initialize the AI model and scheduler
-    # ai_model = GeminiModel()
+    ai_model = GeminiModel(model_name="gemini-1.5-flash-latest")
     # ai_model = OpenAIModel()
-    ai_model = ClaudeModel()
+    # ai_model = ClaudeModel()
     # ai_model = DeepSeekModel()
 
     scheduler = AgentScheduler()
