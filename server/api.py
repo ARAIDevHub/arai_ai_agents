@@ -139,7 +139,8 @@ def get_agents():
 @app.route('/api/agents', methods=['POST'])
 def create_agent():
     """
-    Creates a new agent from provided configuration.
+    Creates a new agent from provided configuration. If an agent with the same name exists,
+    it will be replaced.
     
     Request Body:
         agent_details (dict): Agent configuration including name, personality, etc.
@@ -164,15 +165,9 @@ def create_agent():
     character_dir = os.path.join('configs', character_name)
     os.makedirs(character_dir, exist_ok=True)
 
-    # Generate filename
-    base_filename = f"{character_name}_master"
-    filename = base_filename + ".json"
-    counter = 1
-
-    # Check for duplicates and increment if necessary
-    while os.path.exists(os.path.normpath(os.path.join(character_dir, filename))):
-        filename = f"{base_filename}_{counter}.json"
-        counter += 1
+    # Generate filename - always use _master.json
+    filename = f"{character_name}_master.json"
+    file_path = os.path.normpath(os.path.join(character_dir, filename))
 
     # Create the new character structure based on the incoming data structure
     new_character_data = {
@@ -211,8 +206,8 @@ def create_agent():
         }
     }
 
-    # Write data to the new JSON file within the character's directory
-    with open(os.path.join(character_dir, filename), 'w', encoding='utf-8') as f:
+    # Write data to the JSON file, overwriting if it exists
+    with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(new_character_data, f, ensure_ascii=False, indent=4)
 
     return jsonify(new_character_data), 201

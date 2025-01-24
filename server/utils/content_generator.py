@@ -53,7 +53,7 @@ class ContentGenerator:
         self.prompts_dir = os.path.join(project_root, "prompts")        
 
         # Set the path for the chain prompt
-        self.chain_prompts_path = os.path.join(self.prompts_dir, "prompt_chaining_json.yaml")       
+        self.chain_prompts_path = os.path.join(self.prompts_dir, "prompt_chaining.yaml")       
         
         # Set the paths for the templates
         self.templates_dir = os.path.join(project_root, "templates")
