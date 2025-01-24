@@ -91,6 +91,7 @@ def login_and_save_state(username, password, phone_or_email, storage_path=None):
         return True
 
 def post_tweet_with_saved_state(tweet_text, storage_path=None):
+    print(f"[post_tweet_with_saved_state] - tweet_text: {tweet_text}")
     if storage_path is None:
         storage_path = get_state_path()
         
@@ -102,8 +103,9 @@ def post_tweet_with_saved_state(tweet_text, storage_path=None):
 
         # Now page is already logged in if state.json is still valid
         page.goto("https://x.com/home")
+        print(f"[post_tweet_with_saved_state] - page.goto: {page.goto}")
         # Wait a bit for the home feed to render
-        page.wait_for_timeout(1000) # optional
+        # page.wait_for_timeout(1000) # optional
         # page.wait_for_load_state("networkidle")
         print("[INFO] Checking if we are indeed logged in...")
 

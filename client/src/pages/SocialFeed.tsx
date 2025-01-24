@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { MessageSquare, Heart } from "lucide-react";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager, createAgent, updateSeasons } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager,updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
 
 const SocialFeed: React.FC = () => {
@@ -12,7 +12,7 @@ const SocialFeed: React.FC = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5000); // Default delay of 5 seconds
+  const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
 
   const getCharacterPosts = (character: any) => {
     if (!character?.agent?.seasons) return [];
@@ -120,17 +120,17 @@ const SocialFeed: React.FC = () => {
       }
     };
 
-    const postLoop = async (posts: Post[], delay: number) => {
-      // Create a map for quick access to posts by post_id
-      const postMap = new Map(posts.map(post => [post.post_id, post]));
+    const postLoop = async (posts: Post[], delayInMinutes: number) => {
+      const delayInMilliseconds = delayInMinutes * 60 * 1000; // Convert minutes to milliseconds
 
       // Create a map of all posts in the fullSeasonsArray
       const fullSeasonsArray = selectedCharacter.agent.seasons;
       const allPostsMap = new Map<string, Post>();
 
-      fullSeasonsArray.forEach(season => {
-        season.episodes.forEach(episode => {
-          episode.posts.forEach(p => {
+      // Create a map of all posts in the fullSeasonsArray
+      fullSeasonsArray.forEach((season: Season) => {
+        season.episodes.forEach((episode: Episode) => {
+          episode.posts.forEach((p: Post) => {
             allPostsMap.set(p.post_id, p);
           });
         });
@@ -160,12 +160,12 @@ const SocialFeed: React.FC = () => {
           console.error("Error updating agent:", error);
         }
 
-        console.log(`Waiting for ${delay} milliseconds before next post.`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        console.log(`Waiting for ${delayInMilliseconds} milliseconds before next post.`);
+        await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
       }
     };
 
-    console.log("Starting post loop with delay:", delayBetweenPosts);
+    console.log("Starting post loop with delay:", delayBetweenPosts, "minutes");
     postLoop(unpostedPosts, delayBetweenPosts);
   };
 
@@ -190,7 +190,7 @@ const SocialFeed: React.FC = () => {
       {/* Timer Input */}
       <div className="mb-6 flex items-center justify-center gap-4">
         <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
-          Set Delay Between Posts (ms):
+          Set Delay Between Posts (minutes):
         </label>
         <input
           id="delayInput"

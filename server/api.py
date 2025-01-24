@@ -458,9 +458,9 @@ def post_to_twitter():
 
     try:
         data = request.json
-        print(f"[post_to_twitter] - data: {data}")
         master_data = data.get('master_data')
         post_content = data.get('content')
+        print(f"[post_to_twitter api ] - post_content: {post_content}")
         if not master_data or not post_content:
             return jsonify({'error': 'Master data or post content is required'}), 400
 
@@ -469,7 +469,7 @@ def post_to_twitter():
             # Now we have the full master_data object to work with
             # agent_name = master_data['agent']['agent_details']['name']
             
-            post_manager_twitter.post_single_tweet("TEST")
+            post_manager_twitter.post_single_tweet(post_content)
 
             # post_manager_twitter.post_to_twitter(post_content)
             return jsonify({'success': True}), 200

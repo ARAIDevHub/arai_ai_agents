@@ -226,7 +226,10 @@ class PostManager:
             str: Result of the tweet operation
         """
         print(f"[Post Manager] - post_single_tweet: {tweet_content}")
-        if X_LIVE == "True" and X_DRY_RUN != "True":
+        print(f"[Post Manager] - X_LIVE: {X_LIVE}")
+        print(f"[Post Manager] - X_DRY_RUN: {X_DRY_RUN}")
+        if X_LIVE == "True" and X_DRY_RUN == "False":
+            # Assuming post_tweet_with_saved_state is an async function
             return post_tweet_with_saved_state(tweet_content)
         else:
             print(f"[Post Manager] - Dry run mode, would have posted: {tweet_content}")
