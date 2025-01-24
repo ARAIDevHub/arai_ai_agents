@@ -139,7 +139,7 @@ def get_agents():
     """
     return jsonify(agents)
 
-@app.route('/api/agents', methods=['POST'])
+@app.route('/api/agents/?id', methods=['POST'])
 def create_agent():
     """
     Creates a new agent from provided configuration. If an agent with the same name exists,
@@ -420,17 +420,28 @@ def create_episode_content():
 # Twitter Posting 
 @app.route('/api/start-post-manager', methods=['POST'])
 def start_post_manager():
+    print("[start_post_manager] - Starting post manager")
+
     data = request.json
     agent_name = data.get('agent_name')
+    print(f"[start_post_manager] - agent_name: {agent_name}")
+    
     if not agent_name:
+        print("[start_post_manager] - Agent name is required")
         return jsonify({'error': 'Agent name is required'}), 400
 
     try:
-        post_manager = PostManager(agent_name)
-        # Assuming you have a method to start the post manager
-        post_manager.start()
-        return jsonify({'success': True}), 200
+        # Create PostManager instance with the agent name
+        post_manager = PostManager(agent_name=agent_name)
+        print(f"[start_post_manager] - post_manager created: {post_manager}")
+
+        if post_manager:
+            return jsonify({'success': True, 'message': f'Post manager started for {agent_name}'}), 200
+        else:
+            return jsonify({'error': 'Failed to start post manager'}), 500
+            
     except Exception as e:
+        print(f"[start_post_manager] - Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/post-to-twitter', methods=['POST'])
@@ -441,7 +452,7 @@ def post_to_twitter():
         return jsonify({'error': 'Agent name is required'}), 400
 
     try:
-        post_manager = PostManager(agent_name)
+        post_manager = PostManager()
         post_manager.post_to_twitter()
         return jsonify({'success': True}), 200
     except Exception as e:
