@@ -48,7 +48,6 @@ const generateCharacterConcept = (): string => {
   const origin = getRandomTrait(characterConcepts.origins);
   const power = getRandomTrait(characterConcepts.specialPowers);
   const goal = getRandomTrait(characterConcepts.goals);
-  const nameStartCharacter = getRandomTrait(characterConcepts.alphabet);
 
   // Randomly choose between different concept formats
   const conceptFormats = [
@@ -58,15 +57,14 @@ const generateCharacterConcept = (): string => {
     `An extraordinary ${profession} ${origin} on a mission of ${goal}`,
     `A remarkable ${personality} being who ${power}, working as a ${profession} while ${goal}`,
     `Create a name and try to incorporate the ${profession} into the name. For example,
-    if the profession was a Dr. then the name could be Dr. Name
-    I want the name to start with the letter ${nameStartCharacter} `
+    if the profession was a Dr. then the name could be Dr.{Name} `
   ];
   const conceptFormat2 = [
     `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.`
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.7 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  return Math.random() < 0.5 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
@@ -107,7 +105,6 @@ const AgentGallery: React.FC = () => {
   const generateRandomAgentData = async (): Promise<Agent> => {
     try {
       const concept = generateCharacterConcept();
-      console.log("[generateRandomAgentData] Generated concept:", concept);
 
       const newRandomAgentData = await generateRandomAgent(concept);
       const agentObject = newRandomAgentData.agent;
@@ -150,12 +147,9 @@ const AgentGallery: React.FC = () => {
       }
 
       // Log the concept being saved
-      console.log("[handleAddAgent] - Saving agent with concept:", agent.concept);
 
       // populate our concept
       newAgent.agent.concept = agent.concept || '';
-      console.log(" newAgent.concept", newAgent.agent.concept || 'no concept');
-      console.log("[handleAddAgent] - New agent with  newAgent.agent.concept concept:", newAgent.agent.concept);
 
       // populate our agent details
       const agentDetails = newAgent.agent.agent_details;
@@ -200,11 +194,8 @@ const AgentGallery: React.FC = () => {
         }
       }
 
-      console.log("[handleAddAgent] - New agent with image data:", newAgent);
-
       // Call our api to save the new agent
       const newAgentResponse = await createAgent(newAgent);
-      console.log("[handleAddAgent] - New agent response:", newAgentResponse);
 
       return newAgentResponse;
     } catch (error) {
@@ -242,7 +233,6 @@ const AgentGallery: React.FC = () => {
 
       // Generate new agent data
       const newAgentData = await generateRandomAgentData();
-      console.log("[handleSingleAgentRegeneration] New agent concept:", newAgentData.concept);
 
       const newAgent = {
         ...newAgentData,
@@ -306,18 +296,9 @@ const AgentGallery: React.FC = () => {
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
     try {
-      console.log('[handleSelectAgent] Selected agent:', agent);
 
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));
-
-      // setSelectedAgent(agent);
-
-      // You can add additional logic here, like:
-      // - Navigate to a chat page
-      // - Open a modal
-      // - Update global state
-      // - Make API calls
 
       return Promise.resolve();
     } catch (error) {

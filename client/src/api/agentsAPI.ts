@@ -11,7 +11,6 @@ export async function getAgents() {
 
 // Function to create a new agent
 export async function createAgent(agentData: any) {
-  // console.log('[Client - agentsApi] - agentData', agentData);
   // If the agentData comes in as an Agent object, we need to drill down into the agent one level
   // This allows us to process both Agent and non-agent type objects
   if (agentData.agent) {
@@ -38,8 +37,6 @@ export async function getCharacters() {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const data = await response.json();
-  console.log("[agentsApi] - response", response);
-  console.log("[agentsApi] - data", data);
 
   // Return the data directly
   return data; // Returns an array of the characters
@@ -141,4 +138,54 @@ export async function createEpisodePosts(
   return await response.json();
 }
 
-// ... other API call functions related to agents (e.g., getAgentById, updateAgent, deleteAgent)
+
+// Function to start the post manager
+export async function startPostManager(agentName: string) {
+  const response = await fetch(`${BASE_URL}/start-post-manager/twitter`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ agent_name: agentName }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Function to post to twitter
+export async function postToTwitter(masterData: any, content: string) {
+  const response = await fetch(`${BASE_URL}/post-to-twitter`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      master_data: masterData,
+      content: content
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+export async function updateSeasons(agentName: string, seasons: any[]) {
+  const response = await fetch(`${BASE_URL}/agents/update-seasons`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      agent_name: agentName,
+      seasons: seasons,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}

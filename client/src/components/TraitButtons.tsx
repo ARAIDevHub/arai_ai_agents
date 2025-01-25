@@ -12,7 +12,6 @@ const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options, onTraitButt
   const [selectedOption, setSelectedOption] = useState<string | null>(null); // Track selected option
 
   const handleDeleteTrait = (option: string) => {
-    console.log('Deleting trait:', option);
     setSelectedOption(null); // Clear the selected option
     onTraitButtonClick(field, option); // Call the click handler to delete the trait
   };
@@ -26,7 +25,6 @@ const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options, onTraitButt
                         ${selectedOption === option ? 'bg-orange-500 text-white' : 'bg-cyan-900/30 hover:bg-cyan-800/30 text-cyan-200'} 
                         border border-orange-500/30`}
             onClick={() => {
-              console.log('Button clicked:', option); // Log the content of the button
               setSelectedOption(option); // Update selected option
             }}
           >

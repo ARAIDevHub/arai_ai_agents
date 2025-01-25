@@ -28,11 +28,22 @@ sys.path.append(project_root)
 
 # custom ARAI code imports
 import connectors.twitter_connector as twitter
-from packages.twitter_playwright import twitter_api_free_connector as twitter_api_free
+from connectors.twitter_api_free_connector import (
+    login_and_save_state,
+    post_tweet_with_saved_state
+)
 from handlers import menu_handlers
 
 # Load environment variables
 load_dotenv()
+
+# Define constants from environment variables
+X_ENABLED = os.getenv("X_ENABLED", "False")  
+X_API_OFFICIAL = os.getenv("X_API_OFFICIAL", "False")
+X_USERNAME = os.getenv("X_USERNAME", "") 
+X_PASSWORD = os.getenv("X_PASSWORD","") 
+X_PHONE_OR_EMAIL = os.getenv("X_PHONE_OR_EMAIL", "") 
+X_DRY_RUN = os.getenv("X_DRY_RUN", "True") 
 
 class PostManager:
     """Manages posts for an agent using JSON configuration files.
@@ -53,7 +64,16 @@ class PostManager:
         """
         self.agent_name = agent_name
         self.master_file = os.path.join("configs", agent_name, f"{agent_name}_master.json")
-        self.twitter_connector = twitter.TwitterConnector()
+        
+        # Initialize Twitter connectors based on environment variable
+        if X_API_OFFICIAL == "True":
+            print(f"[Post Manager] Initializing Twitter Connector with official API")
+            self.twitter_connector = twitter.TwitterConnector()
+            self.twitter_api_free = None
+        else:
+            print(f"[Post Manager] Initializing Twitter API Free")
+            self.twitter_connector = None
+            self.twitter_api_free = login_and_save_state(username=X_USERNAME, password=X_PASSWORD, phone_or_email=X_PHONE_OR_EMAIL)
 
         # Load master configuration
         with open(self.master_file, 'r', encoding='utf-8') as f:
@@ -154,21 +174,23 @@ class PostManager:
         return post_content
 
     def post_to_twitter(self):
-        """Post content to Twitter
-
-        Args:
-            live_post (bool): Whether to actually post to Twitter (False for testing)
-        """
+        """Post content to Twitter"""
         tweet_content = self.next_post_number(self.current_post)
 
-        if os.getenv("X_LIVE") == "True":
-
-            if (os.getenv("X_API_OFFICIAL") == "True"):
-                tweet_result = self.twitter_connector.post_tweet(tweet_content)
+        if X_ENABLED:
+            if X_API_OFFICIAL:
+                if self.twitter_connector and not X_DRY_RUN:
+                    tweet_result = self.twitter_connector.post_tweet(tweet_content)
+                else:
+                    print(f"[Post Manager] - Dry run mode, not posting to Twitter", tweet_content)
             else:
-                tweet_result = twitter_api_free.main(tweet_content)
+                if self.twitter_api_free and not X_DRY_RUN:
+                    tweet_result = post_tweet_with_saved_state(tweet_content)
+                else:
+                    print(f"[Post Manager] - Dry run mode, not posting to Twitter", tweet_content)
 
-            print(tweet_result)
+
+            print(f"[Post Manager] Tweet result: {tweet_result}")
 
             if tweet_result.startswith("Error"):
                 self.current_post -= 1
@@ -197,3 +219,20 @@ class PostManager:
 
         except Exception as e:
             print(f"Error writing to log file: {e}")
+
+    @classmethod
+    def post_single_tweet(cls, tweet_content: str) -> str:
+        """Class method to post a single tweet without needing to instantiate PostManager
+        
+        Args:
+            tweet_content (str): The content to tweet
+            
+        Returns:
+            str: Result of the tweet operation
+        """
+        if X_ENABLED == "True" and X_DRY_RUN == "False":
+            return post_tweet_with_saved_state(tweet_content)
+        else:
+            print(f"[Post Manager] - Dry run mode, would have posted: {tweet_content}")
+            return "Dry run - tweet not posted"
+

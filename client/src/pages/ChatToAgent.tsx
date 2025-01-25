@@ -35,7 +35,6 @@ const ChatToAgent: React.FC = () => {
           const masterFilePath = selectedAgent.agent.master_file_path || 
             `configs/${agentName}/${agentName}_master.json`;
           const history = await getChatHistory(masterFilePath);
-          console.log("[ChatToAgent] - loadChatHistory - history", history);
           setChatHistory(history);
         } catch (error) {
           console.error('Error loading chat history:', error);
@@ -69,8 +68,6 @@ const ChatToAgent: React.FC = () => {
       const masterFilePath = selectedAgent?.agent?.master_file_path || 
         `configs/${agentName}/${agentName}_master.json`;
 
-      console.log("[ChatToAgent - masterFilePath] - handleSubmit - masterFilePath", masterFilePath);
-      
       const response = await sendChatMessage(
         masterFilePath,
         userMessage.message,
@@ -111,7 +108,7 @@ const ChatToAgent: React.FC = () => {
             }}
             value={selectedCharacterIndex}
           >
-            <option value={-1} className="text-white">Select an Agent</option>
+            <option value={-1} className="text-white font-semibold ">Select an Agent</option>
             {characters.map((char, index) => (
               <option key={index} value={index}>
                 {char.agent.agent_details.name}
@@ -232,12 +229,12 @@ const ChatToAgent: React.FC = () => {
                   : 'Please select an agent first...'
               }
               disabled={!selectedAgent || isLoading}
-              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/90 border border-orange-500/20 text-white placeholder-gray-400"
+              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/90 border border-orange-500/20 text-white placeholder-gray-400 font-semibold"
             />
             <button
               type="submit"
               disabled={!selectedAgent || isLoading}
-              className="px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-orange-600 text-white disabled:opacity-50"
+              className="px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-orange-600 text-white disabled:opacity-50 font-semibold"
             >
               Send
             </button>

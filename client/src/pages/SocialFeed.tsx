@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useCharacters from "../hooks/useCharacters";
-import { MessageSquare, Heart } from "lucide-react";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager,updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
 
 const SocialFeed: React.FC = () => {
@@ -12,6 +11,22 @@ const SocialFeed: React.FC = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
+  const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
+  const [unpostedCount, setUnpostedCount] = useState<number>(0);
+  const [isPosting, setIsPosting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Update timeLeft whenever delayBetweenPosts changes
+    setTimeLeft(delayBetweenPosts * 60);
+  }, [delayBetweenPosts]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
 
   const getCharacterPosts = (character: any) => {
     if (!character?.agent?.seasons) return [];
@@ -55,7 +70,10 @@ const SocialFeed: React.FC = () => {
     setSelectedCharacter(char);
     const posts = getCharacterPosts(char);
     setCharacterPosts(posts);
-    console.log("Posts loaded:", posts.length);
+
+    // Log the current selected agent
+    const unpostedPosts = posts.filter(post => !post.post_posted);
+    setUnpostedCount(unpostedPosts.length);
   };
 
   const handleGenerateContent = async () => {
@@ -86,6 +104,106 @@ const SocialFeed: React.FC = () => {
     }
   };
 
+  const handleStartPostManager = async () => {
+    if (!selectedCharacter) return;
+
+    try {
+      const response = await startPostManager(selectedCharacter.agent.agent_details.name);
+      console.log("Post manager started successfully:", response);
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error("Error starting post manager:", error);
+    }
+  };
+
+  const startCountdown = () => {
+    const interval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  };
+
+  const handlePostToTwitter = async () => {
+    if (!selectedCharacter) return;
+
+    // Toggle posting state
+    setIsPosting(!isPosting);
+
+    if (isPosting) {
+      // If already posting, stop the process
+      console.log("Stopping post to Twitter.");
+      return;
+    }
+
+    const unpostedPosts = characterPosts.filter(post => !post.post_posted);
+
+    const postContentToTwitter = async (post: Post) => {
+      try {
+        const response = await postToTwitter(selectedCharacter.agent.agent_details.name, post.post_content);
+        console.log("Posted to Twitter successfully:", response);
+
+        post.post_posted = true;
+        setCharacterPosts([...characterPosts]);
+        setUnpostedCount(prevCount => prevCount - 1);
+      } catch (error) {
+        console.error("Error posting to Twitter:", error);
+      }
+    };
+
+    const postLoop = async (posts: Post[], delayInMinutes: number) => {
+      const delayInMilliseconds = delayInMinutes * 60 * 1000; // Convert minutes to milliseconds
+
+      // Reset the timer at the start of the post loop
+      setTimeLeft(delayInMinutes * 60);
+
+      // Create a map of all posts in the fullSeasonsArray
+      const fullSeasonsArray = selectedCharacter.agent.seasons;
+      const allPostsMap = new Map<string, Post>();
+
+      // Create a map of all posts in the fullSeasonsArray
+      fullSeasonsArray.forEach((season: Season) => {
+        season.episodes.forEach((episode: Episode) => {
+          episode.posts.forEach((p: Post) => {
+            allPostsMap.set(p.post_id, p);
+          });
+        });
+      });
+
+      for (const post of posts) {
+        await postContentToTwitter(post);
+        post.post_posted = true;
+        setCharacterPosts([...characterPosts]);
+
+        try {
+          let agentName = selectedCharacter.agent.agent_details.name;
+
+          // Update the post_posted status using the allPostsMap
+          if (allPostsMap.has(post.post_id)) {
+            allPostsMap.get(post.post_id)!.post_posted = true;
+          }
+
+          // Attempt to update the agent's master data with the full seasons array
+          await updateSeasons(agentName, fullSeasonsArray);
+          console.log("Agent updated successfully.");
+        } catch (error) {
+          console.error("Error updating agent:", error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
+
+        // Reset the timer after each post
+        setTimeLeft(delayInMinutes * 60);
+      }
+    };
+    startCountdown(); // Start the countdown when posting begins
+    postLoop(unpostedPosts, delayBetweenPosts);
+  };
+
   if (loading) {
     return (
       <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
@@ -103,15 +221,15 @@ const SocialFeed: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto  max-w-4xl">
       {/* Agent Selection Row */}
-      <div className="mb-6 flex items-center justify-center gap-4">
+      <div className=" flex p-3 items-center justify-center gap-4">
         <div className="flex items-center">
           <label className="text-lg font-semibold text-white mr-2">
             Select Agent:
           </label>
           <select
-            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 "
             onChange={(e) => {
               const index = parseInt(e.target.value);
               const char = characters[index];
@@ -119,7 +237,7 @@ const SocialFeed: React.FC = () => {
             }}
             value={selectedCharacterIndex}
           >
-            <option value={-1} className="text-white">
+            <option value={-1} className="text-white font-semibold">
               Select an Agent
             </option>
             {characters.map((char, index) => (
@@ -128,6 +246,19 @@ const SocialFeed: React.FC = () => {
               </option>
             ))}
           </select>
+        </div>
+        <div className="flex items-center">
+          <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
+            Post Delay (min):
+          </label>
+          <input
+            id="delayInput"
+            type="number"
+            value={delayBetweenPosts}
+            onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
+            min="0"
+            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 font-semibold"
+          />
         </div>
       </div>
 
@@ -147,45 +278,71 @@ const SocialFeed: React.FC = () => {
         <div className="absolute inset-0 bg-slate-900/80" />
 
         {/* Wrap content in relative div to appear above overlay */}
-        <div className="relative z-10 flex flex-col h-full">
+        <div className="relative z-10 flex flex-col h-full justify-center items-center">
           {/* Feed Header */}
-          <div className="mb-8 pt-6 px-4">
-            <h2 className="text-2xl font-bold text-white">
-              {selectedCharacter
-                ? `${selectedCharacter.agent.agent_details.name}'s Feed`
-                : "AI Social Network"}
-            </h2>
-            <p className="text-gray-400 mb-4">
-              {characterPosts.length} Posts Available
-            </p>
-
-            {selectedCharacter && (
-              <div className="flex gap-4 justify-center">
-                <Button
-                  onClick={handleGenerateContent}
-                  disabled={isGenerating}
-                  className="bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isGenerating ? "Generating..." : "Generate Posts Content"}
-                </Button>
-
-                <Button
-                  onClick={() => {}} // Placeholder for future functionality
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-                >
-                  Post to Twitter
-                </Button>
-              </div>
-            )}
+          <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
+            <div className="flex flex-col items-center w-full text-center">
+              <h2 className="text-2xl font-bold text-white font-semibold">
+                {selectedCharacter
+                  ? `${selectedCharacter.agent.agent_details.name}'s Feed`
+                  : "Select an Agent"}
+              </h2>
+              <p className="text-gray-400 mb-2 font-semibold">
+                {unpostedCount} Posts Remaining
+              </p>
+            </div>
+            <div className="absolute right-0 text-white text-lg p-3 font-semibold">
+              Next post in: {formatTime(timeLeft)}
+            </div>
           </div>
+
+          {selectedCharacter && (
+            <div className="flex gap-4 justify-center p-3">
+              <Button
+                onClick={handleGenerateContent}
+                disabled={isGenerating}
+                className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? "Generating..." : "Generate Posts Content"}
+              </Button>
+
+              <Button
+                onClick={handleStartPostManager}
+                className="bg-orange-400 hover:bg-orange-500"
+              >
+                {isLoggedIn ? "Logged in" : "Login to Twitter"}
+              </Button>
+
+              <Button
+                onClick={handlePostToTwitter}
+                className={`${
+                  isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                }`}
+              >
+                {isPosting ? "Posting..." : "Post to Twitter"}
+              </Button>
+
+            </div>
+          )}
 
           {/* Posts Feed */}
           <div className="flex-grow overflow-y-auto space-y-4 p-4">
             {characterPosts.map((post) => (
               <div
                 key={post.post_id}
-                className="max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
+                className="relative max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
               >
+                {/* Post Status Label */}
+                <div
+                  className={`absolute top-4 right-4 px-2 py-1 rounded text-sm font-semibold ${
+                    post.post_posted
+                      ? "bg-green-500 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
+                >
+                  {post.post_posted ? "Posted" : "Not Posted"}
+                </div>
+
                 <div className="flex items-center mb-4">
                   <div
                     className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600"
@@ -229,23 +386,6 @@ const SocialFeed: React.FC = () => {
 
                 {/* Post Actions */}
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
-                  <div className="flex space-x-4 text-sm text-gray-400">
-                    <button className="flex items-center space-x-2 hover:text-cyan-400 transition duration-300">
-                      <Heart className="w-4 h-4" />
-                      <span>{Math.floor(Math.random() * 50)}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:text-cyan-400 transition duration-300">
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{Math.floor(Math.random() * 20)}</span>
-                    </button>
-                  </div>
-
-                  {/* Episode Name */}
-                  {post.episodeName && (
-                    <div className="text-sm text-gray-500 italic">
-                      Episode Name: {post.episodeName}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
