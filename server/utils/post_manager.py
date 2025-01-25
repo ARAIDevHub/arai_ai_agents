@@ -38,7 +38,7 @@ from handlers import menu_handlers
 load_dotenv()
 
 # Define constants from environment variables
-X_LIVE = os.getenv("X_LIVE", "False") 
+X_ENABLED = os.getenv("X_ENABLED", "False")  
 X_API_OFFICIAL = os.getenv("X_API_OFFICIAL", "False")
 X_USERNAME = os.getenv("X_USERNAME", "") 
 X_PASSWORD = os.getenv("X_PASSWORD","") 
@@ -177,7 +177,7 @@ class PostManager:
         """Post content to Twitter"""
         tweet_content = self.next_post_number(self.current_post)
 
-        if X_LIVE:
+        if X_ENABLED:
             if X_API_OFFICIAL:
                 if self.twitter_connector and not X_DRY_RUN:
                     tweet_result = self.twitter_connector.post_tweet(tweet_content)
@@ -230,7 +230,7 @@ class PostManager:
         Returns:
             str: Result of the tweet operation
         """
-        if X_LIVE == "True" and X_DRY_RUN == "False":
+        if X_ENABLED == "True" and X_DRY_RUN == "False":
             return post_tweet_with_saved_state(tweet_content)
         else:
             print(f"[Post Manager] - Dry run mode, would have posted: {tweet_content}")

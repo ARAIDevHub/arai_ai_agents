@@ -62,7 +62,7 @@ class AgentScheduler:
         
         # Schedule regular posts
         # Production schedule:
-        if os.getenv("X_LIVE") == "True":
+        if os.getenv("X_ENABLED") == "True":
             schedule.every(tracker_data.get('post_every_x_minutes')).minutes.do(post_manager.post_to_twitter)
         else:
             # Test schedule if you want to :
