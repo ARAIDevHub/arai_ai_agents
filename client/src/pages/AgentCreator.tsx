@@ -7,7 +7,7 @@ import {
 } from "../interfaces/AgentInterfaces";
 import TraitButtons from "../components/TraitButtons"; // We'll still use your TraitButtons
 import useCharacters from "../hooks/useCharacters";
-import { generateSingleImage } from "../api/leonardoApi";
+import { inconsistentImageLambda } from "../api/leonardoApi";
 import LoadingBar from "../components/LoadingBar";
 
 /**
@@ -589,10 +589,15 @@ const AgentCreator: React.FC = () => {
                     "";
 
                   setLoadingProgress(10);
-                  const imageResponse = await generateSingleImage(
-                    prompt,
-                    LEONARDO_MODEL_ID,
-                    LEONARDO_STYLE_UUID
+
+                  const payload = {
+                    prompt: prompt,
+                    modelId: LEONARDO_MODEL_ID,
+                    styleUUID: LEONARDO_STYLE_UUID,
+                    num_images: 1
+                  };
+                  const imageResponse = await inconsistentImageLambda(
+                    payload
                   );
 
                   if (

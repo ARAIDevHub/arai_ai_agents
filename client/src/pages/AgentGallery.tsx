@@ -295,6 +295,7 @@ const AgentGallery: React.FC = () => {
 
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
+    console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
 
       // Add a small delay to show the loading state
