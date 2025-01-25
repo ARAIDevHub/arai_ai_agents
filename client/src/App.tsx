@@ -5,6 +5,8 @@ import AgentCreator from "./pages/AgentCreator";
 import ChatToAgent from "./pages/ChatToAgent";
 import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
+import TokenLaunchForm from "./pages/TokenLaunch";
+import TokenLaunchFlow from "./pages/TokenLaunchFlow";
 import "./App.css";
 
 // Components
@@ -88,6 +90,30 @@ function App() {
           >
             Chat to Agent
           </Link>
+
+          <Link
+            to="/token-launch"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${
+                isActive("/token-launch")
+                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                  : "text-gray-300 hover:text-cyan-400"
+              }`}
+          >
+            Token Launch
+          </Link>
+
+          <Link
+            to="/token-launch-flow"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${
+                isActive("/token-launch-flow")
+                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                  : "text-gray-300 hover:text-cyan-400"
+              }`}
+          >
+            Token Launch Flow
+          </Link>
         </div>
       </nav>
 
@@ -100,6 +126,8 @@ function App() {
           <Route path="/agent-gallery" element={<AgentGallery />} />
           <Route path="/social-feed" element={<SocialFeed />} />
           <Route path="/chat-to-agent" element={<ChatToAgent />} />
+          <Route path="/token-launch" element={<TokenLaunchForm />} />
+          <Route path="/token-launch-flow" element={<TokenLaunchFlow />} />
         </Routes>
       </main>
 
