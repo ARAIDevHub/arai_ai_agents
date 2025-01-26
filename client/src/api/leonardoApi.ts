@@ -23,7 +23,8 @@ export async function inconsistentImageLambda(payload: LambdaPayload): Promise<a
       headers: {
         'Content-Type': 'application/json'
       },
-      body: "CHAD"
+      body: JSON.stringify(payload)
+
     });
 
     if (!response.ok) {
