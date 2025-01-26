@@ -47,7 +47,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
         e.stopPropagation();
         onSelect(agent);
       }}
-      className="bg-gradient-to-r from-cyan-600 to-orange-600 text-white px-4 py-2 rounded hover:from-cyan-700 hover:to-orange-700"
+      className="opacity-50 cursor-not-allowed bg-gray-500 text-white px-4 py-2 rounded"
     >
       Example Agent
     </button>
@@ -133,8 +133,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                   </div>
                 ) : (
                   <img
-                    src={agent.avatar}
-                    alt={agentName}
+                    src={agent.avatar || 'https://via.placeholder.com/400x400?text=Loading...'}
+                    alt=""
                     className="w-full h-full object-cover"
                   />
                 )}
@@ -158,8 +158,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
               {/* Header with small image */}
               <div className="flex gap-4 mb-4">
                 <img
-                  src={profileImageUrl}
-                  alt={agentName}
+                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  alt=""
                   className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="overflow-hidden">

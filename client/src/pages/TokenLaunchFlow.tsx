@@ -159,20 +159,20 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
             <input
               type="text"
               placeholder="Token Name"
-              className="bg-slate-800/50 p-2 rounded border border-blue-500/20"
+              className="bg-slate-800/50 p-2 rounded border border-blue-500/20 text-white placeholder-white/70"
               value={flowData.tokenName}
               onChange={(e) => setFlowData(prev => ({ ...prev, tokenName: e.target.value }))}
             />
             <input
               type="text"
               placeholder="Token Symbol"
-              className="bg-slate-800/50 p-2 rounded border border-blue-500/20"
+              className="bg-slate-800/50 p-2 rounded border border-blue-500/20 text-white placeholder-white/70"
               value={flowData.tokenSymbol}
               onChange={(e) => setFlowData(prev => ({ ...prev, tokenSymbol: e.target.value }))}
             />
             <textarea
               placeholder="Token Description"
-              className="bg-slate-800/50 p-2 rounded border border-blue-500/20 h-20"
+              className="bg-slate-800/50 p-2 rounded border border-blue-500/20 text-white placeholder-white/70 h-20"
               value={flowData.tokenDescription}
               onChange={(e) => setFlowData(prev => ({ ...prev, tokenDescription: e.target.value }))}
             />
@@ -199,21 +199,21 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
             <input
               type="text"
               placeholder="Website URL"
-              className="bg-slate-800/50 p-2 rounded border border-purple-500/20"
+              className="bg-slate-800/50 p-2 rounded border border-purple-500/20 text-white placeholder-white/70"
               value={flowData.website}
               onChange={(e) => setFlowData(prev => ({ ...prev, website: e.target.value }))}
             />
             <input
               type="text"
               placeholder="X (Twitter) Link"
-              className="bg-slate-800/50 p-2 rounded border border-purple-500/20"
+              className="bg-slate-800/50 p-2 rounded border border-purple-500/20 text-white placeholder-white/70"
               value={flowData.xLink}
               onChange={(e) => setFlowData(prev => ({ ...prev, xLink: e.target.value }))}
             />
             <input
               type="text"
               placeholder="Telegram Link"
-              className="bg-slate-800/50 p-2 rounded border border-purple-500/20"
+              className="bg-slate-800/50 p-2 rounded border border-purple-500/20 text-white placeholder-white/70"
               value={flowData.telegram}
               onChange={(e) => setFlowData(prev => ({ ...prev, telegram: e.target.value }))}
             />
@@ -280,7 +280,7 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
             <input
               type="text"
               placeholder="SOL Amount"
-              className="bg-slate-800/50 p-2 rounded border border-pink-500/20"
+              className="bg-slate-800/50 p-2 rounded border border-pink-500/20 text-white placeholder-white/70"
               value={flowData.solAmount}
               onChange={(e) => setFlowData(prev => ({ ...prev, solAmount: e.target.value }))}
             />
