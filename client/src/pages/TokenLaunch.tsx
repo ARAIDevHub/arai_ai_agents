@@ -84,7 +84,7 @@ const TokenLaunch = () => {
           </button>
         </div>
 
-        <div className="w-full min-h-screen pt-20">
+        <div className="w-full pt-20 pb-8">
           {viewMode === 'form' ? (
             <TokenLaunchForm formData={formData} setFormData={setFormData} />
           ) : (

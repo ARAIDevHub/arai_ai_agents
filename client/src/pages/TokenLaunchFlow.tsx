@@ -608,10 +608,10 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
   );
 
   return (
-    <div className="h-screen bg-[#0B1120]">
+    <div className="w-full bg-[#0B1120] pb-8">
       <PlayControls />
       <Description />
-      <div className="h-full">
+      <div className="w-full mt-4" style={{ height: '800px' }}>
         <ReactFlow 
           nodes={nodes}
           edges={edges}
