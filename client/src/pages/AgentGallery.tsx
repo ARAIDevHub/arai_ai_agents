@@ -210,8 +210,6 @@ const AgentGallery: React.FC = () => {
 
   // Update the handleSingleAgentRegeneration function
   const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
-    const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-    const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
     try {
       // Show loading state immediately with loading name

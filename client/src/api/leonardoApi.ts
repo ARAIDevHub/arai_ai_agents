@@ -6,8 +6,6 @@ const getInconsistentImageLambdaUrl = "https://46i9cnowhh.execute-api.us-east-1.
 export async function inconsistentImageLambda(payload: LambdaPayload): Promise<any> {
   const url = getInconsistentImageLambdaUrl;
 
-  console.log("[LeonardoApi - inconsistentImageLambda] Calling Lambda...");
-
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -25,7 +23,6 @@ export async function inconsistentImageLambda(payload: LambdaPayload): Promise<a
     }
 
     const data = await response.json();
-    console.log('Lambda response:', data);
     return data;
   } catch (error) {
     console.error('Error calling Lambda:', error);

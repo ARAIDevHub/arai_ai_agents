@@ -35,7 +35,6 @@ get_inconsistent_image_lambda_url = "https://46i9cnowhh.execute-api.us-east-1.am
 
 # Function to call the AWS Lambda
 def generate_inconsistent_image_lambda(prompt, model_id, style_uuid, num_images):
-    print("[LeonardoApi - inconsistentImageLambda] Calling Lambda...")
 
     url = get_inconsistent_image_lambda_url
 
@@ -62,7 +61,6 @@ def generate_inconsistent_image_lambda(prompt, model_id, style_uuid, num_images)
 
         # Parse and return the response JSON
         data = response.json()
-        print("Lambda response:", data)
         return data
 
     except requests.RequestException as error:
