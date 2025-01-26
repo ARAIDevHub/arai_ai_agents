@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Heart,
   MessageCircle,
@@ -40,6 +40,47 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const agentEmojis = Array.isArray(agent.emojis) ? agent.emojis : [];
   const agentTags = Array.isArray(agent.tags) ? agent.tags : [];
   const profileImageUrl = agent.avatar || "";
+  const [showNewContent, setShowNewContent] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (agent.isLoading || isRegenerating) {
+      // Reset states when loading starts
+      setLoadingProgress(0);
+      setShowNewContent(false);
+      
+      // Immediately start filling to 30%
+      setLoadingProgress(30);
+      
+      // Start progress up to 90%
+      intervalId = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev < 90) {
+            return Math.min(prev + 1, 90);
+          }
+          return prev;
+        });
+      }, 30);
+    } else if (loadingProgress > 0) {
+      // When regeneration is complete, quickly fill to 100%
+      clearInterval(intervalId);
+      setLoadingProgress(100);
+      
+      // Show new content after progress bar completes
+      const timeout = setTimeout(() => {
+        setLoadingProgress(0);
+        setShowNewContent(true);
+      }, 500);
+      
+      return () => clearTimeout(timeout);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [agent.isLoading, isRegenerating]);
 
   const addButton = agent.isExample ? (
     <button
@@ -127,10 +168,10 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
           <div className="absolute w-full h-full backface-hidden">
             <div className="w-full h-full bg-slate-900/80 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
-                {agent.isLoading ? (
+                {(!showNewContent || agent.isLoading || isRegenerating || loadingProgress > 0) ? (
                   <div className="w-full h-full bg-slate-900/80 flex items-center justify-center">
                     <div className="w-3/4">
-                      <LoadingBar progress={50} />
+                      <LoadingBar progress={loadingProgress} />
                     </div>
                   </div>
                 ) : (
