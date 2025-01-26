@@ -3,7 +3,7 @@ import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
 import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
-import { generateSingleImage } from '../api/leonardoApi';
+import { inconsistentImageLambda } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
 import { generateRandomAgent } from '../utils/generateRandomAgent';
@@ -13,6 +13,10 @@ import famousFigures from '../assets/generate-random-agents/famousFigures.json';
 import LunaQuantumchef from '../assets/example-agents/Luna_Quantumchef_master.json';
 import CosmicCurator from '../assets/example-agents/Cosmic_Curator_master.json';
 import GavelGlitch from '../assets/example-agents/Gavel_Glitch_master.json';
+
+const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+
 
 // Helper function to get random trait
 const getRandomTrait = (traitArray: string[]): string => {
@@ -206,8 +210,6 @@ const AgentGallery: React.FC = () => {
 
   // Update the handleSingleAgentRegeneration function
   const handleSingleAgentRegeneration = async (agentId: string): Promise<void> => {
-    const modelId = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-    const styleUUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
     try {
       // Show loading state immediately with loading name
@@ -254,9 +256,21 @@ const AgentGallery: React.FC = () => {
 
       const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait`;
 
-      const imageResponse = await generateSingleImage(prompt, modelId, styleUUID);
-      if (!imageResponse?.generations_by_pk?.generated_images?.[0]?.url) {
-        throw new Error('No image URL received');
+      const payload = {
+        prompt: prompt,
+        modelId: LEONARDO_MODEL_ID,
+        styleUUID: LEONARDO_STYLE_UUID,
+        num_images: 4
+      };
+      const imageResponse = await inconsistentImageLambda(
+        payload
+      );
+
+      if (
+        !imageResponse?.generations_by_pk?.generated_images?.[0]
+          ?.url
+      ) {
+        throw new Error("No image URL received");
       }
 
       const imageUrl = imageResponse.generations_by_pk.generated_images[0].url;
@@ -295,6 +309,7 @@ const AgentGallery: React.FC = () => {
 
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
+    console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
 
       // Add a small delay to show the loading state

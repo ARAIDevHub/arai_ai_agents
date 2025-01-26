@@ -125,32 +125,23 @@ def create_profile_images(prompt, master_file_path, model_id, style_uuid, num_im
     
     # step 4.4: generate the image
     if consistent:
-        response, payload = images_leonardo.generated_image_consistent(prompt, model_id, style_uuid, num_images)
+        response = images_leonardo.generate_inconsistent_image_lambda(prompt, model_id, style_uuid, num_images)
     else:
-        response, payload = images_leonardo.generated_image_inconsistent(prompt, model_id, style_uuid, num_images)
-            
-    generation_id = response["sdGenerationJob"]["generationId"]
-
-    # step 4.5: retry loop to check for image completion
-    success = False  # Add flag to track success
-    for attempt in range(max_retries):
-        response_url = images_leonardo.get_image_url(generation_id)
-        
-        if response_url.get("generations_by_pk", {}).get("generated_images"):
-            success = True  # Set flag when successful
-            break  # Exit the loop when we have images
-            
-        print(f"Image not ready yet. Attempt {attempt + 1}/{max_retries}. Waiting {delay} seconds...")
-        time.sleep(delay)
+        response = images_leonardo.generate_inconsistent_image_lambda(prompt, model_id, style_uuid, num_images)
     
-    if not success:
-        print("Max retries reached. Image generation may have failed.")
-        return None
-            
+    if not response['generations_by_pk']['generated_images']:
+        raise Exception("No Images Generated")
+
+    generations_by_pk = response['generations_by_pk'].get("generated_images")
+    generated_url = generations_by_pk[0].get('url')
+    generated_id = generations_by_pk[0].get('id')
+        
     # step 4.6: append new URL to the array
-    profile_image_options_template["profile_image_options"].append(response_url)
-    profile_image_template["profile_image"]["payload"] = payload
-    profile_image_template["profile_image"]["details"]["generationId"] = generation_id
+    profile_image_options_template["profile_image_options"].append(response)
+
+    profile_image_template["profile_image"]["details"]["generationId"] = generated_id
+    profile_image_template["profile_image"]["details"]["url"] = generated_url
+    profile_image_template["profile_image"]["details"]["image_id"] = generated_id
 
     # step 4.7: create the save path, use 0 as we are not in a season or episode
     save_path = manager.create_filepath(agent_details["name"], 0, 0, TemplateType.PROFILE_IMAGE_OPTIONS)

@@ -7,8 +7,12 @@ import {
 } from "../interfaces/AgentInterfaces";
 import TraitButtons from "../components/TraitButtons"; // We'll still use your TraitButtons
 import useCharacters from "../hooks/useCharacters";
-import { generateSingleImage } from "../api/leonardoApi";
+import { inconsistentImageLambda } from "../api/leonardoApi";
 import LoadingBar from "../components/LoadingBar";
+
+const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
+const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+
 
 /**
  * AgentCreator Component
@@ -16,8 +20,6 @@ import LoadingBar from "../components/LoadingBar";
  * including personality traits, communication style, and profile images.
  */
 const AgentCreator: React.FC = () => {
-  const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-  const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
   /**
    * Main UI state management
@@ -589,10 +591,15 @@ const AgentCreator: React.FC = () => {
                     "";
 
                   setLoadingProgress(10);
-                  const imageResponse = await generateSingleImage(
-                    prompt,
-                    LEONARDO_MODEL_ID,
-                    LEONARDO_STYLE_UUID
+
+                  const payload = {
+                    prompt: prompt,
+                    modelId: LEONARDO_MODEL_ID,
+                    styleUUID: LEONARDO_STYLE_UUID,
+                    num_images: 4
+                  };
+                  const imageResponse = await inconsistentImageLambda(
+                    payload
                   );
 
                   if (
@@ -642,7 +649,7 @@ const AgentCreator: React.FC = () => {
               <RefreshCcw
                 className={`w-4 h-4 mr-2 ${isGenerating ? "animate-spin" : ""}`}
               />
-              {isGenerating ? "Generating..." : "Generate New"}
+              {isGenerating ? "Generating..." : "Regenerate All"}
             </button>
           </div>
 
