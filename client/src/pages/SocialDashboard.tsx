@@ -32,6 +32,11 @@ const CollapsibleSection = ({ title, children, isOpen, onToggle }) => (
   </div>
 );
 
+const MinecraftSlot = ({ className = '' }) => (
+  <div className={`aspect-square bg-gray-800/80 border-2 border-t-gray-600 border-l-gray-600 
+                   border-r-gray-900 border-b-gray-900 ${className}`} />
+);
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('flow');
   const [minecraftOpen, setMinecraftOpen] = useState(true);
@@ -54,45 +59,95 @@ const Dashboard = () => {
               isOpen={minecraftOpen}
               onToggle={() => setMinecraftOpen(!minecraftOpen)}
             >
-              <div className="p-4">
-                <div className="grid grid-cols-8 gap-2">
-                  {/* Minecraft-style inventory slots */}
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <div 
-                      key={i}
-                      className="aspect-square rounded bg-gray-800/50 border-2 border-gray-700 
-                               hover:border-orange-500/30 transition-colors duration-200"
-                    />
-                  ))}
+              <div className="p-4 bg-gray-700/80">
+                <div className="flex gap-8">
+                  {/* Left Side - Inventory */}
+                  <div className="w-1/2">
+                    {/* Main Inventory Grid */}
+                    <div className="grid grid-cols-9 gap-1 p-2 bg-gray-800/80 border-2 
+                                  border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
+                      {Array.from({ length: 27 }).map((_, i) => (
+                        <MinecraftSlot key={`inv-${i}`} />
+                      ))}
+                    </div>
+
+                    {/* Hotbar */}
+                    <div className="mt-1">
+                      <div className="grid grid-cols-9 gap-1 p-2 bg-gray-800/80 border-2 
+                                    border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
+                        {Array.from({ length: 9 }).map((_, i) => (
+                          <MinecraftSlot key={`hot-${i}`} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side - Crafting */}
+                  <div className="w-1/2 flex justify-center items-start">
+                    <div className="flex items-center gap-8">
+                      {/* Crafting Grid */}
+                      <div className="flex flex-col">
+                        <div className="grid grid-cols-3 gap-1.5 p-3 bg-gray-800/80 border-2 
+                                      border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
+                          {Array.from({ length: 9 }).map((_, i) => (
+                            <MinecraftSlot 
+                              key={`craft-${i}`} 
+                              className="w-16 h-16"
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Arrow */}
+                      <div className="flex items-center text-gray-400">
+                        <div className="w-12 h-12 flex items-center justify-center">
+                          <span className="text-3xl">→</span>
+                        </div>
+                      </div>
+
+                      {/* Result Slot */}
+                      <div className="p-3 bg-gray-800/80 border-2 border-t-gray-900 border-l-gray-900 
+                                    border-r-gray-600 border-b-gray-600">
+                        <MinecraftSlot className="w-20 h-20" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
+
+                {/* Status Bar */}
                 <div className="mt-4 grid grid-cols-3 gap-4">
-                  <div className="p-3 rounded bg-gray-800/50 border border-gray-700">
+                  <div className="p-2 bg-gray-800/80 border-2 border-t-gray-900 border-l-gray-900 
+                                border-r-gray-600 border-b-gray-600">
                     <div className="flex justify-between text-gray-300 text-sm">
                       <span>World Status:</span>
                       <span className="text-green-400">Connected</span>
                     </div>
                   </div>
                   
-                  <div className="p-3 rounded bg-gray-800/50 border border-gray-700">
+                  <div className="p-2 bg-gray-800/80 border-2 border-t-gray-900 border-l-gray-900 
+                                border-r-gray-600 border-b-gray-600">
                     <div className="flex justify-between text-gray-300 text-sm">
                       <span>Active Agents:</span>
                       <span className="text-orange-400">3/5</span>
                     </div>
                   </div>
                   
-                  <div className="p-3 rounded bg-gray-800/50 border border-gray-700">
+                  <div className="p-2 bg-gray-800/80 border-2 border-t-gray-900 border-l-gray-900 
+                                border-r-gray-600 border-b-gray-600">
                     <div className="flex justify-between text-gray-300 text-sm">
                       <span>Resources:</span>
                       <span className="text-blue-400">247</span>
                     </div>
                   </div>
                 </div>
-                
+
+                {/* Deploy Button */}
                 <div className="mt-4">
-                  <button className="w-full px-4 py-2 rounded bg-green-600 hover:bg-green-700 
-                                 border-b-4 border-green-800 text-white font-bold 
-                                 active:translate-y-1 active:border-b-0 transition-all duration-100">
+                  <button className="w-full px-4 py-2 bg-gray-800/80 border-2 border-t-gray-600 
+                                  border-l-gray-600 border-r-gray-900 border-b-gray-900 text-white 
+                                  font-bold hover:bg-gray-700/80 active:border-t-gray-900 
+                                  active:border-l-gray-900 active:border-r-gray-600 
+                                  active:border-b-gray-600">
                     Deploy Agent
                   </button>
                 </div>
