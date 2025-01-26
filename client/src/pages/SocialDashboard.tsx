@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog } from 'lucide-react';
+import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog, MessageSquare, MessagesSquare, Reply, AtSign, TrendingUp } from 'lucide-react';
 import AgentPipeline from '../components/AgentPipeline';
+import CryptoTwitterDashboard from '../components/CryptoTwitterDashboard';
 
 // Card Components
 const Card = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -48,6 +49,82 @@ const MinecraftTab = ({ icon: Icon, label, isActive, onClick }) => (
   </div>
 );
 
+interface TimelineEvent {
+  type: 'post' | 'thread' | 'reply' | 'mention';
+  time: string;
+  content: string;
+  engagement?: {
+    likes: number;
+    replies: number;
+    reposts: number;
+  };
+  status?: 'scheduled' | 'posted' | 'draft';
+}
+
+const TimelineCard = ({ event }: { event: TimelineEvent }) => {
+  const getEventIcon = () => {
+    switch (event.type) {
+      case 'post':
+        return <MessageSquare className="w-4 h-4 text-blue-400" />;
+      case 'thread':
+        return <MessagesSquare className="w-4 h-4 text-green-400" />;
+      case 'reply':
+        return <Reply className="w-4 h-4 text-orange-400" />;
+      case 'mention':
+        return <AtSign className="w-4 h-4 text-purple-400" />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={`p-2 rounded border ${
+      event.status === 'scheduled' ? 'border-orange-500/30 bg-slate-800/50' :
+      event.status === 'posted' ? 'border-green-500/30 bg-slate-800/50' :
+      'border-gray-600/30 bg-slate-800/30'
+    } mb-2`}>
+      <div className="flex items-center gap-2 mb-1">
+        {getEventIcon()}
+        <span className="text-sm text-gray-400">{event.time}</span>
+        {event.status === 'scheduled' && (
+          <span className="text-xs text-orange-400 ml-auto">Scheduled</span>
+        )}
+      </div>
+      <p className="text-sm text-gray-300 line-clamp-2">{event.content}</p>
+      {event.engagement && (
+        <div className="flex gap-3 mt-1 text-xs text-gray-400">
+          <span>♥ {event.engagement.likes}</span>
+          <span>↺ {event.engagement.reposts}</span>
+          <span>↩ {event.engagement.replies}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const DayColumn = ({ date, events, isToday }: { 
+  date: Date, 
+  events: TimelineEvent[], 
+  isToday: boolean 
+}) => (
+  <div className={`flex-1 min-w-0 ${isToday ? 'bg-slate-800/30' : ''}`}>
+    <div className={`sticky top-0 p-2 text-center border-b border-orange-500/30 
+                    ${isToday ? 'bg-orange-500/10' : 'bg-slate-900/80'}`}>
+      <div className="text-sm text-gray-400">
+        {date.toLocaleDateString('en-US', { weekday: 'short' })}
+      </div>
+      <div className={`text-sm ${isToday ? 'text-orange-400 font-bold' : 'text-gray-300'}`}>
+        {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+      </div>
+    </div>
+    <div className="p-2 h-full">
+      {events.map((event, i) => (
+        <TimelineCard key={i} event={event} />
+      ))}
+    </div>
+  </div>
+);
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('flow');
   const [minecraftOpen, setMinecraftOpen] = useState(true);
@@ -57,7 +134,8 @@ const Dashboard = () => {
   const tabs = [
     { id: 'flow', icon: Settings, label: 'Data Flow' },
     { id: 'content', icon: Edit, label: 'Content' },
-    { id: 'calendar', icon: Calendar, label: 'Calendar' }
+    { id: 'calendar', icon: Calendar, label: 'Calendar' },
+    { id: 'crypto', icon: TrendingUp, label: 'Crypto Feed' }
   ];
 
   const minecraftTabs = [
@@ -250,49 +328,100 @@ const Dashboard = () => {
 
       case 'content':
         return (
-          <div className="grid grid-cols-2 gap-4 h-full p-4">
-            <Card>
-              <CardContent>
-                <textarea 
-                  className="w-full h-64 p-2 rounded bg-slate-800 border border-orange-500/30 
-                           text-gray-100 resize-none mb-4 focus:outline-none focus:ring-2 
-                           focus:ring-orange-500/50"
-                  placeholder="Write your post content here..."
-                />
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-gray-400">
-                    <span>Characters: 0/280</span>
-                    <span>Posts today: 0/3</span>
+          <div className="flex flex-col h-full p-4 gap-4">
+            {/* Content Editor */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardContent>
+                  <textarea 
+                    className="w-full h-64 p-2 rounded bg-slate-800 border border-orange-500/30 
+                             text-gray-100 resize-none mb-4 focus:outline-none focus:ring-2 
+                             focus:ring-orange-500/50"
+                    placeholder="Write your post content here..."
+                  />
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>Characters: 0/280</span>
+                      <span>Posts today: 0/3</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 
+                                     hover:from-cyan-700 hover:to-orange-700 text-white rounded">
+                        Schedule
+                      </button>
+                      <button className="px-4 py-2 border border-orange-500/30 text-gray-300 
+                                     hover:bg-slate-800 rounded">
+                        Draft
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 
-                                   hover:from-cyan-700 hover:to-orange-700 text-white rounded">
-                      Schedule
-                    </button>
-                    <button className="px-4 py-2 border border-orange-500/30 text-gray-300 
-                                   hover:bg-slate-800 rounded">
-                      Draft
-                    </button>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent>
+                  <div className="flex items-center gap-2 mb-4 text-gray-100">
+                    <Bot size={20} />
+                    <h3 className="font-medium">AI Assistant</h3>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent>
-                <div className="flex items-center gap-2 mb-4 text-gray-100">
-                  <Bot size={20} />
-                  <h3 className="font-medium">AI Assistant</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
-                    Consider adding market data to support your analysis
+                  <div className="space-y-2">
+                    <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
+                      Consider adding market data to support your analysis
+                    </div>
+                    <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
+                      Include a clear call-to-action for engagement
+                    </div>
                   </div>
-                  <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
-                    Include a clear call-to-action for engagement
-                  </div>
-                </div>
-              </CardContent>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Timeline */}
+            <Card className="flex-1">
+              <div className="flex h-full divide-x divide-orange-500/30">
+                {Array.from({ length: 7 }).map((_, i) => {
+                  const date = new Date();
+                  date.setDate(date.getDate() + (i - 3)); // -3 to +3 days from today
+                  const isToday = i === 3;
+                  
+                  // Example events - replace with real data
+                  const events: TimelineEvent[] = isToday ? [
+                    {
+                      type: 'thread',
+                      time: '10:00',
+                      content: 'Market Analysis Thread #markets #crypto',
+                      status: 'scheduled'
+                    },
+                    {
+                      type: 'post',
+                      time: '14:00',
+                      content: 'Quick update on the latest developments',
+                      status: 'scheduled'
+                    }
+                  ] : [
+                    {
+                      type: 'post',
+                      time: '09:00',
+                      content: 'Previous post content example',
+                      engagement: {
+                        likes: 42,
+                        replies: 12,
+                        reposts: 8
+                      },
+                      status: 'posted'
+                    }
+                  ];
+
+                  return (
+                    <DayColumn
+                      key={i}
+                      date={date}
+                      events={events}
+                      isToday={isToday}
+                    />
+                  );
+                })}
+              </div>
             </Card>
           </div>
         );
@@ -341,6 +470,13 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        );
+
+      case 'crypto':
+        return (
+          <div className="h-full">
+            <CryptoTwitterDashboard />
           </div>
         );
     }
