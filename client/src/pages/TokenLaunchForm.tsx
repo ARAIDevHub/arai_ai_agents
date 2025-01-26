@@ -81,7 +81,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                          text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 placeholder="Enter token name"
                 value={formData.tokenName}
@@ -96,7 +96,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                          text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 placeholder="Enter token symbol"
                 value={formData.tokenSymbol}
@@ -110,7 +110,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 <span className="text-red-500 ml-1">*</span>
               </label>
               <textarea
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                          text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 h-32"
                 placeholder="Enter Token Description"
                 value={formData.tokenDescription}
@@ -126,7 +126,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="border-2 border-dashed border-orange-500/30 rounded-lg p-8 
-                          bg-gray-800/95 flex flex-col items-center justify-center">
+                          bg-slate-900/80 flex flex-col items-center justify-center">
               <div className="w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
                             flex items-center justify-center mb-4">
                 <span className="text-4xl text-orange-400">+</span>
@@ -148,7 +148,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           <div className="relative">
             <input
               type="text"
-              className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+              className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
                        text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
               placeholder="Minimum 0.00000001 SOL/Enter total"
               value={formData.solAmount}
@@ -158,7 +158,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 bg-gray-800/95 p-4 rounded-md border border-orange-500/30">
+        <div className="grid grid-cols-3 gap-4 bg-slate-900/80 p-4 rounded-md border border-orange-500/30">
           <div>
             <p className="text-sm text-gray-100">Estimated Receive</p>
             <p className="font-medium text-gray-100">-- Token</p>
@@ -198,7 +198,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                  className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                            text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   placeholder="Enter Your Website URL"
                 />
@@ -210,7 +210,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                  className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                            text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   placeholder="Enter Your Telegram Link"
                 />
@@ -223,7 +223,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                          text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 placeholder="Enter Your X Link"
               />
@@ -273,7 +273,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     <td className="p-2 border-b border-orange-500/30">
                       <input
                         type="text"
-                        className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                        className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
                                  text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                         placeholder="Enter Private Key"
                         value={row.privateKey}
@@ -292,7 +292,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
-                          className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                          className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
                                    text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                           placeholder="Enter Purchase Amount"
                           value={row.buyAmount}
@@ -362,8 +362,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                   <button 
                     className={`px-4 py-2 rounded-md ${
                       formData.mevTip === '0.00003' 
-                        ? 'bg-gray-800/95 text-gray-100' 
-                        : 'bg-gray-800/50 text-gray-400'
+                        ? 'bg-slate-900/80 text-gray-100' 
+                        : 'bg-slate-900/50 text-gray-400'
                     }`}
                     onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.00003' }))}
                   >
@@ -372,8 +372,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                   <button 
                     className={`px-4 py-2 rounded-md ${
                       formData.mevTip === '0.0001' 
-                        ? 'bg-gray-800/95 text-gray-100' 
-                        : 'bg-gray-800/50 text-gray-400'
+                        ? 'bg-slate-900/80 text-gray-100' 
+                        : 'bg-slate-900/50 text-gray-400'
                     }`}
                     onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0001' }))}
                   >
@@ -383,7 +383,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     className={`px-4 py-2 rounded-md ${
                       formData.mevTip === '0.0003' 
                         ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
-                        : 'bg-gray-800/50 text-gray-400'
+                        : 'bg-slate-900/50 text-gray-400'
                     }`}
                     onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0003' }))}
                   >
@@ -393,7 +393,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    className="w-24 px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                    className="w-24 px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
                              text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     value="0.0003"
                     readOnly
@@ -409,7 +409,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 </div>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
                            text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   value={formData.blockEngine}
                   onChange={(e) => setFormData(prev => ({ ...prev, blockEngine: e.target.value }))}

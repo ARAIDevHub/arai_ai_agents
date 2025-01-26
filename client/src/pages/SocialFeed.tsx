@@ -330,7 +330,7 @@ const SocialFeed: React.FC = () => {
             {characterPosts.map((post) => (
               <div
                 key={post.post_id}
-                className="relative max-w-2xl mx-auto bg-gray-800/50 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30"
+                className="relative max-w-2xl mx-auto slate-800/30 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30"
               >
                 {/* Post Status Label */}
                 <div
