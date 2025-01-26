@@ -127,6 +127,36 @@ const DayColumn = ({ date, events, isToday }: {
   </div>
 );
 
+const ContentEditor = ({ type, limit }: { type: string; limit: number }) => (
+  <Card className="flex-1">
+    <CardContent>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-medium text-gray-100">{type}</h3>
+        <span className="text-sm text-gray-400">0/{limit} today</span>
+      </div>
+      <textarea 
+        className="w-full h-32 p-2 rounded bg-slate-800 border border-orange-500/30 
+                  text-gray-100 resize-none mb-2 focus:outline-none focus:ring-2 
+                  focus:ring-orange-500/50"
+        placeholder={`Write your ${type.toLowerCase()} here...`}
+      />
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-gray-400">Characters: 0/280</span>
+        <div className="flex gap-2">
+          <button className="px-3 py-1 bg-gradient-to-r from-cyan-600 to-orange-600 
+                           hover:from-cyan-700 hover:to-orange-700 text-white rounded text-sm">
+            Schedule
+          </button>
+          <button className="px-3 py-1 border border-orange-500/30 text-gray-300 
+                           hover:bg-slate-800 rounded text-sm">
+            Draft
+          </button>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('flow');
   const [minecraftOpen, setMinecraftOpen] = useState(true);
@@ -333,52 +363,54 @@ const Dashboard = () => {
       case 'content':
         return (
           <div className="flex flex-col h-full p-4 gap-4">
-            {/* Content Editor */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardContent>
-                  <textarea 
-                    className="w-full h-64 p-2 rounded bg-slate-800 border border-orange-500/30 
-                             text-gray-100 resize-none mb-4 focus:outline-none focus:ring-2 
-                             focus:ring-orange-500/50"
-                    placeholder="Write your post content here..."
-                  />
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm text-gray-400">
-                      <span>Characters: 0/280</span>
-                      <span>Posts today: 0/3</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 
-                                     hover:from-cyan-700 hover:to-orange-700 text-white rounded">
-                        Schedule
-                      </button>
-                      <button className="px-4 py-2 border border-orange-500/30 text-gray-300 
-                                     hover:bg-slate-800 rounded">
-                        Draft
-                      </button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent>
-                  <div className="flex items-center gap-2 mb-4 text-gray-100">
-                    <Bot size={20} />
-                    <h3 className="font-medium">AI Assistant</h3>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
-                      Consider adding market data to support your analysis
-                    </div>
-                    <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
-                      Include a clear call-to-action for engagement
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Content Editors Grid */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* Posts Section */}
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-gray-100">Posts</h2>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <ContentEditor key={`post-${i}`} type="Post" limit={3} />
+                ))}
+              </div>
+
+              {/* Comments Section */}
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-gray-100">Comments</h2>
+                <div className="h-[600px] overflow-y-auto pr-2 space-y-4">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <ContentEditor key={`comment-${i}`} type="Comment" limit={20} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Threads Section */}
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-gray-100">Threads</h2>
+                <div className="h-[600px] overflow-y-auto pr-2 space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <ContentEditor key={`thread-${i}`} type="Thread" limit={5} />
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {/* AI Assistant */}
+            <Card>
+              <CardContent>
+                <div className="flex items-center gap-2 mb-4 text-gray-100">
+                  <Bot size={20} />
+                  <h3 className="font-medium">AI Assistant</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
+                    Consider adding market data to support your analysis
+                  </div>
+                  <div className="p-3 bg-slate-800 border border-orange-500/30 rounded text-gray-300">
+                    Include a clear call-to-action for engagement
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Timeline */}
             <Card className="flex-1">
