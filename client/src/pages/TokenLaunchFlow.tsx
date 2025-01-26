@@ -23,6 +23,11 @@ interface TokenFlowData {
   blockEngine: string;
 }
 
+interface TokenLaunchFlowProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+}
+
 const nodeBaseStyle = {
   background: '#0f172a',
   color: '#fff',
@@ -57,7 +62,7 @@ const getNodeStyle = (type: string) => ({
   width: 200,
 });
 
-const TokenLaunchFlow = () => {
+const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData }) => {
   const [flowData, setFlowData] = useState<TokenFlowData>({
     tokenName: '',
     tokenSymbol: '',
@@ -74,17 +79,17 @@ const TokenLaunchFlow = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Define positions for the two windows with more vertical space between them
+  // Update window positions to accommodate text and controls
   const uiWindow = {
     x: 50,
-    y: 50,
-    width: 1200,  // Increased width to accommodate nodes
-    height: 250,  // Reduced height
+    y: 120, // Moved down to make room for text and controls
+    width: 1200,
+    height: 250,
   };
 
   const infrastructureWindow = {
     x: 50,
-    y: 400,  // More space between windows
+    y: 450, // Adjusted spacing
     width: 1200,
     height: 200,
   };
@@ -511,12 +516,28 @@ const TokenLaunchFlow = () => {
       target: 'jito-mev',
       type: 'smoothstep',
       animated: isPlaying,
+      label: 'Launch Transaction',
+      labelStyle: { 
+        fill: '#94a3b8', 
+        fontWeight: 500,
+        fontSize: 12,
+      },
+      labelBgStyle: { 
+        fill: 'rgba(15, 23, 42, 0.8)',
+        rx: 4,
+        ry: 4,
+      },
       style: { 
         stroke: 'url(#gradient)',
-        strokeWidth: 3,  // Thicker for visibility
+        strokeWidth: isPlaying ? 4 : 3,
         strokeDasharray: '5,5'
       },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#f97316' },
+      markerEnd: { 
+        type: MarkerType.ArrowClosed, 
+        color: '#f97316',
+        width: 20,
+        height: 20,
+      },
     },
     {
       id: 'e-consensus-complete',
@@ -551,16 +572,45 @@ const TokenLaunchFlow = () => {
     }
   };
 
+  // Add play button and status section at the top
+  const PlayControls = () => (
+    <div className="absolute top-6 left-6 flex items-center gap-4">
+      <button 
+        onClick={togglePlay}
+        className="bg-slate-800 p-3 rounded-full hover:bg-slate-700 shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+      >
+        {isPlaying ? (
+          <>
+            <Pause className="text-white w-6 h-6" />
+            <span className="text-white">Pause Simulation</span>
+          </>
+        ) : (
+          <>
+            <Play className="text-white w-6 h-6" />
+            <span className="text-white">Start Simulation</span>
+          </>
+        )}
+      </button>
+      {isPlaying && (
+        <div className="text-cyan-400">
+          Simulating token launch process... Step {currentStep}/5
+        </div>
+      )}
+    </div>
+  );
+
+  // Add description section
+  const Description = () => (
+    <div className="absolute top-24 left-6 right-6 text-gray-400 mb-4">
+      This flow diagram shows the complete token launch process from creation through blockchain deployment.
+      Press play to see the transaction flow through the network.
+    </div>
+  );
+
   return (
     <div className="h-screen bg-[#0B1120]">
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
-        <button 
-          onClick={togglePlay}
-          className="bg-slate-800 p-2 rounded-full hover:bg-slate-700"
-        >
-          {isPlaying ? <Pause className="text-white" /> : <Play className="text-white" />}
-        </button>
-      </div>
+      <PlayControls />
+      <Description />
       <div className="h-full">
         <ReactFlow 
           nodes={nodes}
@@ -568,7 +618,7 @@ const TokenLaunchFlow = () => {
           fitView
           minZoom={0.5}
           maxZoom={1.5}
-          defaultZoom={0.8}  // Show more of the diagram by default
+          defaultZoom={0.8}
         >
           <Background color="#1E293B" gap={16} />
           <Controls className="fill-white" />
