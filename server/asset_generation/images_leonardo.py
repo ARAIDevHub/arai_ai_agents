@@ -30,6 +30,45 @@ from utils.template_types import TemplateType
 
 dotenv.load_dotenv()
 
+# Define the Lambda endpoint URL
+get_inconsistent_image_lambda_url = "https://46i9cnowhh.execute-api.us-east-1.amazonaws.com/getImageInconsistent"
+
+# Function to call the AWS Lambda
+def generate_inconsistent_image_lambda(prompt, model_id, style_uuid, num_images):
+    print("[LeonardoApi - inconsistentImageLambda] Calling Lambda...")
+
+    url = get_inconsistent_image_lambda_url
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "prompt": prompt,
+        "modelId": model_id,
+        "styleUUID": style_uuid,
+        "num_images": num_images
+    }
+
+    try:
+        # Send the POST request with the payload
+        # Use dumpts to convert the payload to a string
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+        # Check for HTTP errors
+        if not response.ok:
+            print(f"HTTP error! Status: {response.status_code}, Response: {response.text}")
+            response.raise_for_status()
+
+        # Parse and return the response JSON
+        data = response.json()
+        print("Lambda response:", data)
+        return data
+
+    except requests.RequestException as error:
+        print("Error calling Lambda:", error)
+        raise error
+
 #--------------------------------
 # Generate multiple images from a prompt that are inconsistent with each other
 #--------------------------------
