@@ -46,8 +46,8 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
             <div className="w-full h-full bg-slate-900/80 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
                 <img
-                  src={profileImageUrl}
-                  alt={agentName}
+                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  alt=""
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
@@ -69,8 +69,8 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                 {/* Header with small image */}
                 <div className="flex gap-4 mb-4">
                   <img
-                  src={profileImageUrl}
-                  alt={agentName}
+                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  alt=""
                     className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                   />
                   <div className="overflow-hidden">

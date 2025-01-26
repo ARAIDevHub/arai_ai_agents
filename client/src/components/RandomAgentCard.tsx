@@ -109,16 +109,18 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       </div> */}
       <div
         className="perspective w-64 h-[500px]"
-        onMouseEnter={() => setIsFlipped(true)}
-        onMouseLeave={() => setIsFlipped(false)}
+        onMouseEnter={() => !isRegenerating && setIsFlipped(true)}
+        onMouseLeave={() => !isRegenerating && setIsFlipped(false)}
         onClick={(e) => {
           e.stopPropagation();
-          onSelect(agent);
+          if (!isRegenerating) {
+            onSelect(agent);
+          }
         }}
       >
         <div
           className={`relative w-full h-full duration-500 preserve-3d ${
-            isFlipped ? 'rotate-y-180' : ''
+            isFlipped && !isRegenerating ? 'rotate-y-180' : ''
           }`}
         >
           {/* Front of card */}
