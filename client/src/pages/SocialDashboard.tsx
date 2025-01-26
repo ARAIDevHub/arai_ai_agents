@@ -3,6 +3,7 @@ import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog, M
 import AgentPipeline from '../components/AgentPipeline';
 import CryptoTwitterDashboard from '../components/CryptoTwitterDashboard';
 import StreamingColumns from '../components/StreamingColumns';
+import TwitterStockStream from '../components/TwitterStockStream';
 
 // Card Components
 const Card = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -137,7 +138,8 @@ const Dashboard = () => {
     { id: 'content', icon: Edit, label: 'Content' },
     { id: 'calendar', icon: Calendar, label: 'Calendar' },
     { id: 'crypto', icon: TrendingUp, label: 'Crypto Feed' },
-    { id: 'streams', icon: Layout, label: 'Streams' }
+    { id: 'streams', icon: Layout, label: 'Streams' },
+    { id: 'trading', icon: TrendingUp, label: 'Trading Stream' }
   ];
 
   const minecraftTabs = [
@@ -486,6 +488,13 @@ const Dashboard = () => {
         return (
           <div className="h-full">
             <StreamingColumns />
+          </div>
+        );
+
+      case 'trading':
+        return (
+          <div className="h-full">
+            <TwitterStockStream projects={['BTC', 'ETH', 'SOL', 'ADA']} />
           </div>
         );
     }
