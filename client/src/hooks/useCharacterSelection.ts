@@ -22,7 +22,6 @@ const useCharacterSelection = () => {
       return;
     }
     setSelectedCharacter(character); // Update the selected character state.
-    console.log('[handleCharacterSelect] Selected character:', character.agent.agent_details.name);
   };
 
   return { selectedCharacter, handleCharacterSelect, setSelectedCharacter }; // Return the state and handlers for character selection.
