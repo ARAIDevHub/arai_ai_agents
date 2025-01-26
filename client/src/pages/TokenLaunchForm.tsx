@@ -76,14 +76,14 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
             {/* Left Column */}
             <div className="space-y-6">
               <div>
-                <label className="flex items-center text-lg text-white mb-2">
+                <label className="flex items-center text-lg text-gray-100 mb-2">
                   Token Name
                   <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-orange-500/20 
-                           text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   placeholder="Enter token name"
                   value={formData.tokenName}
                   onChange={(e) => setFormData({...formData, tokenName: e.target.value})}
@@ -91,14 +91,14 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </div>
 
               <div>
-                <label className="flex items-center text-lg text-white mb-2">
+                <label className="flex items-center text-lg text-gray-100 mb-2">
                   Token Symbol
                   <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-orange-500/20 
-                           text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   placeholder="Enter token symbol"
                   value={formData.tokenSymbol}
                   onChange={(e) => setFormData({...formData, tokenSymbol: e.target.value})}
@@ -106,13 +106,13 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </div>
 
               <div>
-                <label className="flex items-center text-lg text-white mb-2">
+                <label className="flex items-center text-lg text-gray-100 mb-2">
                   Token Description
                   <span className="text-red-500 ml-1">*</span>
                 </label>
                 <textarea
-                  className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-orange-500/20 
-                           text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 h-32"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 h-32"
                   placeholder="Enter Token Description"
                   value={formData.tokenDescription}
                   onChange={(e) => setFormData({...formData, tokenDescription: e.target.value})}
@@ -122,17 +122,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
             {/* Right Column */}
             <div>
-              <label className="flex items-center text-lg text-white mb-2">
+              <label className="flex items-center text-lg text-gray-100 mb-2">
                 Token Logo
                 <span className="text-red-500 ml-1">*</span>
               </label>
-              <div className="border-2 border-dashed border-orange-500/20 rounded-lg p-8 
-                            bg-slate-900/50 flex flex-col items-center justify-center">
-                <div className="w-32 h-32 border-2 border-dashed border-orange-500/20 rounded-lg 
+              <div className="border-2 border-dashed border-orange-500/30 rounded-lg p-8 
+                            bg-gray-800/95 flex flex-col items-center justify-center">
+                <div className="w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
                               flex items-center justify-center mb-4">
                   <span className="text-4xl text-orange-400">+</span>
                 </div>
-                <p className="text-cyan-200 mb-1">Click to Upload</p>
+                <p className="text-gray-100 mb-1">Click to Upload</p>
                 <p className="text-gray-400">Supported image formats: PNG/GIF/JPG/WEBP and JPEG</p>
                 <p className="text-gray-400">Recommended size: 1000×1000 pixels</p>
                 <p className="text-gray-400 mt-4 text-center">
@@ -143,14 +143,14 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           </div>
 
           <div>
-            <label className="block text-sm text-cyan-200 mb-2">
+            <label className="block text-sm text-gray-100 mb-2">
               Enter the amount of SOL you want to buy
             </label>
             <div className="relative">
               <input
                 type="text"
-                className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 placeholder="Minimum 0.00000001 SOL/Enter total"
                 value={formData.solAmount}
                 onChange={(e) => setFormData({...formData, solAmount: e.target.value})}
@@ -159,18 +159,18 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 bg-slate-900/50 p-4 rounded-md border border-orange-500/20">
+          <div className="grid grid-cols-3 gap-4 bg-gray-800/95 p-4 rounded-md border border-orange-500/30">
             <div>
-              <p className="text-sm text-cyan-200">Estimated Receive</p>
-              <p className="font-medium text-white">-- Token</p>
+              <p className="text-sm text-gray-100">Estimated Receive</p>
+              <p className="font-medium text-gray-100">-- Token</p>
             </div>
             <div>
-              <p className="text-sm text-cyan-200">Estimated Cost</p>
-              <p className="font-medium text-white">-- SOL</p>
+              <p className="text-sm text-gray-100">Estimated Cost</p>
+              <p className="font-medium text-gray-100">-- SOL</p>
             </div>
             <div>
-              <p className="text-sm text-cyan-200">Current Balance</p>
-              <p className="font-medium text-white">-- SOL</p>
+              <p className="text-sm text-gray-100">Current Balance</p>
+              <p className="font-medium text-gray-100">-- SOL</p>
             </div>
           </div>
 
@@ -194,38 +194,38 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
             <div className="space-y-6 pt-4">
               <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <label className="text-lg text-white mb-2 block">
+                  <label className="text-lg text-gray-100 mb-2 block">
                     Website:
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-orange-500/20 
-                             text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                             text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     placeholder="Enter Your Website URL"
                   />
                 </div>
                 
                 <div>
-                  <label className="text-lg text-white mb-2 block">
+                  <label className="text-lg text-gray-100 mb-2 block">
                     X:
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-orange-500/20 
-                             text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                             text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     placeholder="Enter Your X Link"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-lg text-white mb-2 block">
+                <label className="text-lg text-gray-100 mb-2 block">
                   Telegram:
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-orange-500/20 
-                           text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   placeholder="Enter Your Telegram Link"
                 />
               </div>
@@ -235,7 +235,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           {/* Wallet Parameters Section */}
           <div className="border-t border-orange-500/20 pt-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">Other Wallet Buy Parameters Settings</h3>
+              <h3 className="text-lg font-semibold text-gray-100">Other Wallet Buy Parameters Settings</h3>
               <button className="text-orange-500 hover:text-orange-600 flex items-center gap-1">
                 <span>↗</span> Batch Import Private Keys
               </button>
@@ -247,23 +247,23 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="text-left p-2 border-b border-orange-500/20">
+                    <th className="text-left p-2 border-b border-orange-500/30">
                       <span className="text-red-500">*</span> 
-                      <span className="text-cyan-200">Private Key</span>
+                      <span className="text-gray-100">Private Key</span>
                     </th>
-                    <th className="text-left p-2 border-b border-orange-500/20">
-                      <span className="text-cyan-200">Address</span>
+                    <th className="text-left p-2 border-b border-orange-500/30">
+                      <span className="text-gray-100">Address</span>
                     </th>
-                    <th className="text-left p-2 border-b border-orange-500/20">
-                      <span className="text-cyan-200">SOL Balance</span>
+                    <th className="text-left p-2 border-b border-orange-500/30">
+                      <span className="text-gray-100">SOL Balance</span>
                       <button className="ml-1 text-orange-400 hover:text-orange-300">⟳</button>
                     </th>
-                    <th className="text-left p-2 border-b border-orange-500/20">
-                      <span className="text-cyan-200">Est. Volume</span>
+                    <th className="text-left p-2 border-b border-orange-500/30">
+                      <span className="text-gray-100">Est. Volume</span>
                     </th>
-                    <th className="text-left p-2 border-b border-orange-500/20">
+                    <th className="text-left p-2 border-b border-orange-500/30">
                       <span className="text-red-500">*</span>
-                      <span className="text-cyan-200">Buy Amount in SOL</span>
+                      <span className="text-gray-100">Buy Amount in SOL</span>
                     </th>
                     <th className="w-10"></th>
                   </tr>
@@ -271,11 +271,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 <tbody>
                   {formData.walletRows.map((row) => (
                     <tr key={row.id}>
-                      <td className="p-2 border-b border-orange-500/20">
+                      <td className="p-2 border-b border-orange-500/30">
                         <input
                           type="text"
-                          className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                                   text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                          className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                                   text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                           placeholder="Enter Private Key"
                           value={row.privateKey}
                           onChange={(e) => {
@@ -286,15 +286,15 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                           }}
                         />
                       </td>
-                      <td className="p-2 border-b border-orange-500/20 text-gray-400">-</td>
-                      <td className="p-2 border-b border-orange-500/20 text-gray-400">-</td>
-                      <td className="p-2 border-b border-orange-500/20 text-gray-400">-</td>
-                      <td className="p-2 border-b border-orange-500/20">
+                      <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                      <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                      <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                      <td className="p-2 border-b border-orange-500/30">
                         <div className="flex items-center gap-2">
                           <input
                             type="text"
-                            className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                                     text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                            className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                                     text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                             placeholder="Enter Purchase Amount"
                             value={row.buyAmount}
                             onChange={(e) => {
@@ -309,7 +309,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                           </button>
                         </div>
                       </td>
-                      <td className="p-2 border-b border-orange-500/20">
+                      <td className="p-2 border-b border-orange-500/30">
                         <div className="flex gap-1">
                           {formData.walletRows.length > 1 && (
                             <button 
@@ -339,7 +339,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           {/* Advanced Options Section */}
           <div className="border-t border-orange-500/20 pt-6">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-white font-medium">Advanced Options</span>
+              <span className="text-gray-100 font-medium">Advanced Options</span>
               <button 
                 className={`w-12 h-6 rounded-full transition-colors ${
                   formData.showAdvanced ? 'bg-orange-500' : 'bg-slate-700'
@@ -356,15 +356,15 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-cyan-200">Jito MEV Tip (only needs to be paid once, recommended 0.0003)</span>
+                    <span className="text-gray-100">Jito MEV Tip (only needs to be paid once, recommended 0.0003)</span>
                     <button className="text-orange-400 hover:text-orange-300">ⓘ</button>
                   </div>
                   <div className="flex gap-2 mb-2">
                     <button 
                       className={`px-4 py-2 rounded-md ${
                         formData.mevTip === '0.00003' 
-                          ? 'bg-slate-800 text-cyan-200' 
-                          : 'bg-slate-900/50 text-gray-400'
+                          ? 'bg-gray-800/95 text-gray-100' 
+                          : 'bg-gray-800/50 text-gray-400'
                       }`}
                       onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.00003' }))}
                     >
@@ -373,8 +373,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     <button 
                       className={`px-4 py-2 rounded-md ${
                         formData.mevTip === '0.0001' 
-                          ? 'bg-slate-800 text-cyan-200' 
-                          : 'bg-slate-900/50 text-gray-400'
+                          ? 'bg-gray-800/95 text-gray-100' 
+                          : 'bg-gray-800/50 text-gray-400'
                       }`}
                       onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0001' }))}
                     >
@@ -384,7 +384,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                       className={`px-4 py-2 rounded-md ${
                         formData.mevTip === '0.0003' 
                           ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
-                          : 'bg-slate-900/50 text-gray-400'
+                          : 'bg-gray-800/50 text-gray-400'
                       }`}
                       onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0003' }))}
                     >
@@ -394,24 +394,24 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      className="w-24 px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                      className="w-24 px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                               text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                       value="0.0003"
                       readOnly
                     />
-                    <span className="text-cyan-200">SOL</span>
+                    <span className="text-gray-100">SOL</span>
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-cyan-200">Block Processing Engine</span>
+                    <span className="text-gray-100">Block Processing Engine</span>
                     <button className="text-orange-400 hover:text-orange-300">ⓘ</button>
                   </div>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                             text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 
+                             text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     value={formData.blockEngine}
                     onChange={(e) => setFormData(prev => ({ ...prev, blockEngine: e.target.value }))}
                   />

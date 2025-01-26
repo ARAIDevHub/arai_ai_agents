@@ -229,7 +229,9 @@ const ChatToAgent: React.FC = () => {
                   : 'Please select an agent first...'
               }
               disabled={!selectedAgent || isLoading}
-              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/90 border border-orange-500/20 text-white placeholder-gray-400 font-semibold"
+              className="flex-grow px-4 py-2 rounded-lg bg-gray-800/95 border border-orange-500/30 
+                        text-gray-100 placeholder-gray-400 font-semibold focus:outline-none 
+                        focus:ring-2 focus:ring-orange-500/50"
             />
             <button
               type="submit"

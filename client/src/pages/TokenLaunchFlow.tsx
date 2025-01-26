@@ -411,8 +411,8 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
       style: {
         width: uiWindow.width,
         height: uiWindow.height,
-        background: 'rgba(15, 23, 42, 0.3)',
-        border: '1px solid rgba(59, 130, 246, 0.2)',
+        background: 'rgba(31, 41, 55, 0.95)',
+        border: '1px solid rgba(249, 115, 22, 0.3)',
         borderRadius: '8px',
         zIndex: -1,
       }
@@ -424,8 +424,8 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
       style: {
         width: infrastructureWindow.width,
         height: infrastructureWindow.height,
-        background: 'rgba(15, 23, 42, 0.3)',
-        border: '1px solid rgba(249, 115, 22, 0.2)',
+        background: 'rgba(31, 41, 55, 0.95)',
+        border: '1px solid rgba(249, 115, 22, 0.3)',
         borderRadius: '8px',
         zIndex: -1,
       }
