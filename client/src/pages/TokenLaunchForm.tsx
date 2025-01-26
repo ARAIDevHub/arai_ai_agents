@@ -206,26 +206,26 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               
               <div>
                 <label className="text-lg text-gray-100 mb-2 block">
-                  X:
+                  Telegram:
                 </label>
                 <input
                   type="text"
                   className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
                            text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  placeholder="Enter Your X Link"
+                  placeholder="Enter Your Telegram Link"
                 />
               </div>
             </div>
 
             <div>
               <label className="text-lg text-gray-100 mb-2 block">
-                Telegram:
+                X:
               </label>
               <input
                 type="text"
                 className="w-full px-4 py-3 rounded-lg bg-gray-800/95 border border-orange-500/30 
                          text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                placeholder="Enter Your Telegram Link"
+                placeholder="Enter Your X Link"
               />
             </div>
           </div>

@@ -39,18 +39,36 @@ const TokenLaunch = () => {
     website: '',
     xLink: '',
     telegram: '',
-    walletRows: [{ 
-      id: '1',
-      privateKey: '',
-      address: '',
-      solBalance: '-',
-      estVolume: '-',
-      buyAmount: ''
-    }],
-    showAdvanced: false,
+    walletRows: [
+      { 
+        id: '1',
+        privateKey: '',
+        address: '',
+        solBalance: '-',
+        estVolume: '-',
+        buyAmount: ''
+      },
+      { 
+        id: '2',
+        privateKey: '',
+        address: '',
+        solBalance: '-',
+        estVolume: '-',
+        buyAmount: ''
+      },
+      { 
+        id: '3',
+        privateKey: '',
+        address: '',
+        solBalance: '-',
+        estVolume: '-',
+        buyAmount: ''
+      }
+    ],
+    showAdvanced: true,
     mevTip: '0.00003',
     blockEngine: 'https://mainnet.block-engine.jito.wtf',
-    showSocialLinks: false
+    showSocialLinks: true
   });
 
   return (
