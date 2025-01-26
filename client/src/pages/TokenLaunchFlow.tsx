@@ -9,7 +9,7 @@ import ReactFlow, {
   ReactFlowProvider,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Play, Pause, RefreshCw } from 'lucide-react';
+import { Play, Pause, RefreshCw, Wallet } from 'lucide-react';
 import '../styles/flowControls.css';
 
 interface TokenFlowData {
@@ -81,6 +81,7 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
   });
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
 
   // Update window positions to accommodate text and controls
   const uiWindow = {
@@ -568,9 +569,31 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
     }
   };
 
+  // Add new handler function
+  const handleWalletConnect = () => {
+    setIsWalletConnected(!isWalletConnected);
+    // Add actual wallet connection logic here
+  };
+
   // Add play button and status section at the top
   const PlayControls = () => (
     <div className="absolute top-6 left-6 flex items-center gap-4">
+      {/* Add Wallet Button */}
+      <button 
+        onClick={handleWalletConnect}
+        className="bg-slate-800 p-3 rounded-full hover:bg-slate-700 shadow-lg 
+                 hover:shadow-xl transition-all flex items-center gap-2"
+      >
+        <Wallet className="text-white w-6 h-6" />
+        <span className="text-white">
+          {isWalletConnected ? 'Wallet Connected' : 'Connect Wallet'}
+        </span>
+        {isWalletConnected && (
+          <div className="w-2 h-2 rounded-full bg-green-400 ml-2"></div>
+        )}
+      </button>
+
+      {/* Existing Play Button */}
       <button 
         onClick={togglePlay}
         className="bg-slate-800 p-3 rounded-full hover:bg-slate-700 shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
