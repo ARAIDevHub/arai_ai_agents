@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog, MessageSquare, MessagesSquare, Reply, AtSign, TrendingUp } from 'lucide-react';
+import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog, MessageSquare, MessagesSquare, Reply, AtSign, TrendingUp, Layout } from 'lucide-react';
 import AgentPipeline from '../components/AgentPipeline';
 import CryptoTwitterDashboard from '../components/CryptoTwitterDashboard';
+import StreamingColumns from '../components/StreamingColumns';
 
 // Card Components
 const Card = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -135,7 +136,8 @@ const Dashboard = () => {
     { id: 'flow', icon: Settings, label: 'Data Flow' },
     { id: 'content', icon: Edit, label: 'Content' },
     { id: 'calendar', icon: Calendar, label: 'Calendar' },
-    { id: 'crypto', icon: TrendingUp, label: 'Crypto Feed' }
+    { id: 'crypto', icon: TrendingUp, label: 'Crypto Feed' },
+    { id: 'streams', icon: Layout, label: 'Streams' }
   ];
 
   const minecraftTabs = [
@@ -477,6 +479,13 @@ const Dashboard = () => {
         return (
           <div className="h-full">
             <CryptoTwitterDashboard />
+          </div>
+        );
+
+      case 'streams':
+        return (
+          <div className="h-full">
+            <StreamingColumns />
           </div>
         );
     }
