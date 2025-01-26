@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Wallet } from 'lucide-react';
 
 interface WalletRow {
   id: string;
@@ -31,6 +32,13 @@ interface TokenLaunchFormProps {
 }
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+
+  const handleWalletConnect = () => {
+    setIsWalletConnected(!isWalletConnected);
+    // Add actual wallet connection logic here
+  };
+
   const addWalletRow = () => {
     if (formData.walletRows.length < 20) {
       setFormData(prev => ({
@@ -56,6 +64,22 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
   return (
     <div className="w-full p-6 overflow-visible">
+      <div className="absolute top-6 left-6">
+        <button 
+          onClick={handleWalletConnect}
+          className="bg-slate-800 p-3 rounded-full hover:bg-slate-700 shadow-lg 
+                   hover:shadow-xl transition-all flex items-center gap-2"
+        >
+          <Wallet className="text-white w-6 h-6" />
+          <span className="text-white">
+            {isWalletConnected ? 'Wallet Connected' : 'Connect Wallet'}
+          </span>
+          {isWalletConnected && (
+            <div className="w-2 h-2 rounded-full bg-green-400 ml-2"></div>
+          )}
+        </button>
+      </div>
+
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header Section */}
         <div className="flex items-center gap-2 mb-4">
