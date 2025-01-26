@@ -5,6 +5,7 @@ import AgentCreator from "./pages/AgentCreator";
 import ChatToAgent from "./pages/ChatToAgent";
 import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
+import SocialDashboard from "./pages/SocialDashboard";
 import "./App.css";
 
 // Components
@@ -88,6 +89,17 @@ function App() {
           >
             Chat to Agent
           </Link>
+          <Link
+            to="/social-dashboard"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${
+                isActive("/social-dashboard")
+                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                  : "text-gray-300 hover:text-cyan-400"
+              }`}
+          >
+            Social Dashboard
+          </Link>
         </div>
       </nav>
 
@@ -100,6 +112,7 @@ function App() {
           <Route path="/agent-gallery" element={<AgentGallery />} />
           <Route path="/social-feed" element={<SocialFeed />} />
           <Route path="/chat-to-agent" element={<ChatToAgent />} />
+          <Route path="/social-dashboard" element={<SocialDashboard />} />
         </Routes>
       </main>
 
