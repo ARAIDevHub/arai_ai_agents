@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Settings, Calendar, Edit, Bot } from 'lucide-react';
+import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown } from 'lucide-react';
+import AgentPipeline from '../components/AgentPipeline';
 
 // Card Components
 const Card = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -14,8 +15,27 @@ const CardContent = ({ children, className = '', ...props }: React.HTMLAttribute
   </div>
 );
 
+const CollapsibleSection = ({ title, children, isOpen, onToggle }) => (
+  <div className="rounded-lg border border-orange-500/30 bg-slate-900/80 overflow-hidden">
+    <div 
+      className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-800/50"
+      onClick={onToggle}
+    >
+      <h3 className="text-white font-bold">{title}</h3>
+      {isOpen ? (
+        <ChevronUp className="w-5 h-5 text-gray-400" />
+      ) : (
+        <ChevronDown className="w-5 h-5 text-gray-400" />
+      )}
+    </div>
+    {isOpen && children}
+  </div>
+);
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('flow');
+  const [minecraftOpen, setMinecraftOpen] = useState(true);
+  const [flowOpen, setFlowOpen] = useState(true);
 
   const tabs = [
     { id: 'flow', icon: Settings, label: 'Data Flow' },
@@ -27,12 +47,68 @@ const Dashboard = () => {
     switch (activeTab) {
       case 'flow':
         return (
-          <div className="h-full p-4">
-            <div className="h-full rounded-lg border border-orange-500/30 bg-slate-900/80 p-4">
-              <div className="h-full flex items-center justify-center text-gray-400">
-                ReactFlow Node Editor
+          <div className="h-full flex flex-col gap-4 p-4">
+            {/* Minecraft Section */}
+            <CollapsibleSection 
+              title="Minecraft Integration"
+              isOpen={minecraftOpen}
+              onToggle={() => setMinecraftOpen(!minecraftOpen)}
+            >
+              <div className="p-4">
+                <div className="grid grid-cols-8 gap-2">
+                  {/* Minecraft-style inventory slots */}
+                  {Array.from({ length: 16 }).map((_, i) => (
+                    <div 
+                      key={i}
+                      className="aspect-square rounded bg-gray-800/50 border-2 border-gray-700 
+                               hover:border-orange-500/30 transition-colors duration-200"
+                    />
+                  ))}
+                </div>
+                
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  <div className="p-3 rounded bg-gray-800/50 border border-gray-700">
+                    <div className="flex justify-between text-gray-300 text-sm">
+                      <span>World Status:</span>
+                      <span className="text-green-400">Connected</span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 rounded bg-gray-800/50 border border-gray-700">
+                    <div className="flex justify-between text-gray-300 text-sm">
+                      <span>Active Agents:</span>
+                      <span className="text-orange-400">3/5</span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 rounded bg-gray-800/50 border border-gray-700">
+                    <div className="flex justify-between text-gray-300 text-sm">
+                      <span>Resources:</span>
+                      <span className="text-blue-400">247</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <button className="w-full px-4 py-2 rounded bg-green-600 hover:bg-green-700 
+                                 border-b-4 border-green-800 text-white font-bold 
+                                 active:translate-y-1 active:border-b-0 transition-all duration-100">
+                    Deploy Agent
+                  </button>
+                </div>
               </div>
-            </div>
+            </CollapsibleSection>
+            
+            {/* Flow Section */}
+            <CollapsibleSection
+              title="Data Flow"
+              isOpen={flowOpen}
+              onToggle={() => setFlowOpen(!flowOpen)}
+            >
+              <div className="h-[600px]">
+                <AgentPipeline />
+              </div>
+            </CollapsibleSection>
           </div>
         );
 
