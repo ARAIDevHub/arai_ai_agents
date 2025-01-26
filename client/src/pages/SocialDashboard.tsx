@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown } from 'lucide-react';
+import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog } from 'lucide-react';
 import AgentPipeline from '../components/AgentPipeline';
 
 // Card Components
@@ -37,10 +37,22 @@ const MinecraftSlot = ({ className = '' }) => (
                    border-r-gray-900 border-b-gray-900 ${className}`} />
 );
 
+const MinecraftTab = ({ icon: Icon, label, isActive, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`flex items-center gap-2 p-2 cursor-pointer w-full
+                ${isActive ? 'bg-gray-800/80 border-r-2 border-orange-500/30' : 'hover:bg-gray-800/50'}`}
+  >
+    <Icon className={`w-5 h-5 ${isActive ? 'text-orange-400' : 'text-gray-400'}`} />
+    <span className={`text-sm ${isActive ? 'text-orange-400' : 'text-gray-400'}`}>{label}</span>
+  </div>
+);
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('flow');
   const [minecraftOpen, setMinecraftOpen] = useState(true);
   const [flowOpen, setFlowOpen] = useState(true);
+  const [minecraftTab, setMinecraftTab] = useState('inventory');
 
   const tabs = [
     { id: 'flow', icon: Settings, label: 'Data Flow' },
@@ -48,69 +60,138 @@ const Dashboard = () => {
     { id: 'calendar', icon: Calendar, label: 'Calendar' }
   ];
 
+  const minecraftTabs = [
+    { id: 'inventory', icon: Bot, label: 'Inventory' },
+    { id: 'recipes', icon: Settings, label: 'Recipes' },
+    { id: 'nodes', icon: Database, label: 'Nodes' },
+    { id: 'automation', icon: Cog, label: 'Automation' }
+  ];
+
+  const renderMinecraftContent = () => {
+    switch (minecraftTab) {
+      case 'inventory':
+        return (
+          <div className="flex gap-8">
+            {/* Main Inventory Grid */}
+            <div className="w-1/2">
+              <div className="grid grid-cols-9 gap-1 p-2 bg-gray-800/80 border-2 
+                            border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
+                {Array.from({ length: 27 }).map((_, i) => (
+                  <MinecraftSlot key={`inv-${i}`} />
+                ))}
+              </div>
+
+              {/* Hotbar */}
+              <div className="mt-1">
+                <div className="grid grid-cols-9 gap-1 p-2 bg-gray-800/80 border-2 
+                              border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <MinecraftSlot key={`hot-${i}`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Crafting */}
+            <div className="w-1/2 flex justify-center items-start">
+              <div className="flex items-center gap-8">
+                {/* Crafting Grid */}
+                <div className="flex flex-col">
+                  <div className="grid grid-cols-3 gap-1.5 p-3 bg-gray-800/80 border-2 
+                                border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <MinecraftSlot 
+                        key={`craft-${i}`} 
+                        className="w-16 h-16"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center text-gray-400">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <span className="text-3xl">→</span>
+                  </div>
+                </div>
+
+                {/* Result Slot */}
+                <div className="p-3 bg-gray-800/80 border-2 border-t-gray-900 border-l-gray-900 
+                              border-r-gray-600 border-b-gray-600">
+                  <MinecraftSlot className="w-20 h-20" />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'recipes':
+        return (
+          <div className="grid grid-cols-4 gap-2 p-4">
+            {Array.from({ length: 16 }).map((_, i) => (
+              <div key={i} className="bg-gray-800/80 p-2 border-2 border-gray-700 hover:border-orange-500/30">
+                <div className="text-gray-400 text-sm">Recipe {i + 1}</div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'nodes':
+        return (
+          <div className="p-4">
+            <div className="mb-4">
+              <h4 className="text-gray-300 mb-2">Processing Nodes</h4>
+              <div className="grid grid-cols-3 gap-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-gray-800/80 p-2 border-2 border-gray-700 hover:border-orange-500/30">
+                    <div className="text-gray-400 text-sm">Node {i + 1}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-gray-300 mb-2">Storage Nodes</h4>
+              <div className="grid grid-cols-3 gap-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-gray-800/80 p-2 border-2 border-gray-700 hover:border-orange-500/30">
+                    <div className="text-gray-400 text-sm">Storage {i + 1}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'flow':
         return (
           <div className="h-full flex flex-col gap-4 p-4">
-            {/* Minecraft Section */}
             <CollapsibleSection 
               title="Minecraft Integration"
               isOpen={minecraftOpen}
               onToggle={() => setMinecraftOpen(!minecraftOpen)}
             >
               <div className="p-4 bg-gray-700/80">
-                <div className="flex gap-8">
-                  {/* Left Side - Inventory */}
-                  <div className="w-1/2">
-                    {/* Main Inventory Grid */}
-                    <div className="grid grid-cols-9 gap-1 p-2 bg-gray-800/80 border-2 
-                                  border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
-                      {Array.from({ length: 27 }).map((_, i) => (
-                        <MinecraftSlot key={`inv-${i}`} />
-                      ))}
-                    </div>
-
-                    {/* Hotbar */}
-                    <div className="mt-1">
-                      <div className="grid grid-cols-9 gap-1 p-2 bg-gray-800/80 border-2 
-                                    border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
-                        {Array.from({ length: 9 }).map((_, i) => (
-                          <MinecraftSlot key={`hot-${i}`} />
-                        ))}
-                      </div>
-                    </div>
+                <div className="flex">
+                  {/* Left Side - Tabs */}
+                  <div className="w-48 border-r border-gray-600">
+                    {minecraftTabs.map(tab => (
+                      <MinecraftTab
+                        key={tab.id}
+                        icon={tab.icon}
+                        label={tab.label}
+                        isActive={minecraftTab === tab.id}
+                        onClick={() => setMinecraftTab(tab.id)}
+                      />
+                    ))}
                   </div>
 
-                  {/* Right Side - Crafting */}
-                  <div className="w-1/2 flex justify-center items-start">
-                    <div className="flex items-center gap-8">
-                      {/* Crafting Grid */}
-                      <div className="flex flex-col">
-                        <div className="grid grid-cols-3 gap-1.5 p-3 bg-gray-800/80 border-2 
-                                      border-t-gray-900 border-l-gray-900 border-r-gray-600 border-b-gray-600">
-                          {Array.from({ length: 9 }).map((_, i) => (
-                            <MinecraftSlot 
-                              key={`craft-${i}`} 
-                              className="w-16 h-16"
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Arrow */}
-                      <div className="flex items-center text-gray-400">
-                        <div className="w-12 h-12 flex items-center justify-center">
-                          <span className="text-3xl">→</span>
-                        </div>
-                      </div>
-
-                      {/* Result Slot */}
-                      <div className="p-3 bg-gray-800/80 border-2 border-t-gray-900 border-l-gray-900 
-                                    border-r-gray-600 border-b-gray-600">
-                        <MinecraftSlot className="w-20 h-20" />
-                      </div>
-                    </div>
+                  {/* Right Side - Content */}
+                  <div className="flex-1">
+                    {renderMinecraftContent()}
                   </div>
                 </div>
 
