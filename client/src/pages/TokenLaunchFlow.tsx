@@ -5,9 +5,12 @@ import ReactFlow, {
   Controls, 
   Background,
   MarkerType,
+  ControlButton,
+  ReactFlowProvider,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Play, Pause, RefreshCw } from 'lucide-react';
+import '../styles/flowControls.css';
 
 interface TokenFlowData {
   tokenName: string;
@@ -84,12 +87,12 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
     x: 50,
     y: 120, // Moved down to make room for text and controls
     width: 1200,
-    height: 250,
+    height: 400,
   };
 
   const infrastructureWindow = {
     x: 50,
-    y: 450, // Adjusted spacing
+    y: 550, // Adjusted spacing
     width: 1200,
     height: 200,
   };
@@ -394,7 +397,11 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
             </div>
             <div className="grid grid-cols-6 gap-1">
               {Array(6).fill(0).map((_, i) => (
-                <div key={i} className="h-6 bg-slate-800/50 rounded" />
+                <div 
+                  key={i} 
+                  className="h-6 rounded bg-gradient-to-br from-slate-800/80 to-slate-900/80 
+                             border border-slate-700/30"
+                />
               ))}
             </div>
           </div>
@@ -516,17 +523,6 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
       target: 'jito-mev',
       type: 'smoothstep',
       animated: isPlaying,
-      label: 'Launch Transaction',
-      labelStyle: { 
-        fill: '#94a3b8', 
-        fontWeight: 500,
-        fontSize: 12,
-      },
-      labelBgStyle: { 
-        fill: 'rgba(15, 23, 42, 0.8)',
-        rx: 4,
-        ry: 4,
-      },
       style: { 
         stroke: 'url(#gradient)',
         strokeWidth: isPlaying ? 4 : 3,
@@ -619,9 +615,10 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
           minZoom={0.5}
           maxZoom={1.5}
           defaultZoom={0.8}
+          proOptions={{ hideAttribution: true }}
         >
           <Background color="#1E293B" gap={16} />
-          <Controls className="fill-white" />
+          <Controls />
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#f97316" />
