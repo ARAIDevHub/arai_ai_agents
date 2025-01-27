@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog, MessageSquare, MessagesSquare, Reply, AtSign, TrendingUp, Layout } from 'lucide-react';
+import { Settings, Calendar, Edit, Bot, ChevronUp, ChevronDown, Database, Cog, MessageSquare, MessagesSquare, Reply, AtSign, TrendingUp, Layout, Search } from 'lucide-react';
 import AgentPipeline from '../components/AgentPipeline';
 import CryptoTwitterDashboard from '../components/CryptoTwitterDashboard';
 import StreamingColumns from '../components/StreamingColumns';
 import TwitterStockStream from '../components/TwitterStockStream';
+import DeepSeekSearch from '../components/DeepSeekSearch';
 
 // Card Components
 const Card = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -169,7 +170,8 @@ const Dashboard = () => {
     { id: 'calendar', icon: Calendar, label: 'Calendar' },
     { id: 'crypto', icon: TrendingUp, label: 'Crypto Feed' },
     { id: 'streams', icon: Layout, label: 'Streams' },
-    { id: 'trading', icon: TrendingUp, label: 'Trading Stream' }
+    { id: 'trading', icon: TrendingUp, label: 'Trading Stream' },
+    { id: 'deepseek', icon: Search, label: 'DeepSeek Search' }
   ];
 
   const minecraftTabs = [
@@ -527,6 +529,13 @@ const Dashboard = () => {
         return (
           <div className="h-full">
             <TwitterStockStream projects={['BTC', 'ETH', 'SOL', 'ADA']} />
+          </div>
+        );
+
+      case 'deepseek':
+        return (
+          <div className="h-full">
+            <DeepSeekSearch />
           </div>
         );
     }
