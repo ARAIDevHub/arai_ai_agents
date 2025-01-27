@@ -722,7 +722,7 @@ const AgentCreator: React.FC = () => {
           </div>
 
           {/* Character Info Card */}
-          <div className="p-4 rounded-lg bg-gray-800/95 border border-orange-500/30">
+          <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">
                 Image Generation Description
@@ -733,11 +733,11 @@ const AgentCreator: React.FC = () => {
                 onKeyDown={handleDraftKeyDown("imageDescription")}
                 placeholder="Enter image generation description (Press Enter to commit)"
                 rows={3}
-                className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
               />
             </div>
           </div>
-          <div className="p-4 rounded-lg bg-gray-800/95 border border-orange-500/30">
+          <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">
                 Agent Name
@@ -750,7 +750,7 @@ const AgentCreator: React.FC = () => {
 
       {/* Right Panel */}
       <div className="w-1/2 p-6">
-        <div className="flex gap-4 mb-6 bg-gray-800/95 p-2 rounded-lg">
+        <div className="flex gap-4 mb-6 bg-slate-900/80 p-2 rounded-lg">
           {[
             { id: "basic" as const, icon: Brain, label: "Basic Info" },
             { id: "personality" as const, icon: Wand2, label: "Personality" },
@@ -789,7 +789,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleDraftKeyDown("name")}
                   placeholder="Enter agent name (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
@@ -804,7 +804,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleDraftKeyDown("universe")}
                   placeholder="Enter universe (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
@@ -824,7 +824,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("topic_expertise")}
                   placeholder="Comma-separated (e.g. 'AI, Robotics, Music') (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
             </div>
@@ -848,7 +848,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("personality")}
                   placeholder="Comma-separated personality traits (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
@@ -863,7 +863,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleDraftKeyDown("backstory")}
                   placeholder="Enter agent backstory (Press Enter to commit)"
                   rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
             </div>
@@ -887,7 +887,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("communication_style")}
                   placeholder="Comma-separated (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
@@ -907,7 +907,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("hashtags")}
                   placeholder="Comma-separated #tags (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
@@ -927,7 +927,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("emojis")}
                   placeholder="Split by space (e.g. '✨ 🚀') (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-gray-800/95 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
             </div>
@@ -950,7 +950,7 @@ const AgentCreator: React.FC = () => {
         </button>
 
         {/* Character Selection */}
-        <div className="mt-6 p-4 bg-gray-800/95 rounded-lg border border-orange-500/30">
+        <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
           <label className="text-sm text-gray-100 block mb-2">
             Select Existing Character
           </label>
@@ -963,7 +963,7 @@ const AgentCreator: React.FC = () => {
           ) : (
             <>
               <select
-                className="w-full px-3 py-2 rounded-md bg-gray-800/95 border 
+                className="w-full px-3 py-2 rounded-md bg-slate-900/80 border 
                          border-orange-500/30 text-gray-100 focus:ring-2 
                          focus:ring-orange-500/50 focus:outline-none"
                 onChange={handleCharacterSelect}
