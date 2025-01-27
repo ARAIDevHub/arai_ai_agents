@@ -137,7 +137,7 @@ const ChatToAgent: React.FC = () => {
         {/* Wrap content in relative div to appear above overlay */}
         <div className="relative z-10 flex flex-col h-full">
           {/* Messages */}
-          <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-4 bg-slate-900/30 rounded-lg">
+          <div className="flex-grow overflow-y-auto space-y-4 p-4 bg-slate-900/30 rounded-lg">
             {displayChatHistory.map((message) => (
               <div
                 key={message.message_id}
@@ -229,7 +229,9 @@ const ChatToAgent: React.FC = () => {
                   : 'Please select an agent first...'
               }
               disabled={!selectedAgent || isLoading}
-              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/90 border border-orange-500/20 text-white placeholder-gray-400 font-semibold"
+              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/80 border border-orange-500/30 
+                        text-gray-100 placeholder-gray-400 font-semibold focus:outline-none 
+                        focus:ring-2 focus:ring-orange-500/50"
             />
             <button
               type="submit"

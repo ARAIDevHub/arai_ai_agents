@@ -5,6 +5,7 @@ import AgentCreator from "./pages/AgentCreator";
 import ChatToAgent from "./pages/ChatToAgent";
 import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
+import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
 
 // Components
@@ -88,6 +89,18 @@ function App() {
           >
             Chat to Agent
           </Link>
+
+          {/* <Link
+            to="/token-launch"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${
+                isActive("/token-launch")
+                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                  : "text-gray-300 hover:text-cyan-400"
+              }`}
+          >
+            Token Launch
+          </Link> */}
         </div>
       </nav>
 
@@ -100,6 +113,7 @@ function App() {
           <Route path="/agent-gallery" element={<AgentGallery />} />
           <Route path="/social-feed" element={<SocialFeed />} />
           <Route path="/chat-to-agent" element={<ChatToAgent />} />
+          <Route path="/token-launch" element={<TokenLaunch />} />
         </Routes>
       </main>
 

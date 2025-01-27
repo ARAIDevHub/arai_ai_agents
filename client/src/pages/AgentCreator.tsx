@@ -722,7 +722,7 @@ const AgentCreator: React.FC = () => {
           </div>
 
           {/* Character Info Card */}
-          <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
+          <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">
                 Image Generation Description
@@ -733,17 +733,16 @@ const AgentCreator: React.FC = () => {
                 onKeyDown={handleDraftKeyDown("imageDescription")}
                 placeholder="Enter image generation description (Press Enter to commit)"
                 rows={3}
-                className="w-full px-3 py-2 mt-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                         text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
               />
             </div>
           </div>
-          <div className="p-4 rounded-lg bg-slate-900/50 border border-orange-500/20">
+          <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
             <div className="mb-4">
               <div className="text-lg font-semibold text-orange-400">
                 Agent Name
               </div>
-              <div className="text-gray-300">{agent.agent_details.name}</div>
+              <div className="text-gray-100">{agent.agent_details.name}</div>
             </div>
           </div>
         </div>
@@ -751,7 +750,7 @@ const AgentCreator: React.FC = () => {
 
       {/* Right Panel */}
       <div className="w-1/2 p-6">
-        <div className="flex gap-4 mb-6 bg-slate-900/50 p-2 rounded-lg">
+        <div className="flex gap-4 mb-6 bg-slate-900/80 p-2 rounded-lg">
           {[
             { id: "basic" as const, icon: Brain, label: "Basic Info" },
             { id: "personality" as const, icon: Wand2, label: "Personality" },
@@ -763,7 +762,7 @@ const AgentCreator: React.FC = () => {
                 setActiveTab(id);
               }}
               className={`flex-1 flex items-center justify-center px-4 py-2 
-                          rounded-md text-white ${
+                          rounded-md text-gray-100 ${
                             activeTab === id
                               ? "bg-gradient-to-r from-cyan-600 to-orange-600"
                               : ""
@@ -781,7 +780,7 @@ const AgentCreator: React.FC = () => {
             <div className="space-y-6">
               {/* Agent Name => local draft */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Agent Name
                 </label>
                 <textarea
@@ -790,14 +789,13 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleDraftKeyDown("name")}
                   placeholder="Enter agent name (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
               {/* Universe => local draft */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Universe
                 </label>
                 <textarea
@@ -806,14 +804,13 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleDraftKeyDown("universe")}
                   placeholder="Enter universe (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
               {/* Topic Expertise => local draft => commit on Enter */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Topic Expertise
                 </label>
                 <TraitButtons
@@ -827,8 +824,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("topic_expertise")}
                   placeholder="Comma-separated (e.g. 'AI, Robotics, Music') (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
             </div>
@@ -838,7 +834,7 @@ const AgentCreator: React.FC = () => {
             <div className="space-y-6">
               {/* Personality => local draft => commit on Enter */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Personality
                 </label>
                 <TraitButtons
@@ -852,14 +848,13 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("personality")}
                   placeholder="Comma-separated personality traits (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
               {/* Backstory => local draft */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Backstory
                 </label>
                 <textarea
@@ -868,8 +863,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleDraftKeyDown("backstory")}
                   placeholder="Enter agent backstory (Press Enter to commit)"
                   rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
             </div>
@@ -879,7 +873,7 @@ const AgentCreator: React.FC = () => {
             <div className="space-y-6">
               {/* Communication Style => local draft => commit on Enter */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Communication Style
                 </label>
                 <TraitButtons
@@ -893,14 +887,13 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("communication_style")}
                   placeholder="Comma-separated (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
               {/* Hashtags => local draft => commit on Enter */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Hashtags
                 </label>
                 <TraitButtons
@@ -914,14 +907,13 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("hashtags")}
                   placeholder="Comma-separated #tags (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
 
               {/* Emojis => local draft => commit on Enter => splitted by space */}
               <div>
-                <label className="text-sm text-cyan-200 block mb-2">
+                <label className="text-sm text-gray-100 block mb-2">
                   Emojis
                 </label>
                 <TraitButtons
@@ -935,8 +927,7 @@ const AgentCreator: React.FC = () => {
                   onKeyDown={handleTraitDraftKeyDown("emojis")}
                   placeholder="Split by space (e.g. '✨ 🚀') (Press Enter to commit)"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/50 border border-orange-500/20 
-                               text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 />
               </div>
             </div>
@@ -952,19 +943,19 @@ const AgentCreator: React.FC = () => {
           }
           className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                        from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                       text-white transition-all duration-300 flex items-center justify-center"
+                       text-gray-100 transition-all duration-300 flex items-center justify-center"
         >
           <Save className="w-4 h-4 mr-2" />
           Save Agent
         </button>
 
         {/* Character Selection */}
-        <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-orange-500/20">
-          <label className="text-sm text-cyan-200 block mb-2">
+        <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
+          <label className="text-sm text-gray-100 block mb-2">
             Select Existing Character
           </label>
           {loading ? (
-            <div className="text-cyan-400">Loading characters...</div>
+            <div className="text-gray-100">Loading characters...</div>
           ) : error ? (
             <div className="text-red-400">
               No Existing Agents - {error.message}
@@ -972,8 +963,8 @@ const AgentCreator: React.FC = () => {
           ) : (
             <>
               <select
-                className="w-full px-3 py-2 rounded-md bg-slate-900/50 border 
-                         border-orange-500/20 text-white focus:ring-2 
+                className="w-full px-3 py-2 rounded-md bg-slate-900/80 border 
+                         border-orange-500/30 text-gray-100 focus:ring-2 
                          focus:ring-orange-500/50 focus:outline-none"
                 onChange={handleCharacterSelect}
                 value={selectedCharacterIndex}

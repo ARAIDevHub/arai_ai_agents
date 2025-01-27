@@ -330,7 +330,7 @@ const SocialFeed: React.FC = () => {
             {characterPosts.map((post) => (
               <div
                 key={post.post_id}
-                className="relative max-w-2xl mx-auto bg-slate-900/80 p-6 rounded-lg backdrop-blur-sm border border-cyan-900/50"
+                className="relative max-w-2xl mx-auto slate-800/30 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30"
               >
                 {/* Post Status Label */}
                 <div
@@ -372,7 +372,7 @@ const SocialFeed: React.FC = () => {
 
                 {/* Post Highlights */}
                 {post.post_highlights && (
-                  <div className="mt-4 mb-4 bg-slate-800/30 rounded-lg p-4 border-l-2 border-cyan-500/30">
+                  <div className="mt-4 mb-4 bg-slate-900/50 rounded-lg p-4 border-l-2 border-orange-500/30">
                     <p className="text-gray-400 text-sm italic">
                       {post.post_highlights}
                     </p>
@@ -380,7 +380,7 @@ const SocialFeed: React.FC = () => {
                 )}
 
                 {/* Post Content */}
-                <p className="text-gray-300 mb-2 whitespace-pre-wrap">
+                <p className="text-gray-300 mb-2 whitespace-pre-wrap bg-slate-900/50 p-4 rounded-lg">
                   {post.post_content}
                 </p>
 

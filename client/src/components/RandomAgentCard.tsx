@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Heart,
   MessageCircle,
@@ -40,12 +40,55 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const agentEmojis = Array.isArray(agent.emojis) ? agent.emojis : [];
   const agentTags = Array.isArray(agent.tags) ? agent.tags : [];
   const profileImageUrl = agent.avatar || "";
+  const [showNewContent, setShowNewContent] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (agent.isLoading || isRegenerating) {
+      // Reset states when loading starts
+      setLoadingProgress(0);
+      setShowNewContent(false);
+      
+      // Immediately start filling to 30%
+      setLoadingProgress(30);
+      
+      // Start progress up to 90%
+      intervalId = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev < 90) {
+            return Math.min(prev + 1, 90);
+          }
+          return prev;
+        });
+      }, 30);
+    } else if (loadingProgress > 0) {
+      // When regeneration is complete, quickly fill to 100%
+      clearInterval(intervalId);
+      setLoadingProgress(100);
+      
+      // Show new content after progress bar completes
+      const timeout = setTimeout(() => {
+        setLoadingProgress(0);
+        setShowNewContent(true);
+      }, 500);
+      
+      return () => clearTimeout(timeout);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [agent.isLoading, isRegenerating]);
 
   const addButton = agent.isExample ? (
     <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(agent);
+      }}
       className="opacity-50 cursor-not-allowed bg-gray-500 text-white px-4 py-2 rounded"
-      disabled
-      title="Example agents cannot be added"
     >
       Example Agent
     </button>
@@ -53,6 +96,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
     <button
       className="opacity-50 cursor-not-allowed bg-green-600 text-white px-4 py-2 rounded"
       disabled
+      onClick={(e) => e.stopPropagation()}
     >
       Added ✓
     </button>
@@ -106,38 +150,43 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       </div> */}
       <div
         className="perspective w-64 h-[500px]"
-        onMouseEnter={() => setIsFlipped(true)}
-        onMouseLeave={() => setIsFlipped(false)}
+        onMouseEnter={() => !isRegenerating && setIsFlipped(true)}
+        onMouseLeave={() => !isRegenerating && setIsFlipped(false)}
         onClick={(e) => {
           e.stopPropagation();
-          onSelect(agent);
+          if (!isRegenerating) {
+            onSelect(agent);
+          }
         }}
       >
         <div
           className={`relative w-full h-full duration-500 preserve-3d ${
-            isFlipped ? 'rotate-y-180' : ''
+            isFlipped && !isRegenerating ? 'rotate-y-180' : ''
           }`}
         >
           {/* Front of card */}
           <div className="absolute w-full h-full backface-hidden">
-            <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
+            <div className="w-full h-full bg-slate-900/80 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
-                {agent.isLoading ? (
-                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                {(!showNewContent || agent.isLoading || isRegenerating || loadingProgress > 0) ? (
+                  <div className="w-full h-full bg-slate-900/80 flex items-center justify-center">
                     <div className="w-3/4">
-                      <LoadingBar progress={50} />
+                      <LoadingBar progress={loadingProgress} />
                     </div>
                   </div>
                 ) : (
                   <img
-                    src={agent.avatar}
-                    alt={agentName}
+                    src={agent.avatar || 'https://via.placeholder.com/400x400?text=Loading...'}
+                    alt=""
                     className="w-full h-full object-cover"
                   />
                 )}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
               </div>
-              <div className="h-[100px] p-4 bg-gray-800/95">
+              {/* Only show name and role when not flipped */}
+              <div className={`h-[100px] p-4 bg-slate-900/80 transition-opacity duration-200 ${
+                isFlipped ? 'opacity-0' : 'opacity-100'
+              }`}>
                 <h3 className="text-xl font-bold text-gray-100 mb-1 truncate">
                   {agentName}
                 </h3>
@@ -148,12 +197,12 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col">
+            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col">
               {/* Header with small image */}
               <div className="flex gap-4 mb-4">
                 <img
-                  src={profileImageUrl}
-                  alt={agentName}
+                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  alt=""
                   className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="overflow-hidden">
@@ -165,7 +214,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
               </div>
 
               {/* Content sections with better overflow handling */}
-              <div className="space-y-4 overflow-y-auto flex-grow mb-16 pr-2">
+              <div className="space-y-4 overflow-y-auto flex-grow mb-4 pr-2">
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
                     <Heart className="w-4 h-4 text-orange-400 flex-shrink-0" />
@@ -209,9 +258,14 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                 </div>
               </div>
 
-              {/* Action button - now positioned absolutely at bottom */}
-              <div className="absolute bottom-4 left-4 right-4">
-                {isUserAgent ? selectButton : addButton}
+              {/* Action button - with solid background */}
+              <div className="absolute bottom-2 left-4 right-4">
+                {/* Solid background container */}
+                <div className="bg-slate-900 rounded-md"> {/* Removed opacity, added rounded corners */}
+                  <div className="relative px-4 py-2"> {/* Added some vertical padding */}
+                    {isUserAgent ? selectButton : addButton}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
