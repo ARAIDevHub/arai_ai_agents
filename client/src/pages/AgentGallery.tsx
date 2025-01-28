@@ -100,11 +100,12 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
 };
 
 const AgentGallery: React.FC = () => {
+  // Add selected agent state
+  // const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const initialMount = useRef(true);
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
 
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {
@@ -256,7 +257,7 @@ const AgentGallery: React.FC = () => {
       );
 
       // Incorporate the concept into the prompt
-      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait. Concept: ${newAgent.concept}, Make sure the gender of the character is accurate to the concept. For example, an Elon Musk agent should be a male, and a Cleopatra agent should be a female and look like the historical figure if their name is one of the historical figures.`;
+      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait. Concept: ${newAgent.concept}, Make sure the sex of the character is accurate to the concept. For example, an Elon Musk agent should be a male, and a Cleopatra agent should be a female and look like the historical figure if their name is Cleopatra.`;
 
       const payload = {
         prompt: prompt,
@@ -313,7 +314,7 @@ const AgentGallery: React.FC = () => {
   const handleSelectAgent = async (agent: Agent) => {
     console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
-      setSelectedAgentId(agent.id);
+
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -404,11 +405,9 @@ const AgentGallery: React.FC = () => {
               <div className="flex flex-wrap gap-6 justify-center">
                 {loadedAgents.map((agent) => (
                   <LoadedAgentCard
-                    
                     key={Math.random().toString()}
                     agent={agent}
                     onSelect={handleSelectAgent}
-                    isSelected={selectedAgentId === agent.id}
                   />
                 ))}
               </div>
@@ -425,7 +424,6 @@ const AgentGallery: React.FC = () => {
                     key={Math.random().toString()}
                     agent={agent}
                     onSelect={handleSelectAgent}
-                    isSelected={selectedAgentId === agent.id}
                   />
                 ))}
               </div>
@@ -434,11 +432,11 @@ const AgentGallery: React.FC = () => {
         </div>
 
         {/* Optionally add a visual indicator for selected agent */}
-        {selectedAgentId && (
+        {/* {selectedAgent && (
           <div className="fixed bottom-4 right-4 bg-gradient-to-r from-cyan-600 to-orange-600 text-white px-6 py-3 rounded-md shadow-lg">
-            Selected: {randomAgents.find(agent => agent.id === selectedAgentId)?.name || 'No agent selected'}
+            Selected: {selectedAgent.agent?.agent_details?.name || selectedAgent.name}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

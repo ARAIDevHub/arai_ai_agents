@@ -6,10 +6,9 @@ import { Agent } from '../interfaces/AgentInterfaces';
 interface AgentCardProps {
   agent: Agent,
   onSelect: (agent: Agent) => Promise<void>;
-  isSelected: boolean;
 }
 
-const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, isSelected }) => {
+const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentData = agent.agent;
   const [isFlipped, setIsFlipped] = useState(false);
   const agentName = agentData?.agent_details?.name || 'Unknown Agent';
@@ -20,6 +19,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, isSelected
   const agentTopicExpertise = agentData?.agent_details?.topic_expertise || [];
   const profileImageUrl = agentData?.profile_image?.details?.url || "";
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
 
   const handleCardClick = async () => {
     try {
@@ -140,6 +140,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, isSelected
                         setIsSelecting(true);
                         try {
                           await onSelect(agent);
+                          setIsSelected(true);
                         } finally {
                           setIsSelecting(false);
                         }
