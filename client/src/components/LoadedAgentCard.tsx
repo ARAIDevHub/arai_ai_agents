@@ -6,9 +6,10 @@ import { Agent } from '../interfaces/AgentInterfaces';
 interface AgentCardProps {
   agent: Agent,
   onSelect: (agent: Agent) => Promise<void>;
+  isSelected: boolean;
 }
 
-const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
+const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, isSelected }) => {
   const agentData = agent.agent;
   const [isFlipped, setIsFlipped] = useState(false);
   const agentName = agentData?.agent_details?.name || 'Unknown Agent';
@@ -132,10 +133,10 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                     <button
                       className={`w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
                                   flex items-center justify-center gap-2 text-white
-                                  ${isSelecting ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
+                                  ${isSelecting || isSelected ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
                       onClick={async (e) => {
                         e.stopPropagation();
-                        if (isSelecting) return;
+                        if (isSelecting || isSelected) return;
                         setIsSelecting(true);
                         try {
                           await onSelect(agent);
@@ -143,10 +144,10 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                           setIsSelecting(false);
                         }
                       }}
-                      disabled={isSelecting}
+                      disabled={isSelecting || isSelected}
                     >
                       <CheckCircle className={`w-4 h-4 ${isSelecting ? 'animate-spin' : ''}`} />
-                      {isSelecting ? 'Selecting...' : 'Select Agent'}
+                      {isSelected ? 'Selected' : isSelecting ? 'Selecting...' : 'Select Agent'}
                     </button>
                   </div>
                 </div>
