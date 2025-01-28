@@ -176,10 +176,16 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                   </div>
                 ) : (
                   <img
-                    src={agent.avatar || 'https://via.placeholder.com/400x400?text=Loading...'}
-                    alt=""
+                    src={agent.avatar || ''}
+                    alt={agent.avatar ? '' : 'Please regenerate again'}
                     className="w-full h-full object-cover"
+                    style={{ display: agent.avatar ? 'block' : 'none' }}
                   />
+                )}
+                {!agent.avatar && (
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    Please regenerate again
+                  </div>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
               </div>
@@ -201,7 +207,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
               {/* Header with small image */}
               <div className="flex gap-4 mb-4">
                 <img
-                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  src={profileImageUrl}
                   alt=""
                   className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                 />

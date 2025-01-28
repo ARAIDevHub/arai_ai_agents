@@ -42,7 +42,7 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
     return url;
   } catch (error) {
     console.error('[AgentGallery] Error loading image:', error);
-    return 'https://via.placeholder.com/400x400?text=Image+Load+Failed';
+    return 'Error loading image. Regenerate again';
   }
 };
 
@@ -65,12 +65,12 @@ const generateCharacterConcept = (): string => {
     if the profession was a Dr. then the name could be Dr.{Name} `
   ];
   const conceptFormat2 = [
-    `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.
-    Make sure to use their name as the agents name. It is best to make a variation of their name. For example, if the person is Elon Musk, then the agent name could be Elon Musk Jr., Elon Gate, Trump Bot, Trump Tron, etc. Make something unique and memorable that could go viral within the first 24 hours of being posted.`
+    `Create a parody meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.
+    Make sure to use their name as part of their agent name. It is best to make a variation of their name. For example, if the person is Elon Musk, then the agent name could be Elon Musk Jr., Elon Gate, Trump Bot, Trump Tron, etc. Make something unique and memorable that could go viral within the first 24 hours of being posted.`
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.1 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  return Math.random() < 0.35 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
@@ -118,7 +118,7 @@ const AgentGallery: React.FC = () => {
 
       return {
         id: Math.floor(Math.random() * 1000000).toString(),
-        name: agentDetails.name || '',
+        name: agentDetails.name.replace('_', ' ') || '',
         avatar: '',
         shortDescription: '...',
         tags: agentDetails.hashtags || [],
@@ -222,7 +222,6 @@ const AgentGallery: React.FC = () => {
               ...agent,
               name: 'Generating Agent...', // Add loading name
               isLoading: true,
-              avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
               personality: [],
               communicationStyle: [],
               emojis: [],
@@ -249,7 +248,6 @@ const AgentGallery: React.FC = () => {
           agent.id === agentId
             ? {
               ...newAgent,
-              avatar: 'https://via.placeholder.com/400x400?text=Generating+Image',
               isLoading: true
             }
             : agent
@@ -257,7 +255,7 @@ const AgentGallery: React.FC = () => {
       );
 
       // Incorporate the concept into the prompt
-      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait. Concept: ${newAgent.concept}, Make sure the sex of the character is accurate to the concept. For example, an Elon Musk agent should be a male, and a Cleopatra agent should be a female and look like the historical figure if their name is Cleopatra.`;
+      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait. Concept: ${newAgent.concept} `;
 
       const payload = {
         prompt: prompt,
@@ -301,7 +299,6 @@ const AgentGallery: React.FC = () => {
           agent.id === agentId
             ? {
               ...agent,
-              avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
               isLoading: false
             }
             : agent

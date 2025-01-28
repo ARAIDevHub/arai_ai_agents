@@ -180,7 +180,7 @@ def create_agent():
         "concept": data.get('concept', ''),
         "agent": {
             "agent_details": {
-                "name": character_name,
+                "name": character_name.replace('_', ' '),
                 "personality": data.get('agent_details', {}).get('personality', []),
                 "communication_style": data.get('agent_details', {}).get('communication_style', []),
                 "backstory": data.get('agent_details', {}).get('backstory', ''),
