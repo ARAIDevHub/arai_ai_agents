@@ -18,8 +18,8 @@ function App() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div id="root">
-      <main>
+    <div id="root" className="flex flex-col min-h-screen">
+      <main className="flex-grow">
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
           {/* Header */}
           <header className="bg-gradient-to-r from-cyan-900 to-orange-900 shadow-xl">
