@@ -18,6 +18,7 @@ const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
 
 
+
 // Helper function to get random trait
 const getRandomTrait = (traitArray: string[]): string => {
   return traitArray[Math.floor(Math.random() * traitArray.length)];
@@ -64,11 +65,12 @@ const generateCharacterConcept = (): string => {
     if the profession was a Dr. then the name could be Dr.{Name} `
   ];
   const conceptFormat2 = [
-    `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.`
+    `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.
+    Make sure to use their name as the agents name. It is best to make a variation of their name. For example, if the person is Elon Musk, then the agent name could be Elon Musk Jr., Elon Gate, Trump Bot, Trump Tron, etc. Make something unique and memorable that could go viral within the first 24 hours of being posted.`
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.5 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  return Math.random() < 0.1 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
@@ -254,7 +256,8 @@ const AgentGallery: React.FC = () => {
         )
       );
 
-      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait`;
+      // Incorporate the concept into the prompt
+      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait. Concept: ${newAgent.concept}, Make sure the gender of the character is accurate to the concept. For example, an Elon Musk agent should be a male, and a Cleopatra agent should be a female and look like the historical figure if their name is one of the historical figures.`;
 
       const payload = {
         prompt: prompt,

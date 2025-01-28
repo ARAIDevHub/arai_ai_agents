@@ -64,6 +64,7 @@ class PostManager:
         """
         self.agent_name = agent_name
         self.master_file = os.path.join("configs", agent_name, f"{agent_name}_master.json")
+        self.is_logged_in = False
         
         # Initialize Twitter connectors based on environment variable
         if X_API_OFFICIAL == "True":
@@ -74,6 +75,8 @@ class PostManager:
             print(f"[Post Manager] Initializing Twitter API Free")
             self.twitter_connector = None
             self.twitter_api_free = login_and_save_state(username=X_USERNAME, password=X_PASSWORD, phone_or_email=X_PHONE_OR_EMAIL)
+            if self.twitter_api_free:
+                self.is_logged_in = True
 
         # Load master configuration
         with open(self.master_file, 'r', encoding='utf-8') as f:

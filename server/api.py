@@ -438,10 +438,11 @@ def start_post_manager_twitter():
         post_manager_twitter = PostManager(agent_name=agent_name)
         print(f"[start_post_manager_twitter] - post_manager created: {post_manager_twitter}")
 
-        if post_manager_twitter:
+        # Check if the PostManager is logged in
+        if post_manager_twitter and post_manager_twitter.is_logged_in:
             return jsonify({'success': True, 'message': f'Post manager started for {agent_name}'}), 200
         else:
-            return jsonify({'error': 'Failed to start post manager'}), 500
+            return jsonify({'error': 'Failed to start post manager or login to Twitter'}), 500
             
     except Exception as e:
         print(f"[start_post_manager] - Error: {str(e)}")
