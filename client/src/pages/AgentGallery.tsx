@@ -102,10 +102,25 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
 
 const AgentGallery: React.FC = () => {
   const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
+  const { selectedAgent } = state; // Access the selectedAgent from the context
   const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const initialMount = useRef(true);
+
+  // Load the selected agent's details when the component mounts or when the selected agent changes
+  useEffect(() => {
+    if (selectedAgent && loadedAgents.length > 0) {
+      const selectedIndex = loadedAgents.findIndex(
+        (agent) => agent.name === selectedAgent
+      );
+
+      if (selectedIndex !== -1) {
+        // Optionally, you can set the selected agent in the local state or perform other actions
+        console.log("Selected agent loaded:", loadedAgents[selectedIndex]);
+      }
+    }
+  }, [selectedAgent, loadedAgents]);
 
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {

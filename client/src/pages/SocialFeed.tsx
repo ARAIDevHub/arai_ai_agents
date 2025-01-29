@@ -26,12 +26,15 @@ const SocialFeed: React.FC = () => {
       const index = characters.findIndex(
         (char) => char.agent.agent_details.name === state.selectedAgent
       );
-      if (index !== selectedCharacterIndex) {
-        setSelectedCharacterIndex(index);
-        setSelectedCharacter(characters[index]);
+
+      if (index !== -1 && index !== selectedCharacterIndex) {
+        const char = characters[index];
+        if (char) {
+          handleCharacterSelect(char, index);
+        }
       }
     }
-  }, [state.selectedAgent, characters]);
+  }, [state.selectedAgent, characters, selectedCharacterIndex]);
 
   useEffect(() => {
     // Update timeLeft whenever delayBetweenPosts changes
@@ -45,6 +48,7 @@ const SocialFeed: React.FC = () => {
   };
 
   const getCharacterPosts = (character: any) => {
+    console.log(`[SocialFeed] - getCharacterPosts called with character: ${character}`);
     if (!character?.agent?.seasons) return [];
 
     const allPosts: Post[] = [];
@@ -101,6 +105,7 @@ const SocialFeed: React.FC = () => {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       // Extract the master file path from the character
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
+      console.log(`[SocialFeed] - masterFilePath: ${masterFilePath}`);
 
       // First create new season
       await createSeason(masterFilePath);
