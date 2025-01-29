@@ -22,6 +22,7 @@ const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
  */
 const AgentCreator: React.FC = () => {
   const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
+  const { selectedAgent } = state; // Access the selectedAgent from the context
 
   /**
    * Main UI state management
@@ -321,16 +322,6 @@ const AgentCreator: React.FC = () => {
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
 
-  // Set the selectedCharacterIndex based on the context's selected agent
-  useEffect(() => {
-    if (characters.length > 0 && state.selectedAgent) {
-      const index = characters.findIndex(
-        (char) => char.agent.agent_details.name === state.selectedAgent
-      );
-      setSelectedCharacterIndex(index);
-    }
-  }, [characters, state.selectedAgent]);
-
   /**
    * Form Submission Handler
    * Processes the final agent data and sends it to the server
@@ -492,6 +483,7 @@ const AgentCreator: React.FC = () => {
    * Updates both main agent state and draft states
    */
   const handleCharacterSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log('[AgentCreator] - handleCharacterSelect called');
     const selectedIndex = parseInt(e.target.value);
     setSelectedCharacterIndex(selectedIndex);
     const char = characters[selectedIndex];
@@ -539,6 +531,23 @@ const AgentCreator: React.FC = () => {
       emojis: (char.agent.agent_details.emojis || []).join(" "),
     });
   };
+
+  useEffect(() => {
+    if (selectedAgent && characters.length > 0) {
+      const selectedIndex = characters.findIndex(
+        (char) => char.agent.agent_details.name === selectedAgent
+      );
+
+      if (selectedIndex !== -1 && selectedIndex !== selectedCharacterIndex) {
+        setSelectedCharacterIndex(selectedIndex);
+        const char = characters[selectedIndex];
+        if (char?.agent?.agent_details) {
+          // Use the same logic as the dropdown to update the agent state
+          handleCharacterSelect({ target: { value: selectedIndex.toString() } } as ChangeEvent<HTMLSelectElement>);
+        }
+      }
+    }
+  }, [selectedAgent, characters, selectedCharacterIndex]);
 
   //
   // ──────────────────────────────────────────────────────────────────────────────

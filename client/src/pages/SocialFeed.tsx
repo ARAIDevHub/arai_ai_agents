@@ -97,8 +97,10 @@ const SocialFeed: React.FC = () => {
 
     setIsGenerating(true);
     try {
+      // Adding back the _ to the name to search the file name in the configs folder
+      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       // Extract the master file path from the character
-      const masterFilePath = `configs/${selectedCharacter.agent.agent_details.name}/${selectedCharacter.agent.agent_details.name}_master.json`;
+      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
       // First create new season
       await createSeason(masterFilePath);

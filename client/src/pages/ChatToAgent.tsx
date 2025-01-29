@@ -21,20 +21,24 @@ const ChatToAgent: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null); // Define selectedAgent state
 
   const scrollToBottom = () => {
+    console.log('[ChatToAgent] - scrollToBottom called');
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
+    console.log('[ChatToAgent] - useEffect for displayChatHistory called');
     scrollToBottom();
   }, [displayChatHistory]);
 
   // Load chat history when agent is selected
   useEffect(() => {
+    console.log('[ChatToAgent] - useEffect for state.selectedAgent called');
     const loadChatHistory = async () => {
+      console.log('[ChatToAgent] - loadChatHistory called');
       if (state.selectedAgent) {
         try {
           const agentName = state.selectedAgent;
-          const masterFilePath = `configs/${agentName}/${agentName}_master.json`;
+          const masterFilePath = `configs/${agentName.replace(" ", "_")}/${agentName.replace(" ", "_")}_master.json`;
           const history = await getChatHistory(masterFilePath);
           setChatHistory(history);
         } catch (error) {
@@ -50,6 +54,7 @@ const ChatToAgent: React.FC = () => {
   }, [state.selectedAgent]);
 
   useEffect(() => {
+    console.log('[ChatToAgent] - useEffect for state.selectedAgent and characters called');
     if (state.selectedAgent) {
       const index = characters.findIndex(
         (char) => char.agent.agent_details.name === state.selectedAgent
@@ -62,6 +67,7 @@ const ChatToAgent: React.FC = () => {
   }, [state.selectedAgent, characters]);
 
   const handleSelectAgent = (index: number) => {
+    console.log(`[ChatToAgent] - handleSelectAgent called with index: ${index}`);
     const char = characters[index];
     if (char) {
       setSelectedCharacterIndex(index);
@@ -71,6 +77,7 @@ const ChatToAgent: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('[ChatToAgent] - handleSubmit called');
     e.preventDefault();
     if (!input.trim() || !selectedAgent) return;
 
@@ -88,7 +95,7 @@ const ChatToAgent: React.FC = () => {
     try {
       const agentName = selectedAgent?.agent?.agent_details?.name || '';
       const masterFilePath = selectedAgent?.agent?.master_file_path || 
-        `configs/${agentName}/${agentName}_master.json`;
+        `configs/${agentName.replace(" ", "_")}/${agentName.replace(" ", "_")}_master.json`;
 
       const response = await sendChatMessage(
         masterFilePath,
