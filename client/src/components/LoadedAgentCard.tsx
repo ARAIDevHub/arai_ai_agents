@@ -19,6 +19,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentTopicExpertise = agentData?.agent_details?.topic_expertise || [];
   const profileImageUrl = agentData?.profile_image?.details?.url || "";
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
 
   const handleCardClick = async () => {
     try {
@@ -46,7 +47,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
             <div className="w-full h-full bg-slate-900/80 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
                 <img
-                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  src={profileImageUrl}
                   alt=""
                   className="w-full h-full object-cover"
                 />
@@ -69,7 +70,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                 {/* Header with small image */}
                 <div className="flex gap-4 mb-4">
                   <img
-                  src={profileImageUrl || 'https://via.placeholder.com/400x400?text=Loading...'}
+                  src={profileImageUrl}
                   alt=""
                     className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                   />
@@ -132,21 +133,22 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
                     <button
                       className={`w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
                                   flex items-center justify-center gap-2 text-white
-                                  ${isSelecting ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
+                                  ${isSelecting || isSelected ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
                       onClick={async (e) => {
                         e.stopPropagation();
-                        if (isSelecting) return;
+                        if (isSelecting || isSelected) return;
                         setIsSelecting(true);
                         try {
                           await onSelect(agent);
+                          setIsSelected(true);
                         } finally {
                           setIsSelecting(false);
                         }
                       }}
-                      disabled={isSelecting}
+                      disabled={isSelecting || isSelected}
                     >
                       <CheckCircle className={`w-4 h-4 ${isSelecting ? 'animate-spin' : ''}`} />
-                      {isSelecting ? 'Selecting...' : 'Select Agent'}
+                      {isSelected ? 'Selected' : isSelecting ? 'Selecting...' : 'Select Agent'}
                     </button>
                   </div>
                 </div>

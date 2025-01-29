@@ -3,6 +3,7 @@ import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
 import { createSeason, createEpisodePosts, postToTwitter, startPostManager,updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
+import Notification from "../components/Notification.tsx";
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
@@ -16,6 +17,7 @@ const SocialFeed: React.FC = () => {
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [isPosting, setIsPosting] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
 
   useEffect(() => {
     // Update timeLeft whenever delayBetweenPosts changes
@@ -110,9 +112,22 @@ const SocialFeed: React.FC = () => {
     try {
       const response = await startPostManager(selectedCharacter.agent.agent_details.name);
       console.log("Post manager started successfully:", response);
+
+      if (!response) {
+        setNotification({ message: "Please check your .env Twitter configuration.", type: 'error' });
+        return;
+      }
+
       setIsLoggedIn(true);
     } catch (error) {
       console.error("Error starting post manager:", error);
+      
+      // Check for specific error conditions
+      if (error instanceof Error && error.message.includes("credentials")) {
+        setNotification({ message: "Error: Missing or incorrect credentials. Please check your .env file.", type: 'error' });
+      } else {
+        setNotification({ message: "Please check your .env Twitter configuration", type: 'error' });
+      }
     }
   };
 
@@ -222,6 +237,13 @@ const SocialFeed: React.FC = () => {
 
   return (
     <div className="container mx-auto  max-w-4xl">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
       {/* Agent Selection Row */}
       <div className=" flex p-3 items-center justify-center gap-4">
         <div className="flex items-center">
@@ -308,7 +330,9 @@ const SocialFeed: React.FC = () => {
 
               <Button
                 onClick={handleStartPostManager}
-                className="bg-orange-400 hover:bg-orange-500"
+                className={`${
+                  isLoggedIn ? "bg-green-400 hover:bg-green-500" : "bg-orange-400 hover:bg-orange-500"
+                }`}
               >
                 {isLoggedIn ? "Logged in" : "Login to Twitter"}
               </Button>
@@ -326,7 +350,7 @@ const SocialFeed: React.FC = () => {
           )}
 
           {/* Posts Feed */}
-          <div className="flex-grow overflow-y-auto space-y-4 p-4">
+          <div className="flex-grow overflow-y-auto space-y-4 ">
             {characterPosts.map((post) => (
               <div
                 key={post.post_id}
