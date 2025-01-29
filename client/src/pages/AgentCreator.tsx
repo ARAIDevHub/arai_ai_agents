@@ -22,6 +22,7 @@ const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
  */
 const AgentCreator: React.FC = () => {
   const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
+  console.log("[AgentCreator] - useAgent state:", state);
 
   /**
    * Main UI state management
@@ -33,6 +34,7 @@ const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"basic" | "personality" | "style">(
     "basic"
   );
+  console.log("[AgentCreator] - activeTab:", activeTab);
 
   /**
    * Core agent state
@@ -88,9 +90,11 @@ const AgentCreator: React.FC = () => {
     selectedImage: undefined,
     seasons: [],
   });
+  console.log("[AgentCreator] - Initial agent state:", agent);
 
   // The fetched characters
   const { characters, loading, error } = useCharacters();
+  console.log("[AgentCreator] - Characters fetched:", characters);
 
   /**
    * Draft field management
@@ -103,6 +107,7 @@ const AgentCreator: React.FC = () => {
     backstory: "",
     imageDescription: "",
   });
+  console.log("[AgentCreator] - Initial draftFields:", draftFields);
 
   /**
    * Synchronization Effects
@@ -117,6 +122,7 @@ const AgentCreator: React.FC = () => {
       imageDescription:
         agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
     });
+    console.log("[AgentCreator] - Updated draftFields:", draftFields);
   }, [agent]);
 
   /**
@@ -137,6 +143,7 @@ const AgentCreator: React.FC = () => {
     hashtags: "",
     emojis: "",
   });
+  console.log("[AgentCreator] - Initial draftTraits:", draftTraits);
 
   /**
    * Synchronization Effects
@@ -151,6 +158,7 @@ const AgentCreator: React.FC = () => {
       hashtags: agent.agent_details.hashtags.join(", "),
       emojis: agent.agent_details.emojis.join(" "),
     });
+    console.log("[AgentCreator] - Updated draftTraits:", draftTraits);
   }, [agent]);
 
   /**
@@ -159,6 +167,7 @@ const AgentCreator: React.FC = () => {
    * Sets default placeholder if no images are available
    */
   useEffect(() => {
+    console.log("[AgentCreator] - useEffect profile_image_options:", agent.profile_image_options);
     if (agent.profile_image_options.length > 0) {
       const firstImage =
         agent.profile_image_options[0]?.generations_by_pk
@@ -168,6 +177,7 @@ const AgentCreator: React.FC = () => {
           id: "",
           generationId: "",
         } as GeneratedImage);
+        console.log("[AgentCreator] - First image:", firstImage);
 
       setAgent((prev) => ({
         ...prev,
@@ -181,6 +191,7 @@ const AgentCreator: React.FC = () => {
           },
         },
       }));
+      console.log("[AgentCreator] - Updated agent with first image:", agent);
     } else {
       setAgent((prev) => ({
         ...prev,
@@ -192,6 +203,7 @@ const AgentCreator: React.FC = () => {
           },
         },
       }));
+      console.log("[AgentCreator] - Set placeholder image:", agent);
     }
   }, [agent.profile_image_options]);
 
@@ -207,6 +219,7 @@ const AgentCreator: React.FC = () => {
         ...prev,
         [field]: e.target.value,
       }));
+      console.log(`[AgentCreator] - Updated draftFields ${field}:`, draftFields);
     };
 
   const handleDraftKeyDown =
@@ -241,6 +254,7 @@ const AgentCreator: React.FC = () => {
                 : [newImageOption],
             };
           });
+          console.log("[AgentCreator] - Updated agent with new image description:", agent);
         } else {
           setAgent((prev) => ({
             ...prev,
@@ -249,6 +263,7 @@ const AgentCreator: React.FC = () => {
               [field]: draftFields[field],
             },
           }));
+          console.log(`[AgentCreator] - Updated agent_details ${field}:`, agent);
         }
       }
     };
@@ -265,6 +280,7 @@ const AgentCreator: React.FC = () => {
         ...prev,
         [field]: e.target.value,
       }));
+      console.log(`[AgentCreator] - Updated draftTraits ${field}:`, draftTraits);
     };
 
   const handleTraitDraftKeyDown =
@@ -286,6 +302,7 @@ const AgentCreator: React.FC = () => {
             [field]: arrayValue,
           },
         }));
+        console.log(`[AgentCreator] - Updated agent_details ${field}:`, agent);
       }
     };
 
@@ -307,19 +324,24 @@ const AgentCreator: React.FC = () => {
         ),
       },
     }));
+    console.log(`[AgentCreator] - Deleted trait ${value} from ${field}:`, agent);
   };
 
   // State to manage the visibility of the success message
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  console.log("[AgentCreator] - showSuccessMessage:", showSuccessMessage);
 
   // Add state for loading progress near other state declarations
   const [loadingProgress, setLoadingProgress] = useState(0);
+  console.log("[AgentCreator] - loadingProgress:", loadingProgress);
 
   // Add a new state for tracking image generation
   const [isGenerating, setIsGenerating] = useState(false);
+  console.log("[AgentCreator] - isGenerating:", isGenerating);
 
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
+  console.log("[AgentCreator] - selectedCharacterIndex:", selectedCharacterIndex);
 
   /**
    * Form Submission Handler
@@ -332,6 +354,7 @@ const AgentCreator: React.FC = () => {
       | React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
+    console.log("[AgentCreator] - handleSubmitCreateAgent called");
 
     type AgentState = typeof agent;
 
@@ -395,14 +418,14 @@ const AgentCreator: React.FC = () => {
     };
 
     try {
-
       await createAgent(updatedAgent);
+      console.log("[AgentCreator] - Agent created successfully:", updatedAgent);
 
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
       setAgent(updatedAgent);
     } catch (error) {
-      console.error("Error creating agent:", error);
+      console.error("[AgentCreator] - Error creating agent:", error);
     }
   };
 
@@ -417,7 +440,7 @@ const AgentCreator: React.FC = () => {
         const charactersData = await getCharacters();
         if (!Array.isArray(charactersData)) {
           console.error(
-            "Expected array of characters, received:",
+            "[AgentCreator] - Expected array of characters, received:",
             typeof charactersData
           );
           return;
@@ -467,9 +490,9 @@ const AgentCreator: React.FC = () => {
             concept: agentConcept || "",
           };
         });
-      console.log("Processed characters:", processed);
+        console.log("[AgentCreator] - Processed characters:", processed);
       } catch (error) {
-        console.error("Error loading characters:", error);
+        console.error("[AgentCreator] - Error loading characters:", error);
       }
     };
 
@@ -528,6 +551,7 @@ const AgentCreator: React.FC = () => {
       hashtags: (char.agent.agent_details.hashtags || []).join(", "),
       emojis: (char.agent.agent_details.emojis || []).join(" "),
     });
+    console.log("[AgentCreator] - Character selected:", char);
   };
 
   useEffect(() => {
@@ -655,7 +679,7 @@ const AgentCreator: React.FC = () => {
                     setLoadingProgress(100);
                     setTimeout(() => setLoadingProgress(0), 500);
                   } catch (error) {
-                    console.error("Error generating new image:", error);
+                    console.error("[AgentCreator] - Error generating new image:", error);
                     setLoadingProgress(0);
                   } finally {
                     setIsGenerating(false);
@@ -684,7 +708,6 @@ const AgentCreator: React.FC = () => {
                                   : ""
                               }`}
                     onClick={async () => {
-
                       try {
                         setLoadingProgress(30);
 
@@ -705,7 +728,7 @@ const AgentCreator: React.FC = () => {
                         setLoadingProgress(100);
                         setTimeout(() => setLoadingProgress(0), 500);
                       } catch (error) {
-                        console.error("Error loading image:", error);
+                        console.error("[AgentCreator] - Error loading image:", error);
                         setLoadingProgress(0);
                       }
                     }}
@@ -731,6 +754,7 @@ const AgentCreator: React.FC = () => {
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
+                        {console.log("[AgentCreator] - Image selected with index:", index)}
                       </div>
                     )}
                   </div>
@@ -777,6 +801,7 @@ const AgentCreator: React.FC = () => {
                 key={id}
                 onClick={() => {
                   setActiveTab(id);
+                  console.log("[AgentCreator] - Tab changed to:", id);
                 }}
                 className={`flex-1 flex items-center justify-center px-4 py-2 
                             rounded-md text-gray-100 ${
