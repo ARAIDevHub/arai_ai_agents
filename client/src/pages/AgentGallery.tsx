@@ -112,7 +112,7 @@ const AgentGallery: React.FC = () => {
   useEffect(() => {
     if (selectedAgent && loadedAgents.length > 0) {
       const selectedIndex = loadedAgents.findIndex(
-        (agent) => agent.name === selectedAgent
+        (agent) => agent.agent.agent_details.name === selectedAgent
       );
 
       if (selectedIndex !== -1) {
@@ -133,7 +133,7 @@ const AgentGallery: React.FC = () => {
 
       return {
         id: Math.floor(Math.random() * 1000000).toString(),
-        name: agentDetails.name.replace('_', ' ') || '',
+        name: agentDetails.name?.replace('_', ' ') ?? '',
         avatar: '',
         shortDescription: '...',
         tags: agentDetails.hashtags || [],
@@ -327,7 +327,7 @@ const AgentGallery: React.FC = () => {
     console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
       // Dispatch the selected agent to the global state
-      dispatch({ type: 'SET_AGENT', payload: agent.name });
+      dispatch({ type: 'SET_AGENT', payload: agent.agent?.agent_details.name || '' });
 
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));
