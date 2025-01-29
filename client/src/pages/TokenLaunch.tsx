@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import TokenLaunchForm from './TokenLaunchForm';
 import TokenLaunchFlow from './TokenLaunchFlow';
 import { LayoutGrid, GitGraph } from 'lucide-react';
+import { useAgent } from '../context/AgentContext';
 
 interface WalletRow {
   id: string;
@@ -29,6 +30,7 @@ interface FormData {
 }
 
 const TokenLaunch = () => {
+  const { state, dispatch } = useAgent();
   const [viewMode, setViewMode] = useState<'form' | 'flow'>('form');
   const [formData, setFormData] = useState<FormData>({
     tokenName: '',

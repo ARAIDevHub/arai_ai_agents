@@ -9,6 +9,7 @@ import TraitButtons from "../components/TraitButtons"; // We'll still use your T
 import useCharacters from "../hooks/useCharacters";
 import { inconsistentImageLambda } from "../api/leonardoApi";
 import LoadingBar from "../components/LoadingBar";
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
@@ -20,6 +21,7 @@ const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
  * including personality traits, communication style, and profile images.
  */
 const AgentCreator: React.FC = () => {
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
 
   /**
    * Main UI state management
@@ -319,6 +321,16 @@ const AgentCreator: React.FC = () => {
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
 
+  // Set the selectedCharacterIndex based on the context's selected agent
+  useEffect(() => {
+    if (characters.length > 0 && state.selectedAgent) {
+      const index = characters.findIndex(
+        (char) => char.agent.agent_details.name === state.selectedAgent
+      );
+      setSelectedCharacterIndex(index);
+    }
+  }, [characters, state.selectedAgent]);
+
   /**
    * Form Submission Handler
    * Processes the final agent data and sends it to the server
@@ -485,44 +497,46 @@ const AgentCreator: React.FC = () => {
     const char = characters[selectedIndex];
     if (!char?.agent?.agent_details) return;
 
-    const details = char.agent.agent_details;
+    // Dispatch the selected agent to the global state
+    dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
 
+    // Update local state
     setAgent({
       agent_details: {
-        name: details.name || "",
-        personality: details.personality || [],
-        communication_style: details.communication_style || [],
-        backstory: details.backstory || "",
-        universe: details.universe || "",
-        topic_expertise: details.topic_expertise || [],
-        hashtags: details.hashtags || [],
-        emojis: details.emojis || [],
-        concept: details.concept || "",
+        name: char.agent.agent_details.name || "",
+        personality: char.agent.agent_details.personality || [],
+        communication_style: char.agent.agent_details.communication_style || [],
+        backstory: char.agent.agent_details.backstory || "",
+        universe: char.agent.agent_details.universe || "",
+        topic_expertise: char.agent.agent_details.topic_expertise || [],
+        hashtags: char.agent.agent_details.hashtags || [],
+        emojis: char.agent.agent_details.emojis || [],
+        concept: char.agent.agent_details.concept || "",
       },
-      profile_image: char.agent?.profile_image_options || [],
-      profile_image_options: char.agent?.profile_image_options || [],
-      selectedImage: char.agent?.profile_image_options?.[0]?.generations_by_pk
+      profile_image: char.agent.profile_image_options || [],
+      profile_image_options: char.agent.profile_image_options || [],
+      selectedImage: char.agent.profile_image_options?.[0]?.generations_by_pk
         ?.generated_images?.length
         ? 0
         : undefined,
-      seasons: char.agent?.seasons || [],
+      seasons: char.agent.seasons || [],
     });
 
     // Sync local drafts
     setDraftFields({
-      name: details.name || "",
-      universe: details.universe || "",
-      backstory: details.backstory || "",
+      name: char.agent.agent_details.name || "",
+      universe: char.agent.agent_details.universe || "",
+      backstory: char.agent.agent_details.backstory || "",
       imageDescription:
-        char.agent?.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
+        char.agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
     });
 
     setDraftTraits({
-      topic_expertise: (details.topic_expertise || []).join(", "),
-      personality: (details.personality || []).join(", "),
-      communication_style: (details.communication_style || []).join(", "),
-      hashtags: (details.hashtags || []).join(", "),
-      emojis: (details.emojis || []).join(" "),
+      topic_expertise: (char.agent.agent_details.topic_expertise || []).join(", "),
+      personality: (char.agent.agent_details.personality || []).join(", "),
+      communication_style: (char.agent.agent_details.communication_style || []).join(", "),
+      hashtags: (char.agent.agent_details.hashtags || []).join(", "),
+      emojis: (char.agent.agent_details.emojis || []).join(" "),
     });
   };
 

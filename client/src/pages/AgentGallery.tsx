@@ -13,6 +13,7 @@ import famousFigures from '../assets/generate-random-agents/famousFigures.json';
 import LunaQuantumchef from '../assets/example-agents/Luna_Quantumchef_master.json';
 import CosmicCurator from '../assets/example-agents/Cosmic_Curator_master.json';
 import GavelGlitch from '../assets/example-agents/Gavel_Glitch_master.json';
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
@@ -100,8 +101,7 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
 };
 
 const AgentGallery: React.FC = () => {
-  // Add selected agent state
-  // const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
   const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
@@ -311,6 +311,8 @@ const AgentGallery: React.FC = () => {
   const handleSelectAgent = async (agent: Agent) => {
     console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
+      // Dispatch the selected agent to the global state
+      dispatch({ type: 'SET_AGENT', payload: agent.name });
 
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));

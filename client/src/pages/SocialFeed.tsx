@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager,updateSeasons } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
@@ -18,6 +20,18 @@ const SocialFeed: React.FC = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
+
+  useEffect(() => {
+    if (state.selectedAgent) {
+      const index = characters.findIndex(
+        (char) => char.agent.agent_details.name === state.selectedAgent
+      );
+      if (index !== selectedCharacterIndex) {
+        setSelectedCharacterIndex(index);
+        setSelectedCharacter(characters[index]);
+      }
+    }
+  }, [state.selectedAgent, characters]);
 
   useEffect(() => {
     // Update timeLeft whenever delayBetweenPosts changes
@@ -51,7 +65,6 @@ const SocialFeed: React.FC = () => {
 
     // Sort posts by season number, episode number, and post number
     return allPosts.sort((a, b) => {
-      // Provide default values in case of undefined
       const aSeasonNum = a.seasonNumber ?? 0;
       const bSeasonNum = b.seasonNumber ?? 0;
       const aEpisodeNum = a.episodeNumber ?? 0;
@@ -70,6 +83,7 @@ const SocialFeed: React.FC = () => {
   const handleCharacterSelect = (char: any, index: number) => {
     setSelectedCharacterIndex(index);
     setSelectedCharacter(char);
+    dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
     const posts = getCharacterPosts(char);
     setCharacterPosts(posts);
 
