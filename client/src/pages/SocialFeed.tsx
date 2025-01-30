@@ -98,9 +98,9 @@ const SocialFeed: React.FC = () => {
   };
 
   const handleGenerateContent = async () => {
-    if (!selectedCharacter || state.isGenerating) return;
+    if (!selectedCharacter || isGenerating) return;
 
-    dispatch({ type: 'SET_GENERATING', payload: true });
+    setIsGenerating(true);
     try {
       // Adding back the _ to the name to search the file name in the configs folder
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
@@ -124,29 +124,27 @@ const SocialFeed: React.FC = () => {
       console.error("Error generating content:", error);
       // Handle error (show notification, etc.)
     } finally {
-      dispatch({ type: 'SET_GENERATING', payload: false });
+      setIsGenerating(false);
     }
   };
 
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
 
-    dispatch({ type: 'SET_LOGGED_IN', payload: false }); // Ensure initial state is not logged in
-    dispatch({ type: 'SET_GENERATING', payload: true }); // Set logging in state to true
-
+    setIsLoggingIn(true); // Set logging in state to true
     try {
       const response = await startPostManager(selectedCharacter.agent.agent_details.name.replace(" ", "_"));
       console.log("Post manager started successfully:", response);
 
-      if (response) {
-        dispatch({ type: 'SET_LOGGED_IN', payload: true }); // Set logged in state to true
-        setNotification({ message: "Logged in successfully!", type: 'success' });
-      } else {
+      if (!response) {
         setNotification({ message: "Please check your .env Twitter configuration.", type: 'error' });
+        return;
       }
+
+      setIsLoggedIn(true);
     } catch (error) {
       console.error("Error starting post manager:", error);
-
+      
       // Check for specific error conditions
       if (error instanceof Error && error.message.includes("credentials")) {
         setNotification({ message: "Error: Missing or incorrect credentials. Please check your .env file.", type: 'error' });
@@ -154,7 +152,7 @@ const SocialFeed: React.FC = () => {
         setNotification({ message: "Please check your .env Twitter configuration", type: 'error' });
       }
     } finally {
-      dispatch({ type: 'SET_GENERATING', payload: false }); // Reset logging in state
+      setIsLoggingIn(false); // Reset logging in state
     }
   };
 
@@ -171,8 +169,12 @@ const SocialFeed: React.FC = () => {
   };
 
   const handlePostToTwitter = async () => {
-    dispatch({ type: 'SET_POSTING', payload: !state.isPosting });
-    if (state.isPosting) {
+    if (!selectedCharacter) return;
+
+    // Toggle posting state
+    setIsPosting(!isPosting);
+
+    if (isPosting) {
       // If already posting, stop the process
       console.log("Stopping post to Twitter.");
       return;
@@ -345,30 +347,32 @@ const SocialFeed: React.FC = () => {
             <div className="flex gap-4 justify-center p-3">
               <Button
                 onClick={handleGenerateContent}
-                disabled={state.isGenerating}
+                disabled={isGenerating}
                 className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {state.isGenerating ? "Generating..." : "Generate Posts Content"}
+                {isGenerating ? "Generating..." : "Generate Posts Content"}
               </Button>
 
               <Button
                 onClick={handleStartPostManager}
                 className={`${
-                  state.isLoggedIn
+                  isLoggedIn
                     ? "bg-green-400 hover:bg-green-500"
+                    : isLoggingIn
+                    ? "bg-yellow-400 hover:bg-yellow-500"
                     : "bg-orange-400 hover:bg-orange-500"
                 }`}
               >
-                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
+                {isLoggedIn ? "Logged in" : isLoggingIn ? "Logging in..." : "Login to Twitter"}
               </Button>
 
               <Button
                 onClick={handlePostToTwitter}
                 className={`${
-                  state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                  isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
                 }`}
               >
-                {state.isPosting ? "Posting..." : "Post to Twitter"}
+                {isPosting ? "Posting..." : "Post to Twitter"}
               </Button>
 
             </div>

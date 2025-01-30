@@ -7,6 +7,7 @@ interface AgentState {
   isGenerating: boolean;
   isLoggedIn: boolean;
   isPosting: boolean;
+  delayBetweenPosts: number; // Add delayBetweenPosts to the state
 }
 
 // Define the actions
@@ -15,7 +16,8 @@ type Action =
   | { type: 'TOGGLE_BUTTON'; payload: boolean }
   | { type: 'SET_GENERATING'; payload: boolean }
   | { type: 'SET_LOGGED_IN'; payload: boolean }
-  | { type: 'SET_POSTING'; payload: boolean };
+  | { type: 'SET_POSTING'; payload: boolean }
+  | { type: 'SET_DELAY'; payload: number }; // Add action for setting delay
 
 // Create the context
 const AgentContext = createContext<{
@@ -37,8 +39,10 @@ const agentReducer = (state: AgentState, action: Action): AgentState => {
       return { ...state, isLoggedIn: action.payload };
     case 'SET_POSTING':
       return { ...state, isPosting: action.payload };
+    case 'SET_DELAY':
+      return { ...state, delayBetweenPosts: action.payload }; // Handle delay action
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      throw new Error(`Unhandled action type:`);
   }
 };
 
@@ -49,7 +53,8 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isButtonActive: false, // Initialize the button state
     isGenerating: false,
     isLoggedIn: false,
-    isPosting: false
+    isPosting: false,
+    delayBetweenPosts: 5 // Initialize delay with a default value
   });
 
   return (
