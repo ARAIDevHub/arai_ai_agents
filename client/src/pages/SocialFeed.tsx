@@ -13,13 +13,9 @@ const SocialFeed: React.FC = () => {
     useState<number>(-1);
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
   const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
-  const [isPosting, setIsPosting] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false); // New state for tracking login process
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
 
   useEffect(() => {

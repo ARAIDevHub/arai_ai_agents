@@ -577,10 +577,6 @@ const AgentCreator: React.FC = () => {
     }
   }, [state.selectedAgent, characters]);
 
-  const handleButtonClick = () => {
-    dispatch({ type: 'TOGGLE_BUTTON', payload: !state.isButtonActive });
-  };
-
   //
   // ──────────────────────────────────────────────────────────────────────────────
   // 10) Render

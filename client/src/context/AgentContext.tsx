@@ -38,7 +38,7 @@ const agentReducer = (state: AgentState, action: Action): AgentState => {
     case 'SET_POSTING':
       return { ...state, isPosting: action.payload };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      throw new Error(`Unhandled action type:`);
   }
 };
 
