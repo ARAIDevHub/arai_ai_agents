@@ -55,6 +55,7 @@ const generateCharacterConcept = (): string => {
   const power = getRandomTrait(characterConcepts.specialPowers);
   const goal = getRandomTrait(characterConcepts.goals);
 
+  // Randomly choose between different concept formats
   const conceptFormats = [
     `A ${personality} ${profession} who ${power} and is ${origin}`,
     `${profession} ${origin}, who ${power} while ${goal}`,
@@ -69,12 +70,8 @@ const generateCharacterConcept = (): string => {
     Make sure to use their name as part of their agent name. It is best to make a variation of their name. For example, if the person is Elon Musk, then the agent name could be Elon Musk Jr., Elon Gate, Trump Bot, Trump Tron, etc. Make something unique and memorable that could go viral within the first 24 hours of being posted.`
   ];
 
-  // Log the random number to debug the selection process
-  const randomValue = Math.random();
-  console.log(`[generateCharacterConcept] Random value: ${randomValue}`);
-
-  // 75% chance of conceptFormats, 25% chance of conceptFormat2
-  return randomValue < 0.75 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  // 80% chance of conceptFormat1, 20% chance of conceptFormat2
+  return Math.random() < 0.25 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
@@ -99,7 +96,8 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
     universe: masterJson.agent.agent_details.universe || '',
     backstory: masterJson.agent.agent_details.backstory || '',
     topic_expertise: masterJson.agent.agent_details.topic_expertise || [],
-    isExample: true // Add this flag to identify example agents
+    isExample: true, // Add this flag to identify example agents
+    backgroundImageUrl: masterJson.agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || '',
   };
 };
 
@@ -146,7 +144,8 @@ const AgentGallery: React.FC = () => {
         universe: agentDetails.universe || '',
         backstory: agentDetails.backstory || '',
         concept: concept,
-        topic_expertise: agentDetails.topic_expertise || []
+        topic_expertise: agentDetails.topic_expertise || [],
+        backgroundImageUrl: agentObject.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || '',
       };
     } catch (error) {
       console.error("[generateRandomAgentData] Error:", error);

@@ -42,6 +42,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const profileImageUrl = agent.avatar || "";
   const [showNewContent, setShowNewContent] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const backImageUrl = agent.backgroundImageUrl;
+  console.log("RandomAgent backImageUrl", backImageUrl);
 
   useEffect(() => {
     let intervalId: number | undefined;
@@ -203,9 +205,17 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col">
+            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col relative">
+              {/* Add background image with opacity */}
+              {backImageUrl && (
+                <img
+                  src={backImageUrl}
+                  alt="Background"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+              )}
               {/* Header with small image */}
-              <div className="flex gap-4 mb-4">
+              <div className="flex gap-4 mb-4 relative z-10">
                 <img
                   src={profileImageUrl}
                   alt=""
