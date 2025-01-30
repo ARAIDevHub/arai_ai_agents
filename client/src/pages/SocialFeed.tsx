@@ -39,7 +39,6 @@ const SocialFeed: React.FC = () => {
   };
 
   const getCharacterPosts = (character: any) => {
-    console.log(`[SocialFeed] - getCharacterPosts called with character: ${character}`);
     if (!character?.agent?.seasons) return [];
 
     const allPosts: Post[] = [];
@@ -96,7 +95,6 @@ const SocialFeed: React.FC = () => {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       // Extract the master file path from the character
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
-      console.log(`[SocialFeed] - masterFilePath: ${masterFilePath}`);
 
       // First create new season
       await createSeason(masterFilePath);
@@ -126,7 +124,6 @@ const SocialFeed: React.FC = () => {
 
     try {
       const response = await startPostManager(selectedCharacter.agent.agent_details.name.replace(" ", "_"));
-      console.log("Post manager started successfully:", response);
 
       if (response) {
         dispatch({ type: 'SET_LOGGED_IN', payload: true }); // Set logged in state to true
@@ -151,7 +148,6 @@ const SocialFeed: React.FC = () => {
   const handlePostToTwitter = async () => {
     dispatch({ type: 'SET_POSTING', payload: !state.isPosting });
     if (state.isPosting) {
-      console.log("Stopping post to Twitter.");
       return;
     }
 
@@ -160,7 +156,6 @@ const SocialFeed: React.FC = () => {
     const postContentToTwitter = async (post: Post) => {
       try {
         const response = await postToTwitter(selectedCharacter.agent.agent_details.name.replace(" ", "_"), post.post_content);
-        console.log("Posted to Twitter successfully:", response);
 
         // Update the post status in the selectedCharacter
         const updatedSeasons = selectedCharacter.agent.seasons.map((season: Season) => {
@@ -193,10 +188,7 @@ const SocialFeed: React.FC = () => {
 
         // Update the JSON file to mark the post as posted
         let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
-        console.log(`[SocialFeed] - agentName: ${agentName}`);
-        console.log(`[SocialFeed] - updatedSeasons: ${JSON.stringify(updatedSeasons)}`);
         await updateSeasons(agentName, updatedSeasons);
-        console.log("Agent updated successfully.");
 
         // Set hasPosted to true after the first post
         if (!state.hasPosted) {
@@ -238,7 +230,6 @@ const SocialFeed: React.FC = () => {
           }
 
           await updateSeasons(agentName, fullSeasonsArray);
-          console.log("Agent updated successfully.");
         } catch (error) {
           console.error("Error updating agent:", error);
         }

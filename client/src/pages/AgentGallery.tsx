@@ -118,7 +118,6 @@ const AgentGallery: React.FC = () => {
 
       if (selectedIndex !== -1) {
         // Optionally, you can set the selected agent in the local state or perform other actions
-        console.log("Selected agent loaded:", loadedAgents[selectedIndex]);
       }
     }
   }, [selectedAgent, loadedAgents]);
@@ -326,7 +325,6 @@ const AgentGallery: React.FC = () => {
 
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
-    console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
       // Dispatch the selected agent to the global state
       dispatch({ type: 'SET_AGENT', payload: agent.agent?.agent_details.name || '' });

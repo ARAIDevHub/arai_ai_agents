@@ -112,7 +112,6 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
         try {
           await onAddAgent(agent);
           setIsAdded(true);
-          console.log("RandomAgentCard - Add Agent", agent);
           dispatch({ type: 'SET_AGENT', payload: agent.name || '' });
         } finally {
           setIsRegenerating(false);

@@ -22,7 +22,6 @@ const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
  */
 const AgentCreator: React.FC = () => {
   const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
-  console.log("[AgentCreator] - useAgent state:", state);
 
   /**
    * Main UI state management
@@ -34,7 +33,6 @@ const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"basic" | "personality" | "style">(
     "basic"
   );
-  console.log("[AgentCreator] - activeTab:", activeTab);
 
   /**
    * Core agent state
@@ -90,11 +88,9 @@ const AgentCreator: React.FC = () => {
     selectedImage: undefined,
     seasons: [],
   });
-  console.log("[AgentCreator] - Initial agent state:", agent);
 
   // The fetched characters
   const { characters, loading, error } = useCharacters();
-  console.log("[AgentCreator] - Characters fetched:", characters);
 
   /**
    * Draft field management
@@ -163,7 +159,6 @@ const AgentCreator: React.FC = () => {
    * Sets default placeholder if no images are available
    */
   useEffect(() => {
-    console.log("[AgentCreator] - useEffect profile_image_options:", agent.profile_image_options);
     if (agent.profile_image_options.length > 0) {
       const selectedImageIndex = agent.selectedImage !== undefined ? agent.selectedImage : 0;
       const selectedImage =
@@ -173,7 +168,6 @@ const AgentCreator: React.FC = () => {
           id: "",
           generationId: "",
         } as GeneratedImage);
-      console.log("[AgentCreator] - Selected image:", selectedImage);
 
       setAgent((prev) => ({
         ...prev,
@@ -185,7 +179,6 @@ const AgentCreator: React.FC = () => {
           },
         },
       }));
-      console.log("[AgentCreator] - Updated agent with selected image:", agent);
     } else {
       setAgent((prev) => ({
         ...prev,
@@ -197,7 +190,6 @@ const AgentCreator: React.FC = () => {
           },
         },
       }));
-      console.log("[AgentCreator] - Set placeholder image:", agent);
     }
   }, [agent.profile_image_options, agent.selectedImage]);
 
@@ -213,7 +205,6 @@ const AgentCreator: React.FC = () => {
         ...prev,
         [field]: e.target.value,
       }));
-      console.log(`[AgentCreator] - Updated draftFields ${field}:`, draftFields);
     };
 
   const handleDraftKeyDown =
@@ -248,7 +239,6 @@ const AgentCreator: React.FC = () => {
                 : [newImageOption],
             };
           });
-          console.log("[AgentCreator] - Updated agent with new image description:", agent);
         } else {
           setAgent((prev) => ({
             ...prev,
@@ -257,7 +247,6 @@ const AgentCreator: React.FC = () => {
               [field]: draftFields[field],
             },
           }));
-          console.log(`[AgentCreator] - Updated agent_details ${field}:`, agent);
         }
       }
     };
@@ -274,7 +263,6 @@ const AgentCreator: React.FC = () => {
         ...prev,
         [field]: e.target.value,
       }));
-      console.log(`[AgentCreator] - Updated draftTraits ${field}:`, draftTraits);
     };
 
   const handleTraitDraftKeyDown =
@@ -296,7 +284,6 @@ const AgentCreator: React.FC = () => {
             [field]: arrayValue,
           },
         }));
-        console.log(`[AgentCreator] - Updated agent_details ${field}:`, agent);
       }
     };
 
@@ -318,20 +305,16 @@ const AgentCreator: React.FC = () => {
         ),
       },
     }));
-    console.log(`[AgentCreator] - Deleted trait ${value} from ${field}:`, agent);
   };
 
   // State to manage the visibility of the success message
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  console.log("[AgentCreator] - showSuccessMessage:", showSuccessMessage);
 
   // Add state for loading progress near other state declarations
   const [loadingProgress, setLoadingProgress] = useState(0);
-  console.log("[AgentCreator] - loadingProgress:", loadingProgress);
 
   // Add a new state for tracking image generation
   const [isGenerating, setIsGenerating] = useState(false);
-  console.log("[AgentCreator] - isGenerating:", isGenerating);
 
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
@@ -347,7 +330,6 @@ const AgentCreator: React.FC = () => {
       | React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
-    console.log("[AgentCreator] - handleSubmitCreateAgent called");
 
     type AgentState = typeof agent;
 
@@ -412,7 +394,6 @@ const AgentCreator: React.FC = () => {
 
     try {
       await createAgent(updatedAgent);
-      console.log("[AgentCreator] - Agent created successfully:", updatedAgent);
 
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
@@ -483,7 +464,6 @@ const AgentCreator: React.FC = () => {
             concept: agentConcept || "",
           };
         });
-        console.log("[AgentCreator] - Processed characters:", processed);
       } catch (error) {
         console.error("[AgentCreator] - Error loading characters:", error);
       }
@@ -498,10 +478,7 @@ const AgentCreator: React.FC = () => {
    * Updates both main agent state and draft states
    */
   const handleCharacterSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log("[handleCharacterSelect] - handleCharacterSelect called");
     const selectedIndex = parseInt(e.target.value);
-    console.log("[handleCharacterSelect] - Selected index:", selectedIndex);
-    console.log("[handleCharacterSelect] - Characters:, e", e);
     setSelectedCharacterIndex(selectedIndex);
     const char = characters[selectedIndex];
     if (!char?.agent?.agent_details) return;
@@ -510,16 +487,12 @@ const AgentCreator: React.FC = () => {
     dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
 
     const profileImageUrl = char.agent.profile_image?.details.url || "";
-    console.log("[handleCharacterSelect] - Profile image URL:", profileImageUrl);
     const profileImageOptions = char.agent.profile_image_options || [];
-    console.log("[handleCharacterSelect] - Profile image options:", profileImageOptions);
     const generatedImages = profileImageOptions[0]?.generations_by_pk?.generated_images || [];
-    console.log("[handleCharacterSelect] - Generated images:", generatedImages);
 
     const imageIndex = generatedImages.findIndex(
       (img: { url: string }) => img.url === profileImageUrl
     ) || 0;
-    console.log("[handleCharacterSelect] - Image index:", imageIndex);
 
 
     // Get the image index for the
@@ -562,7 +535,6 @@ const AgentCreator: React.FC = () => {
       hashtags: (char.agent.agent_details.hashtags || []).join(", "),
       emojis: (char.agent.agent_details.emojis || []).join(" "),
     });
-    console.log("[AgentCreator] - Character selected:", char);
   };
 
   useEffect(() => {
@@ -812,7 +784,6 @@ const AgentCreator: React.FC = () => {
                 key={id}
                 onClick={() => {
                   setActiveTab(id);
-                  console.log("[AgentCreator] - Tab changed to:", id);
                 }}
                 className={`flex-1 flex items-center justify-center px-4 py-2 
                             rounded-md text-gray-100 ${

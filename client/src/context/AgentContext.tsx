@@ -31,7 +31,6 @@ const AgentContext = createContext<{
 
 // Define the reducer
 const agentReducer = (state: AgentState, action: Action): AgentState => {
-  console.log(`[Agentcontext] - agentReducer called with state: ${JSON.stringify(state)} and action: ${JSON.stringify(action)}`);
   switch (action.type) {
     case 'SET_AGENT':
       return { ...state, selectedAgent: action.payload };
@@ -50,7 +49,7 @@ const agentReducer = (state: AgentState, action: Action): AgentState => {
     case 'SET_HAS_POSTED':
       return { ...state, hasPosted: action.payload };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      throw new Error(`Unhandled action type: `);
   }
 };
 
@@ -67,7 +66,7 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     hasPosted: false // Initialize hasPosted to false
   });
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Restore timeLeft from localStorage
@@ -91,11 +90,11 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   useEffect(() => {
     if (state.hasPosted) {
-      if (intervalRef.current) {
+      if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
       }
 
-      intervalRef.current = setInterval(() => {
+      intervalRef.current = window.setInterval(() => {
         if (state.timeLeft > 0) {
           dispatch({ type: 'SET_TIME_LEFT', payload: state.timeLeft - 1 });
         } else {
@@ -107,7 +106,7 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }, 1000);
 
       return () => {
-        if (intervalRef.current) {
+        if (intervalRef.current !== null) {
           clearInterval(intervalRef.current);
         }
       };
@@ -123,9 +122,7 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
 // Custom hook to use the AgentContext
 export const useAgent = () => {
-  // console.log("[Agentcontext] - useAgent hook called");
   const context = useContext(AgentContext);
-  // console.log(`[Agentcontext] - useAgent hook called with context: ${JSON.stringify(context)}`);
   if (!context) {
     throw new Error('useAgent must be used within an AgentProvider');
   }
