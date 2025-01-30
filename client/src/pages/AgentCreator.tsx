@@ -165,29 +165,27 @@ const AgentCreator: React.FC = () => {
   useEffect(() => {
     console.log("[AgentCreator] - useEffect profile_image_options:", agent.profile_image_options);
     if (agent.profile_image_options.length > 0) {
-      const firstImage =
-        agent.profile_image_options[0]?.generations_by_pk
-          ?.generated_images?.[0] ??
+      const selectedImageIndex = agent.selectedImage !== undefined ? agent.selectedImage : 0;
+      const selectedImage =
+        agent.profile_image_options[0]?.generations_by_pk?.generated_images?.[selectedImageIndex] ??
         ({
           url: "https://via.placeholder.com/400x400?text=Brain+Placeholder",
           id: "",
           generationId: "",
         } as GeneratedImage);
-        console.log("[AgentCreator] - First image:", firstImage);
+      console.log("[AgentCreator] - Selected image:", selectedImage);
 
       setAgent((prev) => ({
         ...prev,
-        selectedImage:
-          prev.selectedImage !== undefined ? prev.selectedImage : 0,
         profile_image: {
           details: {
-            url: firstImage.url,
-            image_id: firstImage.id,
-            generationId: firstImage.generationId,
+            url: selectedImage.url,
+            image_id: selectedImage.id,
+            generationId: selectedImage.generationId,
           },
         },
       }));
-      console.log("[AgentCreator] - Updated agent with first image:", agent);
+      console.log("[AgentCreator] - Updated agent with selected image:", agent);
     } else {
       setAgent((prev) => ({
         ...prev,
@@ -201,7 +199,7 @@ const AgentCreator: React.FC = () => {
       }));
       console.log("[AgentCreator] - Set placeholder image:", agent);
     }
-  }, [agent.profile_image_options]);
+  }, [agent.profile_image_options, agent.selectedImage]);
 
   /**
    * Field Update Handlers
@@ -337,7 +335,6 @@ const AgentCreator: React.FC = () => {
 
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
-  console.log("[AgentCreator] - selectedCharacterIndex:", selectedCharacterIndex);
 
   /**
    * Form Submission Handler
