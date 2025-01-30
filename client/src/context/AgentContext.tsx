@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext, ReactNode } from 'react';
+import React, { createContext, useReducer, useContext, ReactNode, useEffect, useRef } from 'react';
 
 // Define the shape of the state
 interface AgentState {
@@ -7,6 +7,9 @@ interface AgentState {
   isGenerating: boolean;
   isLoggedIn: boolean;
   isPosting: boolean;
+  delayBetweenPosts: number; // Add delayBetweenPosts to the state
+  timeLeft: number; // Add timeLeft to the state
+  hasPosted: boolean; // Track if the first post has been made
 }
 
 // Define the actions
@@ -15,7 +18,10 @@ type Action =
   | { type: 'TOGGLE_BUTTON'; payload: boolean }
   | { type: 'SET_GENERATING'; payload: boolean }
   | { type: 'SET_LOGGED_IN'; payload: boolean }
-  | { type: 'SET_POSTING'; payload: boolean };
+  | { type: 'SET_POSTING'; payload: boolean }
+  | { type: 'SET_DELAY'; payload: number } // Action to set delayBetweenPosts
+  | { type: 'SET_TIME_LEFT'; payload: number }
+  | { type: 'SET_HAS_POSTED'; payload: boolean }; // Action to set hasPosted
 
 // Create the context
 const AgentContext = createContext<{
@@ -37,8 +43,14 @@ const agentReducer = (state: AgentState, action: Action): AgentState => {
       return { ...state, isLoggedIn: action.payload };
     case 'SET_POSTING':
       return { ...state, isPosting: action.payload };
+    case 'SET_DELAY':
+      return { ...state, delayBetweenPosts: action.payload };
+    case 'SET_TIME_LEFT':
+      return { ...state, timeLeft: action.payload };
+    case 'SET_HAS_POSTED':
+      return { ...state, hasPosted: action.payload };
     default:
-      throw new Error(`Unhandled action type:`);
+      throw new Error(`Unhandled action type: ${action.type}`);
   }
 };
 
@@ -49,8 +61,51 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isButtonActive: false, // Initialize the button state
     isGenerating: false,
     isLoggedIn: false,
-    isPosting: false
+    isPosting: false,
+    delayBetweenPosts: 5, // Default delay of 5 minutes
+    timeLeft: 300, // Default timeLeft in seconds (5 minutes)
+    hasPosted: false // Initialize hasPosted to false
   });
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Restore timeLeft from localStorage
+    const savedTimeLeft = localStorage.getItem('timeLeft');
+    if (savedTimeLeft) {
+      dispatch({ type: 'SET_TIME_LEFT', payload: parseInt(savedTimeLeft, 10) });
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save timeLeft to localStorage whenever it changes
+    localStorage.setItem('timeLeft', state.timeLeft.toString());
+  }, [state.timeLeft]);
+
+  useEffect(() => {
+    if (state.hasPosted) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      intervalRef.current = setInterval(() => {
+        if (state.timeLeft > 0) {
+          dispatch({ type: 'SET_TIME_LEFT', payload: state.timeLeft - 1 });
+        } else {
+          clearInterval(intervalRef.current!);
+          dispatch({ type: 'SET_TIME_LEFT', payload: state.delayBetweenPosts * 60 });
+          // Trigger a new post here
+          // You can dispatch an action or call a function to handle posting
+        }
+      }, 1000);
+
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      };
+    }
+  }, [state.timeLeft, state.delayBetweenPosts, state.hasPosted]);
 
   return (
     <AgentContext.Provider value={{ state, dispatch }}>

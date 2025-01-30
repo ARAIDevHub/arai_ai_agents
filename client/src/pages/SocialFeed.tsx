@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
 import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
@@ -8,15 +8,15 @@ import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
-  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
+  const { state, dispatch } = useAgent();
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
-  const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
-  const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -32,11 +32,6 @@ const SocialFeed: React.FC = () => {
       }
     }
   }, [state.selectedAgent, characters, selectedCharacterIndex]);
-
-  useEffect(() => {
-    // Update timeLeft whenever delayBetweenPosts changes
-    setTimeLeft(delayBetweenPosts * 60);
-  }, [delayBetweenPosts]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -154,22 +149,9 @@ const SocialFeed: React.FC = () => {
     }
   };
 
-  const startCountdown = () => {
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-  };
-
   const handlePostToTwitter = async () => {
     dispatch({ type: 'SET_POSTING', payload: !state.isPosting });
     if (state.isPosting) {
-      // If already posting, stop the process
       console.log("Stopping post to Twitter.");
       return;
     }
@@ -184,58 +166,39 @@ const SocialFeed: React.FC = () => {
         post.post_posted = true;
         setCharacterPosts([...characterPosts]);
         setUnpostedCount(prevCount => prevCount - 1);
+
+        // Set hasPosted to true after the first post
+        if (!state.hasPosted) {
+          dispatch({ type: 'SET_HAS_POSTED', payload: true });
+          dispatch({ type: 'SET_TIME_LEFT', payload: state.delayBetweenPosts * 60 });
+        }
       } catch (error) {
         console.error("Error posting to Twitter:", error);
       }
     };
 
     const postLoop = async (posts: Post[], delayInMinutes: number) => {
-      console.log("[SocialFeed] - postLoop called");
-      console.log("[SocialFeed] - delayInMinutes:", delayInMinutes);
-      const delayInMilliseconds = delayInMinutes * 60 * 1000; // Convert minutes to milliseconds
-
-      // Create a map of all posts in the fullSeasonsArray
-      const fullSeasonsArray = selectedCharacter.agent.seasons;
-      const allPostsMap = new Map<string, Post>();
-
-      // Create a map of all posts in the fullSeasonsArray
-      fullSeasonsArray.forEach((season: Season) => {
-        season.episodes.forEach((episode: Episode) => {
-          episode.posts.forEach((p: Post) => {
-            allPostsMap.set(p.post_id, p);
-          });
-        });
-      });
+      const delayInMilliseconds = delayInMinutes * 60 * 1000;
 
       for (const post of posts) {
-        console.log("[SocialFeed] - postLoop - post:", post);
         await postContentToTwitter(post);
         post.post_posted = true;
         setCharacterPosts([...characterPosts]);
 
         try {
           let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
-
-          // Update the post_posted status using the allPostsMap
-          if (allPostsMap.has(post.post_id)) {
-            allPostsMap.get(post.post_id)!.post_posted = true;
-          }
-
-          // Attempt to update the agent's master data with the full seasons array
-          await updateSeasons(agentName, fullSeasonsArray);
+          await updateSeasons(agentName, selectedCharacter.agent.seasons);
           console.log("Agent updated successfully.");
         } catch (error) {
           console.error("Error updating agent:", error);
         }
 
         await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
-
-        // Reset the timer after each post
-        setTimeLeft(delayInMinutes * 60);
+        dispatch({ type: 'SET_TIME_LEFT', payload: delayInMinutes * 60 });
       }
     };
-    startCountdown(); // Start the countdown when posting begins
-    postLoop(unpostedPosts, delayBetweenPosts);
+
+    postLoop(unpostedPosts, state.delayBetweenPosts);
   };
 
   if (loading) {
@@ -295,8 +258,8 @@ const SocialFeed: React.FC = () => {
           <input
             id="delayInput"
             type="number"
-            value={delayBetweenPosts}
-            onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
+            value={state.delayBetweenPosts}
+            onChange={(e) => dispatch({ type: 'SET_DELAY', payload: Number(e.target.value) })}
             min="0"
             className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 font-semibold"
           />
@@ -333,7 +296,7 @@ const SocialFeed: React.FC = () => {
               </p>
             </div>
             <div className="absolute right-0 text-white text-lg p-3 font-semibold">
-              Next post in: {formatTime(timeLeft)}
+              Next post in: {formatTime(state.timeLeft)}
             </div>
           </div>
 
