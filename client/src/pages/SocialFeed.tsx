@@ -19,6 +19,7 @@ const SocialFeed: React.FC = () => {
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [isPosting, setIsPosting] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false); // New state for tracking login process
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
 
   useEffect(() => {
@@ -130,8 +131,9 @@ const SocialFeed: React.FC = () => {
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
 
+    setIsLoggingIn(true); // Set logging in state to true
     try {
-      const response = await startPostManager(selectedCharacter.agent.agent_details.name);
+      const response = await startPostManager(selectedCharacter.agent.agent_details.name.replace(" ", "_"));
       console.log("Post manager started successfully:", response);
 
       if (!response) {
@@ -149,6 +151,8 @@ const SocialFeed: React.FC = () => {
       } else {
         setNotification({ message: "Please check your .env Twitter configuration", type: 'error' });
       }
+    } finally {
+      setIsLoggingIn(false); // Reset logging in state
     }
   };
 
@@ -180,7 +184,7 @@ const SocialFeed: React.FC = () => {
 
     const postContentToTwitter = async (post: Post) => {
       try {
-        const response = await postToTwitter(selectedCharacter.agent.agent_details.name, post.post_content);
+        const response = await postToTwitter(selectedCharacter.agent.agent_details.name.replace(" ", "_"), post.post_content);
         console.log("Posted to Twitter successfully:", response);
 
         post.post_posted = true;
@@ -192,10 +196,9 @@ const SocialFeed: React.FC = () => {
     };
 
     const postLoop = async (posts: Post[], delayInMinutes: number) => {
+      console.log("[SocialFeed] - postLoop called");
+      console.log("[SocialFeed] - delayInMinutes:", delayInMinutes);
       const delayInMilliseconds = delayInMinutes * 60 * 1000; // Convert minutes to milliseconds
-
-      // Reset the timer at the start of the post loop
-      setTimeLeft(delayInMinutes * 60);
 
       // Create a map of all posts in the fullSeasonsArray
       const fullSeasonsArray = selectedCharacter.agent.seasons;
@@ -211,12 +214,13 @@ const SocialFeed: React.FC = () => {
       });
 
       for (const post of posts) {
+        console.log("[SocialFeed] - postLoop - post:", post);
         await postContentToTwitter(post);
         post.post_posted = true;
         setCharacterPosts([...characterPosts]);
 
         try {
-          let agentName = selectedCharacter.agent.agent_details.name;
+          let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
 
           // Update the post_posted status using the allPostsMap
           if (allPostsMap.has(post.post_id)) {
@@ -352,10 +356,14 @@ const SocialFeed: React.FC = () => {
               <Button
                 onClick={handleStartPostManager}
                 className={`${
-                  isLoggedIn ? "bg-green-400 hover:bg-green-500" : "bg-orange-400 hover:bg-orange-500"
+                  isLoggedIn
+                    ? "bg-green-400 hover:bg-green-500"
+                    : isLoggingIn
+                    ? "bg-yellow-400 hover:bg-yellow-500"
+                    : "bg-orange-400 hover:bg-orange-500"
                 }`}
               >
-                {isLoggedIn ? "Logged in" : "Login to Twitter"}
+                {isLoggedIn ? "Logged in" : isLoggingIn ? "Logging in..." : "Login to Twitter"}
               </Button>
 
               <Button
