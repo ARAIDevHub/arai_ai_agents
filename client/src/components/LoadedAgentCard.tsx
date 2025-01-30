@@ -30,7 +30,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
     }
   };
 
-    return (
+  return (
     <div className="relative">
       <div
         className="perspective w-64 h-[500px]"
@@ -72,15 +72,16 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
               {backImageUrl && (
                 <img
                   src={backImageUrl}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover opacity-15"
+                  alt="Background"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
                 />
               )}
-              <div className="flex gap-4 mb-4">
+              {/* Header with small image */}
+              <div className="flex gap-4 mb-4 relative z-10">
                 <img
                   src={profileImageUrl}
                   alt=""
-                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0 z-20" // Ensure no opacity
                 />
                 <div className="overflow-hidden">
                   <h3 className="text-xl font-bold text-gray-100 truncate">

@@ -219,7 +219,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
                 <img
                   src={profileImageUrl}
                   alt=""
-                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0 z-20"
                 />
                 <div className="overflow-hidden">
                   <h3 className="text-xl font-bold text-gray-100 truncate">
