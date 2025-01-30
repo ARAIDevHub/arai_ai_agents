@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Agent } from '../interfaces/AgentInterfaces';
 import LoadingBar from './LoadingBar';
+import { useAgent } from '../context/AgentContext';
 
 // Define the props for AgentCard
 interface RandomAgentCardProps {
@@ -30,6 +31,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   isUserAgent,
   onRegenerate,
 }) => {
+  const { dispatch } = useAgent();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -43,7 +45,6 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const [showNewContent, setShowNewContent] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const backImageUrl = agent.backgroundImageUrl;
-  console.log("RandomAgent backImageUrl", backImageUrl);
 
   useEffect(() => {
     let intervalId: number | undefined;
@@ -111,6 +112,8 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
         try {
           await onAddAgent(agent);
           setIsAdded(true);
+          console.log("RandomAgentCard - Add Agent", agent);
+          dispatch({ type: 'SET_AGENT', payload: agent.name || '' });
         } finally {
           setIsRegenerating(false);
         }
@@ -152,8 +155,16 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       </div> */}
       <div
         className="perspective w-64 h-[500px]"
-        onMouseEnter={() => !isRegenerating && setIsFlipped(true)}
-        onMouseLeave={() => !isRegenerating && setIsFlipped(false)}
+        onMouseEnter={() => {
+          if (!isRegenerating) {
+            setIsFlipped(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (!isRegenerating) {
+            setIsFlipped(false);
+          }
+        }}
         onClick={(e) => {
           e.stopPropagation();
           if (!isRegenerating) {
