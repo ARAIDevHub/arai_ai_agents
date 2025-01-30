@@ -16,7 +16,6 @@ const SocialFeed: React.FC = () => {
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -163,9 +162,41 @@ const SocialFeed: React.FC = () => {
         const response = await postToTwitter(selectedCharacter.agent.agent_details.name.replace(" ", "_"), post.post_content);
         console.log("Posted to Twitter successfully:", response);
 
-        post.post_posted = true;
+        // Update the post status in the selectedCharacter
+        const updatedSeasons = selectedCharacter.agent.seasons.map((season: Season) => {
+          return {
+            ...season,
+            episodes: season.episodes.map((episode: Episode) => {
+              return {
+                ...episode,
+                posts: episode.posts.map((p: Post) => {
+                  if (p.post_id === post.post_id) {
+                    return { ...p, post_posted: true };
+                  }
+                  return p;
+                })
+              };
+            })
+          };
+        });
+
+        setSelectedCharacter({
+          ...selectedCharacter,
+          agent: {
+            ...selectedCharacter.agent,
+            seasons: updatedSeasons
+          }
+        });
+
         setCharacterPosts([...characterPosts]);
         setUnpostedCount(prevCount => prevCount - 1);
+
+        // Update the JSON file to mark the post as posted
+        let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+        console.log(`[SocialFeed] - agentName: ${agentName}`);
+        console.log(`[SocialFeed] - updatedSeasons: ${JSON.stringify(updatedSeasons)}`);
+        await updateSeasons(agentName, updatedSeasons);
+        console.log("Agent updated successfully.");
 
         // Set hasPosted to true after the first post
         if (!state.hasPosted) {
@@ -180,6 +211,19 @@ const SocialFeed: React.FC = () => {
     const postLoop = async (posts: Post[], delayInMinutes: number) => {
       const delayInMilliseconds = delayInMinutes * 60 * 1000;
 
+            // Create a map of all posts in the fullSeasonsArray
+      const fullSeasonsArray = selectedCharacter.agent.seasons;
+      const allPostsMap = new Map<string, Post>();
+
+      // Create a map of all posts in the fullSeasonsArray
+      fullSeasonsArray.forEach((season: Season) => {
+        season.episodes.forEach((episode: Episode) => {
+          episode.posts.forEach((p: Post) => {
+            allPostsMap.set(p.post_id, p);
+          });
+        });
+      });
+
       for (const post of posts) {
         await postContentToTwitter(post);
         post.post_posted = true;
@@ -187,7 +231,13 @@ const SocialFeed: React.FC = () => {
 
         try {
           let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
-          await updateSeasons(agentName, selectedCharacter.agent.seasons);
+
+          // Update the post_posted status using the allPostsMap
+          if (allPostsMap.has(post.post_id)) {
+            allPostsMap.get(post.post_id)!.post_posted = true;
+          }
+
+          await updateSeasons(agentName, fullSeasonsArray);
           console.log("Agent updated successfully.");
         } catch (error) {
           console.error("Error updating agent:", error);

@@ -83,6 +83,13 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [state.timeLeft]);
 
   useEffect(() => {
+    // Update timeLeft whenever delayBetweenPosts changes
+    if (!state.hasPosted) {
+      dispatch({ type: 'SET_TIME_LEFT', payload: state.delayBetweenPosts * 60 });
+    }
+  }, [state.delayBetweenPosts]);
+
+  useEffect(() => {
     if (state.hasPosted) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -116,9 +123,9 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
 // Custom hook to use the AgentContext
 export const useAgent = () => {
-  console.log("[Agentcontext] - useAgent hook called");
+  // console.log("[Agentcontext] - useAgent hook called");
   const context = useContext(AgentContext);
-  console.log(`[Agentcontext] - useAgent hook called with context: ${JSON.stringify(context)}`);
+  // console.log(`[Agentcontext] - useAgent hook called with context: ${JSON.stringify(context)}`);
   if (!context) {
     throw new Error('useAgent must be used within an AgentProvider');
   }
