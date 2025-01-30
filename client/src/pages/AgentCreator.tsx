@@ -107,7 +107,6 @@ const AgentCreator: React.FC = () => {
     backstory: "",
     imageDescription: "",
   });
-  console.log("[AgentCreator] - Initial draftFields:", draftFields);
 
   /**
    * Synchronization Effects
@@ -122,7 +121,6 @@ const AgentCreator: React.FC = () => {
       imageDescription:
         agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
     });
-    console.log("[AgentCreator] - Updated draftFields:", draftFields);
   }, [agent]);
 
   /**
@@ -143,7 +141,6 @@ const AgentCreator: React.FC = () => {
     hashtags: "",
     emojis: "",
   });
-  console.log("[AgentCreator] - Initial draftTraits:", draftTraits);
 
   /**
    * Synchronization Effects
@@ -158,7 +155,6 @@ const AgentCreator: React.FC = () => {
       hashtags: agent.agent_details.hashtags.join(", "),
       emojis: agent.agent_details.emojis.join(" "),
     });
-    console.log("[AgentCreator] - Updated draftTraits:", draftTraits);
   }, [agent]);
 
   /**
@@ -505,13 +501,31 @@ const AgentCreator: React.FC = () => {
    * Updates both main agent state and draft states
    */
   const handleCharacterSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log("[handleCharacterSelect] - handleCharacterSelect called");
     const selectedIndex = parseInt(e.target.value);
+    console.log("[handleCharacterSelect] - Selected index:", selectedIndex);
+    console.log("[handleCharacterSelect] - Characters:, e", e);
     setSelectedCharacterIndex(selectedIndex);
     const char = characters[selectedIndex];
     if (!char?.agent?.agent_details) return;
 
     // Dispatch the selected agent to the global state
     dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
+
+    const profileImageUrl = char.agent.profile_image?.details.url || "";
+    console.log("[handleCharacterSelect] - Profile image URL:", profileImageUrl);
+    const profileImageOptions = char.agent.profile_image_options || [];
+    console.log("[handleCharacterSelect] - Profile image options:", profileImageOptions);
+    const generatedImages = profileImageOptions[0]?.generations_by_pk?.generated_images || [];
+    console.log("[handleCharacterSelect] - Generated images:", generatedImages);
+
+    const imageIndex = generatedImages.findIndex(
+      (img: { url: string }) => img.url === profileImageUrl
+    ) || 0;
+    console.log("[handleCharacterSelect] - Image index:", imageIndex);
+
+
+    // Get the image index for the
 
     // Update local state
     setAgent({
@@ -530,7 +544,7 @@ const AgentCreator: React.FC = () => {
       profile_image_options: char.agent.profile_image_options || [],
       selectedImage: char.agent.profile_image_options?.[0]?.generations_by_pk
         ?.generated_images?.length
-        ? 0
+        ? imageIndex
         : undefined,
       seasons: char.agent.seasons || [],
     });
@@ -708,6 +722,7 @@ const AgentCreator: React.FC = () => {
                                   : ""
                               }`}
                     onClick={async () => {
+
                       try {
                         setLoadingProgress(30);
 
@@ -754,7 +769,6 @@ const AgentCreator: React.FC = () => {
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
-                        {console.log("[AgentCreator] - Image selected with index:", index)}
                       </div>
                     )}
                   </div>
