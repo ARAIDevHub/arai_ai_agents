@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Wallet } from 'lucide-react';
+import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { clusterApiUrl } from '@solana/web3.js';
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 interface WalletRow {
   id: string;
@@ -32,12 +38,19 @@ interface TokenLaunchFormProps {
 }
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  // Get wallet context
+  const { connected, publicKey } = useWallet();
 
-  const handleWalletConnect = () => {
-    setIsWalletConnected(!isWalletConnected);
-    // Add actual wallet connection logic here
-  };
+  // Replace the existing wallet connection code with Solana wallet components
+  const WalletConnectButton = () => (
+    <div className="absolute top-6 left-6">
+      <WalletMultiButton className="bg-slate-800 p-3 rounded-full hover:bg-slate-700 shadow-lg 
+                   hover:shadow-xl transition-all flex items-center gap-2" />
+      {connected && (
+        <div className="w-2 h-2 rounded-full bg-green-400 ml-2 absolute right-2 top-1/2 transform -translate-y-1/2"></div>
+      )}
+    </div>
+  );
 
   const addWalletRow = () => {
     if (formData.walletRows.length < 20) {
@@ -64,21 +77,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
   return (
     <div className="w-full p-6 overflow-visible">
-      <div className="absolute top-6 left-6">
-        <button 
-          onClick={handleWalletConnect}
-          className="bg-slate-800 p-3 rounded-full hover:bg-slate-700 shadow-lg 
-                   hover:shadow-xl transition-all flex items-center gap-2"
-        >
-          <Wallet className="text-white w-6 h-6" />
-          <span className="text-white">
-            {isWalletConnected ? 'Wallet Connected' : 'Connect Wallet'}
-          </span>
-          {isWalletConnected && (
-            <div className="w-2 h-2 rounded-full bg-green-400 ml-2"></div>
-          )}
-        </button>
-      </div>
+      <WalletConnectButton />
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header Section */}
@@ -197,21 +196,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           </div>
         </div>
 
-        {/* Social Links Toggle */}
-        <div className="flex items-center justify-between border-t border-orange-500/20 pt-4">
-          <span className="text-white font-medium">Add Social Links</span>
-          <button 
-            className={`w-12 h-6 rounded-full transition-colors ${
-              formData.showSocialLinks ? 'bg-orange-500' : 'bg-slate-700'
-            }`}
-            onClick={() => setFormData(prev => ({ ...prev, showSocialLinks: !prev.showSocialLinks }))}
-          >
-            <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${
-              formData.showSocialLinks ? 'translate-x-7' : 'translate-x-1'
-            }`} />
-          </button>
-        </div>
-
         {/* Social Links Section */}
         {formData.showSocialLinks && (
           <div className="space-y-6 pt-4">
@@ -255,194 +239,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           </div>
         )}
 
-        {/* Wallet Parameters Section */}
-        <div className="border-t border-orange-500/20 pt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-100">Other Wallet Buy Parameters Settings</h3>
-            <button className="text-orange-500 hover:text-orange-600 flex items-center gap-1">
-              <span>↗</span> Batch Import Private Keys
-            </button>
-          </div>
-          
-          <p className="text-gray-400 mb-4">Supports up to 20 wallet addresses for purchases. Over 16 addresses require two signatures.</p>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="text-left p-2 border-b border-orange-500/30">
-                    <span className="text-red-500">*</span> 
-                    <span className="text-gray-100">Private Key</span>
-                  </th>
-                  <th className="text-left p-2 border-b border-orange-500/30">
-                    <span className="text-gray-100">Address</span>
-                  </th>
-                  <th className="text-left p-2 border-b border-orange-500/30">
-                    <span className="text-gray-100">SOL Balance</span>
-                    <button className="ml-1 text-orange-400 hover:text-orange-300">⟳</button>
-                  </th>
-                  <th className="text-left p-2 border-b border-orange-500/30">
-                    <span className="text-gray-100">Est. Volume</span>
-                  </th>
-                  <th className="text-left p-2 border-b border-orange-500/30">
-                    <span className="text-red-500">*</span>
-                    <span className="text-gray-100">Buy Amount in SOL</span>
-                  </th>
-                  <th className="w-10"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {formData.walletRows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="p-2 border-b border-orange-500/30">
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                                 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                        placeholder="Enter Private Key"
-                        value={row.privateKey}
-                        onChange={(e) => {
-                          const updatedRows = formData.walletRows.map(r =>
-                            r.id === row.id ? { ...r, privateKey: e.target.value } : r
-                          );
-                          setFormData(prev => ({ ...prev, walletRows: updatedRows }));
-                        }}
-                      />
-                    </td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
-                    <td className="p-2 border-b border-orange-500/30">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                                   text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                          placeholder="Enter Purchase Amount"
-                          value={row.buyAmount}
-                          onChange={(e) => {
-                            const updatedRows = formData.walletRows.map(r =>
-                              r.id === row.id ? { ...r, buyAmount: e.target.value } : r
-                            );
-                            setFormData(prev => ({ ...prev, walletRows: updatedRows }));
-                          }}
-                        />
-                        <button className="px-3 py-2 bg-slate-800 text-cyan-200 rounded-md hover:bg-slate-700">
-                          MAX
-                        </button>
-                      </div>
-                    </td>
-                    <td className="p-2 border-b border-orange-500/30">
-                      <div className="flex gap-1">
-                        {formData.walletRows.length > 1 && (
-                          <button 
-                            className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
-                            onClick={() => removeWalletRow(row.id)}
-                          >
-                            −
-                          </button>
-                        )}
-                        {row.id === formData.walletRows[formData.walletRows.length - 1].id && (
-                          <button 
-                            className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
-                            onClick={addWalletRow}
-                          >
-                            +
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Advanced Options Section */}
-        <div className="border-t border-orange-500/20 pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-100 font-medium">Advanced Options</span>
-            <button 
-              className={`w-12 h-6 rounded-full transition-colors ${
-                formData.showAdvanced ? 'bg-orange-500' : 'bg-slate-700'
-              }`}
-              onClick={() => setFormData(prev => ({ ...prev, showAdvanced: !prev.showAdvanced }))}
-            >
-              <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${
-                formData.showAdvanced ? 'translate-x-7' : 'translate-x-1'
-              }`} />
-            </button>
-          </div>
-
-          {formData.showAdvanced && (
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-gray-100">Jito MEV Tip (only needs to be paid once, recommended 0.0003)</span>
-                  <button className="text-orange-400 hover:text-orange-300">ⓘ</button>
-                </div>
-                <div className="flex gap-2 mb-2">
-                  <button 
-                    className={`px-4 py-2 rounded-md ${
-                      formData.mevTip === '0.00003' 
-                        ? 'bg-slate-900/80 text-gray-100' 
-                        : 'bg-slate-900/50 text-gray-400'
-                    }`}
-                    onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.00003' }))}
-                  >
-                    Default 0.00003
-                  </button>
-                  <button 
-                    className={`px-4 py-2 rounded-md ${
-                      formData.mevTip === '0.0001' 
-                        ? 'bg-slate-900/80 text-gray-100' 
-                        : 'bg-slate-900/50 text-gray-400'
-                    }`}
-                    onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0001' }))}
-                  >
-                    High 0.0001
-                  </button>
-                  <button 
-                    className={`px-4 py-2 rounded-md ${
-                      formData.mevTip === '0.0003' 
-                        ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
-                        : 'bg-slate-900/50 text-gray-400'
-                    }`}
-                    onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0003' }))}
-                  >
-                    Ultra-High 0.0003
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    className="w-24 px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                             text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                    value="0.0003"
-                    readOnly
-                  />
-                  <span className="text-gray-100">SOL</span>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-gray-100">Block Processing Engine</span>
-                  <button className="text-orange-400 hover:text-orange-300">ⓘ</button>
-                </div>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  value={formData.blockEngine}
-                  onChange={(e) => setFormData(prev => ({ ...prev, blockEngine: e.target.value }))}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Submit Button */}
         <button className="w-full bg-gradient-to-r from-cyan-600 to-orange-600 
                          hover:from-cyan-700 hover:to-orange-700 text-white py-3 rounded-md 
@@ -454,4 +250,28 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   );
 };
 
-export default TokenLaunchForm;
+// Create a wrapper component to provide wallet context
+const TokenLaunchFormWithWallet: React.FC<TokenLaunchFormProps> = (props) => {
+  // You can change network to 'devnet' or 'mainnet-beta' as needed
+  const network = WalletAdapterNetwork.Mainnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  
+  const wallets = useMemo(
+    () => [
+      new PhantomWalletAdapter(),
+    ],
+    []
+  );
+
+  return (
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <TokenLaunchForm {...props} />
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
+  );
+};
+
+export default TokenLaunchFormWithWallet;
