@@ -1,3 +1,5 @@
+https://github.com/rckprtr/pumpdotfun-sdk/tree/91c3ddc159af3c532046d2a20023408857f90a96
+
 https://frontend-api-v3.pump.fun/auth/my-profile
 
 https://frontend-api-v3.pump.fun/coins/create
