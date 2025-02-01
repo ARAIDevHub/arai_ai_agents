@@ -421,6 +421,7 @@ def create_episode_content():
         return jsonify({"error": str(e)}), 500
 
 # Twitter Posting 
+# Twitter Posting 
 @app.route('/api/start-post-manager/twitter', methods=['POST'])
 def start_post_manager_twitter():
     global post_manager_twitter
@@ -448,17 +449,15 @@ def start_post_manager_twitter():
         print(f"[start_post_manager] - Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/api/post-to-twitter', methods=['POST'])
 def post_to_twitter():
     global post_manager_twitter
     
-    print("\n")
     try:
         data = request.json
         master_data = data.get('master_data')
         post_content = data.get('content')
-        print(f"[post_to_twitter api ] - post_content: {post_content}")
+        
         if not master_data or not post_content:
             return jsonify({'error': 'Master data or post content is required'}), 400
 

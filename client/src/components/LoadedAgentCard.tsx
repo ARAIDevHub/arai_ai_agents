@@ -18,6 +18,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentEmojis = agentData?.agent_details?.emojis || [];
   const agentTopicExpertise = agentData?.agent_details?.topic_expertise || [];
   const profileImageUrl = agentData?.profile_image?.details?.url || "";
+  const backImageUrl = agentData?.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || "";
   const [isSelecting, setIsSelecting] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -29,7 +30,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
     }
   };
 
-    return (
+  return (
     <div className="relative">
       <div
         className="perspective w-64 h-[500px]"
@@ -66,23 +67,31 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30">
-                {/* Header with small image */}
-                <div className="flex gap-4 mb-4">
-                  <img
+            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 relative">
+              {/* Add background image with opacity */}
+              {backImageUrl && (
+                <img
+                  src={backImageUrl}
+                  alt="Background"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+              )}
+              {/* Header with small image */}
+              <div className="flex gap-4 mb-4 relative z-10">
+                <img
                   src={profileImageUrl}
                   alt=""
-                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                  />
-                  <div className="overflow-hidden">
-                    <h3 className="text-xl font-bold text-gray-100 truncate">
-                      {agentName}
-                    </h3>
-                    <p className="text-orange-400 text-sm truncate">
-                      {Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert
-                    </p>
-                  </div>
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0 z-20" // Ensure no opacity
+                />
+                <div className="overflow-hidden">
+                  <h3 className="text-xl font-bold text-gray-100 truncate">
+                    {agentName}
+                  </h3>
+                  <p className="text-orange-400 text-sm truncate">
+                    {Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert
+                  </p>
                 </div>
+              </div>
               <div className="space-y-4 overflow-y-auto max-h-[350px] pr-2 pb-16">
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">

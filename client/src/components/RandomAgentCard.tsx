@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Agent } from '../interfaces/AgentInterfaces';
 import LoadingBar from './LoadingBar';
+import { useAgent } from '../context/AgentContext';
 
 // Define the props for AgentCard
 interface RandomAgentCardProps {
@@ -30,6 +31,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   isUserAgent,
   onRegenerate,
 }) => {
+  const { dispatch } = useAgent();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -42,6 +44,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
   const profileImageUrl = agent.avatar || "";
   const [showNewContent, setShowNewContent] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const backImageUrl = agent.backgroundImageUrl;
 
   useEffect(() => {
     let intervalId: number | undefined;
@@ -109,6 +112,7 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
         try {
           await onAddAgent(agent);
           setIsAdded(true);
+          dispatch({ type: 'SET_AGENT', payload: agent.name || '' });
         } finally {
           setIsRegenerating(false);
         }
@@ -150,8 +154,16 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
       </div> */}
       <div
         className="perspective w-64 h-[500px]"
-        onMouseEnter={() => !isRegenerating && setIsFlipped(true)}
-        onMouseLeave={() => !isRegenerating && setIsFlipped(false)}
+        onMouseEnter={() => {
+          if (!isRegenerating) {
+            setIsFlipped(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (!isRegenerating) {
+            setIsFlipped(false);
+          }
+        }}
         onClick={(e) => {
           e.stopPropagation();
           if (!isRegenerating) {
@@ -203,13 +215,21 @@ const RandomAgentCard: React.FC<RandomAgentCardProps> = ({
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col">
+            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 flex flex-col relative">
+              {/* Add background image with opacity */}
+              {backImageUrl && (
+                <img
+                  src={backImageUrl}
+                  alt="Background"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+              )}
               {/* Header with small image */}
-              <div className="flex gap-4 mb-4">
+              <div className="flex gap-4 mb-4 relative z-10">
                 <img
                   src={profileImageUrl}
                   alt=""
-                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0 z-20"
                 />
                 <div className="overflow-hidden">
                   <h3 className="text-xl font-bold text-gray-100 truncate">

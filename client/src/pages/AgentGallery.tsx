@@ -13,6 +13,7 @@ import famousFigures from '../assets/generate-random-agents/famousFigures.json';
 import LunaQuantumchef from '../assets/example-agents/Luna_Quantumchef_master.json';
 import CosmicCurator from '../assets/example-agents/Cosmic_Curator_master.json';
 import GavelGlitch from '../assets/example-agents/Gavel_Glitch_master.json';
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
@@ -70,7 +71,7 @@ const generateCharacterConcept = (): string => {
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.35 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  return Math.random() < 0.25 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
@@ -95,17 +96,31 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
     universe: masterJson.agent.agent_details.universe || '',
     backstory: masterJson.agent.agent_details.backstory || '',
     topic_expertise: masterJson.agent.agent_details.topic_expertise || [],
-    isExample: true // Add this flag to identify example agents
+    isExample: true, // Add this flag to identify example agents
+    backgroundImageUrl: masterJson.agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || '',
   };
 };
 
 const AgentGallery: React.FC = () => {
-  // Add selected agent state
-  // const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
+  const { selectedAgent } = state; // Access the selectedAgent from the context
   const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const initialMount = useRef(true);
+
+  // Load the selected agent's details when the component mounts or when the selected agent changes
+  useEffect(() => {
+    if (selectedAgent && loadedAgents.length > 0) {
+      const selectedIndex = loadedAgents.findIndex(
+        (agent) => agent.agent.agent_details.name === selectedAgent
+      );
+
+      if (selectedIndex !== -1) {
+        // Optionally, you can set the selected agent in the local state or perform other actions
+      }
+    }
+  }, [selectedAgent, loadedAgents]);
 
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {
@@ -118,7 +133,7 @@ const AgentGallery: React.FC = () => {
 
       return {
         id: Math.floor(Math.random() * 1000000).toString(),
-        name: agentDetails.name.replace('_', ' ') || '',
+        name: agentDetails.name?.replace('_', ' ') ?? '',
         avatar: '',
         shortDescription: '...',
         tags: agentDetails.hashtags || [],
@@ -128,7 +143,8 @@ const AgentGallery: React.FC = () => {
         universe: agentDetails.universe || '',
         backstory: agentDetails.backstory || '',
         concept: concept,
-        topic_expertise: agentDetails.topic_expertise || []
+        topic_expertise: agentDetails.topic_expertise || [],
+        backgroundImageUrl: agentObject.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || '',
       };
     } catch (error) {
       console.error("[generateRandomAgentData] Error:", error);
@@ -309,8 +325,9 @@ const AgentGallery: React.FC = () => {
 
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
-    console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
+      // Dispatch the selected agent to the global state
+      dispatch({ type: 'SET_AGENT', payload: agent.agent?.agent_details.name || '' });
 
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));

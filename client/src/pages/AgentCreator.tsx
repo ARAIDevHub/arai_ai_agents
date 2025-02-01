@@ -9,6 +9,7 @@ import TraitButtons from "../components/TraitButtons"; // We'll still use your T
 import useCharacters from "../hooks/useCharacters";
 import { inconsistentImageLambda } from "../api/leonardoApi";
 import LoadingBar from "../components/LoadingBar";
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
@@ -20,6 +21,7 @@ const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
  * including personality traits, communication style, and profile images.
  */
 const AgentCreator: React.FC = () => {
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
 
   /**
    * Main UI state management
@@ -158,9 +160,9 @@ const AgentCreator: React.FC = () => {
    */
   useEffect(() => {
     if (agent.profile_image_options.length > 0) {
-      const firstImage =
-        agent.profile_image_options[0]?.generations_by_pk
-          ?.generated_images?.[0] ??
+      const selectedImageIndex = agent.selectedImage !== undefined ? agent.selectedImage : 0;
+      const selectedImage =
+        agent.profile_image_options[0]?.generations_by_pk?.generated_images?.[selectedImageIndex] ??
         ({
           url: "https://via.placeholder.com/400x400?text=Brain+Placeholder",
           id: "",
@@ -169,13 +171,11 @@ const AgentCreator: React.FC = () => {
 
       setAgent((prev) => ({
         ...prev,
-        selectedImage:
-          prev.selectedImage !== undefined ? prev.selectedImage : 0,
         profile_image: {
           details: {
-            url: firstImage.url,
-            image_id: firstImage.id,
-            generationId: firstImage.generationId,
+            url: selectedImage.url,
+            image_id: selectedImage.id,
+            generationId: selectedImage.generationId,
           },
         },
       }));
@@ -191,7 +191,7 @@ const AgentCreator: React.FC = () => {
         },
       }));
     }
-  }, [agent.profile_image_options]);
+  }, [agent.profile_image_options, agent.selectedImage]);
 
   /**
    * Field Update Handlers
@@ -393,14 +393,13 @@ const AgentCreator: React.FC = () => {
     };
 
     try {
-
       await createAgent(updatedAgent);
 
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
       setAgent(updatedAgent);
     } catch (error) {
-      console.error("Error creating agent:", error);
+      console.error("[AgentCreator] - Error creating agent:", error);
     }
   };
 
@@ -415,7 +414,7 @@ const AgentCreator: React.FC = () => {
         const charactersData = await getCharacters();
         if (!Array.isArray(charactersData)) {
           console.error(
-            "Expected array of characters, received:",
+            "[AgentCreator] - Expected array of characters, received:",
             typeof charactersData
           );
           return;
@@ -465,9 +464,8 @@ const AgentCreator: React.FC = () => {
             concept: agentConcept || "",
           };
         });
-      console.log("Processed characters:", processed);
       } catch (error) {
-        console.error("Error loading characters:", error);
+        console.error("[AgentCreator] - Error loading characters:", error);
       }
     };
 
@@ -485,46 +483,71 @@ const AgentCreator: React.FC = () => {
     const char = characters[selectedIndex];
     if (!char?.agent?.agent_details) return;
 
-    const details = char.agent.agent_details;
+    // Dispatch the selected agent to the global state
+    dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
 
+    const profileImageUrl = char.agent.profile_image?.details.url || "";
+    const profileImageOptions = char.agent.profile_image_options || [];
+    const generatedImages = profileImageOptions[0]?.generations_by_pk?.generated_images || [];
+
+    const imageIndex = generatedImages.findIndex(
+      (img: { url: string }) => img.url === profileImageUrl
+    ) || 0;
+
+
+    // Get the image index for the
+
+    // Update local state
     setAgent({
       agent_details: {
-        name: details.name || "",
-        personality: details.personality || [],
-        communication_style: details.communication_style || [],
-        backstory: details.backstory || "",
-        universe: details.universe || "",
-        topic_expertise: details.topic_expertise || [],
-        hashtags: details.hashtags || [],
-        emojis: details.emojis || [],
-        concept: details.concept || "",
+        name: char.agent.agent_details.name || "",
+        personality: char.agent.agent_details.personality || [],
+        communication_style: char.agent.agent_details.communication_style || [],
+        backstory: char.agent.agent_details.backstory || "",
+        universe: char.agent.agent_details.universe || "",
+        topic_expertise: char.agent.agent_details.topic_expertise || [],
+        hashtags: char.agent.agent_details.hashtags || [],
+        emojis: char.agent.agent_details.emojis || [],
+        concept: char.agent.agent_details.concept || "",
       },
-      profile_image: char.agent?.profile_image_options || [],
-      profile_image_options: char.agent?.profile_image_options || [],
-      selectedImage: char.agent?.profile_image_options?.[0]?.generations_by_pk
+      profile_image: char.agent.profile_image_options || [],
+      profile_image_options: char.agent.profile_image_options || [],
+      selectedImage: char.agent.profile_image_options?.[0]?.generations_by_pk
         ?.generated_images?.length
-        ? 0
+        ? imageIndex
         : undefined,
-      seasons: char.agent?.seasons || [],
+      seasons: char.agent.seasons || [],
     });
 
     // Sync local drafts
     setDraftFields({
-      name: details.name || "",
-      universe: details.universe || "",
-      backstory: details.backstory || "",
+      name: char.agent.agent_details.name || "",
+      universe: char.agent.agent_details.universe || "",
+      backstory: char.agent.agent_details.backstory || "",
       imageDescription:
-        char.agent?.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
+        char.agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
     });
 
     setDraftTraits({
-      topic_expertise: (details.topic_expertise || []).join(", "),
-      personality: (details.personality || []).join(", "),
-      communication_style: (details.communication_style || []).join(", "),
-      hashtags: (details.hashtags || []).join(", "),
-      emojis: (details.emojis || []).join(" "),
+      topic_expertise: (char.agent.agent_details.topic_expertise || []).join(", "),
+      personality: (char.agent.agent_details.personality || []).join(", "),
+      communication_style: (char.agent.agent_details.communication_style || []).join(", "),
+      hashtags: (char.agent.agent_details.hashtags || []).join(", "),
+      emojis: (char.agent.agent_details.emojis || []).join(" "),
     });
   };
+
+  useEffect(() => {
+    if (state.selectedAgent) {
+      const index = characters.findIndex(
+        (char) => char.agent.agent_details.name === state.selectedAgent
+      );
+      if (index !== -1 && index !== selectedCharacterIndex) {
+        setSelectedCharacterIndex(index);
+        handleCharacterSelect({ target: { value: index.toString() } } as ChangeEvent<HTMLSelectElement>);
+      }
+    }
+  }, [state.selectedAgent, characters]);
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
@@ -639,7 +662,7 @@ const AgentCreator: React.FC = () => {
                     setLoadingProgress(100);
                     setTimeout(() => setLoadingProgress(0), 500);
                   } catch (error) {
-                    console.error("Error generating new image:", error);
+                    console.error("[AgentCreator] - Error generating new image:", error);
                     setLoadingProgress(0);
                   } finally {
                     setIsGenerating(false);
@@ -689,7 +712,7 @@ const AgentCreator: React.FC = () => {
                         setLoadingProgress(100);
                         setTimeout(() => setLoadingProgress(0), 500);
                       } catch (error) {
-                        console.error("Error loading image:", error);
+                        console.error("[AgentCreator] - Error loading image:", error);
                         setLoadingProgress(0);
                       }
                     }}

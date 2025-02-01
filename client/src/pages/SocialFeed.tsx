@@ -1,28 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager,updateSeasons } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
 import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
+  const { state, dispatch } = useAgent();
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [delayBetweenPosts, setDelayBetweenPosts] = useState<number>(5); // Default delay of 5 minutes
-  const [timeLeft, setTimeLeft] = useState<number>(delayBetweenPosts * 60); // Initialize with delay in seconds
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
-  const [isPosting, setIsPosting] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
 
+
   useEffect(() => {
-    // Update timeLeft whenever delayBetweenPosts changes
-    setTimeLeft(delayBetweenPosts * 60);
-  }, [delayBetweenPosts]);
+    if (state.selectedAgent) {
+      const index = characters.findIndex(
+        (char) => char.agent.agent_details.name === state.selectedAgent
+      );
+
+      if (index !== -1 && index !== selectedCharacterIndex) {
+        const char = characters[index];
+        if (char) {
+          handleCharacterSelect(char, index);
+        }
+      }
+    }
+  }, [state.selectedAgent, characters, selectedCharacterIndex]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -51,7 +59,6 @@ const SocialFeed: React.FC = () => {
 
     // Sort posts by season number, episode number, and post number
     return allPosts.sort((a, b) => {
-      // Provide default values in case of undefined
       const aSeasonNum = a.seasonNumber ?? 0;
       const bSeasonNum = b.seasonNumber ?? 0;
       const aEpisodeNum = a.episodeNumber ?? 0;
@@ -70,6 +77,7 @@ const SocialFeed: React.FC = () => {
   const handleCharacterSelect = (char: any, index: number) => {
     setSelectedCharacterIndex(index);
     setSelectedCharacter(char);
+    dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
     const posts = getCharacterPosts(char);
     setCharacterPosts(posts);
 
@@ -79,12 +87,14 @@ const SocialFeed: React.FC = () => {
   };
 
   const handleGenerateContent = async () => {
-    if (!selectedCharacter || isGenerating) return;
+    if (!selectedCharacter || state.isGenerating) return;
 
-    setIsGenerating(true);
+    dispatch({ type: 'SET_GENERATING', payload: true });
     try {
+      // Adding back the _ to the name to search the file name in the configs folder
+      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       // Extract the master file path from the character
-      const masterFilePath = `configs/${selectedCharacter.agent.agent_details.name}/${selectedCharacter.agent.agent_details.name}_master.json`;
+      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
       // First create new season
       await createSeason(masterFilePath);
@@ -102,56 +112,42 @@ const SocialFeed: React.FC = () => {
       console.error("Error generating content:", error);
       // Handle error (show notification, etc.)
     } finally {
-      setIsGenerating(false);
+      dispatch({ type: 'SET_GENERATING', payload: false });
     }
   };
 
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
 
+    dispatch({ type: 'SET_LOGGED_IN', payload: false }); // Ensure initial state is not logged in
+    dispatch({ type: 'SET_GENERATING', payload: true }); // Set logging in state to true
+
     try {
-      const response = await startPostManager(selectedCharacter.agent.agent_details.name);
-      console.log("Post manager started successfully:", response);
+      const response = await startPostManager(selectedCharacter.agent.agent_details.name.replace(" ", "_"));
 
-      if (!response) {
+      if (response) {
+        dispatch({ type: 'SET_LOGGED_IN', payload: true }); // Set logged in state to true
+        setNotification({ message: "Logged in successfully!", type: 'success' });
+      } else {
         setNotification({ message: "Please check your .env Twitter configuration.", type: 'error' });
-        return;
       }
-
-      setIsLoggedIn(true);
     } catch (error) {
       console.error("Error starting post manager:", error);
-      
+
       // Check for specific error conditions
       if (error instanceof Error && error.message.includes("credentials")) {
         setNotification({ message: "Error: Missing or incorrect credentials. Please check your .env file.", type: 'error' });
       } else {
         setNotification({ message: "Please check your .env Twitter configuration", type: 'error' });
       }
+    } finally {
+      dispatch({ type: 'SET_GENERATING', payload: false }); // Reset logging in state
     }
   };
 
-  const startCountdown = () => {
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-  };
-
   const handlePostToTwitter = async () => {
-    if (!selectedCharacter) return;
-
-    // Toggle posting state
-    setIsPosting(!isPosting);
-
-    if (isPosting) {
-      // If already posting, stop the process
-      console.log("Stopping post to Twitter.");
+    dispatch({ type: 'SET_POSTING', payload: !state.isPosting });
+    if (state.isPosting) {
       return;
     }
 
@@ -159,24 +155,55 @@ const SocialFeed: React.FC = () => {
 
     const postContentToTwitter = async (post: Post) => {
       try {
-        const response = await postToTwitter(selectedCharacter.agent.agent_details.name, post.post_content);
-        console.log("Posted to Twitter successfully:", response);
+        const response = await postToTwitter(selectedCharacter.agent.agent_details.name.replace(" ", "_"), post.post_content);
 
-        post.post_posted = true;
+        // Update the post status in the selectedCharacter
+        const updatedSeasons = selectedCharacter.agent.seasons.map((season: Season) => {
+          return {
+            ...season,
+            episodes: season.episodes.map((episode: Episode) => {
+              return {
+                ...episode,
+                posts: episode.posts.map((p: Post) => {
+                  if (p.post_id === post.post_id) {
+                    return { ...p, post_posted: true };
+                  }
+                  return p;
+                })
+              };
+            })
+          };
+        });
+
+        setSelectedCharacter({
+          ...selectedCharacter,
+          agent: {
+            ...selectedCharacter.agent,
+            seasons: updatedSeasons
+          }
+        });
+
         setCharacterPosts([...characterPosts]);
         setUnpostedCount(prevCount => prevCount - 1);
+
+        // Update the JSON file to mark the post as posted
+        let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+        await updateSeasons(agentName, updatedSeasons);
+
+        // Set hasPosted to true after the first post
+        if (!state.hasPosted) {
+          dispatch({ type: 'SET_HAS_POSTED', payload: true });
+          dispatch({ type: 'SET_TIME_LEFT', payload: state.delayBetweenPosts * 60 });
+        }
       } catch (error) {
         console.error("Error posting to Twitter:", error);
       }
     };
 
     const postLoop = async (posts: Post[], delayInMinutes: number) => {
-      const delayInMilliseconds = delayInMinutes * 60 * 1000; // Convert minutes to milliseconds
+      const delayInMilliseconds = delayInMinutes * 60 * 1000;
 
-      // Reset the timer at the start of the post loop
-      setTimeLeft(delayInMinutes * 60);
-
-      // Create a map of all posts in the fullSeasonsArray
+            // Create a map of all posts in the fullSeasonsArray
       const fullSeasonsArray = selectedCharacter.agent.seasons;
       const allPostsMap = new Map<string, Post>();
 
@@ -195,28 +222,24 @@ const SocialFeed: React.FC = () => {
         setCharacterPosts([...characterPosts]);
 
         try {
-          let agentName = selectedCharacter.agent.agent_details.name;
+          let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
 
           // Update the post_posted status using the allPostsMap
           if (allPostsMap.has(post.post_id)) {
             allPostsMap.get(post.post_id)!.post_posted = true;
           }
 
-          // Attempt to update the agent's master data with the full seasons array
           await updateSeasons(agentName, fullSeasonsArray);
-          console.log("Agent updated successfully.");
         } catch (error) {
           console.error("Error updating agent:", error);
         }
 
         await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
-
-        // Reset the timer after each post
-        setTimeLeft(delayInMinutes * 60);
+        dispatch({ type: 'SET_TIME_LEFT', payload: delayInMinutes * 60 });
       }
     };
-    startCountdown(); // Start the countdown when posting begins
-    postLoop(unpostedPosts, delayBetweenPosts);
+
+    postLoop(unpostedPosts, state.delayBetweenPosts);
   };
 
   if (loading) {
@@ -276,8 +299,8 @@ const SocialFeed: React.FC = () => {
           <input
             id="delayInput"
             type="number"
-            value={delayBetweenPosts}
-            onChange={(e) => setDelayBetweenPosts(Number(e.target.value))}
+            value={state.delayBetweenPosts}
+            onChange={(e) => dispatch({ type: 'SET_DELAY', payload: Number(e.target.value) })}
             min="0"
             className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 font-semibold"
           />
@@ -314,7 +337,7 @@ const SocialFeed: React.FC = () => {
               </p>
             </div>
             <div className="absolute right-0 text-white text-lg p-3 font-semibold">
-              Next post in: {formatTime(timeLeft)}
+              Next post in: {formatTime(state.timeLeft)}
             </div>
           </div>
 
@@ -322,28 +345,30 @@ const SocialFeed: React.FC = () => {
             <div className="flex gap-4 justify-center p-3">
               <Button
                 onClick={handleGenerateContent}
-                disabled={isGenerating}
+                disabled={state.isGenerating}
                 className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isGenerating ? "Generating..." : "Generate Posts Content"}
+                {state.isGenerating ? "Generating..." : "Generate Posts Content"}
               </Button>
 
               <Button
                 onClick={handleStartPostManager}
                 className={`${
-                  isLoggedIn ? "bg-green-400 hover:bg-green-500" : "bg-orange-400 hover:bg-orange-500"
+                  state.isLoggedIn
+                    ? "bg-green-400 hover:bg-green-500"
+                    : "bg-orange-400 hover:bg-orange-500"
                 }`}
               >
-                {isLoggedIn ? "Logged in" : "Login to Twitter"}
+                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
               </Button>
 
               <Button
                 onClick={handlePostToTwitter}
                 className={`${
-                  isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                  state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
                 }`}
               >
-                {isPosting ? "Posting..." : "Post to Twitter"}
+                {state.isPosting ? "Posting..." : "Post to Twitter"}
               </Button>
 
             </div>
