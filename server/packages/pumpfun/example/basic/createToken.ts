@@ -25,6 +25,7 @@ interface TokenCreationParams {
   unitLimit: number;
   unitPrice: number;
   initialBuyAmount: number;
+  imagePath?: string;
 }
 
 // Modify the main function to accept parameters
@@ -51,6 +52,7 @@ export async function createTokenWithParams(params: TokenCreationParams) {
   console.log("🔑 Setting up test account and mint...");
   const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
   const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
+  
 
   // Initialize PumpFun SDK
   console.log("🛠 Initializing PumpFun SDK...");
@@ -75,7 +77,7 @@ export async function createTokenWithParams(params: TokenCreationParams) {
       name: params.name,
       symbol: params.symbol,
       description: params.description,
-      file: await fs.openAsBlob(path.join(__dirname, "random.png")),
+      file: await fs.openAsBlob(params.imagePath || path.join(__dirname, "random.png")),
     };
     console.log("Creating token metadata...");
     console.log(`Token metadata: ${JSON.stringify(tokenMetadata, null, 2)}`);

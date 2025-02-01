@@ -35,6 +35,8 @@ ENV/
 # API Keys
 .env
 dont_share/
+**/.keys/*
+!**/.keys/.gitignore
 
 #agent configs and memory
 configs/
@@ -43,3 +45,21 @@ configs/
 to_delete/
 
 **state.json
+
+#server
+server/dist/
+server/node_modules/
+server/packages/pumpfun/example/basic/
+*.node_modules
+*.keys
+*.key
+*.keys
+*.pem
+*.keystore
+*.secret.*
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+

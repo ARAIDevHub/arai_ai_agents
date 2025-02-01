@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
+const BASE_URL = "http://localhost:3000/api"; // Changed from 8080 to 3000
 
 // Function to get all agents
 export async function getAgents() {

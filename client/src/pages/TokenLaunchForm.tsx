@@ -8,7 +8,6 @@ import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from 
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { DEFAULT_DECIMALS, PumpFunSDK } from "pumpdotfun-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
-import { tokenService } from '../services/api';
 import { createToken } from '../api/agentsAPI';
 
 interface WalletRow {
