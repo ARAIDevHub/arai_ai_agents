@@ -4,8 +4,10 @@ import { ConnectionProvider, WalletProvider, useWallet, useConnection } from '@s
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { clusterApiUrl } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { DEFAULT_DECIMALS, PumpFunSDK } from "../../../server/packages/pumpfun/src";
+import { AnchorProvider } from "@coral-xyz/anchor";
 
 interface WalletRow {
   id: string;
@@ -52,82 +54,87 @@ interface Payload {
 }
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
-  const { connected, publicKey, wallet, disconnect } = useWallet();
-  const [payload, setPayload] = useState<Payload>({
-    name: '',
-    ticker: '',
-    description: '',
-    showName: true,
-  });
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const { connection } = useConnection();
+  const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
+  const SLIPPAGE_BASIS_POINTS = 100n;
 
-  // Update payload whenever form fields change
-  useEffect(() => {
-    const newPayload: Payload = {
-      name: formData.tokenName,
-      ticker: formData.tokenSymbol,
-      description: formData.tokenDescription,
-      website: formData.website,
-      telegram: formData.telegram,
-      twitter: formData.xLink,
-      showName: true,
-      // We'll handle image separately since it needs to be uploaded to IPFS first
-      image: formData.logo ? URL.createObjectURL(formData.logo) : undefined,
-    };
-
-    setPayload(newPayload);
-    console.log('Current Payload:', newPayload);
-  }, [formData]);
-
-  useEffect(() => {
-    if (wallet?.adapter?.connecting) {
-      setConnectionError(null);
+  // Add new function to initialize SDK
+  const initializePumpFunSDK = () => {
+    if (!publicKey || !signTransaction || !signAllTransactions) {
+      throw new Error("Wallet not connected");
     }
-    
-    wallet?.adapter?.on('error', (error) => {
-      console.error('Wallet error:', error);
-      setConnectionError(error.message);
-    });
 
-    return () => {
-      wallet?.adapter?.off('error');
+    // Create a wallet adapter that uses Phantom's signing capabilities
+    const phantomWallet = {
+      publicKey: publicKey,
+      signTransaction: signTransaction,
+      signAllTransactions: signAllTransactions,
     };
-  }, [wallet]);
 
-  useEffect(() => {
-    if (connected) {
-      console.log('Connected with public key:', publicKey?.toBase58());
-    }
-  }, [connected, publicKey]);
+    const provider = new AnchorProvider(
+      connection,
+      phantomWallet,
+      { commitment: "finalized" }
+    );
 
-  useEffect(() => {
-    return () => {
-      // Cleanup on component unmount
-      if (connected) {
-        disconnect?.();
-      }
-    };
-  }, [connected, disconnect]);
+    return new PumpFunSDK(provider);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!connected) {
+    if (!connected || !publicKey) {
       alert('Please connect your wallet first');
       return;
     }
 
-    // Verify the connected network
-    const { connection } = useConnection();
-    const network = await connection.getVersion();
-    
-    if (network['solana-core'] !== '1.17.20') {
-      alert('Please connect to Mainnet');
-      return;
-    }
+    try {
+      // Initialize SDK with Phantom wallet
+      const sdk = initializePumpFunSDK();
 
-    // Continue with submission...
-    console.log('Submitting payload:', payload);
+      // Generate a new random mint keypair
+      const mint = Keypair.generate();
+
+      // Prepare token metadata
+      const tokenMetadata = {
+        name: formData.tokenName,
+        symbol: formData.tokenSymbol,
+        description: formData.tokenDescription,
+        file: formData.logo ? new Blob([formData.logo]) : undefined,
+      };
+
+      // Convert SOL amount to lamports
+      const solAmount = BigInt(parseFloat(formData.solAmount) * LAMPORTS_PER_SOL);
+
+      // Create and buy tokens
+      const createResults = await sdk.createAndBuy(
+        publicKey, // Using connected Phantom wallet's public key
+        mint,
+        tokenMetadata,
+        solAmount,
+        SLIPPAGE_BASIS_POINTS,
+        {
+          unitLimit: 250000,
+          unitPrice: 250000,
+        }
+      );
+
+      if (createResults.success) {
+        console.log("✅ Token created and bought successfully!");
+        console.log("Transaction Results:", createResults);
+        console.log("Token URL:", `https://pump.fun/${mint.publicKey.toBase58()}`);
+        
+        // Get and display the bonding curve info
+        const boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
+        console.log("Bonding curve:", boundingCurveAccount);
+      } else {
+        console.error("❌ Transaction failed");
+      }
+
+    } catch (error) {
+      console.error("Error creating token:", error);
+      alert(`Error creating token: ${error.message}`);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
