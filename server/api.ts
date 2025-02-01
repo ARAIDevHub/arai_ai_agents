@@ -33,7 +33,10 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
       unitLimit: parseFloat(req.body.unitLimit) || 1000000,
       unitPrice: parseFloat(req.body.unitPrice) || 0,
       initialBuyAmount: parseFloat(req.body.initialBuyAmount) || 0,
-      imagePath
+      imagePath,
+      twitter: req.body.twitter || '',
+      telegram: req.body.telegram || '',
+      website: req.body.website || ''
     });
 
     // Clean up temporary file

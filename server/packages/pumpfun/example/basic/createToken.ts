@@ -26,6 +26,9 @@ interface TokenCreationParams {
   unitPrice: number;
   initialBuyAmount: number;
   imagePath?: string;
+  twitter?: string;
+  telegram?: string;
+  website?: string;
 }
 
 // Modify the main function to accept parameters
@@ -58,12 +61,15 @@ export async function createTokenWithParams(params: TokenCreationParams) {
   console.log("🛠 Initializing PumpFun SDK...");
   let sdk = new PumpFunSDK(provider);
 
-  // Verify test account has SOL balance
+  // Verify test account has sufficient SOL balance
   console.log("Checking SOL balance...");
   let currentSolBalance = await connection.getBalance(testAccount.publicKey);
   console.log(`Current SOL balance: ${currentSolBalance / LAMPORTS_PER_SOL} SOL`);
-  if (currentSolBalance == 0) {
-    throw new Error(`Please send SOL to: ${testAccount.publicKey.toBase58()}`);
+  const MINIMUM_SOL_BALANCE = 0.01 * LAMPORTS_PER_SOL; // 0.05 SOL
+  if (currentSolBalance < MINIMUM_SOL_BALANCE) {
+    throw new Error(
+      `Insufficient SOL balance. Please send at least 0.01 SOL to: ${testAccount.publicKey.toBase58()}`
+    );
   }
 
   // Check for existing bonding curve
@@ -77,6 +83,9 @@ export async function createTokenWithParams(params: TokenCreationParams) {
       name: params.name,
       symbol: params.symbol,
       description: params.description,
+      twitter: params.twitter || "",
+      telegram: params.telegram || "",
+      website: params.website || "",
       file: await fs.openAsBlob(params.imagePath || path.join(__dirname, "random.png")),
     };
     console.log("Creating token metadata...");
@@ -100,6 +109,8 @@ export async function createTokenWithParams(params: TokenCreationParams) {
     );
     console.log("Token creation results:", createResults);
     console.log("Token creation success:", createResults.success);
+    console.log("Success:", `https://pump.fun/${mint.publicKey.toBase58()}`);
+
 
     if (createResults.success) {
       return {
@@ -116,7 +127,7 @@ export async function createTokenWithParams(params: TokenCreationParams) {
     let buyResults = await sdk.buy(
       testAccount,
       mint.publicKey,
-      BigInt(0.0001 * LAMPORTS_PER_SOL),
+      BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL),
       SLIPPAGE_BASIS_POINTS,
       {
         unitLimit: 250000,

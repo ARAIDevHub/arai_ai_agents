@@ -26,7 +26,7 @@ interface FormData {
   solAmount: string;
   image: File | null;
   website?: string;
-  xLink?: string;
+  twitter?: string;
   telegram?: string;
   walletRows: WalletRow[];
   showAdvanced: boolean;
@@ -116,7 +116,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         initialBuyAmount: parseFloat(formData.solAmount),
         // Optional social links
         website: formData.website,
-        xLink: formData.xLink,
+        twitter: formData.twitter,
         telegram: formData.telegram,
         // Include the image if present
         image: formData.image
@@ -453,11 +453,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </label>
               <input
                 type="text"
-                name="xLink"
+                name="twitter"
                 className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
                          text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 placeholder="Enter Your X Link"
-                value={formData.xLink}
+                value={formData.twitter}
                 onChange={handleChange}
               />
             </div>

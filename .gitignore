@@ -49,7 +49,7 @@ to_delete/
 #server
 server/dist/
 server/node_modules/
-server/packages/pumpfun/example/basic/
+!server/package-lock.json
 *.node_modules
 *.keys
 *.key
@@ -63,3 +63,10 @@ server/packages/pumpfun/example/basic/
 *.cer
 *.der
 
+/*mint.json
+
+# Ignore mint files
+*mint*
+**/mint*
+**/*mint*
+.keys/mint*
