@@ -109,7 +109,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       const tokenParams = {
         name: formData.tokenName,
         symbol: formData.tokenSymbol,
-        description: formData.tokenDescription,
+        description: `Created with ARAI AI Agents- ${formData.tokenDescription}`,
         // Convert SOL amount to unit price (1 SOL = 1 billion lamports)
         unitPrice: parseFloat(formData.solAmount) * 1000000000,
         unitLimit: 1000000, // Default supply limit
@@ -128,7 +128,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       
       if (result.success) {
         console.log("Token creation successful:", result.output);
-        alert('Token created successfully! Check console for details.');
+        alert(`Token created successfully! The created token is at pumpfun address: ${result.url}`);
       } else {
         console.error("Token creation failed:", result.error);
         throw new Error(result.error || 'Token creation failed');
