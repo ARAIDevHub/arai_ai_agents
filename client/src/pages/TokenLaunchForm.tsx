@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Wallet } from 'lucide-react';
+// import { Wallet } from 'lucide-react';
 import { ConnectionProvider, WalletProvider, useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
-import { DEFAULT_DECIMALS, PumpFunSDK } from "../../../server/packages/pumpfun/src";
+import { DEFAULT_DECIMALS, PumpFunSDK } from "pumpdotfun-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
+import { saveAs } from 'file-saver';
 
 interface WalletRow {
   id: string;
@@ -58,84 +59,189 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
   const SLIPPAGE_BASIS_POINTS = 100n;
 
-  // Add new function to initialize SDK
+  // Add logging for wallet connection state changes
+  useEffect(() => {
+    console.log('Wallet connection state:', {
+      connected,
+      publicKey: publicKey?.toString(),
+      hasSignTransaction: !!signTransaction,
+      hasSignAllTransactions: !!signAllTransactions
+    });
+  }, [connected, publicKey, signTransaction, signAllTransactions]);
+
   const initializePumpFunSDK = () => {
+    console.log('Initializing PumpFun SDK...');
     if (!publicKey || !signTransaction || !signAllTransactions) {
+      console.error('SDK Init Error: Wallet not connected or missing signing capabilities');
       throw new Error("Wallet not connected");
     }
 
-    // Create a wallet adapter that uses Phantom's signing capabilities
     const phantomWallet = {
       publicKey: publicKey,
       signTransaction: signTransaction,
       signAllTransactions: signAllTransactions,
     };
+    console.log('Created phantom wallet adapter:', {
+      publicKey: phantomWallet.publicKey.toString(),
+      hasSigners: !!phantomWallet.signTransaction && !!phantomWallet.signAllTransactions
+    });
 
     const provider = new AnchorProvider(
       connection,
       phantomWallet,
       { commitment: "finalized" }
     );
+    console.log('Created AnchorProvider with connection:', connection.rpcEndpoint);
 
-    return new PumpFunSDK(provider);
+    const sdk = new PumpFunSDK(provider);
+    console.log('PumpFun SDK initialized successfully');
+    return sdk;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!connected || !publicKey) {
+    if (!connected || !publicKey || !signTransaction || !signAllTransactions) {
+      console.error('Submit blocked: Wallet not connected', {
+        connected,
+        publicKey: publicKey?.toString(),
+        hasSignTransaction: !!signTransaction,
+        hasSignAllTransactions: !!signAllTransactions
+      });
       alert('Please connect your wallet first');
       return;
     }
 
     try {
-      // Initialize SDK with Phantom wallet
+      console.log('Starting token creation process...');
       const sdk = initializePumpFunSDK();
+      console.log('SDK initialized:', {
+        connection: connection.rpcEndpoint,
+        wallet: publicKey.toString()
+      });
 
-      // Generate a new random mint keypair
       const mint = Keypair.generate();
+      console.log('Generated mint keypair:', {
+        publicKey: mint.publicKey.toString(),
+        secretKey: mint.secretKey.toString()
+      });
 
-      // Prepare token metadata
+      // Create blob directly from the file
+      let fileBlob;
+      if (formData.logo) {
+        const arrayBuffer = await formData.logo.arrayBuffer();
+        fileBlob = new Blob([arrayBuffer], { type: formData.logo.type });
+        console.log('Created file blob:', {
+          type: formData.logo.type,
+          size: fileBlob.size,
+          originalFileName: formData.logo.name
+        });
+      }
+
       const tokenMetadata = {
         name: formData.tokenName,
         symbol: formData.tokenSymbol,
         description: formData.tokenDescription,
-        file: formData.logo ? new Blob([formData.logo]) : undefined,
+        file: fileBlob,
       };
+      console.log('Prepared token metadata:', {
+        ...tokenMetadata,
+        file: fileBlob ? `Blob present (${fileBlob.size} bytes)` : 'No file'
+      });
 
-      // Convert SOL amount to lamports
       const solAmount = BigInt(parseFloat(formData.solAmount) * LAMPORTS_PER_SOL);
-
-      // Create and buy tokens
-      const createResults = await sdk.createAndBuy(
-        publicKey, // Using connected Phantom wallet's public key
-        mint,
-        tokenMetadata,
-        solAmount,
-        SLIPPAGE_BASIS_POINTS,
-        {
-          unitLimit: 250000,
-          unitPrice: 250000,
-        }
+      console.log('Calculated SOL amount:', {
+        input: formData.solAmount,
+        lamports: solAmount.toString(),
+        inSol: parseFloat(formData.solAmount)
+      });
+      
+      // Get the create instructions
+      console.log('Getting create instructions...');
+      const createTx = await sdk.getCreateInstructions(
+        publicKey,
+        tokenMetadata.name,
+        tokenMetadata.symbol,
+        tokenMetadata.description,
+        mint
       );
+      console.log('Create transaction obtained:', {
+        instructions: createTx.instructions.length,
+        signers: createTx.signers?.length
+      });
 
-      if (createResults.success) {
-        console.log("✅ Token created and bought successfully!");
-        console.log("Transaction Results:", createResults);
-        console.log("Token URL:", `https://pump.fun/${mint.publicKey.toBase58()}`);
-        
-        // Get and display the bonding curve info
-        const boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
-        console.log("Bonding curve:", boundingCurveAccount);
-      } else {
-        console.error("❌ Transaction failed");
+      // Get the buy instructions
+      console.log('Getting buy instructions...');
+      const buyTx = await sdk.getBuyInstructionsBySolAmount(
+        publicKey,
+        mint.publicKey,
+        solAmount,
+        SLIPPAGE_BASIS_POINTS
+      );
+      console.log('Buy transaction obtained:', {
+        instructions: buyTx.instructions.length,
+        signers: buyTx.signers?.length
+      });
+
+      // Combine transactions
+      const transactions = [createTx, buyTx];
+      console.log('Combined transactions:', {
+        count: transactions.length,
+        types: ['create', 'buy']
+      });
+      
+      // Sign all transactions with Phantom
+      console.log('Requesting wallet signature for transactions...');
+      const signedTransactions = await signAllTransactions(transactions);
+      console.log('Transactions signed by wallet:', {
+        count: signedTransactions.length,
+        signatures: signedTransactions.map(tx => tx.signatures.map(sig => sig.publicKey.toString()))
+      });
+
+      // Send signed transactions
+      for (let i = 0; i < signedTransactions.length; i++) {
+        const tx = signedTransactions[i];
+        console.log(`Sending transaction ${i + 1}...`);
+        const sig = await connection.sendRawTransaction(tx.serialize());
+        console.log(`Transaction ${i + 1} sent:`, sig);
+        console.log(`Confirming transaction ${i + 1}...`);
+        await connection.confirmTransaction(sig, 'confirmed');
+        console.log(`Transaction ${i + 1} confirmed:`, {
+          signature: sig,
+          link: `https://solscan.io/tx/${sig}`
+        });
       }
 
+      console.log('All transactions completed successfully');
+      const tokenUrl = `https://pump.fun/${mint.publicKey.toBase58()}`;
+      console.log('Token created:', {
+        mint: mint.publicKey.toString(),
+        url: tokenUrl
+      });
+      alert(`Token created successfully! View at: ${tokenUrl}`);
+
+      // Get and log the bonding curve account
+      const boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
+      console.log("Bonding curve account:", {
+        mint: mint.publicKey.toString(),
+        account: boundingCurveAccount
+      });
+
     } catch (error) {
-      console.error("Error creating token:", error);
+      console.error("Error creating token:", {
+        error,
+        message: error.message,
+        stack: error.stack,
+        type: error.constructor.name
+      });
       alert(`Error creating token: ${error.message}`);
     }
   };
+
+  // Log form data changes
+  // useEffect(() => {
+  //   console.log('Form data updated:', formData);
+  // }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -145,12 +251,45 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }));
   };
 
-  // Modify the file input handler for logo
-  const handleLogoUpload = (file: File | null) => {
-    setFormData(prev => ({
-      ...prev,
-      logo: file
-    }));
+  // Modify the handleLogoUpload function
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Validate file type
+      if (!file.type.match(/^image\/(png|jpeg|jpg|gif|webp)$/)) {
+        alert('Please upload an image file (PNG, JPEG, JPG, GIF or WEBP)');
+        return;
+      }
+
+      // Validate file size (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        return;
+      }
+
+      // Update form data with just the file
+      setFormData(prev => ({
+        ...prev,
+        logo: file
+      }));
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewElement = document.getElementById('logo-preview') as HTMLImageElement;
+        if (previewElement && e.target?.result) {
+          previewElement.src = e.target.result as string;
+          previewElement.style.display = 'block';
+        }
+      };
+      reader.readAsDataURL(file);
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Error uploading file. Please try again.');
+    }
   };
 
   // Update the WalletConnectButton component
@@ -293,14 +432,23 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               Token Logo
               <span className="text-red-500 ml-1">*</span>
             </label>
-            <div className="border-2 border-dashed border-orange-500/30 rounded-lg p-8 
-                          bg-slate-900/80 flex flex-col items-center justify-center">
+            <div 
+              className="border-2 border-dashed border-orange-500/30 rounded-lg p-8 
+                         bg-slate-900/80 flex flex-col items-center justify-center cursor-pointer"
+              onClick={() => document.getElementById('logo-upload')?.click()}
+            >
               <div className="w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
-                            flex items-center justify-center mb-4">
+                            flex items-center justify-center mb-4 relative">
+                <img 
+                  id="logo-preview"
+                  alt="Token Logo Preview"
+                  className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                  style={{ display: 'none' }}
+                />
                 <span className="text-4xl text-orange-400">+</span>
               </div>
               <p className="text-gray-100 mb-1">Click to Upload</p>
-              <p className="text-gray-400">Supported image formats: PNG/GIF/JPG/WEBP and JPEG</p>
+              <p className="text-gray-400">Supported formats: PNG/GIF/JPG/WEBP and JPEG</p>
               <p className="text-gray-400">Recommended size: 1000×1000 pixels</p>
               <p className="text-gray-400 mt-4 text-center">
                 If it meets the above requirements, it can be better displayed on various platforms and applications.
@@ -309,8 +457,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 id="logo-upload"
                 type="file"
                 className="hidden"
-                accept="image/*"
-                onChange={(e) => handleLogoUpload(e.target.files?.[0] || null)}
+                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                onChange={handleLogoUpload}
               />
             </div>
           </div>
