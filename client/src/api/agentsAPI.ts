@@ -190,31 +190,60 @@ export async function updateSeasons(agentName: string, seasons: any[]) {
   return await response.json();
 }
 
-// Function to create a new token
-export async function createToken() {
-  console.log('[agentsAPI] - createToken: Making API request to create token...');
+// Update the createToken interface and function
+interface TokenCreationParams {
+  name: string;
+  symbol: string;
+  description: string;
+  unitLimit: number;
+  unitPrice: number;
+  initialBuyAmount: number;
+  website?: string;
+  xLink?: string;
+  telegram?: string;
+  image?: File | null;
+}
+
+export async function createToken(params: TokenCreationParams) {
+  console.group('Token Creation');
+  console.log('Starting token creation with params:', params);
   
   try {
-    const response = await fetch(`${BASE_URL}/create-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    // Create FormData if we have an image
+    const formData = new FormData();
+    
+    // Add all parameters to FormData
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        if (key === 'image' && value instanceof File) {
+          formData.append('file', value);
+        } else {
+          formData.append(key, value.toString());
+        }
       }
     });
 
-    console.log('[agentsAPI] - createToken: Raw API response:', response);
+    console.log('Making API request...');
+    const response = await fetch(`${BASE_URL}/create-token`, {
+      method: "POST",
+      body: formData, // Send as FormData instead of JSON
+    });
 
+    console.log('API response status:', response.status);
+    
     if (!response.ok) {
-      console.error('[agentsAPI] - createToken: API request failed:', response.status, response.statusText);
+      console.error('API request failed:', response.status, response.statusText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log("[agentsAPI] - createToken: Parsed API response data:", data);
+    console.log('API response data:', data);
     return data;
     
   } catch (error) {
-    console.error("[agentsAPI] - createToken: Error during API call:", error);
+    console.error('Error during token creation:', error);
     throw error;
+  } finally {
+    console.groupEnd();
   }
 }

@@ -26,6 +26,8 @@ from prompt_chaining.step_3_create_posts import create_episode_posts
 from utils.post_manager import PostManager
 from utils.scheduler import AgentScheduler
 import subprocess
+import sys
+from pathlib import Path
 
 
 # Load environment variables
@@ -521,63 +523,105 @@ def update_seasons():
 @app.route('/api/create-token', methods=['POST'])
 def create_token():
     """
-    Creates a new token using PumpFun SDK.
+    Creates a new token using PumpFun SDK with specified parameters.
     """
-    print("\n=== Starting Token Creation Process ===")
-    print("Received token creation request")
+    print("\n[api.py]=== Starting Token Creation Process ===")
     
     try:
-        # Get the directory of the TypeScript file
-        ts_file_path = os.path.join(
-            'packages', 
-            'pumpfun', 
-            'example', 
-            'basic', 
-            'createToken.ts'
-        )
-        print(f"TypeScript file path: {ts_file_path}")
+        # Get file and form data
+        file = request.files.get('file')
         
-        print("Executing ts-node command...")
-        # Execute the TypeScript file using ts-node
-        process = subprocess.Popen(
-            ['npx', 'ts-node', ts_file_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        # Get other parameters from form data
+        data = {
+            'name': request.form.get('name'),
+            'symbol': request.form.get('symbol'),
+            'description': request.form.get('description'),
+            'unitLimit': float(request.form.get('unitLimit', 1000000)),
+            'unitPrice': float(request.form.get('unitPrice', 0)),
+            'initialBuyAmount': float(request.form.get('initialBuyAmount', 0)),
+            'website': request.form.get('website', ''),
+            'xLink': request.form.get('xLink', ''),
+            'telegram': request.form.get('telegram', '')
+        }
+
+        print(f"[api.py] - Creating token with parameters: {data}")
         
-        # Get output and errors
-        stdout, stderr = process.communicate()
-        print("\nProcess Output:")
-        print(f"stdout: {stdout}")
-        if stderr:
-            print(f"stderr: {stderr}")
+        # Save the uploaded file temporarily if provided
+        temp_file_path = None
+        if file:
+            temp_file_path = os.path.join('temp', file.filename)
+            os.makedirs('temp', exist_ok=True)
+            file.save(temp_file_path)
+            data['image_path'] = temp_file_path
+
+        # Get the absolute paths
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        pumpfun_dir = os.path.join(current_dir, 'packages', 'pumpfun')
+        ts_file_path = os.path.join(pumpfun_dir, 'example', 'basic', 'createToken.ts')
         
-        # Check if the process was successful
-        if process.returncode == 0:
-            print("Token creation successful")
-            response_data = {
+        # Create a temporary file with the parameters
+        params_file = os.path.join(os.path.dirname(ts_file_path), 'temp_params.json')
+        with open(params_file, 'w') as f:
+            json.dump(data, f)
+        
+        try:
+            print(f"[api.py] - Executing TypeScript file from {pumpfun_dir}")
+            # Change directory to pumpfun directory first
+            os.chdir(pumpfun_dir)
+            
+            process = subprocess.Popen(
+                [
+                    'npx',
+                    'ts-node',
+                    '--project', 'tsconfig.json',  # Use the project's tsconfig
+                    'example/basic/createToken.ts',  # Use relative path
+                    'example/basic/temp_params.json'  # Pass params file
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=pumpfun_dir,  # Set working directory to pumpfun root
+                env={**os.environ, 'FORCE_COLOR': '1'}
+            )
+            
+            stdout, stderr = process.communicate()
+            
+            # Clean up temporary files
+            if os.path.exists(params_file):
+                os.remove(params_file)
+            if temp_file_path and os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+            
+            # Check for errors in stderr
+            if process.returncode != 0:
+                print(f"[api.py] - Error output: {stderr}")
+                return jsonify({
+                    "success": False,
+                    "error": f"Token creation failed: {stderr}"
+                }), 500
+            
+            # Process successful output
+            print(f"[api.py] - Success output: {stdout}")
+            return jsonify({
                 "success": True,
-                "message": "Token created successfully",
-                "output": stdout,
-            }
-            print(f"Sending response: {response_data}")
-            return jsonify(response_data), 200
-        else:
-            print(f"Token creation failed with return code: {process.returncode}")
+                "output": stdout
+            }), 200
+            
+        except Exception as e:
+            print(f"[api.py] - Error executing token creation: {str(e)}")
             return jsonify({
                 "success": False,
-                "error": stderr
+                "error": f"Error executing token creation: {str(e)}"
             }), 500
             
     except Exception as e:
-        print(f"Error during token creation: {str(e)}")
+        print(f"[api.py] - Error during token creation: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
     finally:
-        print("=== Token Creation Process Complete ===\n")
+        print("[api.py] - === Token Creation Process Complete ===\n")
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")

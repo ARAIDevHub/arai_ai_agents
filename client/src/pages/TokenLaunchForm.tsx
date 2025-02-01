@@ -98,29 +98,46 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     e.preventDefault();
     
     if (!connected || !publicKey) {
-        alert('Please connect your wallet first');
-        return;
+      alert('Please connect your wallet first');
+      return;
     }
 
     console.log('Starting token creation process...');
     console.log('Form data being submitted:', formData);
 
     try {
-        console.log('Calling createToken API endpoint...');
-        const result = await createToken();
-        console.log('Token creation API response:', result);
-        
-        if (result.success) {
-            console.log("Token creation successful:", result.output);
-            alert('Token created successfully! Check console for details.');
-        } else {
-            console.error("Token creation failed:", result.error);
-            throw new Error(result.error || 'Token creation failed');
-        }
+      // Create token parameters from form data
+      const tokenParams = {
+        name: formData.tokenName,
+        symbol: formData.tokenSymbol,
+        description: formData.tokenDescription,
+        // Convert SOL amount to unit price (1 SOL = 1 billion lamports)
+        unitPrice: parseFloat(formData.solAmount) * 1000000000,
+        unitLimit: 1000000, // Default supply limit
+        initialBuyAmount: parseFloat(formData.solAmount),
+        // Optional social links
+        website: formData.website,
+        xLink: formData.xLink,
+        telegram: formData.telegram,
+        // Include the image if present
+        image: formData.image
+      };
+
+      console.log('Calling createToken API endpoint with params:', tokenParams);
+      const result = await createToken(tokenParams);
+      console.log('Token creation API response:', result);
+      
+      if (result.success) {
+        console.log("Token creation successful:", result.output);
+        alert('Token created successfully! Check console for details.');
+      } else {
+        console.error("Token creation failed:", result.error);
+        throw new Error(result.error || 'Token creation failed');
+      }
 
     } catch (error) {
-        console.error("Error in handleSubmit:", error);
-        alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("Error in handleSubmit:", error);
+      alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
