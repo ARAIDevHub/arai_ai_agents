@@ -18,7 +18,7 @@ interface FormData {
   tokenSymbol: string;
   tokenDescription: string;
   solAmount: string;
-  logo: File | null;
+  image: File | null;
   website?: string;
   xLink?: string;
   telegram?: string;
@@ -37,7 +37,7 @@ const TokenLaunch = () => {
     tokenSymbol: '',
     tokenDescription: '',
     solAmount: '',
-    logo: null,
+    image: null,
     website: '',
     xLink: '',
     telegram: '',

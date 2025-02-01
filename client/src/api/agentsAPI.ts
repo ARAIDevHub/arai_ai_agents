@@ -189,3 +189,32 @@ export async function updateSeasons(agentName: string, seasons: any[]) {
   }
   return await response.json();
 }
+
+// Function to create a new token
+export async function createToken() {
+  console.log('[agentsAPI] - createToken: Making API request to create token...');
+  
+  try {
+    const response = await fetch(`${BASE_URL}/create-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+
+    console.log('[agentsAPI] - createToken: Raw API response:', response);
+
+    if (!response.ok) {
+      console.error('[agentsAPI] - createToken: API request failed:', response.status, response.statusText);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("[agentsAPI] - createToken: Parsed API response data:", data);
+    return data;
+    
+  } catch (error) {
+    console.error("[agentsAPI] - createToken: Error during API call:", error);
+    throw error;
+  }
+}

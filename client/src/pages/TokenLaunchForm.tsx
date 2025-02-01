@@ -8,7 +8,8 @@ import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from 
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { DEFAULT_DECIMALS, PumpFunSDK } from "pumpdotfun-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
-import { saveAs } from 'file-saver';
+import { tokenService } from '../services/api';
+import { createToken } from '../api/agentsAPI';
 
 interface WalletRow {
   id: string;
@@ -24,7 +25,7 @@ interface FormData {
   tokenSymbol: string;
   tokenDescription: string;
   solAmount: string;
-  logo: File | null;
+  image: File | null;
   website?: string;
   xLink?: string;
   telegram?: string;
@@ -81,167 +82,52 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       signTransaction: signTransaction,
       signAllTransactions: signAllTransactions,
     };
-    console.log('Created phantom wallet adapter:', {
-      publicKey: phantomWallet.publicKey.toString(),
-      hasSigners: !!phantomWallet.signTransaction && !!phantomWallet.signAllTransactions
-    });
 
     const provider = new AnchorProvider(
       connection,
       phantomWallet,
       { commitment: "finalized" }
     );
-    console.log('Created AnchorProvider with connection:', connection.rpcEndpoint);
 
     const sdk = new PumpFunSDK(provider);
-    console.log('PumpFun SDK initialized successfully');
+    
     return sdk;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!connected || !publicKey || !signTransaction || !signAllTransactions) {
-      console.error('Submit blocked: Wallet not connected', {
-        connected,
-        publicKey: publicKey?.toString(),
-        hasSignTransaction: !!signTransaction,
-        hasSignAllTransactions: !!signAllTransactions
-      });
-      alert('Please connect your wallet first');
-      return;
+    if (!connected || !publicKey) {
+        alert('Please connect your wallet first');
+        return;
     }
 
+    console.log('Starting token creation process...');
+    console.log('Form data being submitted:', formData);
+
     try {
-      console.log('Starting token creation process...');
-      const sdk = initializePumpFunSDK();
-      console.log('SDK initialized:', {
-        connection: connection.rpcEndpoint,
-        wallet: publicKey.toString()
-      });
-
-      const mint = Keypair.generate();
-      console.log('Generated mint keypair:', {
-        publicKey: mint.publicKey.toString(),
-        secretKey: mint.secretKey.toString()
-      });
-
-      // Create blob directly from the file
-      let fileBlob;
-      if (formData.logo) {
-        const arrayBuffer = await formData.logo.arrayBuffer();
-        fileBlob = new Blob([arrayBuffer], { type: formData.logo.type });
-        console.log('Created file blob:', {
-          type: formData.logo.type,
-          size: fileBlob.size,
-          originalFileName: formData.logo.name
-        });
-      }
-
-      const tokenMetadata = {
-        name: formData.tokenName,
-        symbol: formData.tokenSymbol,
-        description: formData.tokenDescription,
-        file: fileBlob,
-      };
-      console.log('Prepared token metadata:', {
-        ...tokenMetadata,
-        file: fileBlob ? `Blob present (${fileBlob.size} bytes)` : 'No file'
-      });
-
-      const solAmount = BigInt(parseFloat(formData.solAmount) * LAMPORTS_PER_SOL);
-      console.log('Calculated SOL amount:', {
-        input: formData.solAmount,
-        lamports: solAmount.toString(),
-        inSol: parseFloat(formData.solAmount)
-      });
-      
-      // Get the create instructions
-      console.log('Getting create instructions...');
-      const createTx = await sdk.getCreateInstructions(
-        publicKey,
-        tokenMetadata.name,
-        tokenMetadata.symbol,
-        tokenMetadata.description,
-        mint
-      );
-      console.log('Create transaction obtained:', {
-        instructions: createTx.instructions.length,
-        signers: createTx.signers?.length
-      });
-
-      // Get the buy instructions
-      console.log('Getting buy instructions...');
-      const buyTx = await sdk.getBuyInstructionsBySolAmount(
-        publicKey,
-        mint.publicKey,
-        solAmount,
-        SLIPPAGE_BASIS_POINTS
-      );
-      console.log('Buy transaction obtained:', {
-        instructions: buyTx.instructions.length,
-        signers: buyTx.signers?.length
-      });
-
-      // Combine transactions
-      const transactions = [createTx, buyTx];
-      console.log('Combined transactions:', {
-        count: transactions.length,
-        types: ['create', 'buy']
-      });
-      
-      // Sign all transactions with Phantom
-      console.log('Requesting wallet signature for transactions...');
-      const signedTransactions = await signAllTransactions(transactions);
-      console.log('Transactions signed by wallet:', {
-        count: signedTransactions.length,
-        signatures: signedTransactions.map(tx => tx.signatures.map(sig => sig.publicKey.toString()))
-      });
-
-      // Send signed transactions
-      for (let i = 0; i < signedTransactions.length; i++) {
-        const tx = signedTransactions[i];
-        console.log(`Sending transaction ${i + 1}...`);
-        const sig = await connection.sendRawTransaction(tx.serialize());
-        console.log(`Transaction ${i + 1} sent:`, sig);
-        console.log(`Confirming transaction ${i + 1}...`);
-        await connection.confirmTransaction(sig, 'confirmed');
-        console.log(`Transaction ${i + 1} confirmed:`, {
-          signature: sig,
-          link: `https://solscan.io/tx/${sig}`
-        });
-      }
-
-      console.log('All transactions completed successfully');
-      const tokenUrl = `https://pump.fun/${mint.publicKey.toBase58()}`;
-      console.log('Token created:', {
-        mint: mint.publicKey.toString(),
-        url: tokenUrl
-      });
-      alert(`Token created successfully! View at: ${tokenUrl}`);
-
-      // Get and log the bonding curve account
-      const boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
-      console.log("Bonding curve account:", {
-        mint: mint.publicKey.toString(),
-        account: boundingCurveAccount
-      });
+        console.log('Calling createToken API endpoint...');
+        const result = await createToken();
+        console.log('Token creation API response:', result);
+        
+        if (result.success) {
+            console.log("Token creation successful:", result.output);
+            alert('Token created successfully! Check console for details.');
+        } else {
+            console.error("Token creation failed:", result.error);
+            throw new Error(result.error || 'Token creation failed');
+        }
 
     } catch (error) {
-      console.error("Error creating token:", {
-        error,
-        message: error.message,
-        stack: error.stack,
-        type: error.constructor.name
-      });
-      alert(`Error creating token: ${error.message}`);
+        console.error("Error in handleSubmit:", error);
+        alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   // Log form data changes
-  // useEffect(() => {
-  //   console.log('Form data updated:', formData);
-  // }, [formData]);
+  useEffect(() => {
+    console.log('Form data updated:', formData);
+  }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -251,8 +137,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }));
   };
 
-  // Modify the handleLogoUpload function
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Modify the handleImageUpload function
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -272,13 +158,13 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       // Update form data with just the file
       setFormData(prev => ({
         ...prev,
-        logo: file
+        image: file
       }));
 
       // Show preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        const previewElement = document.getElementById('logo-preview') as HTMLImageElement;
+        const previewElement = document.getElementById('image-preview') as HTMLImageElement;
         if (previewElement && e.target?.result) {
           previewElement.src = e.target.result as string;
           previewElement.style.display = 'block';
@@ -429,19 +315,19 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           {/* Right Column */}
           <div>
             <label className="flex items-center text-lg text-gray-100 mb-2">
-              Token Logo
+              Token image
               <span className="text-red-500 ml-1">*</span>
             </label>
             <div 
               className="border-2 border-dashed border-orange-500/30 rounded-lg p-8 
                          bg-slate-900/80 flex flex-col items-center justify-center cursor-pointer"
-              onClick={() => document.getElementById('logo-upload')?.click()}
+              onClick={() => document.getElementById('image-upload')?.click()}
             >
               <div className="w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
                             flex items-center justify-center mb-4 relative">
                 <img 
-                  id="logo-preview"
-                  alt="Token Logo Preview"
+                  id="image-preview"
+                  alt="Token image Preview"
                   className="absolute inset-0 w-full h-full object-cover rounded-lg"
                   style={{ display: 'none' }}
                 />
@@ -454,11 +340,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 If it meets the above requirements, it can be better displayed on various platforms and applications.
               </p>
               <input
-                id="logo-upload"
+                id="image-upload"
                 type="file"
                 className="hidden"
                 accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-                onChange={handleLogoUpload}
+                onChange={handleImageUpload}
               />
             </div>
           </div>
@@ -476,7 +362,20 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                        text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
               placeholder="Minimum 0.00000001 SOL/Enter total"
               value={formData.solAmount}
-              onChange={handleChange}
+              onChange={(e) => {
+                // Only allow numbers and decimal point
+                const value = e.target.value.replace(/[^0-9.]/g, '');
+                // Prevent multiple decimal points
+                const decimalCount = (value.match(/\./g) || []).length;
+                if (decimalCount <= 1) {
+                  setFormData(prev => ({
+                    ...prev,
+                    solAmount: value
+                  }));
+                }
+              }}
+              pattern="[0-9]*[.]?[0-9]*"
+              inputMode="decimal"
             />
             <span className="absolute right-3 top-2 text-gray-400">SOL</span>
           </div>
@@ -556,7 +455,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     hover:from-cyan-700 hover:to-orange-700 text-white py-3 rounded-md 
                     transition-colors"
         >
-          Pump Launch and Buy
+          Launch Pumpfun Token
         </button>
       </div>
     </form>
@@ -567,11 +466,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 const TokenLaunchFormWithWallet: React.FC<TokenLaunchFormProps> = (props) => {
   const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => {
-    const url = clusterApiUrl(network);
+    // Use the HELIUS_RPC_URL from environment variables
+    const url = import.meta.env.VITE_HELIUS_RPC_URL || clusterApiUrl(network);
+    console.log('Using RPC endpoint:', url);
+    
     // Validate endpoint URL
     if (!url.startsWith('https://')) {
-      throw new Error('Invalid RPC endpoint');
+      console.error('Invalid RPC endpoint:', url);
+      return clusterApiUrl(network); // Fallback to default
     }
+    
+    console.log('Using RPC endpoint:', url);
     return url;
   }, [network]);
   

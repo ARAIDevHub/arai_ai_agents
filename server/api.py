@@ -25,6 +25,7 @@ from prompt_chaining.step_2_create_content import create_seasons_and_episodes
 from prompt_chaining.step_3_create_posts import create_episode_posts
 from utils.post_manager import PostManager
 from utils.scheduler import AgentScheduler
+import subprocess
 
 
 # Load environment variables
@@ -516,6 +517,67 @@ def update_seasons():
     except Exception as e:
         print(f"Error updating seasons: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/create-token', methods=['POST'])
+def create_token():
+    """
+    Creates a new token using PumpFun SDK.
+    """
+    print("\n=== Starting Token Creation Process ===")
+    print("Received token creation request")
+    
+    try:
+        # Get the directory of the TypeScript file
+        ts_file_path = os.path.join(
+            'packages', 
+            'pumpfun', 
+            'example', 
+            'basic', 
+            'createToken.ts'
+        )
+        print(f"TypeScript file path: {ts_file_path}")
+        
+        print("Executing ts-node command...")
+        # Execute the TypeScript file using ts-node
+        process = subprocess.Popen(
+            ['npx', 'ts-node', ts_file_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        # Get output and errors
+        stdout, stderr = process.communicate()
+        print("\nProcess Output:")
+        print(f"stdout: {stdout}")
+        if stderr:
+            print(f"stderr: {stderr}")
+        
+        # Check if the process was successful
+        if process.returncode == 0:
+            print("Token creation successful")
+            response_data = {
+                "success": True,
+                "message": "Token created successfully",
+                "output": stdout,
+            }
+            print(f"Sending response: {response_data}")
+            return jsonify(response_data), 200
+        else:
+            print(f"Token creation failed with return code: {process.returncode}")
+            return jsonify({
+                "success": False,
+                "error": stderr
+            }), 500
+            
+    except Exception as e:
+        print(f"Error during token creation: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+    finally:
+        print("=== Token Creation Process Complete ===\n")
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")
