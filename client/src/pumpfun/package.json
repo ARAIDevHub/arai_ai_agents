@@ -1,0 +1,8 @@
+{
+  "type": "commonjs",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
+}
