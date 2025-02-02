@@ -202,6 +202,7 @@ interface TokenCreationParams {
   xLink?: string;
   telegram?: string;
   image?: File | null;
+  walletPublicKey: string;
 }
 
 export async function createToken(params: TokenCreationParams) {
@@ -209,10 +210,8 @@ export async function createToken(params: TokenCreationParams) {
   console.log('Starting token creation with params:', params);
   
   try {
-    // Create FormData if we have an image
     const formData = new FormData();
     
-    // Add all parameters to FormData
     Object.entries(params).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
         if (key === 'image' && value instanceof File) {
@@ -223,21 +222,16 @@ export async function createToken(params: TokenCreationParams) {
       }
     });
 
-    console.log('Making API request...');
     const response = await fetch(`${BASE_URL}/create-token`, {
       method: "POST",
-      body: formData, // Send as FormData instead of JSON
+      body: formData,
     });
-
-    console.log('API response status:', response.status);
     
     if (!response.ok) {
-      console.error('API request failed:', response.status, response.statusText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('API response data:', data);
     return data;
     
   } catch (error) {

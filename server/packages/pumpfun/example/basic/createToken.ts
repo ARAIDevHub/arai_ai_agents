@@ -29,6 +29,7 @@ interface TokenCreationParams {
   twitter?: string;
   telegram?: string;
   website?: string;
+  walletPublicKey?: string;
 }
 
 // Modify the main function to accept parameters

@@ -23,7 +23,6 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
     console.log('Received file:', req.file);
     console.log('Received body:', req.body);
 
-    // Create a temporary file path for the image
     const imagePath = req.file ? req.file.path : path.join(__dirname, 'packages/pumpfun/example/basic/random.png');
 
     const result = await createTokenWithParams({
@@ -36,7 +35,8 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
       imagePath,
       twitter: req.body.twitter || '',
       telegram: req.body.telegram || '',
-      website: req.body.website || ''
+      website: req.body.website || '',
+      walletPublicKey: req.body.walletPublicKey,
     });
 
     // Clean up temporary file
@@ -47,7 +47,6 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Token creation error:', error);
-    // Type guard to safely handle the error
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
     } else {

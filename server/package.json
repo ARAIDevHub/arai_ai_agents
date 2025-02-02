@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/api.js",
+    "start": "ts-node api.ts",
     "dev": "ts-node api.ts",
     "watch": "nodemon --exec ts-node api.ts"
   },
@@ -17,9 +17,15 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/multer": "^1.4.12",
-    "@types/node": "^20.11.0",
+    "@types/node": "^20.17.16",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
+  },
+  "ts-node": {
+    "files": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }

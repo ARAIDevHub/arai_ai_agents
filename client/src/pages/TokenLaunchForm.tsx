@@ -4,7 +4,7 @@ import { ConnectionProvider, WalletProvider, useWallet, useConnection } from '@s
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { DEFAULT_DECIMALS, PumpFunSDK } from "pumpdotfun-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
@@ -96,7 +96,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!connected || !publicKey) {
+    if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
       return;
     }
@@ -110,27 +110,43 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         name: formData.tokenName,
         symbol: formData.tokenSymbol,
         description: `Created with ARAI AI Agents- ${formData.tokenDescription}`,
-        // Convert SOL amount to unit price (1 SOL = 1 billion lamports)
-        unitPrice: parseFloat(formData.solAmount) * 1000000000,
-        unitLimit: 1000000, // Default supply limit
+        unitPrice: parseFloat(formData.solAmount) * LAMPORTS_PER_SOL,
+        unitLimit: 1000000,
         initialBuyAmount: parseFloat(formData.solAmount),
-        // Optional social links
         website: formData.website,
         twitter: formData.twitter,
         telegram: formData.telegram,
-        // Include the image if present
-        image: formData.image
+        image: formData.image,
+        walletPublicKey: publicKey.toBase58(),
       };
 
       console.log('Calling createToken API endpoint with params:', tokenParams);
       const result = await createToken(tokenParams);
       console.log('Token creation API response:', result);
       
-      if (result.success) {
-        console.log("Token creation successful:", result.output);
-        alert(`Token created successfully! The created token is at pumpfun address: ${result.url}`);
+      if (result.success && result.transaction) {
+        try {
+          // Deserialize and sign the transaction
+          const transaction = Transaction.from(Buffer.from(result.transaction.serializedTransaction));
+          
+          // Add recent blockhash
+          const { blockhash } = await connection.getLatestBlockhash();
+          transaction.recentBlockhash = blockhash;
+          transaction.feePayer = publicKey;
+
+          // Sign the transaction
+          const signedTx = await signTransaction(transaction);
+          
+          // Send the signed transaction
+          const txId = await connection.sendRawTransaction(signedTx.serialize());
+          await connection.confirmTransaction(txId);
+          
+          alert(`Token created successfully! View at: ${result.url}`);
+        } catch (error) {
+          console.error('Transaction error:', error);
+          throw new Error('Failed to process transaction');
+        }
       } else {
-        console.error("Token creation failed:", result.error);
         throw new Error(result.error || 'Token creation failed');
       }
 
