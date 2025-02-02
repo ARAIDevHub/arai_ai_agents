@@ -9,6 +9,9 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 import { DEFAULT_DECIMALS, PumpFunSDK } from "pumpdotfun-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { createToken } from '../api/agentsAPI';
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import bs58 from 'bs58';
+
 
 interface WalletRow {
   id: string;
@@ -54,6 +57,26 @@ interface Payload {
   image?: string;
 }
 
+interface TokenMetadata {
+  name: string;
+  symbol: string;
+  description: string;
+  twitter?: string;
+  telegram?: string;
+  website?: string;
+  file: string; // base64 encoded image
+}
+
+interface TokenCreationResponse {
+  testAccount: string; // Public key as string
+  mint: string; // Public key as string
+  tokenMetadata: TokenMetadata;
+  buyAmount: string; // BigInt as string
+  slippageBasisPoints: string; // BigInt as string
+  unitLimit?: number;
+  unitPrice?: number;
+}
+
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
   const { connection } = useConnection();
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
@@ -69,39 +92,42 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     });
   }, [connected, publicKey, signTransaction, signAllTransactions]);
 
-  const initializePumpFunSDK = () => {
-    console.log('Initializing PumpFun SDK...');
-    if (!publicKey || !signTransaction || !signAllTransactions) {
-      console.error('SDK Init Error: Wallet not connected or missing signing capabilities');
-      throw new Error("Wallet not connected");
-    }
-
-    const phantomWallet = {
-      publicKey: publicKey,
-      signTransaction: signTransaction,
-      signAllTransactions: signAllTransactions,
-    };
-
-    const provider = new AnchorProvider(
-      connection,
-      phantomWallet,
-      { commitment: "finalized" }
-    );
-
-    const sdk = new PumpFunSDK(provider);
-    
-    return sdk;
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
+    // Check if wallet is connected
     if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
       return;
     }
 
     console.log('Starting token creation process...');
+    const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL;
+    
+    // Validate the RPC URL
+    if (!heliusRpcUrl || !heliusRpcUrl.startsWith('https://')) {
+      console.error('Invalid Helius RPC URL:', heliusRpcUrl);
+      alert('Invalid RPC endpoint configuration');
+      return;
+    }
+
+    // Create connection with validated URL
+    let connection = new Connection(heliusRpcUrl);
+    
+    // Create an AnchorProvider using the connected wallet
+    const provider = new AnchorProvider(
+      connection,
+      {
+        publicKey: publicKey,
+        signTransaction,
+        signAllTransactions,
+      },
+      { commitment: "finalized" }
+    );
+
+    console.log("The provider is", provider);
+
     console.log('Form data being submitted:', formData);
 
     try {
@@ -119,51 +145,46 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         image: formData.image };
 
       console.log('Calling createToken API endpoint with params:', tokenParams);
-      const createTokenObject = await createToken(tokenParams);
-
+      const response = await createToken(tokenParams);
+      
+      // Deserialize the response
+      const createTokenObject = response as TokenCreationResponse;
+      
+      // Convert string values back to their proper types
       const {
         testAccount,
         mint,
         tokenMetadata,
-        buyAmount,
-        slippageBasisPoints,
+        buyAmount: buyAmountStr,
+        slippageBasisPoints: slippageStr,
         unitLimit,
         unitPrice
       } = createTokenObject;
 
-      console.log('Test account:', testAccount);
-      console.log('Mint:', mint);
-      console.log('Token metadata:', tokenMetadata);
-      console.log('Buy amount:', BigInt(buyAmount));
-      console.log('Slippage basis points:', slippageBasisPoints);
-      console.log('Unit limit:', unitLimit);
-      console.log('Unit price:', unitPrice);
-      
-    //   if (result.success && result.transaction) {
-    //     try {
-    //       // Deserialize and sign the transaction
-    //       const transaction = Transaction.from(Buffer.from(result.transaction.serializedTransaction));
-          
-    //       // Add recent blockhash
-    //       const { blockhash } = await connection.getLatestBlockhash();
-    //       transaction.recentBlockhash = blockhash;
-    //       transaction.feePayer = publicKey;
+      // Convert string values to BigInt
+      const buyAmount = BigInt(buyAmountStr);
+      const slippageBasisPoints = BigInt(slippageStr);
 
-    //       // Sign the transaction
-    //       const signedTx = await signTransaction(transaction);
-          
-    //       // Send the signed transaction
-    //       const txId = await connection.sendRawTransaction(signedTx.serialize());
-    //       await connection.confirmTransaction(txId);
-          
-    //       alert(`Token created successfully! View at: ${result.url}`);
-    //     } catch (error) {
-    //       console.error('Transaction error:', error);
-    //       throw new Error('Failed to process transaction');
-    //     }
-    //   } else {
-    //     throw new Error(result.error || 'Token creation failed');
-    //   }
+      // Convert base64 image back to Blob if needed
+      const imageBlob = tokenMetadata.file ? 
+        new Blob([Uint8Array.from(atob(tokenMetadata.file), c => c.charCodeAt(0))], 
+          { type: 'image/png' }) : null;
+
+      console.log('Deserialized response:', {
+        testAccount: new PublicKey(testAccount), // Convert to PublicKey
+        mint: new PublicKey(mint), // Convert to PublicKey
+        tokenMetadata: {
+          ...tokenMetadata,
+          file: imageBlob
+        },
+        buyAmount,
+        slippageBasisPoints,
+        unitLimit,
+        unitPrice
+      });
+
+      // Now you can use these values to create and sign your transaction
+      // ... rest of your transaction code ...
 
     } catch (error) {
       console.error("Error in handleSubmit:", error);
