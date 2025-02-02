@@ -8,6 +8,7 @@
     "watch": "nodemon --exec ts-node api.ts"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.98.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "http-proxy-middleware": "^3.0.3",
