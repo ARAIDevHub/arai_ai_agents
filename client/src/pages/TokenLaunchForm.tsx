@@ -152,41 +152,32 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       // Deserialize the response
       const createTokenObject = response as TokenCreationResponse;
       
-      // Convert string values back to their proper types
       const {
         testAccount,
         mint,
         tokenMetadata,
-        // buyAmount: buyAmountStr,
-        // slippageBasisPoints: slippageStr,
-        // unitLimit,
-        // unitPrice
       } = createTokenObject;
 
-      // Convert string values to BigInt
-      // const buyAmount = BigInt(buyAmountStr);
-      // const slippageBasisPoints = BigInt(slippageStr);
+      // Convert base64 string to Blob correctly
+      const base64String = tokenMetadata.file;
+      const byteCharacters = atob(base64String);
+      const byteNumbers = new Array(byteCharacters.length);
+      
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      const imageBlob = new Blob([byteArray], { type: 'image/jpeg' });
 
-      // Convert base64 image back to Blob if needed
-      const imageBlob = tokenMetadata.file ? 
-        new Blob([Uint8Array.from(atob(tokenMetadata.file), c => c.charCodeAt(0))], 
-          { type: 'image/png' }) : null;
+      // Create the final metadata object
+      const finalMetadata = {
+        ...tokenMetadata,
+        file: imageBlob
+      };
 
-      console.log('Deserialized response:', {
-        testAccount: new PublicKey(testAccount), // Convert to PublicKey
-        mint: new PublicKey(mint), // Convert to PublicKey
-        tokenMetadata: {
-          ...tokenMetadata,
-          file: imageBlob
-        },
-        // buyAmount,
-        // slippageBasisPoints,
-        // unitLimit,
-        // unitPrice
-      });
-
-      // Now you can use these values to create and sign your transaction
-      // ... rest of your transaction code ...
+      console.log("Final metadata prepared:", finalMetadata);
+      console.log("Image blob size:", imageBlob.size);
 
       let sdk = new PumpFunSDK(provider);
       console.log("The sdk is", sdk);
@@ -213,10 +204,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     
     if (!boundingCurveAccount) {
       try {
+        console.log("Creating and buying token...");
+        console.log("The testAccount is", testAccount);
+        console.log("The mintPubkey is", mintPubkey);
+        console.log("The tokenMetadata is", finalMetadata);
+        console.log("The tokenMetadata file is", finalMetadata.file);
+        console.log("The solAmount is", parseFloat(formData.solAmount) * LAMPORTS_PER_SOL);
+        console.log("The SLIPPAGE_BASIS_POINTS is", SLIPPAGE_BASIS_POINTS);
         let createResults = await sdk.createAndBuy(
           testAccount,
           mintPubkey,
-          tokenMetadata,
+          finalMetadata,
           parseFloat(formData.solAmount) * LAMPORTS_PER_SOL,
           SLIPPAGE_BASIS_POINTS,
           {
