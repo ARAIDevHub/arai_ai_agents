@@ -64,10 +64,10 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
       throw new Error('Token creation failed - no result returned');
     }
 
-    // Update the serialization to handle all fields
+    // Update the serialization to use the public secretKey property
     const serializedResult = {
-      testAccount: result.testAccount.publicKey.toString(),
-      mint: result.mint.publicKey.toString(),
+      testAccount: Buffer.from(result.testAccount.secretKey).toString('base64'),
+      mint: Buffer.from(result.mint.secretKey).toString('base64'),
       tokenMetadata: {
         ...result.tokenMetadata,
         file: await result.tokenMetadata.file.slice().arrayBuffer().then(buffer => 
@@ -80,7 +80,7 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
       unitPrice: result.unitPrice
     };
 
-    console.log("[api.ts] - The serialized result is", serializedResult);
+    console.log("[api.ts] - Sending keypair data to client");
     res.json(serializedResult);
   } catch (error) {
     console.error('[api.ts] - Token creation error:', error);

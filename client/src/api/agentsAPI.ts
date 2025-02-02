@@ -204,7 +204,25 @@ interface TokenCreationParams {
   image?: File | null;
 }
 
-export async function createToken(params: TokenCreationParams) {
+interface TokenCreationResponse {
+  testAccount: string;  // base64 encoded secretKey (full keypair data)
+  mint: string;        // base64 encoded secretKey (full keypair data)
+  tokenMetadata: {
+    name: string;
+    symbol: string;
+    description: string;
+    twitter?: string;
+    telegram?: string;
+    website?: string;
+    file: string;     // base64 encoded image
+  };
+  buyAmount: string;
+  slippageBasisPoints: string;
+  unitLimit?: number;
+  unitPrice?: number;
+}
+
+export async function createToken(params: TokenCreationParams): Promise<TokenCreationResponse> {
   console.group('Token Creation');
   console.log('Starting token creation with params:', params);
   
@@ -226,8 +244,18 @@ export async function createToken(params: TokenCreationParams) {
       body: formData,
     });
     
-    const data = await response.json();
-    console.log("[agentsAPI] - The data is", data)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TokenCreationResponse = await response.json();
+    console.log("[agentsAPI] - Received keypair data from server");
+    
+    // Validate the received data
+    if (!data.testAccount || !data.mint) {
+      throw new Error('Missing keypair data in server response');
+    }
+
     return data;
     
   } catch (error) {

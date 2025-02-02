@@ -122,8 +122,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       connection,
       {
         publicKey: publicKey,
-        signTransaction,
-        signAllTransactions,
+        signTransaction: signTransaction!,
+        signAllTransactions: signAllTransactions!,
       },
       { commitment: "finalized" }
     );
@@ -157,6 +157,19 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         mint,
         tokenMetadata,
       } = createTokenObject;
+      console.log("The returned testAccount is", testAccount);
+      console.log("The returned mint is", mint);
+
+      // Convert base64 strings back to Keypairs
+      const testAccountKeypair = Keypair.fromSecretKey(
+        Buffer.from(testAccount, 'base64')
+      );
+      const mintKeypair = Keypair.fromSecretKey(
+        Buffer.from(mint, 'base64')
+      );
+
+      console.log("Reconstructed testAccount keypair:", testAccountKeypair);
+      console.log("Reconstructed mint keypair:", mintKeypair);
 
       // Convert base64 string to Blob correctly
       const base64String = tokenMetadata.file;
@@ -195,10 +208,9 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
     // Check for existing bonding curve
     console.log("The mint string is", mint);
-    const mintPubkey = new PublicKey(mint);
-    console.log("The mint public key is", mintPubkey);
+    console.log("The mint keypair is", mintKeypair);
 
-    let boundingCurveAccount = await sdk.getBondingCurveAccount(mintPubkey);
+    let boundingCurveAccount = await sdk.getBondingCurveAccount(mintKeypair.publicKey);
     console.log("Checking for existing bonding curve...");
     console.log(`Bounding curve account: ${boundingCurveAccount ? "exists" : "does not exist"}`);
     
@@ -206,14 +218,14 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       try {
         console.log("Creating and buying token...");
         console.log("The testAccount is", testAccount);
-        console.log("The mintPubkey is", mintPubkey);
+        console.log("The mintKeypair is", mintKeypair);
         console.log("The tokenMetadata is", finalMetadata);
         console.log("The tokenMetadata file is", finalMetadata.file);
         console.log("The solAmount is", parseFloat(formData.solAmount) * LAMPORTS_PER_SOL);
         console.log("The SLIPPAGE_BASIS_POINTS is", SLIPPAGE_BASIS_POINTS);
         let createResults = await sdk.createAndBuy(
-          testAccount,
-          mintPubkey,
+          testAccountKeypair,
+          mintKeypair,
           finalMetadata,
           parseFloat(formData.solAmount) * LAMPORTS_PER_SOL,
           SLIPPAGE_BASIS_POINTS,
@@ -224,8 +236,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         );
         console.log("Create and buy results:", createResults);
       } catch (error) {
-        console.error("Error in createAndBuy:", error);
-        alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        if (error instanceof Error) {
+          if (error.message.includes('User rejected')) {
+            alert('Transaction was rejected by the wallet');
+          } else {
+            console.error("Error in createAndBuy:", error);
+            alert(`Error creating token: ${error.message}`);
+          }
+        } else {
+          console.error("Unknown error in createAndBuy:", error);
+          alert('An unknown error occurred while creating the token');
+        }
       }
     }
 
@@ -363,8 +384,16 @@ useEffect(() => {
     return new Blob([byteArray]);
   };
 
+  const handleFormChange = (e: React.FormEvent<HTMLFormElement>) => {
+    // Handle form-level changes if needed
+  };
+
   return (
-    <form onSubmit={handleSubmit} onChange={handleChange} className="w-full p-6 overflow-visible">
+    <form 
+      onSubmit={handleSubmit} 
+      onChange={handleFormChange}  // Use the new handler
+      className="w-full p-6 overflow-visible"
+    >
       <WalletConnectButton />
 
       <div className="max-w-4xl mx-auto space-y-6">
