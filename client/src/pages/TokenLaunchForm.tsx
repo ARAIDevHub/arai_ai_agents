@@ -24,7 +24,7 @@ interface FormData {
   tokenSymbol: string;
   tokenDescription: string;
   solAmount: string;
-  image: File | null;
+  image: File;
   website?: string;
   twitter?: string;
   telegram?: string;
@@ -116,39 +116,54 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         website: formData.website,
         twitter: formData.twitter,
         telegram: formData.telegram,
-        image: formData.image,
-        walletPublicKey: publicKey.toBase58(),
-      };
+        image: formData.image };
 
       console.log('Calling createToken API endpoint with params:', tokenParams);
-      const result = await createToken(tokenParams);
-      console.log('Token creation API response:', result);
-      
-      if (result.success && result.transaction) {
-        try {
-          // Deserialize and sign the transaction
-          const transaction = Transaction.from(Buffer.from(result.transaction.serializedTransaction));
-          
-          // Add recent blockhash
-          const { blockhash } = await connection.getLatestBlockhash();
-          transaction.recentBlockhash = blockhash;
-          transaction.feePayer = publicKey;
+      const createTokenObject = await createToken(tokenParams);
 
-          // Sign the transaction
-          const signedTx = await signTransaction(transaction);
+      const {
+        testAccount,
+        mint,
+        tokenMetadata,
+        buyAmount,
+        slippageBasisPoints,
+        unitLimit,
+        unitPrice
+      } = createTokenObject;
+
+      console.log('Test account:', testAccount);
+      console.log('Mint:', mint);
+      console.log('Token metadata:', tokenMetadata);
+      console.log('Buy amount:', BigInt(buyAmount));
+      console.log('Slippage basis points:', slippageBasisPoints);
+      console.log('Unit limit:', unitLimit);
+      console.log('Unit price:', unitPrice);
+      
+    //   if (result.success && result.transaction) {
+    //     try {
+    //       // Deserialize and sign the transaction
+    //       const transaction = Transaction.from(Buffer.from(result.transaction.serializedTransaction));
           
-          // Send the signed transaction
-          const txId = await connection.sendRawTransaction(signedTx.serialize());
-          await connection.confirmTransaction(txId);
+    //       // Add recent blockhash
+    //       const { blockhash } = await connection.getLatestBlockhash();
+    //       transaction.recentBlockhash = blockhash;
+    //       transaction.feePayer = publicKey;
+
+    //       // Sign the transaction
+    //       const signedTx = await signTransaction(transaction);
           
-          alert(`Token created successfully! View at: ${result.url}`);
-        } catch (error) {
-          console.error('Transaction error:', error);
-          throw new Error('Failed to process transaction');
-        }
-      } else {
-        throw new Error(result.error || 'Token creation failed');
-      }
+    //       // Send the signed transaction
+    //       const txId = await connection.sendRawTransaction(signedTx.serialize());
+    //       await connection.confirmTransaction(txId);
+          
+    //       alert(`Token created successfully! View at: ${result.url}`);
+    //     } catch (error) {
+    //       console.error('Transaction error:', error);
+    //       throw new Error('Failed to process transaction');
+    //     }
+    //   } else {
+    //     throw new Error(result.error || 'Token creation failed');
+    //   }
 
     } catch (error) {
       console.error("Error in handleSubmit:", error);
@@ -272,6 +287,16 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       ...prev,
       walletRows: prev.walletRows.filter(row => row.id !== id)
     }));
+  };
+
+  const base64ToBlob = (base64: string): Blob => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray]);
   };
 
   return (

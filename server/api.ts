@@ -5,6 +5,26 @@ import { createTokenWithParams } from './packages/pumpfun/example/basic/createTo
 import path from 'path';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { Keypair } from '@solana/web3.js';
+
+// Update the interface to match the full returned object
+interface TokenCreationResult {
+  testAccount: Keypair;
+  mint: Keypair;
+  tokenMetadata: {
+    name: string;
+    symbol: string;
+    description: string;
+    twitter?: string;
+    telegram?: string;
+    website?: string;
+    file: Blob;
+  };
+  buyAmount: bigint;
+  slippageBasisPoints: bigint;
+  unitLimit?: number;
+  unitPrice?: number;
+}
 
 const app = express();
 const upload = multer({ dest: 'temp/' });
@@ -36,17 +56,34 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
       twitter: req.body.twitter || '',
       telegram: req.body.telegram || '',
       website: req.body.website || '',
-      walletPublicKey: req.body.walletPublicKey,
-    });
+      wallet: req.body.wallet,
+    }) as TokenCreationResult;
 
     // Clean up temporary file
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
+    if (!result) {
+      throw new Error('Token creation failed - no result returned');
     }
 
-    res.json(result);
+    // Update the serialization to handle all fields
+    const serializedResult = {
+      testAccount: result.testAccount.publicKey.toString(),
+      mint: result.mint.publicKey.toString(),
+      tokenMetadata: {
+        ...result.tokenMetadata,
+        file: await result.tokenMetadata.file.slice().arrayBuffer().then(buffer => 
+          Buffer.from(buffer).toString('base64')
+        )
+      },
+      buyAmount: result.buyAmount.toString(),
+      slippageBasisPoints: result.slippageBasisPoints.toString(),
+      unitLimit: result.unitLimit,
+      unitPrice: result.unitPrice
+    };
+
+    console.log("[api.ts] - The serialized result is", serializedResult);
+    res.json(serializedResult);
   } catch (error) {
-    console.error('Token creation error:', error);
+    console.error('[api.ts] - Token creation error:', error);
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
     } else {

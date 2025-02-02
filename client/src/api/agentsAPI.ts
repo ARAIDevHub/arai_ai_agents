@@ -195,14 +195,13 @@ interface TokenCreationParams {
   name: string;
   symbol: string;
   description: string;
-  unitLimit: number;
-  unitPrice: number;
-  initialBuyAmount: number;
+  // unitLimit: number;
+  // unitPrice: number;
+  // initialBuyAmount: number;
   website?: string;
   xLink?: string;
   telegram?: string;
   image?: File | null;
-  walletPublicKey: string;
 }
 
 export async function createToken(params: TokenCreationParams) {
@@ -227,15 +226,12 @@ export async function createToken(params: TokenCreationParams) {
       body: formData,
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
     const data = await response.json();
+    console.log("[agentsAPI] - The data is", data)
     return data;
     
   } catch (error) {
-    console.error('Error during token creation:', error);
+    console.error('[agentsAPI] - Error during token creation:', error);
     throw error;
   } finally {
     console.groupEnd();

@@ -22,15 +22,14 @@ interface TokenCreationParams {
   name: string;
   symbol: string;
   description: string;
-  unitLimit?: number;
-  unitPrice?: number;
+  unitLimit: number;
+  unitPrice: number;
   initialBuyAmount: number;
   imagePath?: string;
   twitter?: string;
   telegram?: string;
   website?: string;
   walletPublicKey?: string;
-  wallet?: any;
 }
 
 // Modify the main function to accept parameters
@@ -48,18 +47,16 @@ export async function createTokenWithParams(params: TokenCreationParams) {
   console.log("📡 Connecting to Helius RPC...");
   let connection = new Connection(process.env.HELIUS_RPC_URL || "");
 
-  let wallet = new NodeWallet(new Keypair()); // note this is not used
+  let wallet = new NodeWallet(new Keypair());
   const provider = new AnchorProvider(connection, wallet, {
     commitment: "finalized",
   });
-  console.log("The provider is", provider)
 
   // Generate or load existing keypairs
   console.log("🔑 Setting up test account and mint...");
   const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
-  console.log("The test account is", testAccount)
   const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
-  console.log("The mint is", mint)
+  
 
   // Initialize PumpFun SDK
   console.log("🛠 Initializing PumpFun SDK...");
@@ -99,67 +96,54 @@ export async function createTokenWithParams(params: TokenCreationParams) {
     console.log("Calculating buy amount...");
     console.log(`Buy amount: ${buyAmount} lamports`);
 
-    const createTokenObject = {
-      testAccount: testAccount,
-      mint: mint,
-      tokenMetadata: tokenMetadata,
-      buyAmount: buyAmount,
-      slippageBasisPoints: SLIPPAGE_BASIS_POINTS,
-      unitLimit: params.unitLimit,
-      unitPrice: params.unitPrice,
+    // Create bonding curve with passed parameters
+    let createResults = await sdk.createAndBuy(
+      testAccount,
+      mint,
+      tokenMetadata,
+      buyAmount,
+      SLIPPAGE_BASIS_POINTS,
+      {
+        unitLimit: params.unitLimit,
+        unitPrice: params.unitPrice,
+      },
+    );
+    console.log("Token creation results:", createResults);
+    console.log("Token creation success:", createResults.success);
+    console.log("Success:", `https://pump.fun/${mint.publicKey.toBase58()}`);
+
+
+    if (createResults.success) {
+      return {
+        success: true,
+        mintAddress: mint.publicKey.toBase58(),
+        transaction: createResults,
+        url: `https://pump.fun/${mint.publicKey.toBase58()}`
+      };
+    } else {
+      throw new Error("Token creation failed");
     }
-    console.log("The createTokenObject is", createTokenObject)
-    return createTokenObject;
+  } else {
+    console.log("💰 Token already exists. Executing buy transaction...");
+    let buyResults = await sdk.buy(
+      testAccount,
+      mint.publicKey,
+      BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL),
+      SLIPPAGE_BASIS_POINTS,
+      {
+        unitLimit: 250000,
+        unitPrice: 250000,
+      },
+    );
 
-    // // Create bonding curve with passed parameters
-    // let createResults = await sdk.createAndBuy(
-    //   testAccount,
-    //   mint,
-    //   tokenMetadata,
-    //   buyAmount,
-    //   SLIPPAGE_BASIS_POINTS,
-    //   {
-    //     unitLimit: params.unitLimit,
-    //     unitPrice: params.unitPrice,
-    //   },
-    // );
-    // console.log("Token creation results:", createResults);
-    // console.log("Token creation success:", createResults.success);
-    // console.log("Success:", `https://pump.fun/${mint.publicKey.toBase58()}`);
-    
-
-
-  //   if (createResults.success) {
-  //     return {
-  //       success: true,
-  //       mintAddress: mint.publicKey.toBase58(),
-  //       transaction: createResults,
-  //       url: `https://pump.fun/${mint.publicKey.toBase58()}`
-  //     };
-  //   } else {
-  //     throw new Error("Token creation failed");
-  //   }
-  // } else {
-  //   console.log("💰 Token already exists. Executing buy transaction...");
-  //   let buyResults = await sdk.buy(
-  //     testAccount,
-  //     mint.publicKey,
-  //     BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL),
-  //     SLIPPAGE_BASIS_POINTS,
-  //     {
-  //       unitLimit: 250000,
-  //       unitPrice: 250000,
-  //     },
-  //   );
-
-  //   if (buyResults.success) {
-  //     console.log("✅ Buy transaction successful!");
-  //     console.log("Buy Results:", buyResults);
-  //     printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
-  //     console.log("Bonding curve after buy", await sdk.getBondingCurveAccount(mint.publicKey));
-  //   } else {
-  //     console.log("❌ Buy transaction failed");
-  //   }
+    if (buyResults.success) {
+      console.log("✅ Buy transaction successful!");
+      console.log("Buy Results:", buyResults);
+      printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
+      console.log("Bonding curve after buy", await sdk.getBondingCurveAccount(mint.publicKey));
+    } else {
+      console.log("❌ Buy transaction failed");
+    }
   }
 }
 
