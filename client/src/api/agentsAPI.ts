@@ -195,34 +195,16 @@ interface TokenCreationParams {
   name: string;
   symbol: string;
   description: string;
-  // unitLimit: number;
-  // unitPrice: number;
-  // initialBuyAmount: number;
+  unitLimit: number;
+  unitPrice: number;
+  initialBuyAmount: number;
   website?: string;
   xLink?: string;
   telegram?: string;
   image?: File | null;
 }
 
-interface TokenCreationResponse {
-  testAccount: string;  // base64 encoded secretKey (full keypair data)
-  mint: string;        // base64 encoded secretKey (full keypair data)
-  tokenMetadata: {
-    name: string;
-    symbol: string;
-    description: string;
-    twitter?: string;
-    telegram?: string;
-    website?: string;
-    file: string;     // base64 encoded image
-  };
-  buyAmount: string;
-  slippageBasisPoints: string;
-  unitLimit?: number;
-  unitPrice?: number;
-}
-
-export async function createToken(params: TokenCreationParams): Promise<TokenCreationResponse> {
+export async function createToken(params: TokenCreationParams) {
   console.group('Token Creation');
   console.log('Starting token creation with params:', params);
   
@@ -239,28 +221,46 @@ export async function createToken(params: TokenCreationParams): Promise<TokenCre
       }
     });
 
+    console.log('Making API request...');
     const response = await fetch(`${BASE_URL}/create-token`, {
       method: "POST",
       body: formData,
     });
+
+    // Log the raw response for debugging
+    console.log('[agentsAPI] - Raw response:', response);
     
+    let data;
+    const textResponse = await response.text();
+    console.log('[agentsAPI] - Response text:', textResponse);
+
+    try {
+      data = JSON.parse(textResponse);
+    } catch (parseError) {
+      console.error('[agentsAPI] - JSON parse error:', parseError);
+      throw new Error('Invalid response from server');
+    }
+
+    console.log('[agentsAPI] - Parsed response data:', data);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(data?.message || data?.error || `HTTP error! status: ${response.status}`);
     }
-
-    const data: TokenCreationResponse = await response.json();
-    console.log("[agentsAPI] - Received keypair data from server");
     
-    // Validate the received data
-    if (!data.testAccount || !data.mint) {
-      throw new Error('Missing keypair data in server response');
-    }
-
-    return data;
+    // If we got here, the request was successful
+    return {
+      success: true,
+      data: data.data || data,
+      message: data.message || 'Token created successfully'
+    };
     
   } catch (error) {
-    console.error('[agentsAPI] - Error during token creation:', error);
-    throw error;
+    console.error('Error during token creation:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      message: 'Token creation failed'
+    };
   } finally {
     console.groupEnd();
   }

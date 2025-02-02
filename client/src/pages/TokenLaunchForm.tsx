@@ -6,23 +6,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
-import { DEFAULT_DECIMALS, PumpFunSDK } from "pumpdotfun-sdk";
-import { AnchorProvider } from "@coral-xyz/anchor";
 import { createToken } from '../api/agentsAPI';
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import bs58 from 'bs58';
-
-// ipfs 
-import axios from 'axios';
-const pinataApiKey = import.meta.env.VITE_PINATA_API_KEY;
-console.log("The pinataApiKey is", pinataApiKey);
-const pinataSecretKey = import.meta.env.VITE_PINATA_SECRET_API_KEY;
-console.log("The pinataSecretKey is", pinataSecretKey);
-
-// Add better error handling
-if (!pinataApiKey || !pinataSecretKey) {
-  console.error('Missing Pinata API configuration. Please check your .env file in the client directory.');
-}
 
 interface WalletRow {
   id: string;
@@ -89,9 +73,7 @@ interface TokenCreationResponse {
 }
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
-  const { connection } = useConnection();
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
-  const SLIPPAGE_BASIS_POINTS = 100n;
 
   // Add logging for wallet connection state changes
   useEffect(() => {
@@ -105,48 +87,16 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    const SLIPPAGE_BASIS_POINTS = 100n;
-
     e.preventDefault();
 
-    // Check if wallet is connected
     if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
       return;
     }
 
-    console.log('Starting token creation process...');
-    const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL;
-    
-    // Validate the RPC URL
-    if (!heliusRpcUrl || !heliusRpcUrl.startsWith('https://')) {
-      console.error('Invalid Helius RPC URL:', heliusRpcUrl);
-      alert('Invalid RPC endpoint configuration');
-      return;
-    }
-
-    // Create connection with validated URL
-    let connection = new Connection(heliusRpcUrl);
-    
-    // Create an AnchorProvider using the connected wallet
-    const provider = new AnchorProvider(
-      connection,
-      {
-        publicKey: publicKey,
-        signTransaction: signTransaction!,
-        signAllTransactions: signAllTransactions!,
-      },
-      { commitment: "finalized" }
-    );
-
-    console.log("The provider is", provider);
-
     console.log('Form data being submitted:', formData);
 
-    
-
     try {
-      // Create token parameters from form data
       const tokenParams = {
         name: formData.tokenName,
         symbol: formData.tokenSymbol,
@@ -157,146 +107,33 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         website: formData.website,
         twitter: formData.twitter,
         telegram: formData.telegram,
-        image: formData.image };
+        image: formData.image
+      };
 
       console.log('Calling createToken API endpoint with params:', tokenParams);
       const response = await createToken(tokenParams);
-      
-      // Deserialize the response
-      const createTokenObject = response as TokenCreationResponse;
-      
-      const {
-        testAccount,
-        mint,
-        tokenMetadata,
-      } = createTokenObject;
-      console.log("The returned testAccount is", testAccount);
-      console.log("The returned mint is", mint);
+      console.log('Token creation API response:', response);
 
-      // Convert base64 strings back to Keypairs
-      const testAccountKeypair = Keypair.fromSecretKey(
-        Buffer.from(testAccount, 'base64')
-      );
-      const mintKeypair = Keypair.fromSecretKey(
-        Buffer.from(mint, 'base64')
-      );
-
-      console.log("Reconstructed testAccount keypair:", testAccountKeypair);
-      console.log("Reconstructed mint keypair:", mintKeypair);
-
-      // Convert base64 string to Blob correctly
-      const base64String = tokenMetadata.file;
-      const byteCharacters = atob(base64String);
-      const byteNumbers = new Array(byteCharacters.length);
-      
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      
-      const byteArray = new Uint8Array(byteNumbers);
-      const imageBlob = new Blob([byteArray], { type: 'image/jpeg' });
-
-      const formDataUpload = new FormData();
-      formDataUpload.append("file", imageBlob, formData.image.name);
-
-      const metadata = JSON.stringify({
-        name: formData.image.name,
-        keyvalues: {
-          project: "PumpFun",
-          user: "YourUsername"
-        }
-      });
-      formDataUpload.append("pinataMetadata", metadata);
-
-      const options = JSON.stringify({
-        cidVersion: 0
-      });
-      formDataUpload.append("pinataOptions", options);
-
-      const responseIpfs = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formDataUpload, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "pinata_api_key": pinataApiKey,
-          "pinata_secret_api_key": pinataSecretKey
-        }
-      });
-
-      const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${responseIpfs.data.IpfsHash}`;
-      console.log("✅ IPFS Image URL:", ipfsUrl);
-
-      // Create the final metadata object
-      const finalMetadata = {
-        ...tokenMetadata,
-        file: imageBlob
-      };
-
-      console.log("Final metadata prepared:", finalMetadata);
-      console.log("Image blob size:", imageBlob.size);
-
-      let sdk = new PumpFunSDK(provider);
-      console.log("The sdk is", sdk);
-
-      console.log("Checking SOL balance...");
-      let currentSolBalance = await connection.getBalance(publicKey);
-      console.log(`Current SOL balance: ${currentSolBalance / LAMPORTS_PER_SOL} SOL`);
-
-      const MINIMUM_SOL_BALANCE = 0.01 * LAMPORTS_PER_SOL; // 0.01 SOL
-      if (currentSolBalance < MINIMUM_SOL_BALANCE) {
-        throw new Error(
-          `Insufficient SOL balance. Please send at least 0.01 SOL to: ${publicKey.toString()}`
-        );
+      if (response.success) {
+        // Show success message with token details
+        const mintAddress = response.data?.mintAddress || 'N/A';
+        const url = response.data?.url || 'N/A';
+        
+        alert(`Token created successfully!\nMint Address: ${mintAddress}\nView token at: ${url}`);
+        
+        // Optional: Clear form or redirect
+        // setFormData(initialFormState);
+        // navigate('/success');
+      } else {
+        console.error('Token creation failed:', response.error);
+        throw new Error(response.message || response.error || 'Token creation failed');
       }
 
-    // Check for existing bonding curve
-    console.log("The mint string is", mint);
-    console.log("The mint keypair is", mintKeypair);
-
-    let boundingCurveAccount = await sdk.getBondingCurveAccount(mintKeypair.publicKey);
-    console.log("Checking for existing bonding curve...");
-    console.log(`Bounding curve account: ${boundingCurveAccount ? "exists" : "does not exist"}`);
-    
-    if (!boundingCurveAccount) {
-      try {
-        console.log("Creating and buying token...");
-        console.log("The testAccount is", testAccount);
-        console.log("The mintKeypair is", mintKeypair);
-        console.log("The tokenMetadata is", finalMetadata);
-        console.log("The tokenMetadata file is", finalMetadata.file);
-        console.log("The solAmount is", parseFloat(formData.solAmount) * LAMPORTS_PER_SOL);
-        console.log("The SLIPPAGE_BASIS_POINTS is", SLIPPAGE_BASIS_POINTS);
-        let createResults = await sdk.createAndBuy(
-          testAccountKeypair,
-          mintKeypair,
-          finalMetadata,
-          parseFloat(formData.solAmount) * LAMPORTS_PER_SOL,
-          SLIPPAGE_BASIS_POINTS,
-          {
-            unitLimit: 250000,
-            unitPrice: 250000,
-          },
-        );
-        console.log("Create and buy results:", createResults);
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message.includes('User rejected')) {
-            alert('Transaction was rejected by the wallet');
-          } else {
-            console.error("Error in createAndBuy:", error);
-            alert(`Error creating token: ${error.message}`);
-          }
-        } else {
-          console.error("Unknown error in createAndBuy:", error);
-          alert('An unknown error occurred while creating the token');
-        }
-      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
     }
-
-  } catch (error) {
-    console.error("Error in handleSubmit:", error);
-    alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};  // End of handleSubmit
-
+  };
 // Log form data changes
 useEffect(() => {
   console.log('Form data updated:', formData);

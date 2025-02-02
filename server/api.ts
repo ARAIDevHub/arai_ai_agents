@@ -5,26 +5,6 @@ import { createTokenWithParams } from './packages/pumpfun/example/basic/createTo
 import path from 'path';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { Keypair } from '@solana/web3.js';
-
-// Update the interface to match the full returned object
-interface TokenCreationResult {
-  testAccount: Keypair;
-  mint: Keypair;
-  tokenMetadata: {
-    name: string;
-    symbol: string;
-    description: string;
-    twitter?: string;
-    telegram?: string;
-    website?: string;
-    file: Blob;
-  };
-  buyAmount: bigint;
-  slippageBasisPoints: bigint;
-  unitLimit?: number;
-  unitPrice?: number;
-}
 
 const app = express();
 const upload = multer({ dest: 'temp/' });
@@ -35,6 +15,17 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 app.use(express.json());
+
+// First, let's add the necessary type definitions at the top of the file
+interface TokenCreationResult {
+  success: boolean;
+  mintAddress?: string;
+  mint?: {
+    toString: () => string;
+  };
+  transaction?: any;
+  url?: string;
+}
 
 // Token creation endpoints (TypeScript)
 app.post('/api/create-token', upload.single('file'), async (req, res) => {
@@ -55,40 +46,41 @@ app.post('/api/create-token', upload.single('file'), async (req, res) => {
       imagePath,
       twitter: req.body.twitter || '',
       telegram: req.body.telegram || '',
-      website: req.body.website || '',
-      wallet: req.body.wallet,
+      website: req.body.website || ''
     }) as TokenCreationResult;
 
     // Clean up temporary file
-    if (!result) {
-      throw new Error('Token creation failed - no result returned');
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
     }
 
-    // Update the serialization to use the public secretKey property
-    const serializedResult = {
-      testAccount: Buffer.from(result.testAccount.secretKey).toString('base64'),
-      mint: Buffer.from(result.mint.secretKey).toString('base64'),
-      tokenMetadata: {
-        ...result.tokenMetadata,
-        file: await result.tokenMetadata.file.slice().arrayBuffer().then(buffer => 
-          Buffer.from(buffer).toString('base64')
-        )
+    // Ensure result has the expected properties
+    console.log('Token creation result:', result);
+
+    // Get the mint address from either mintAddress or mint
+    const mintAddress = result?.mintAddress || result?.mint?.toString() || 'unknown';
+
+    // Structure the success response
+    const response = {
+      success: true,
+      data: {
+        mintAddress,
+        transaction: result?.transaction || {},
+        url: result?.url || `https://pump.fun/${mintAddress}`
       },
-      buyAmount: result.buyAmount.toString(),
-      slippageBasisPoints: result.slippageBasisPoints.toString(),
-      unitLimit: result.unitLimit,
-      unitPrice: result.unitPrice
+      message: 'Token created successfully'
     };
 
-    console.log("[api.ts] - Sending keypair data to client");
-    res.json(serializedResult);
+    console.log('Sending response:', response);
+    return res.json(response);
+
   } catch (error) {
-    console.error('[api.ts] - Token creation error:', error);
-    if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'An unknown error occurred' });
-    }
+    console.error('Token creation error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      message: 'Token creation failed'
+    });
   }
 });
 
