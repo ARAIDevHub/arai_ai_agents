@@ -94,6 +94,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const SLIPPAGE_BASIS_POINTS = 100n;
+
     e.preventDefault();
 
     // Check if wallet is connected
@@ -155,15 +157,15 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         testAccount,
         mint,
         tokenMetadata,
-        buyAmount: buyAmountStr,
-        slippageBasisPoints: slippageStr,
-        unitLimit,
-        unitPrice
+        // buyAmount: buyAmountStr,
+        // slippageBasisPoints: slippageStr,
+        // unitLimit,
+        // unitPrice
       } = createTokenObject;
 
       // Convert string values to BigInt
-      const buyAmount = BigInt(buyAmountStr);
-      const slippageBasisPoints = BigInt(slippageStr);
+      // const buyAmount = BigInt(buyAmountStr);
+      // const slippageBasisPoints = BigInt(slippageStr);
 
       // Convert base64 image back to Blob if needed
       const imageBlob = tokenMetadata.file ? 
@@ -177,25 +179,68 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           ...tokenMetadata,
           file: imageBlob
         },
-        buyAmount,
-        slippageBasisPoints,
-        unitLimit,
-        unitPrice
+        // buyAmount,
+        // slippageBasisPoints,
+        // unitLimit,
+        // unitPrice
       });
 
       // Now you can use these values to create and sign your transaction
       // ... rest of your transaction code ...
 
-    } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
+      let sdk = new PumpFunSDK(provider);
+      console.log("The sdk is", sdk);
 
-  // Log form data changes
-  useEffect(() => {
-    console.log('Form data updated:', formData);
-  }, [formData]);
+      console.log("Checking SOL balance...");
+      let currentSolBalance = await connection.getBalance(publicKey);
+      console.log(`Current SOL balance: ${currentSolBalance / LAMPORTS_PER_SOL} SOL`);
+
+      const MINIMUM_SOL_BALANCE = 0.01 * LAMPORTS_PER_SOL; // 0.01 SOL
+      if (currentSolBalance < MINIMUM_SOL_BALANCE) {
+        throw new Error(
+          `Insufficient SOL balance. Please send at least 0.01 SOL to: ${publicKey.toString()}`
+        );
+      }
+
+    // Check for existing bonding curve
+    console.log("The mint string is", mint);
+    const mintPubkey = new PublicKey(mint);
+    console.log("The mint public key is", mintPubkey);
+
+    let boundingCurveAccount = await sdk.getBondingCurveAccount(mintPubkey);
+    console.log("Checking for existing bonding curve...");
+    console.log(`Bounding curve account: ${boundingCurveAccount ? "exists" : "does not exist"}`);
+    
+    if (!boundingCurveAccount) {
+      try {
+        let createResults = await sdk.createAndBuy(
+          testAccount,
+          mintPubkey,
+          tokenMetadata,
+          parseFloat(formData.solAmount) * LAMPORTS_PER_SOL,
+          SLIPPAGE_BASIS_POINTS,
+          {
+            unitLimit: 250000,
+            unitPrice: 250000,
+          },
+        );
+        console.log("Create and buy results:", createResults);
+      } catch (error) {
+        console.error("Error in createAndBuy:", error);
+        alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+  } catch (error) {
+    console.error("Error in handleSubmit:", error);
+    alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};  // End of handleSubmit
+
+// Log form data changes
+useEffect(() => {
+  console.log('Form data updated:', formData);
+}, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
