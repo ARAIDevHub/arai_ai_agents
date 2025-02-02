@@ -70,3 +70,4 @@ server/node_modules/
 **/mint*
 **/*mint*
 .keys/mint*
+server/packages/pumpfun/notes.md

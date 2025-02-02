@@ -12,6 +12,17 @@ import { createToken } from '../api/agentsAPI';
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import bs58 from 'bs58';
 
+// ipfs 
+import axios from 'axios';
+const pinataApiKey = import.meta.env.VITE_PINATA_API_KEY;
+console.log("The pinataApiKey is", pinataApiKey);
+const pinataSecretKey = import.meta.env.VITE_PINATA_SECRET_API_KEY;
+console.log("The pinataSecretKey is", pinataSecretKey);
+
+// Add better error handling
+if (!pinataApiKey || !pinataSecretKey) {
+  console.error('Missing Pinata API configuration. Please check your .env file in the client directory.');
+}
 
 interface WalletRow {
   id: string;
@@ -132,6 +143,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
     console.log('Form data being submitted:', formData);
 
+    
+
     try {
       // Create token parameters from form data
       const tokenParams = {
@@ -182,6 +195,34 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       
       const byteArray = new Uint8Array(byteNumbers);
       const imageBlob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", imageBlob, formData.image.name);
+
+      const metadata = JSON.stringify({
+        name: formData.image.name,
+        keyvalues: {
+          project: "PumpFun",
+          user: "YourUsername"
+        }
+      });
+      formDataUpload.append("pinataMetadata", metadata);
+
+      const options = JSON.stringify({
+        cidVersion: 0
+      });
+      formDataUpload.append("pinataOptions", options);
+
+      const responseIpfs = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formDataUpload, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "pinata_api_key": pinataApiKey,
+          "pinata_secret_api_key": pinataSecretKey
+        }
+      });
+
+      const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${responseIpfs.data.IpfsHash}`;
+      console.log("✅ IPFS Image URL:", ipfsUrl);
 
       // Create the final metadata object
       const finalMetadata = {
