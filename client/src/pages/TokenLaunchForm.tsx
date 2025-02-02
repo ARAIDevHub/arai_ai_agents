@@ -62,16 +62,6 @@ interface TokenMetadata {
   file: string; // base64 encoded image
 }
 
-interface TokenCreationResponse {
-  testAccount: string; // Public key as string
-  mint: string; // Public key as string
-  tokenMetadata: TokenMetadata;
-  buyAmount: string; // BigInt as string
-  slippageBasisPoints: string; // BigInt as string
-  unitLimit?: number;
-  unitPrice?: number;
-}
-
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
 
@@ -115,15 +105,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       console.log('Token creation API response:', response);
 
       if (response.success) {
-        // Show success message with token details
         const mintAddress = response.data?.mintAddress || 'N/A';
         const url = response.data?.url || 'N/A';
+        const txSignature = response.data?.transaction?.signature || 'N/A';
         
-        alert(`Token created successfully!\nMint Address: ${mintAddress}\nView token at: ${url}`);
-        
-        // Optional: Clear form or redirect
-        // setFormData(initialFormState);
-        // navigate('/success');
+        alert(
+          `Token operation successful!\n\n` +
+          `Mint Address: ${mintAddress}\n` +
+          `Transaction: ${txSignature}\n` +
+          `View token at: ${url}\n\n` +
+          `View transaction: https://solscan.io/tx/${txSignature}`
+        );
       } else {
         console.error('Token creation failed:', response.error);
         throw new Error(response.message || response.error || 'Token creation failed');
@@ -475,6 +467,195 @@ useEffect(() => {
             </div>
           </div>
         )}
+
+           {/* Wallet Parameters Section */}
+           <div className="border-t border-orange-500/20 pt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-100">Other Wallet Buy Parameters Settings</h3>
+            <button className="text-orange-500 hover:text-orange-600 flex items-center gap-1">
+              <span>↗</span> Batch Import Private Keys
+            </button>
+          </div>
+          
+          <p className="text-gray-400 mb-4">Supports up to 20 wallet addresses for purchases. Over 16 addresses require two signatures.</p>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-red-500">*</span> 
+                    <span className="text-gray-100">Private Key</span>
+                  </th>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-gray-100">Address</span>
+                  </th>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-gray-100">SOL Balance</span>
+                    <button className="ml-1 text-orange-400 hover:text-orange-300">⟳</button>
+                  </th>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-gray-100">Est. Volume</span>
+                  </th>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-red-500">*</span>
+                    <span className="text-gray-100">Buy Amount in SOL</span>
+                  </th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {formData.walletRows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="p-2 border-b border-orange-500/30">
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
+                                 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                        placeholder="Enter Private Key"
+                        value={row.privateKey}
+                        onChange={(e) => {
+                          const updatedRows = formData.walletRows.map(r =>
+                            r.id === row.id ? { ...r, privateKey: e.target.value } : r
+                          );
+                          setFormData(prev => ({ ...prev, walletRows: updatedRows }));
+                        }}
+                      />
+                    </td>
+                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                    <td className="p-2 border-b border-orange-500/30">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
+                                   text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                          placeholder="Enter Purchase Amount"
+                          value={row.buyAmount}
+                          onChange={(e) => {
+                            const updatedRows = formData.walletRows.map(r =>
+                              r.id === row.id ? { ...r, buyAmount: e.target.value } : r
+                            );
+                            setFormData(prev => ({ ...prev, walletRows: updatedRows }));
+                          }}
+                        />
+                        <button className="px-3 py-2 bg-slate-800 text-cyan-200 rounded-md hover:bg-slate-700">
+                          MAX
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-2 border-b border-orange-500/30">
+                      <div className="flex gap-1">
+                        {formData.walletRows.length > 1 && (
+                          <button 
+                            className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
+                            onClick={() => removeWalletRow(row.id)}
+                          >
+                            −
+                          </button>
+                        )}
+                        {row.id === formData.walletRows[formData.walletRows.length - 1].id && (
+                          <button 
+                            className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
+                            onClick={addWalletRow}
+                          >
+                            +
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Advanced Options Section */}
+        <div className="border-t border-orange-500/20 pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-gray-100 font-medium">Advanced Options</span>
+            <button 
+              className={`w-12 h-6 rounded-full transition-colors ${
+                formData.showAdvanced ? 'bg-orange-500' : 'bg-slate-700'
+              }`}
+              onClick={() => setFormData(prev => ({ ...prev, showAdvanced: !prev.showAdvanced }))}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${
+                formData.showAdvanced ? 'translate-x-7' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+
+          {formData.showAdvanced && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-gray-100">Jito MEV Tip (only needs to be paid once, recommended 0.0003)</span>
+                  <button className="text-orange-400 hover:text-orange-300">ⓘ</button>
+                </div>
+                <div className="flex gap-2 mb-2">
+                  <button 
+                    className={`px-4 py-2 rounded-md ${
+                      formData.mevTip === '0.00003' 
+                        ? 'bg-slate-900/80 text-gray-100' 
+                        : 'bg-slate-900/50 text-gray-400'
+                    }`}
+                    onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.00003' }))}
+                  >
+                    Default 0.00003
+                  </button>
+                  <button 
+                    className={`px-4 py-2 rounded-md ${
+                      formData.mevTip === '0.0001' 
+                        ? 'bg-slate-900/80 text-gray-100' 
+                        : 'bg-slate-900/50 text-gray-400'
+                    }`}
+                    onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0001' }))}
+                  >
+                    High 0.0001
+                  </button>
+                  <button 
+                    className={`px-4 py-2 rounded-md ${
+                      formData.mevTip === '0.0003' 
+                        ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' 
+                        : 'bg-slate-900/50 text-gray-400'
+                    }`}
+                    onClick={() => setFormData(prev => ({ ...prev, mevTip: '0.0003' }))}
+                  >
+                    Ultra-High 0.0003
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    className="w-24 px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
+                             text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    value="0.0003"
+                    readOnly
+                  />
+                  <span className="text-gray-100">SOL</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-gray-100">Block Processing Engine</span>
+                  <button className="text-orange-400 hover:text-orange-300">ⓘ</button>
+                </div>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  value={formData.blockEngine}
+                  onChange={(e) => setFormData(prev => ({ ...prev, blockEngine: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
 
         {/* Submit Button */}
         <button 
