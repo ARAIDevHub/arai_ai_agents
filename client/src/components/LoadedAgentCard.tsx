@@ -18,7 +18,9 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
   const agentEmojis = agentData?.agent_details?.emojis || [];
   const agentTopicExpertise = agentData?.agent_details?.topic_expertise || [];
   const profileImageUrl = agentData?.profile_image?.details?.url || "";
+  const backImageUrl = agentData?.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || "";
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
 
   const handleCardClick = async () => {
     try {
@@ -28,7 +30,7 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
     }
   };
 
-    return (
+  return (
     <div className="relative">
       <div
         className="perspective w-64 h-[500px]"
@@ -43,16 +45,18 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
         >
           {/* Front of card */}
           <div className="absolute w-full h-full backface-hidden">
-            <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
+            <div className="w-full h-full bg-slate-900/80 rounded-lg overflow-hidden shadow-xl border border-orange-500/30">
               <div className="relative h-[400px]">
                 <img
                   src={profileImageUrl}
-                  alt={agentName}
+                  alt=""
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-16" />
               </div>
-              <div className="h-[100px] p-4 bg-gray-800/95">
+              <div className={`h-[100px] p-4 bg-slate-900/80 transition-opacity duration-200 ${
+                isFlipped ? 'opacity-0' : 'opacity-100'
+              }`}>
                 <h3 className="text-xl font-bold text-gray-100 mb-1">
                   {agentName}
                 </h3>
@@ -63,23 +67,31 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
 
           {/* Back of card */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="w-full h-full bg-gray-800 rounded-lg p-4 shadow-xl border border-orange-500/30">
-                {/* Header with small image */}
-                <div className="flex gap-4 mb-4">
-                  <img
+            <div className="w-full h-full bg-slate-900/80 rounded-lg p-4 shadow-xl border border-orange-500/30 relative">
+              {/* Add background image with opacity */}
+              {backImageUrl && (
+                <img
+                  src={backImageUrl}
+                  alt="Background"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+              )}
+              {/* Header with small image */}
+              <div className="flex gap-4 mb-4 relative z-10">
+                <img
                   src={profileImageUrl}
-                  alt={agentName}
-                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                  />
-                  <div className="overflow-hidden">
-                    <h3 className="text-xl font-bold text-gray-100 truncate">
-                      {agentName}
-                    </h3>
-                    <p className="text-orange-400 text-sm truncate">
-                      {Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert
-                    </p>
-                  </div>
+                  alt=""
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0 z-20" // Ensure no opacity
+                />
+                <div className="overflow-hidden">
+                  <h3 className="text-xl font-bold text-gray-100 truncate">
+                    {agentName}
+                  </h3>
+                  <p className="text-orange-400 text-sm truncate">
+                    {Array.isArray(agentTopicExpertise) ? agentTopicExpertise[0] : agentTopicExpertise} Expert
+                  </p>
                 </div>
+              </div>
               <div className="space-y-4 overflow-y-auto max-h-[350px] pr-2 pb-16">
                 <div>
                   <div className="flex items-center gap-2 text-gray-300 mb-1">
@@ -125,25 +137,30 @@ const LoadedAgentCard: React.FC<AgentCardProps> = ({ agent, onSelect }) => {
               </div>
               {/* Action button  - Update once we have a global Store and s*/}
               <div className="absolute bottom-2 left-4 right-4">
-                <button
-                  className={`w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
-                              flex items-center justify-center gap-2 text-white
-                              ${isSelecting ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    if (isSelecting) return;
-                    setIsSelecting(true);
-                    try {
-                      await onSelect(agent);
-                    } finally {
-                      setIsSelecting(false);
-                    }
-                  }}
-                  disabled={isSelecting}
-                >
-                  <CheckCircle className={`w-4 h-4 ${isSelecting ? 'animate-spin' : ''}`} />
-                  {isSelecting ? 'Selecting...' : 'Select Agent'}
-                </button>
+                <div className="bg-slate-900 rounded-md">
+                  <div className="relative px-4 py-2">
+                    <button
+                      className={`w-full px-4 py-2 bg-gradient-to-r from-cyan-600 to-orange-600 rounded-md 
+                                  flex items-center justify-center gap-2 text-white
+                                  ${isSelecting || isSelected ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-700 hover:to-orange-700'}`}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (isSelecting || isSelected) return;
+                        setIsSelecting(true);
+                        try {
+                          await onSelect(agent);
+                          setIsSelected(true);
+                        } finally {
+                          setIsSelecting(false);
+                        }
+                      }}
+                      disabled={isSelecting || isSelected}
+                    >
+                      <CheckCircle className={`w-4 h-4 ${isSelecting ? 'animate-spin' : ''}`} />
+                      {isSelected ? 'Selected' : isSelecting ? 'Selecting...' : 'Select Agent'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

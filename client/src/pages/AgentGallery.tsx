@@ -13,9 +13,11 @@ import famousFigures from '../assets/generate-random-agents/famousFigures.json';
 import LunaQuantumchef from '../assets/example-agents/Luna_Quantumchef_master.json';
 import CosmicCurator from '../assets/example-agents/Cosmic_Curator_master.json';
 import GavelGlitch from '../assets/example-agents/Gavel_Glitch_master.json';
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+
 
 
 // Helper function to get random trait
@@ -41,7 +43,7 @@ const loadImageWithFallback = async (url: string): Promise<string> => {
     return url;
   } catch (error) {
     console.error('[AgentGallery] Error loading image:', error);
-    return 'https://via.placeholder.com/400x400?text=Image+Load+Failed';
+    return 'Error loading image. Regenerate again';
   }
 };
 
@@ -64,11 +66,12 @@ const generateCharacterConcept = (): string => {
     if the profession was a Dr. then the name could be Dr.{Name} `
   ];
   const conceptFormat2 = [
-    `Create a meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.`
+    `Create a parody meme of ${getRandomFamousPerson()}. The meme should be a funny and clever meme that captures the essence of the person and their achievements. Make it witty and memorable while staying respectful. Include their most iconic features, expressions, or famous quotes if applicable.
+    Make sure to use their name as part of their agent name. It is best to make a variation of their name. For example, if the person is Elon Musk, then the agent name could be Elon Musk Jr., Elon Gate, Trump Bot, Trump Tron, etc. Make something unique and memorable that could go viral within the first 24 hours of being posted.`
   ];
 
   // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.5 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  return Math.random() < 0.25 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions
@@ -93,17 +96,31 @@ const convertMasterJsonToAgent = (masterJson: any): Agent => {
     universe: masterJson.agent.agent_details.universe || '',
     backstory: masterJson.agent.agent_details.backstory || '',
     topic_expertise: masterJson.agent.agent_details.topic_expertise || [],
-    isExample: true // Add this flag to identify example agents
+    isExample: true, // Add this flag to identify example agents
+    backgroundImageUrl: masterJson.agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || '',
   };
 };
 
 const AgentGallery: React.FC = () => {
-  // Add selected agent state
-  // const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
+  const { selectedAgent } = state; // Access the selectedAgent from the context
   const { characters: loadedAgents } = useCharacters();
   const [filter, setFilter] = useState('all');
   const [randomAgents, setRandomAgents] = useState<Agent[]>([]);
   const initialMount = useRef(true);
+
+  // Load the selected agent's details when the component mounts or when the selected agent changes
+  useEffect(() => {
+    if (selectedAgent && loadedAgents.length > 0) {
+      const selectedIndex = loadedAgents.findIndex(
+        (agent) => agent.agent.agent_details.name === selectedAgent
+      );
+
+      if (selectedIndex !== -1) {
+        // Optionally, you can set the selected agent in the local state or perform other actions
+      }
+    }
+  }, [selectedAgent, loadedAgents]);
 
   // Define generateRandomAgentData inside AgentGallery so it's accessible to child components
   const generateRandomAgentData = async (): Promise<Agent> => {
@@ -116,7 +133,7 @@ const AgentGallery: React.FC = () => {
 
       return {
         id: Math.floor(Math.random() * 1000000).toString(),
-        name: agentDetails.name || '',
+        name: agentDetails.name?.replace('_', ' ') ?? '',
         avatar: '',
         shortDescription: '...',
         tags: agentDetails.hashtags || [],
@@ -126,7 +143,8 @@ const AgentGallery: React.FC = () => {
         universe: agentDetails.universe || '',
         backstory: agentDetails.backstory || '',
         concept: concept,
-        topic_expertise: agentDetails.topic_expertise || []
+        topic_expertise: agentDetails.topic_expertise || [],
+        backgroundImageUrl: agentObject.profile_image_options?.[0]?.generations_by_pk?.generated_images?.[0]?.url || '',
       };
     } catch (error) {
       console.error("[generateRandomAgentData] Error:", error);
@@ -220,7 +238,6 @@ const AgentGallery: React.FC = () => {
               ...agent,
               name: 'Generating Agent...', // Add loading name
               isLoading: true,
-              avatar: 'https://via.placeholder.com/400x400?text=Generating+Agent',
               personality: [],
               communicationStyle: [],
               emojis: [],
@@ -247,14 +264,14 @@ const AgentGallery: React.FC = () => {
           agent.id === agentId
             ? {
               ...newAgent,
-              avatar: 'https://via.placeholder.com/400x400?text=Generating+Image',
               isLoading: true
             }
             : agent
         )
       );
 
-      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait`;
+      // Incorporate the concept into the prompt
+      const prompt = `Generate an anime character portrait of ${newAgent.name} with ${getRandomTrait(imageTraits.hairStyles)} ${getRandomTrait(imageTraits.hairColors)} hair, ${getRandomTrait(imageTraits.eyeColors)} eyes, wearing ${getRandomTrait(imageTraits.clothingStyles)} style clothing. Their personality can be described as ${newAgent.personality?.join(', ') || 'unknown'}. Scene: ${getRandomTrait(imageTraits.backgrounds)}. Style: high quality, detailed anime art, character portrait. Concept: ${newAgent.concept} `;
 
       const payload = {
         prompt: prompt,
@@ -298,7 +315,6 @@ const AgentGallery: React.FC = () => {
           agent.id === agentId
             ? {
               ...agent,
-              avatar: 'https://via.placeholder.com/400x400?text=Image+Generation+Failed',
               isLoading: false
             }
             : agent
@@ -309,8 +325,9 @@ const AgentGallery: React.FC = () => {
 
   // Add handleSelectAgent function
   const handleSelectAgent = async (agent: Agent) => {
-    console.log("[handleSelectAgent] Selecting agent:", agent);
     try {
+      // Dispatch the selected agent to the global state
+      dispatch({ type: 'SET_AGENT', payload: agent.agent?.agent_details.name || '' });
 
       // Add a small delay to show the loading state
       await new Promise(resolve => setTimeout(resolve, 500));

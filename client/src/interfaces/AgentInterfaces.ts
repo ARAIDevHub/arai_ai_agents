@@ -53,6 +53,7 @@ export interface Agent {
   leonardoResponse?: any;
   leonardoImage?: any;
   topic_expertise?: string[];
+  backgroundImageUrl?: string;
   agent?: {
     concept: string;
     agent_details: AgentDetails;

@@ -180,7 +180,7 @@ def create_agent():
         "concept": data.get('concept', ''),
         "agent": {
             "agent_details": {
-                "name": character_name,
+                "name": character_name.replace('_', ' '),
                 "personality": data.get('agent_details', {}).get('personality', []),
                 "communication_style": data.get('agent_details', {}).get('communication_style', []),
                 "backstory": data.get('agent_details', {}).get('backstory', ''),
@@ -421,6 +421,7 @@ def create_episode_content():
         return jsonify({"error": str(e)}), 500
 
 # Twitter Posting 
+# Twitter Posting 
 @app.route('/api/start-post-manager/twitter', methods=['POST'])
 def start_post_manager_twitter():
     global post_manager_twitter
@@ -438,26 +439,25 @@ def start_post_manager_twitter():
         post_manager_twitter = PostManager(agent_name=agent_name)
         print(f"[start_post_manager_twitter] - post_manager created: {post_manager_twitter}")
 
-        if post_manager_twitter:
+        # Check if the PostManager is logged in
+        if post_manager_twitter and post_manager_twitter.is_logged_in:
             return jsonify({'success': True, 'message': f'Post manager started for {agent_name}'}), 200
         else:
-            return jsonify({'error': 'Failed to start post manager'}), 500
+            return jsonify({'error': 'Failed to start post manager or login to Twitter'}), 500
             
     except Exception as e:
         print(f"[start_post_manager] - Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/api/post-to-twitter', methods=['POST'])
 def post_to_twitter():
     global post_manager_twitter
     
-    print("\n")
     try:
         data = request.json
         master_data = data.get('master_data')
         post_content = data.get('content')
-        print(f"[post_to_twitter api ] - post_content: {post_content}")
+        
         if not master_data or not post_content:
             return jsonify({'error': 'Master data or post content is required'}), 400
 

@@ -4,9 +4,10 @@ import { Agent } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
 import { User } from 'lucide-react';
 import { Message, ChatHistory } from '../interfaces/ChatInterfaces';
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 
 const ChatToAgent: React.FC = () => {
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { state, dispatch } = useAgent(); // Use the context to get state and dispatch
   const { characters } = useCharacters();
   const [input, setInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatHistory>({ 
@@ -17,6 +18,7 @@ const ChatToAgent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedCharacterIndex, setSelectedCharacterIndex] = useState<number>(-1);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null); // Define selectedAgent state
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,24 +31,44 @@ const ChatToAgent: React.FC = () => {
   // Load chat history when agent is selected
   useEffect(() => {
     const loadChatHistory = async () => {
-      if (selectedAgent?.agent?.agent_details?.name) {
+      if (state.selectedAgent) {
         try {
-          const agentName = selectedAgent.agent.agent_details.name;
-          const masterFilePath = selectedAgent.agent.master_file_path || 
-            `configs/${agentName}/${agentName}_master.json`;
+          const agentName = state.selectedAgent;
+          const masterFilePath = `configs/${agentName.replace(" ", "_")}/${agentName.replace(" ", "_")}_master.json`;
           const history = await getChatHistory(masterFilePath);
           setChatHistory(history);
         } catch (error) {
           console.error('Error loading chat history:', error);
           setChatHistory({ 
-            agent_name: selectedAgent.agent.agent_details.name, 
+            agent_name: state.selectedAgent, 
             chat_history: [] 
           });
         }
       }
     };
     loadChatHistory();
-  }, [selectedAgent]);
+  }, [state.selectedAgent]);
+
+  useEffect(() => {
+    if (state.selectedAgent) {
+      const index = characters.findIndex(
+        (char) => char.agent.agent_details.name === state.selectedAgent
+      );
+      if (index !== selectedCharacterIndex) {
+        setSelectedCharacterIndex(index);
+        setSelectedAgent(characters[index]);
+      }
+    }
+  }, [state.selectedAgent, characters]);
+
+  const handleSelectAgent = (index: number) => {
+    const char = characters[index];
+    if (char) {
+      setSelectedCharacterIndex(index);
+      setSelectedAgent(char);
+      dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +88,7 @@ const ChatToAgent: React.FC = () => {
     try {
       const agentName = selectedAgent?.agent?.agent_details?.name || '';
       const masterFilePath = selectedAgent?.agent?.master_file_path || 
-        `configs/${agentName}/${agentName}_master.json`;
+        `configs/${agentName.replace(" ", "_")}/${agentName.replace(" ", "_")}_master.json`;
 
       const response = await sendChatMessage(
         masterFilePath,
@@ -98,13 +120,7 @@ const ChatToAgent: React.FC = () => {
             className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800"
             onChange={(e) => {
               const index = parseInt(e.target.value);
-              const char = characters[index];
-              if (char) {
-                
-                setSelectedCharacterIndex(index);
-                setSelectedAgent(char);
-                setDisplayChatHistory([]);
-              }
+              handleSelectAgent(index);
             }}
             value={selectedCharacterIndex}
           >
@@ -137,7 +153,7 @@ const ChatToAgent: React.FC = () => {
         {/* Wrap content in relative div to appear above overlay */}
         <div className="relative z-10 flex flex-col h-full">
           {/* Messages */}
-          <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-4 bg-slate-900/30 rounded-lg">
+          <div className="flex-grow overflow-y-auto space-y-4 p-4 bg-slate-900/30 rounded-lg">
             {displayChatHistory.map((message) => (
               <div
                 key={message.message_id}
@@ -229,7 +245,9 @@ const ChatToAgent: React.FC = () => {
                   : 'Please select an agent first...'
               }
               disabled={!selectedAgent || isLoading}
-              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/90 border border-orange-500/20 text-white placeholder-gray-400 font-semibold"
+              className="flex-grow px-4 py-2 rounded-lg bg-slate-900/80 border border-orange-500/30 
+                        text-gray-100 placeholder-gray-400 font-semibold focus:outline-none 
+                        focus:ring-2 focus:ring-orange-500/50"
             />
             <button
               type="submit"

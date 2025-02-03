@@ -6,6 +6,7 @@ import ChatToAgent from "./pages/ChatToAgent";
 import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
 import SocialDashboard from "./pages/SocialDashboard";
+import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
 
 // Components
@@ -100,21 +101,36 @@ function App() {
           >
             Social Dashboard
           </Link>
+
+{/*           <Link
+            to="/token-launch"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${
+
+                isActive("/token-launch")
+                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                  : "text-gray-300 hover:text-cyan-400"
+              }`}
+          >
+            Token Launch
+          </Link> */}
         </div>
       </nav>
 
+
       {/* Main Content */}
       <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/agent-creator" element={<AgentCreator />} />
-          {/* <Route path="/agent-studio" element={<AgentStudio />} /> */}
-          <Route path="/agent-gallery" element={<AgentGallery />} />
-          <Route path="/social-feed" element={<SocialFeed />} />
-          <Route path="/chat-to-agent" element={<ChatToAgent />} />
-          <Route path="/social-dashboard" element={<SocialDashboard />} />
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/agent-creator" element={<AgentCreator />} />
+        {/* <Route path="/agent-studio" element={<AgentStudio />} /> */}
+        <Route path="/agent-gallery" element={<AgentGallery />} />
+        <Route path="/social-feed" element={<SocialFeed />} />
+        <Route path="/chat-to-agent" element={<ChatToAgent />} />
+        <Route path="/social-dashboard" element={<SocialDashboard />} />
+        <Route path="/token-launch" element={<TokenLaunch />} />
+      </Routes>
+    </main>
 
       {/* Footer */}
       <footer className="bg-slate-900/80 py-6 text-center text-sm text-gray-400 backdrop-blur-sm">
