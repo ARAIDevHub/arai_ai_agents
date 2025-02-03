@@ -7,6 +7,7 @@ import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
 import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
+import SocialDashboard from "./pages/SocialDashboard";
 
 // Components
 // import Header from './components/Header';
@@ -103,6 +104,17 @@ function App() {
               >
                 Token Launch
               </Link> */}
+              {/*           <Link
+            to="/social-dashboard"
+            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+              ${
+                isActive("/social-dashboard")
+                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                  : "text-gray-300 hover:text-cyan-400"
+              }`}
+          >
+            Social Dashboard
+          </Link> */}
             </div>
           </nav>
 
@@ -115,6 +127,7 @@ function App() {
             <Route path="/social-feed" element={<SocialFeed />} />
             <Route path="/chat-to-agent" element={<ChatToAgent />} />
             <Route path="/token-launch" element={<TokenLaunch />} />
+            <Route path="/social-dashboard" element={<SocialDashboard />} />
           </Routes>
         </div>
       </main>

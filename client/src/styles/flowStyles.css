@@ -1,0 +1,97 @@
+.flow-path {
+  stroke-dasharray: 5;
+  animation: flow 1s linear infinite;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.flow-dot {
+  fill: currentColor;
+  r: 3;
+  filter: url(#glow);
+}
+
+.flow-line {
+  stroke-width: 6;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.flow-resource {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.1s;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.flow-dot-wrapper {
+  animation: move 3s linear infinite;
+}
+
+@keyframes flow {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes move {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+.connection-dot {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+  border-radius: 50%;
+  font-size: 12px;
+  z-index: 10;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.node-connector {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__node {
+  width: auto !important;
+}
+
+.react-flow__handle {
+  opacity: 0;
+}
+
+@keyframes flowAnimation {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+} 
