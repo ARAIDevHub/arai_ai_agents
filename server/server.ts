@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import cors from 'cors';
 
 // Load env variables before other imports, pointing to the root .env file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -13,6 +14,9 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
+app.use(cors({
+  origin: '*'
+}));
 
 // API Routes
 app.use('/api/cookie-fun', cookieFunRoutes);
