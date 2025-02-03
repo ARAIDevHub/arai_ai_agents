@@ -8,6 +8,7 @@ import AgentGallery from "./pages/AgentGallery";
 import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
 import SocialDashboard from "./pages/SocialDashboard";
+import CookieDotFunDataTesting from "./pages/cookieDotFunDataTesting";
 
 // Components
 // import Header from './components/Header';
@@ -115,6 +116,17 @@ function App() {
           >
             Social Dashboard
           </Link> */}
+              <Link
+                to="/cookie-fun-testing"
+                className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+                  ${
+                    isActive("/cookie-fun-testing")
+                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                      : "text-gray-300 hover:text-cyan-400"
+                  }`}
+              >
+                API Testing
+              </Link>
             </div>
           </nav>
 
@@ -128,6 +140,7 @@ function App() {
             <Route path="/chat-to-agent" element={<ChatToAgent />} />
             <Route path="/token-launch" element={<TokenLaunch />} />
             <Route path="/social-dashboard" element={<SocialDashboard />} />
+            <Route path="/cookie-fun-testing" element={<CookieDotFunDataTesting />} />
           </Routes>
         </div>
       </main>

@@ -1,3 +1,12 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build outputs
+dist
+dist-ssr
+*.local
+
 # Logs
 logs
 *.log
@@ -6,11 +15,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
 
 # Editor directories and files
 .vscode/*
@@ -23,4 +27,5 @@ dist-ssr
 *.sln
 *.sw?
 
-package-lock.json
+# TypeScript
+*.tsbuildinfo

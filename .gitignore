@@ -25,6 +25,11 @@ wheels/
 venv/
 ENV/
 
+# Node.js
+node_modules/
+package-lock.json
+*.tsbuildinfo
+
 # IDEs and editors
 .idea/
 .vscode/
@@ -36,10 +41,9 @@ ENV/
 .env
 dont_share/
 
-#agent configs and memory
+# Agent configs and memory
 configs/
 
-#working files
+# Working files
 to_delete/
-
 **state.json
