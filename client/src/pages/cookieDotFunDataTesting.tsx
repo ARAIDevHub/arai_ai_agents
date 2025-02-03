@@ -3,7 +3,7 @@ import {
   getCookieFunAgentsPaged,
   getCookieFunAgentByTwitter,
   getCookieFunAgentByContract
-} from '../api/agentsAPI';
+} from '../api/cookieAPI';
 import JsonView from '@microlink/react-json-view';
 
 const CookieDotFunDataTesting: React.FC = () => {

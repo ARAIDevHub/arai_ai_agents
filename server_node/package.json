@@ -7,10 +7,10 @@
     "express": "^4.21.2"
   },
   "scripts": {
-    "dev": "ts-node server.ts",
+    "dev": "ts-node src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc",
-    "watch": "ts-node-dev --respawn server.ts"
+    "watch": "ts-node-dev --respawn src/server.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
