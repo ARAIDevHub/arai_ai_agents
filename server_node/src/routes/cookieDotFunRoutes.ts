@@ -2,8 +2,11 @@ import axios, { AxiosResponse } from 'axios';
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
-const envPath = path.resolve(__dirname, '../../.env');
+const envPath = path.resolve(__dirname, '../../../.env');
 const COOKIE_FUN_API_KEY = dotenv.config({ path: envPath }).parsed?.COOKIE_FUN_API_KEY || '';
+if (!COOKIE_FUN_API_KEY) {
+    throw new Error('Missing required environment variable: COOKIE_FUN_API_KEY');
+}
 console.log('COOKIE_FUN_API_KEY:', COOKIE_FUN_API_KEY);
 // Create router
 const router = express.Router();
