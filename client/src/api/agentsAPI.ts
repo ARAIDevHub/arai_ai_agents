@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
+const BASE_URL = "http://localhost:3001/api/cookie-fun"; // Updated base URL
 
 // Function to get all agents
 export async function getAgents() {

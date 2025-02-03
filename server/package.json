@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "axios": "^1.x.x",
+    "express": "^4.21.2"
+  },
+  "scripts": {
+    "start": "ts-node server.ts",
+    "dev": "nodemon --exec ts-node server.ts",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^18.x.x",
+    "typescript": "^4.x.x",
+    "ts-node": "^10.x.x"
+  }
+}
