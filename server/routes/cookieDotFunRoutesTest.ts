@@ -29,21 +29,26 @@ if (!process.env.COOKIE_FUN_API_KEY) {
 const testApis = async () => {
     try {
         // Test getAgentsPaged
+        console.log("----------------------------------------------------------------")
         console.log('\nTesting getAgentsPaged:');
         console.log('Using API Key:', process.env.COOKIE_FUN_API_KEY);
-        const pagedData = await getAgentsPaged({ interval: '_7Days', page: 1, pageSize: 5 });
+        const pagedData = await getAgentsPaged({ interval: '_7Days', page: 2, pageSize: 2 });
         console.log('Paged Data:', JSON.stringify(pagedData, null, 2));
+        console.log('\n')
+        console.log("------------------------------------------------------------------------------------------------")
+        // Test getAgentByTwitter
+        console.log('\nTesting getAgentByTwitter:');
+        const twitterData = await getAgentByTwitter('FartCoinOfSOL', '_7Days');
+        console.log('Twitter Data:', JSON.stringify(twitterData, null, 2));
+        console.log('\n')
+        console.log("------------------------------------------------------------------------------------------------")
 
-        // // Test getAgentByTwitter
-        // console.log('\nTesting getAgentByTwitter:');
-        // const twitterData = await getAgentByTwitter('vitalik', '_7Days');
-        // console.log('Twitter Data:', JSON.stringify(twitterData, null, 2));
-
-        // // Test getAgentByContract
-        // console.log('\nTesting getAgentByContract:');
-        // const contractData = await getAgentByContract('0x1234567890123456789012345678901234567890', '_7Days');
-        // console.log('Contract Data:', JSON.stringify(contractData, null, 2));
-
+        // Test getAgentByContract
+        console.log('\nTesting getAgentByContract:');
+        const contractData = await getAgentByContract('9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump', '_7Days');
+        console.log('Contract Data:', JSON.stringify(contractData, null, 2));
+        console.log('\n')
+        console.log("------------------------------------------------------------------------------------------------")
     } catch (error: any) {
         console.error('Test Error:', error.message);
         if (error.response) {

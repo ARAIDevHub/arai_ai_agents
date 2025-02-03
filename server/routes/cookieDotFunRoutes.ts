@@ -83,6 +83,9 @@ export async function getAgentByTwitter(
     twitterUsername: string, 
     interval?: string
 ): Promise<AgentResponse> {
+    if (interval !== '_3Days' && interval !== '_7Days') {
+        throw new Error('Invalid interval must be _3Days or _7Days');
+    }
     const response: AxiosResponse<AgentResponse> = await api.get(
         `/agents/twitterUsername/${twitterUsername}`,
         { params: interval ? { interval } : {} }
@@ -94,6 +97,10 @@ export async function getAgentByContract(
     contractAddress: string, 
     interval?: string
 ): Promise<AgentResponse> {
+
+    if (interval !== '_3Days' && interval !== '_7Days') {
+        throw new Error('Invalid interval must be _3Days or _7Days');
+    }
     const response: AxiosResponse<AgentResponse> = await api.get(
         `/agents/contractAddress/${contractAddress}`,
         { params: interval ? { interval } : {} }
