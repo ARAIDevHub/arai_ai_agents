@@ -2,7 +2,8 @@
   "dependencies": {
     "@types/express": "^5.0.0",
     "axios": "^1.x.x",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "dotenv": "^16.0.0"
   },
   "scripts": {
     "start": "ts-node server.ts",

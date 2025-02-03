@@ -1,5 +1,11 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load env variables before other imports, pointing to the root .env file
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 import express from 'express';
-import cookieFunRoutes from './src/routes/cookie.fun';
+import { router as cookieFunRoutes } from './routes/cookieDotFunRoutes';
 // Import future API routes here
 // import otherApiRoutes from './routes/other.api';
 
