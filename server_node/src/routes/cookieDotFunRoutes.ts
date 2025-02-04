@@ -242,7 +242,7 @@ export async function getAllAgentsPaged(params: PaginationParams = {}): Promise<
     console.log("[cookieDotFunRoutes - getAllAgentsPaged] ");
     const pageSize = 25 // Maxing out to loop through all pages
     const interval = params.interval || '_7Days';
-    const maxPages = 3; // Current amount of pages is 277
+    const maxPages = 300; // Current amount of pages is 277
     const rateLimit = 250; // Milliseconds between requests to avoid rate limiting
     
     if (interval !== '_3Days' && interval !== '_7Days') {
@@ -255,8 +255,6 @@ export async function getAllAgentsPaged(params: PaginationParams = {}): Promise<
 
     while (hasMoreData && currentPage <= maxPages) {
         try {
-            // getAgentsPaged is the function that fetches a single page of agents
-            // returning response.data
             console.log("[cookieDotFunRoutes - getAllAgentsPaged] currentPage", currentPage);
             const response = await getAgentsPaged({ 
                 page: currentPage, 
@@ -264,7 +262,6 @@ export async function getAllAgentsPaged(params: PaginationParams = {}): Promise<
                 interval 
             });
             const agentsData = response.ok.data || [];
-
 
             if (!agentsData.length || agentsData.length === 0) {
                 console.log("[cookieDotFunRoutes - getAgentsPaged] No more data");
@@ -275,10 +272,21 @@ export async function getAllAgentsPaged(params: PaginationParams = {}): Promise<
             allAgentsData = allAgentsData.concat(agentsData);
             currentPage++;
 
-            // Add rate limiting to prevent overwhelming the API
             await new Promise(resolve => setTimeout(resolve, rateLimit));
         } catch (error) {
             console.error(`Error fetching page ${currentPage}:`, error);
+            // Write what we have so far before stopping
+            try {
+                const dataDirPath = path.join(__dirname, '../../data');
+                const jsonFilePath = path.join(dataDirPath, 'allAgents.json');
+                if (!fs.existsSync(dataDirPath)) {
+                    fs.mkdirSync(dataDirPath, { recursive: true });
+                }
+                fs.writeFileSync(jsonFilePath, JSON.stringify(allAgentsData, null, 2));
+                console.log('Partial data written to file before error');
+            } catch (writeError) {
+                console.error('Error writing to file:', writeError);
+            }
             hasMoreData = false;
         }
     }
@@ -286,27 +294,13 @@ export async function getAllAgentsPaged(params: PaginationParams = {}): Promise<
     if (currentPage > maxPages) {
         console.warn('Reached maximum page limit');
     }
-    console.log("Processed all pages");
-    // Write the data to our local storage data/agents.json
-    try {
-        // Construct the path to the JSON file
-        const dataDirPath = path.join(__dirname, '../../data');
-        const jsonFilePath = path.join(dataDirPath, 'allAgents.json');
 
-        // Ensure the data directory exists
-        if (!fs.existsSync(dataDirPath)) {
-            fs.mkdirSync(dataDirPath, { recursive: true });
-        }
-
-        // Write data to the JSON file, creating or overwriting as necessary
-        fs.writeFileSync(jsonFilePath, JSON.stringify(allAgentsData, null, 2));
-        console.log('Data successfully written to:', jsonFilePath);
-    } catch (error) {
-        console.error('Error writing to file:', error);
-    }
+    console.log(`Processed ${currentPage - 1} pages`);
 
     return {
         success: true,
+        partialData: false,
+        lastSuccessfulPage: currentPage - 1,
         data: allAgentsData,
         totalCount: allAgentsData.length,
         pageSize,

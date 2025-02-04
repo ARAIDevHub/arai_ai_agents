@@ -175,7 +175,7 @@ const CookieDotFunDataTesting: React.FC = () => {
             className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
             disabled={loadingAll}
           >
-            {loadingAll ? 'Loading All Agents...' : 'Get All Agents'}
+            {loadingAll ? 'Generating...' : 'Get All Agents'}
           </button>
           {loadingAll && <span className="ml-2">This may take several seconds...</span>}
         </div>
