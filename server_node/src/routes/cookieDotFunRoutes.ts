@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
-import { getAllAgentsPaged } from '../services/cookieDotFunService';  // Make sure to import the service
+import fs from 'fs';
 const envPath = path.resolve(__dirname, '../../../.env');
 const COOKIE_FUN_API_KEY = dotenv.config({ path: envPath }).parsed?.COOKIE_FUN_API_KEY || '';
 if (!COOKIE_FUN_API_KEY) {
@@ -118,16 +118,48 @@ router.get('/agents/paged', async (req, res) => {
  * WARNING: This is a heavy operation that may take several seconds
  * @param interval - Time interval for data (_3Days or _7Days)
  */
-router.get('/agents/all', async (req: express.Request, res: express.Response) => {
+router.get('/agents/all', async (req, res) => {
     try {
+        console.log("[cookieDotFunRoutes - router - getAllAgentsPaged] Request received");
         const interval = req.query.interval as string;
+
+        const dataDirPath = path.join(__dirname, '../../data');
+        const jsonFilePath = path.join(dataDirPath, 'allAgents.json');
+
+        if (fs.existsSync(jsonFilePath)) {
+            const fileData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+            const timestamp = new Date(fileData.timestamp);
+            const now = new Date();
+            const hoursSinceUpdate = (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60);
+
+            if (hoursSinceUpdate < 6) {
+                console.log("✅ Using cached data from:", jsonFilePath);
+                res.json(fileData); // ✅ DO NOT `return res.json()`
+                return;
+            } else {
+                console.log("🔄 Cached data is outdated, fetching new data...");
+            }
+        } else {
+            console.log("⚠️ No cached data found, fetching fresh data...");
+        }
+
         const data = await getAllAgentsPaged({ interval });
-        res.json(data);
+
+        const responseWithTimestamp = {
+            timestamp: new Date().toISOString(),
+            ...data
+        };
+
+        fs.writeFileSync(jsonFilePath, JSON.stringify(responseWithTimestamp, null, 2));
+        console.log("✅ New data cached successfully.");
+
+        res.json(responseWithTimestamp); // ✅ DO NOT `return res.json()`
     } catch (error) {
-        console.error('Error fetching all agents:', error);
-        res.status(500).json({ error: 'Failed to fetch all agents' });
+        console.error('❌ Error fetching all agents:', error);
+        res.status(500).json({ error: 'Failed to fetch all agents' }); // ✅ No return needed
     }
 });
+
 
 /**
  * Helper Functions
@@ -254,8 +286,25 @@ export async function getAllAgentsPaged(params: PaginationParams = {}): Promise<
     if (currentPage > maxPages) {
         console.warn('Reached maximum page limit');
     }
-    console.log("The allAgentsData array is ", allAgentsData);
-    console.log("The currentPage is ", currentPage);
+    console.log("Processed all pages");
+    // Write the data to our local storage data/agents.json
+    try {
+        // Construct the path to the JSON file
+        const dataDirPath = path.join(__dirname, '../../data');
+        const jsonFilePath = path.join(dataDirPath, 'allAgents.json');
+
+        // Ensure the data directory exists
+        if (!fs.existsSync(dataDirPath)) {
+            fs.mkdirSync(dataDirPath, { recursive: true });
+        }
+
+        // Write data to the JSON file, creating or overwriting as necessary
+        fs.writeFileSync(jsonFilePath, JSON.stringify(allAgentsData, null, 2));
+        console.log('Data successfully written to:', jsonFilePath);
+    } catch (error) {
+        console.error('Error writing to file:', error);
+    }
+
     return {
         success: true,
         data: allAgentsData,

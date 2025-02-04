@@ -47,3 +47,10 @@ configs/
 # Working files
 to_delete/
 **state.json
+
+# Ignore the entire data directory
+
+# Specifically ignore agents.json (if you want to ensure it's ignored even if moved)
+data/agents.json
+data/allAgents.json
+# Ignore anything inside the data directory

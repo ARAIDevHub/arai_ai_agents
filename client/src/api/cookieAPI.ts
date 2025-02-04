@@ -5,6 +5,7 @@ const BASE_URL_COOKIE_FUN = `${import.meta.env.VITE_API_BASE_URL}/cookie-fun`;
 
 // Add these new functions
 export async function getCookieFunAgentsPaged(params: PaginationParams = {}): Promise<CookieFunResponse> {
+  console.log("[getCookieFunAgentsPaged] params:", params);
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       pageSize: (params.pageSize || 25).toString(),
@@ -22,6 +23,7 @@ export async function getCookieFunAgentsPaged(params: PaginationParams = {}): Pr
     username: string, 
     interval: string = '_7Days'
   ): Promise<CookieFunResponse> {
+    console.log("[getCookieFunAgentByTwitter] username:", username);
     const response = await fetch(`${BASE_URL_COOKIE_FUN}/twitter/${username}?interval=${interval}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -33,6 +35,7 @@ export async function getCookieFunAgentsPaged(params: PaginationParams = {}): Pr
     address: string,
     interval: string = '_7Days'
   ): Promise<CookieFunResponse> {
+    console.log("[getCookieFunAgentByContract] address:", address);
     const response = await fetch(`${BASE_URL_COOKIE_FUN}/contract/${address}?interval=${interval}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -43,6 +46,7 @@ export async function getCookieFunAgentsPaged(params: PaginationParams = {}): Pr
   export async function getCookieFunAllAgents(
     interval: string = '_7Days'
   ): Promise<CookieFunResponse> {
+    console.log("[getCookieFunAllAgents] interval:", interval);
     const response = await fetch(`${BASE_URL_COOKIE_FUN}/agents/all?interval=${interval}`);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
