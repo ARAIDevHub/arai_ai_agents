@@ -53,4 +53,10 @@ to_delete/
 # Specifically ignore agents.json (if you want to ensure it's ignored even if moved)
 data/agents.json
 data/allAgents.json
-# Ignore anything inside the data directory
+
+# Ignore everything inside the data/ directory
+data/*
+
+# Allow the data directory itself
+!data/
+!data/.gitkeep
