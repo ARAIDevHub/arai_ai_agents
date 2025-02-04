@@ -40,3 +40,13 @@ export async function getCookieFunAgentsPaged(params: PaginationParams = {}): Pr
     return await response.json();
   }
   
+  export async function getCookieFunAllAgents(
+    interval: string = '_7Days'
+  ): Promise<CookieFunResponse> {
+    const response = await fetch(`${BASE_URL_COOKIE_FUN}/agents/all?interval=${interval}`);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  }
+  
