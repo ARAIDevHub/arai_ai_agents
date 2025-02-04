@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { getAgentByTwitter, getAgentByContract, getAgentsPaged } from '../src/routes/cookieDotFunRoutes';
+import { getAgentByTwitter, getAgentByContract, getAgentsPaged, getAllAgentsPaged } from '../src/routes/cookieDotFunRoutes';
 
 // Add at the top of the file
 console.log('Current directory:', process.cwd());
@@ -47,6 +47,14 @@ const testApis = async () => {
         console.log('\nTesting getAgentByContract:');
         const contractData = await getAgentByContract('9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump', '_7Days');
         console.log('Contract Data:', JSON.stringify(contractData, null, 2));
+        console.log('\n')
+        console.log("------------------------------------------------------------------------------------------------")
+
+        // Test getAllAgentsPaged
+        console.log('\nTesting getAllAgentsPaged:');
+        const allData = await getAllAgentsPaged({ interval: '_7Days' });
+        console.log('Total agents fetched:', allData.totalCount);
+
         console.log('\n')
         console.log("------------------------------------------------------------------------------------------------")
     } catch (error: any) {

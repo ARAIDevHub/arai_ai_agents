@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
   getCookieFunAgentsPaged,
   getCookieFunAgentByTwitter,
-  getCookieFunAgentByContract
+  getCookieFunAgentByContract,
+  getCookieFunAllAgents
 } from '../api/cookieAPI';
 import JsonView from '@microlink/react-json-view';
 
@@ -15,6 +16,7 @@ const CookieDotFunDataTesting: React.FC = () => {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
 
   const handleGetPaged = async () => {
     try {
@@ -56,6 +58,19 @@ const CookieDotFunDataTesting: React.FC = () => {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGetAllAgents = async () => {
+    try {
+      setLoadingAll(true);
+      setError(null);
+      const data = await getCookieFunAllAgents(interval);
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoadingAll(false);
     }
   };
 
@@ -149,6 +164,21 @@ const CookieDotFunDataTesting: React.FC = () => {
         >
           Get by Contract
         </button>
+      </div>
+
+      {/* All Agents Section */}
+      <div className="mb-6 p-4 bg-slate-800 rounded-lg">
+        <h2 className="text-xl mb-4">Get All Agents</h2>
+        <div className="flex items-center">
+          <button
+            onClick={handleGetAllAgents}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+            disabled={loadingAll}
+          >
+            {loadingAll ? 'Generating...' : 'Get All Agents'}
+          </button>
+          {loadingAll && <span className="ml-2">This may take several seconds...</span>}
+        </div>
       </div>
 
       {/* Results Section */}
