@@ -16,7 +16,7 @@ interface TokenFlowData {
   tokenName: string;
   tokenSymbol: string;
   tokenDescription: string;
-  logo: File | null;
+  image: File | null;
   website: string;
   xLink: string;
   telegram: string;
@@ -70,7 +70,7 @@ const TokenLaunchFlow: React.FC<TokenLaunchFlowProps> = ({ formData, setFormData
     tokenName: '',
     tokenSymbol: '',
     tokenDescription: '',
-    logo: null,
+    image: null,
     website: '',
     xLink: '',
     telegram: '',
