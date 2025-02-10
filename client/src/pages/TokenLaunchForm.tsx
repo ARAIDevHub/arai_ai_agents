@@ -6,10 +6,10 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
-import { createToken } from '../api/agentsAPI';
+import { createToken } from '../api/tokenAPI';
 
 interface WalletRow {
-  id: string;
+  id: string; 
   privateKey: string;
   address: string;
   solBalance: string;

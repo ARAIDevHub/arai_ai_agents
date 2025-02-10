@@ -1,9 +1,10 @@
 {
+    "extends": "./tsconfig.base.json",
     "compilerOptions": {
-      "target": "es2020",
-      "module": "commonjs",
+      "target": "es2022",
+      "module": "es2022",
       "outDir": "./dist",
-      "rootDir": "./src",
+      "rootDir": "./",
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
@@ -15,10 +16,13 @@
       "noUnusedLocals": false,
       "noUnusedParameters": false,
       "noImplicitReturns": true,
-      "noFallthroughCasesInSwitch": true
+      "noFallthroughCasesInSwitch": true,
+      "types": ["node"],
+      "typeRoots": ["./node_modules/@types", "./types"]
     },
     "include": [
-      "src/**/*"
+      "src/**/*",
+      "packages/pumpfun/example/basic/**/*"
     ],
     "exclude": [
       "node_modules",

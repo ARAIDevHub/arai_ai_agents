@@ -1,5 +1,4 @@
 const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
-const BASE_URL_COOKIE_FUN = `${import.meta.env.VITE_API_BASE_URL}/cookie-fun`;
 
 // Function to get all agents
 export async function getAgents() {
@@ -191,80 +190,3 @@ export async function updateSeasons(agentName: string, seasons: any[]) {
   return await response.json();
 }
 
-// PumpFun API
-
-// Update the createToken interface and function
-interface TokenCreationParams {
-  name: string;
-  symbol: string;
-  description: string;
-  unitLimit: number;
-  unitPrice: number;
-  initialBuyAmount: number;
-  website?: string;
-  xLink?: string;
-  telegram?: string;
-  image?: File | null;
-}
-
-export async function createToken(params: TokenCreationParams) {
-  console.group('Token Creation');
-  console.log('Starting token creation with params:', params);
-  
-  try {
-    const formData = new FormData();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        if (key === 'image' && value instanceof File) {
-          formData.append('file', value);
-        } else {
-          formData.append(key, value.toString());
-        }
-      }
-    });
-
-    console.log('Making API request...');
-    const response = await fetch(`${BASE_URL}/create-token`, {
-      method: "POST",
-      body: formData,
-    });
-
-    // Log the raw response for debugging
-    console.log('[agentsAPI] - Raw response:', response);
-    
-    let data;
-    const textResponse = await response.text();
-    console.log('[agentsAPI] - Response text:', textResponse);
-
-    try {
-      data = JSON.parse(textResponse);
-    } catch (parseError) {
-      console.error('[agentsAPI] - JSON parse error:', parseError);
-      throw new Error('Invalid response from server');
-    }
-
-    console.log('[agentsAPI] - Parsed response data:', data);
-
-    if (!response.ok) {
-      throw new Error(data?.message || data?.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    // If we got here, the request was successful
-    return {
-      success: true,
-      data: data.data || data,
-      message: data.message || 'Token created successfully'
-    };
-    
-  } catch (error) {
-    console.error('Error during token creation:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Token creation failed'
-    };
-  } finally {
-    console.groupEnd();
-  }
-}

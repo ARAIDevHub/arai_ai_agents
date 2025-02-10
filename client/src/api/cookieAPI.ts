@@ -1,6 +1,6 @@
 import { CookieFunResponse, PaginationParams } from '../interfaces/cookie.FunInterfaces';
 
-const BASE_URL_COOKIE_FUN = `${import.meta.env.VITE_API_BASE_URL}/cookie-fun`;
+const BASE_URL_COOKIE_FUN = `http://localhost:3001/api/cookie-fun`;
 
 
 // Add these new functions
