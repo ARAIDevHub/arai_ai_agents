@@ -7,6 +7,7 @@
     "blob-polyfill": "^9.0.20240710",
     "bn": "^1.0.5",
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.0.0",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",

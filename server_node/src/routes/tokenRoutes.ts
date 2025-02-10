@@ -5,6 +5,7 @@ import { createTokenWithParams } from '../../packages/pumpfun/example/basic/crea
 import path from 'path';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import CryptoJS from 'crypto-js';
 
 const router = express.Router();
 
@@ -30,16 +31,17 @@ interface TokenCreationResult {
 
 // Token creation endpoints (TypeScript)
 router.post('/create-token', upload.single('file'), async (req, res) => {
-  console.log('POST /api/token/create-token route called');
+  console.log('[tokenRoutes] POST /api/token/create-token route called');
 
   try {
-    console.log('=== Starting Token Creation Process ===');
-    console.log('Received file:', req.file);
-    console.log('Received body:', req.body);
+    console.log('[tokenRoutes] === Starting Token Creation Process ===');
+    console.log('[tokenRoutes] Received file:', req.file);
+    console.log('[tokenRoutes] Received body:', req.body);
 
     const imagePath = req.file ? req.file.path : path.join(__dirname, 'packages/pumpfun/example/basic/random.png');
 
-    const result = await createTokenWithParams({
+    // Prepare the token parameters
+    const tokenParams = {
       name: req.body.name,
       symbol: req.body.symbol,
       description: req.body.description,
@@ -49,8 +51,21 @@ router.post('/create-token', upload.single('file'), async (req, res) => {
       imagePath,
       twitter: req.body.twitter || '',
       telegram: req.body.telegram || '',
-      website: req.body.website || ''
-    }) as TokenCreationResult;
+      website: req.body.website || '',
+      // Ensure salt is handled correctly
+    //   salt: req.body.salt || generateSalt() // Add a function to generate salt if not provided
+    };
+    console.log('[tokenRoutes] Token parameters:', tokenParams);
+
+    const walletRows = req.body.encryptedWalletRows;
+    console.log('[tokenRoutes] Wallet rows:', walletRows);
+
+    // // Encrypt the token parameters
+    // const secretKey = 'your-secret-key'; // Ensure this matches the frontend key
+    // const encryptedWalletRows = CryptoJS.AES.encrypt(JSON.stringify(tokenParams), secretKey).toString();
+
+    // Call createTokenWithParams with the encrypted data
+    const result = await createTokenWithParams(tokenParams, walletRows) as TokenCreationResult;
 
     // Clean up temporary file
     if (req.file) {
@@ -78,10 +93,10 @@ router.post('/create-token', upload.single('file'), async (req, res) => {
     res.json(response);
 
   } catch (error) {
-    console.error('Token creation error:', error);
+    console.error('Error during token creation:', error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      error: error instanceof Error ? error.message : 'Internal Server Error',
       message: 'Token creation failed'
     });
   }

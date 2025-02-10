@@ -57,3 +57,6 @@ data/allAgents.json
 
 # Ignore everything inside the data/ directory
 data/*
+
+# Ignore temp files created by multer
+server_node/temp/

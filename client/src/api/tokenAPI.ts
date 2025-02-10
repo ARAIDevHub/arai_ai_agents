@@ -16,7 +16,7 @@ interface TokenCreationParams {
     image?: File | null;
   }
   
-  export async function createToken(params: TokenCreationParams) {
+  export async function createToken(params: TokenCreationParams, encryptedWalletRows: string) {
     console.group('[tokenAPI] - Token Creation');
     console.log('[tokenAPI] - Starting token creation with params:', params);
     
@@ -32,7 +32,10 @@ interface TokenCreationParams {
           }
         }
       });
-  
+      console.log("[tokenAPI] - Form Data:", formData);
+      formData.append('encryptedWalletRows', encryptedWalletRows);
+      //Full formData:
+      console.log('[tokenAPI] - Full formData:', formData);
       console.log('Making API request...');
       const response = await fetch(`${BASE_URL_TOKENS}/create-token`, {
         method: "POST",

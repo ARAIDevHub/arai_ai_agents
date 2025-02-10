@@ -7,6 +7,7 @@ import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-r
 import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
+import CryptoJS from 'crypto-js';
 
 interface WalletRow {
   id: string; 
@@ -75,9 +76,19 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     });
   }, [connected, publicKey, signTransaction, signAllTransactions]);
 
+  const encryptData = (data: any) => {
+    console.log('Encrypting data...');
+    console.log('Data:', data);
+    const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), import.meta.env.VITE_SECRET_KEY || '').toString();
+    console.log('Ciphertext:', ciphertext);
+    return ciphertext;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('handleSubmit function called');
+    const secretKey = import.meta.env.VITE_SECRET_KEY || '';
+    console.log('Secret key:', secretKey);
 
     if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
@@ -100,8 +111,13 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         image: formData.image
       };
 
-      console.log('Calling createToken API endpoint with params:', tokenParams);
-      const response = await createToken(tokenParams);
+      // Encrypt the tokenParams before sending
+      // Encrypt our wallet rows
+      const walletRows = formData.walletRows
+      console.log('[tokenLaunchForm] Wallet rows:', walletRows);
+      const encryptedWalletRows = encryptData(walletRows);
+      console.log('[tokenLaunchForm] Encrypted wallet rows:', encryptedWalletRows);
+      const response = await createToken(tokenParams, encryptedWalletRows);
       console.log('Token creation API response:', response);
 
       if (response.success) {
@@ -126,10 +142,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       alert(`Error creating token: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
     }
   };
-// Log form data changes
-useEffect(() => {
-  console.log('Form data updated:', formData);
-}, [formData]);
+
+  // Log form data changes
+  useEffect(() => {
+    console.log('Form data updated:', formData);
+  }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
