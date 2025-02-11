@@ -9,6 +9,7 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
 import CryptoJS from 'crypto-js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import bs58 from 'bs58'; // Import bs58 for base58 decoding
 
 const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump"
 
@@ -68,6 +69,7 @@ interface TokenMetadata {
 }
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
+  const [araiTokenBalance, setAraiTokenBalance] = useState<number | null>(null);
 
   const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL || "";
   console.log('[tokenLaunchForm] Helius RPC URL:', heliusRpcUrl);
@@ -108,11 +110,14 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               const tokenAccount = tokenAccounts.value[0];
               const totalARAITokens = tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
               console.log('Total ARAI tokens:', totalARAITokens);
+              setAraiTokenBalance(totalARAITokens);
             } else {
               console.warn('No token accounts found for the specified mint address.');
+              setAraiTokenBalance(null);
             }
           } catch (error) {
             console.error('Error fetching token account balance:', error);
+            setAraiTokenBalance(null);
           }
         }
       }
@@ -245,6 +250,10 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }
   };
 
+  const formatNumberWithCommas = (number: number): string => {
+    return new Intl.NumberFormat('en-US').format(number);
+  };
+
   // Update the WalletConnectButton component
   const WalletConnectButton = () => {
     const { connected, connecting, disconnect } = useWallet();
@@ -280,6 +289,14 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <span className="w-2 h-2 rounded-full bg-red-400"></span>
               Disconnect
             </button>
+          )}
+
+          {/* Display ARAI token balance to the right of the disconnect button */}
+          {connected && araiTokenBalance !== null && (
+            <div className="ml-4 px-4 py-2 rounded-lg bg-slate-900/80 border border-orange-500/30 
+                         text-white font-semibold flex items-center justify-center">
+              ARAI Balance: {formatNumberWithCommas(araiTokenBalance)}
+            </div>
           )}
         </div>
       </div>
@@ -321,6 +338,42 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
   const handleFormChange = (e: React.FormEvent<HTMLFormElement>) => {
     // Handle form-level changes if needed
+  };
+
+  const handlePrivateKeyChange = async (e: React.ChangeEvent<HTMLInputElement>, rowId: string) => {
+    const privateKey = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      walletRows: prev.walletRows.map(row =>
+        row.id === rowId ? { ...row, privateKey } : row
+      )
+    }));
+
+    if (privateKey) {
+      console.log('[tokenLaunchForm] Private key:', privateKey);
+      try {
+        // Decode the base58 private key
+        const secretKey = bs58.decode(privateKey);
+        const keypair = Keypair.fromSecretKey(secretKey);
+        const publicKey = keypair.publicKey.toString();
+        console.log('[tokenLaunchForm] Derived public key:', publicKey);
+
+        const connection = new Connection(heliusRpcUrl);
+        const balance = await connection.getBalance(keypair.publicKey);
+        const solBalance = balance / LAMPORTS_PER_SOL;
+        console.log('[tokenLaunchForm] SOL balance:', solBalance);
+
+        setFormData(prev => ({
+          ...prev,
+          walletRows: prev.walletRows.map(row =>
+            row.id === rowId ? { ...row, address: publicKey, solBalance: solBalance.toFixed(2) } : row
+          )
+        }));
+      } catch (error) {
+        console.error('Error processing private key:', error);
+        alert('Invalid private key. Please check and try again.');
+      }
+    }
   };
 
   return (
@@ -579,16 +632,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                                  text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                         placeholder="Enter Private Key"
                         value={row.privateKey}
-                        onChange={(e) => {
-                          const updatedRows = formData.walletRows.map(r =>
-                            r.id === row.id ? { ...r, privateKey: e.target.value } : r
-                          );
-                          setFormData(prev => ({ ...prev, walletRows: updatedRows }));
-                        }}
+                        onChange={(e) => handlePrivateKeyChange(e, row.id)}
                       />
                     </td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
+                    <td className="p-2 border-b border-orange-500/30 text-gray-400">{row.address}</td>
+                    <td className="p-2 border-b border-orange-500/30 text-gray-400">{row.solBalance}</td>
                     <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
                     <td className="p-2 border-b border-orange-500/30">
                       <div className="flex items-center gap-2">
