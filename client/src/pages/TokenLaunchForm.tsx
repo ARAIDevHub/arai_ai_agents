@@ -9,7 +9,7 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
 import CryptoJS from 'crypto-js';
 import bs58 from 'bs58'; // Import bs58 for base58 decoding
-import WalletRow from '../components/WalletRow';
+import WalletRow from '../components/tokenCreationComponents/WalletRow';
 
 const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump"
 
@@ -532,9 +532,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     addWalletRow={addWalletRow}
                     isLastRow={true}
                     canRemoveRow={false}
-
                   />
-           )}
+                )}
               </tbody>
             </table>
           </div>
@@ -657,7 +656,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 </tr>
               </thead>
               <tbody>
-                {formData.walletRows.map((row, index) => (
+                {formData.walletRows.slice(1).map((row, index) => (
                   <WalletRow
                     key={row.id}
                     row={row}
@@ -665,8 +664,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     handleBuyAmountChange={handleBuyAmountChange}
                     removeWalletRow={removeWalletRow}
                     addWalletRow={addWalletRow}
-                    isLastRow={index === formData.walletRows.length - 1}
-                    canRemoveRow={formData.walletRows.length > 1}
+                    isLastRow={index === formData.walletRows.length - 2}
+                    canRemoveRow={formData.walletRows.length > 2}
                   />
                 ))}
               </tbody>
