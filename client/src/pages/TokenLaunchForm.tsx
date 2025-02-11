@@ -8,6 +8,10 @@ import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transa
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
 import CryptoJS from 'crypto-js';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+
+const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump"
+
 
 interface WalletRow {
   id: string; 
@@ -64,6 +68,9 @@ interface TokenMetadata {
 }
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
+
+  const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL || "";
+  console.log('[tokenLaunchForm] Helius RPC URL:', heliusRpcUrl);
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
 
   // Add logging for wallet connection state changes
@@ -75,6 +82,45 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       hasSignAllTransactions: !!signAllTransactions
     });
   }, [connected, publicKey, signTransaction, signAllTransactions]);
+
+  // Create a new connection to the Helius RPC URL
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (heliusRpcUrl) {
+        const connection = new Connection(heliusRpcUrl);
+        console.log('[tokenLaunchForm] Helius RPC connection:', connection);
+        if (connected && publicKey && signTransaction) {
+          console.log('[tokenLaunchForm] Wallet is connected and ready to sign transactions');
+          // Check the current wallet's balance of ARAI tokens
+          const balance = await connection.getBalance(publicKey);
+          console.log('[tokenLaunchForm] Current wallet balance:', balance);
+          // Convert the balance to SOL
+          const solBalance = balance / LAMPORTS_PER_SOL;
+          console.log('[tokenLaunchForm] Current wallet balance in SOL:', solBalance);
+
+          try {
+            const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+              publicKey,
+              { mint: new PublicKey(araiTokenAddress) }
+            );
+
+            if (tokenAccounts.value.length > 0) {
+              const tokenAccount = tokenAccounts.value[0];
+              const totalARAITokens = tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
+              console.log('Total ARAI tokens:', totalARAITokens);
+            } else {
+              console.warn('No token accounts found for the specified mint address.');
+            }
+          } catch (error) {
+            console.error('Error fetching token account balance:', error);
+          }
+        }
+      }
+    };
+
+    fetchBalance();
+  }, [heliusRpcUrl, connected, publicKey, signTransaction]);
+
 
   const encryptData = (data: any) => {
     console.log('Encrypting data...');
@@ -88,7 +134,9 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     e.preventDefault();
     console.log('handleSubmit function called');
     const secretKey = import.meta.env.VITE_SECRET_KEY || '';
+
     console.log('Secret key:', secretKey);
+
 
     if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
