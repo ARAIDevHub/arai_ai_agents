@@ -14,6 +14,7 @@ interface WalletRowProps {
   addWalletRow: () => void;
   isLastRow: boolean;
   canRemoveRow: boolean;
+  showButtons: boolean;
 }
 
 const WalletRow: React.FC<WalletRowProps> = ({
@@ -23,7 +24,8 @@ const WalletRow: React.FC<WalletRowProps> = ({
   removeWalletRow,
   addWalletRow,
   isLastRow,
-  canRemoveRow
+  canRemoveRow,
+  showButtons
 }) => {
   return (
     <tr key={row.id}>
@@ -39,25 +41,21 @@ const WalletRow: React.FC<WalletRowProps> = ({
       </td>
       <td className="p-2 border-b border-orange-500/30 text-gray-400">{row.address}</td>
       <td className="p-2 border-b border-orange-500/30 text-gray-400">{row.solBalance}</td>
-      <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
       <td className="p-2 border-b border-orange-500/30">
         <div className="flex items-center gap-2">
           <input
             type="text"
             className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
                      text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            placeholder="Enter Purchase Amount"
+            placeholder="Enter Buy Amount in SOL"
             value={row.buyAmount}
             onChange={(e) => handleBuyAmountChange(e, row.id)}
           />
-          <button className="px-3 py-2 bg-slate-800 text-cyan-200 rounded-md hover:bg-slate-700">
-            MAX
-          </button>
         </div>
       </td>
       <td className="p-2 border-b border-orange-500/30">
         <div className="flex gap-1">
-          {canRemoveRow && (
+          {showButtons && canRemoveRow && (
             <button 
               className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
               onClick={() => removeWalletRow(row.id)}
@@ -65,7 +63,7 @@ const WalletRow: React.FC<WalletRowProps> = ({
               −
             </button>
           )}
-          {isLastRow && (
+          {showButtons && isLastRow && (
             <button 
               className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
               onClick={addWalletRow}

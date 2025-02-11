@@ -497,7 +497,9 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         </div>
 
         <div>
-
+        <label className="block text-lg text-gray-100 mb-2 pt-4">
+            Enter your Developer Wallet Info
+          </label>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
@@ -532,41 +534,16 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     addWalletRow={addWalletRow}
                     isLastRow={true}
                     canRemoveRow={false}
+                    showButtons={false}
                   />
-                )}
+           )}
               </tbody>
             </table>
           </div>
-          <label className="block text-lg text-gray-100 mb-2 pt-4">
-            Enter the amount of SOL you want to buy
-          </label>
+
 
           
-          <div className="relative">
-            <input
-              type="text"
-              name="solAmount"
-              className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                       text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-              placeholder="Minimum 0.00000001 SOL/Enter total"
-              value={formData.solAmount}
-              onChange={(e) => {
-                // Only allow numbers and decimal point
-                const value = e.target.value.replace(/[^0-9.]/g, '');
-                // Prevent multiple decimal points
-                const decimalCount = (value.match(/\./g) || []).length;
-                if (decimalCount <= 1) {
-                  setFormData(prev => ({
-                    ...prev,
-                    solAmount: value
-                  }));
-                }
-              }}
-              pattern="[0-9]*[.]?[0-9]*"
-              inputMode="decimal"
-            />
-            <span className="absolute right-3 top-2 text-gray-400">SOL</span>
-          </div>
+
         </div>
 
         {/* Social Links Section */}
@@ -624,7 +601,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
            {/* Wallet Parameters Section */}
            <div className="border-t border-orange-500/20 pt-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-100">Other Wallet Buy Parameters Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-100">Enter Additional Jito Bundle Wallets</h3>
             <button className="text-orange-500 hover:text-orange-600 flex items-center gap-1">
               <span>↗</span> Batch Import Private Keys
             </button>
@@ -666,6 +643,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     addWalletRow={addWalletRow}
                     isLastRow={index === formData.walletRows.length - 2}
                     canRemoveRow={formData.walletRows.length > 2}
+                    showButtons={true}
                   />
                 ))}
               </tbody>
