@@ -8,8 +8,8 @@ import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transa
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
 import CryptoJS from 'crypto-js';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import bs58 from 'bs58'; // Import bs58 for base58 decoding
+import WalletRow from '../components/WalletRow';
 
 const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump"
 
@@ -376,10 +376,18 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }
   };
 
+  const handleBuyAmountChange = (e: React.ChangeEvent<HTMLInputElement>, rowId: string) => {
+    const buyAmount = e.target.value;
+    const updatedRows = formData.walletRows.map(row =>
+      row.id === rowId ? { ...row, buyAmount } : row
+    );
+    setFormData(prev => ({ ...prev, walletRows: updatedRows }));
+  };
+
   return (
     <form 
       onSubmit={handleSubmit} 
-      onChange={handleFormChange}  // Use the new handler
+      onChange={handleFormChange}
       className="w-full p-6 overflow-visible"
     >
       <WalletConnectButton />
@@ -489,9 +497,52 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         </div>
 
         <div>
-          <label className="block text-sm text-gray-100 mb-2">
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-red-500">*</span> 
+                    <span className="text-gray-100">Private Key</span>
+                  </th>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-gray-100">Address</span>
+                  </th>
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-gray-100">SOL Balance</span>
+                    <button className="ml-1 text-orange-400 hover:text-orange-300">⟳</button>
+                  </th>
+
+                  <th className="text-left p-2 border-b border-orange-500/30">
+                    <span className="text-red-500">*</span>
+                    <span className="text-gray-100">Buy Amount in SOL</span>
+                  </th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {formData.walletRows[0] && (
+                  <WalletRow
+                    key={formData.walletRows[0].id}
+                    row={formData.walletRows[0]}
+                    handlePrivateKeyChange={handlePrivateKeyChange}
+                    handleBuyAmountChange={handleBuyAmountChange}
+                    removeWalletRow={removeWalletRow}
+                    addWalletRow={addWalletRow}
+                    isLastRow={true}
+                    canRemoveRow={false}
+
+                  />
+           )}
+              </tbody>
+            </table>
+          </div>
+          <label className="block text-lg text-gray-100 mb-2 pt-4">
             Enter the amount of SOL you want to buy
           </label>
+
+          
           <div className="relative">
             <input
               type="text"
@@ -516,21 +567,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               inputMode="decimal"
             />
             <span className="absolute right-3 top-2 text-gray-400">SOL</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 bg-slate-900/80 p-4 rounded-md border border-orange-500/30">
-          <div>
-            <p className="text-sm text-gray-100">Estimated Receive</p>
-            <p className="font-medium text-gray-100">-- Token</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-100">Estimated Cost</p>
-            <p className="font-medium text-gray-100">-- SOL</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-100">Current Balance</p>
-            <p className="font-medium text-gray-100">-- SOL</p>
           </div>
         </div>
 
@@ -612,9 +648,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     <span className="text-gray-100">SOL Balance</span>
                     <button className="ml-1 text-orange-400 hover:text-orange-300">⟳</button>
                   </th>
-                  <th className="text-left p-2 border-b border-orange-500/30">
-                    <span className="text-gray-100">Est. Volume</span>
-                  </th>
+
                   <th className="text-left p-2 border-b border-orange-500/30">
                     <span className="text-red-500">*</span>
                     <span className="text-gray-100">Buy Amount in SOL</span>
@@ -623,62 +657,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 </tr>
               </thead>
               <tbody>
-                {formData.walletRows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="p-2 border-b border-orange-500/30">
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                                 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                        placeholder="Enter Private Key"
-                        value={row.privateKey}
-                        onChange={(e) => handlePrivateKeyChange(e, row.id)}
-                      />
-                    </td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">{row.address}</td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">{row.solBalance}</td>
-                    <td className="p-2 border-b border-orange-500/30 text-gray-400">-</td>
-                    <td className="p-2 border-b border-orange-500/30">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 
-                                   text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                          placeholder="Enter Purchase Amount"
-                          value={row.buyAmount}
-                          onChange={(e) => {
-                            const updatedRows = formData.walletRows.map(r =>
-                              r.id === row.id ? { ...r, buyAmount: e.target.value } : r
-                            );
-                            setFormData(prev => ({ ...prev, walletRows: updatedRows }));
-                          }}
-                        />
-                        <button className="px-3 py-2 bg-slate-800 text-cyan-200 rounded-md hover:bg-slate-700">
-                          MAX
-                        </button>
-                      </div>
-                    </td>
-                    <td className="p-2 border-b border-orange-500/30">
-                      <div className="flex gap-1">
-                        {formData.walletRows.length > 1 && (
-                          <button 
-                            className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
-                            onClick={() => removeWalletRow(row.id)}
-                          >
-                            −
-                          </button>
-                        )}
-                        {row.id === formData.walletRows[formData.walletRows.length - 1].id && (
-                          <button 
-                            className="w-6 h-6 flex items-center justify-center text-orange-400 hover:text-orange-300"
-                            onClick={addWalletRow}
-                          >
-                            +
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                {formData.walletRows.map((row, index) => (
+                  <WalletRow
+                    key={row.id}
+                    row={row}
+                    handlePrivateKeyChange={handlePrivateKeyChange}
+                    handleBuyAmountChange={handleBuyAmountChange}
+                    removeWalletRow={removeWalletRow}
+                    addWalletRow={addWalletRow}
+                    isLastRow={index === formData.walletRows.length - 1}
+                    canRemoveRow={formData.walletRows.length > 1}
+                  />
                 ))}
               </tbody>
             </table>
@@ -686,7 +675,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         </div>
 
         {/* Advanced Options Section */}
-        <div className="border-t border-orange-500/20 pt-6">
+        {/* <div className="border-t border-orange-500/20 pt-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-gray-100 font-medium">Advanced Options</span>
             <button 
@@ -767,7 +756,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
 
         {/* Submit Button */}

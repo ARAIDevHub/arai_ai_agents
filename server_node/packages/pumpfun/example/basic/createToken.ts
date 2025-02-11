@@ -43,8 +43,12 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   }
   console.log("🚀 [createToken.ts] Secret key:", secretKey);
   // Decrypt the encryptedWalletRows
-  const decryptedParams = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
-  console.log("🚀 [createToken.ts] Decrypted params:", decryptedParams);
+  const decryptedWalletRows = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
+  console.log("🚀 [createToken.ts] Decrypted wallet rows:", decryptedWalletRows);
+
+  // The first wallet is the test account
+  const testAccount = Keypair.fromSecretKey(new Uint8Array(decryptedWalletRows[0].privateKey.split(',').map(Number)));
+  console.log("🚀 [createToken.ts] Test account:", testAccount);
   
   // Load environment variables from root .env file
   dotenv.config({ path: path.resolve(__dirname, "../../../../../.env") });
@@ -64,8 +68,8 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 
   // Generate or load existing keypairs
   console.log("🔑 [createToken.ts] Setting up test account and mint...");
-  const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
-  console.log("[createToken.ts] The test account is", testAccount)
+  // const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
+  // console.log("[createToken.ts] The test account is", testAccount)
   const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
   console.log("[createToken.ts] The mint is", mint)
   
