@@ -60,3 +60,6 @@ data/*
 
 # Ignore temp files created by multer
 server_node/temp/
+
+# Add this line to ignore the .keys directory
+server_node/packages/pumpfun/example/basic/.keys/

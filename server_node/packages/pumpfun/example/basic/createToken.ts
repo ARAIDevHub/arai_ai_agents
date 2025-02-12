@@ -12,6 +12,8 @@ import {
   printSPLBalance,
 } from "../util";
 import CryptoJS from 'crypto-js';
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
+
 
 // Directory where keypair files will be stored
 const KEYS_FOLDER = __dirname + "/.keys";
@@ -43,13 +45,29 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   }
   console.log("🚀 [createToken.ts] Secret key:", secretKey);
   // Decrypt the encryptedWalletRows
-  const decryptedWalletRows = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
-  console.log("🚀 [createToken.ts] Decrypted wallet rows:", decryptedWalletRows);
+  const decryptedWalletRowsString = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
+  console.log("🚀 [createToken.ts] Decrypted wallet rows string:", decryptedWalletRowsString);
 
-  // The first wallet is the test account
-  const testAccount = Keypair.fromSecretKey(new Uint8Array(decryptedWalletRows[0].privateKey.split(',').map(Number)));
-  console.log("🚀 [createToken.ts] Test account:", testAccount);
-  
+  let decryptedWalletRows;
+  try {
+    decryptedWalletRows = JSON.parse(decryptedWalletRowsString);
+    console.log("🚀 [createToken.ts] Parsed decrypted wallet rows:", decryptedWalletRows);
+  } catch (error: any) {
+    throw new Error("Failed to parse decrypted wallet rows: " + error.message);
+  }
+
+  if (!Array.isArray(decryptedWalletRows) || decryptedWalletRows.length === 0 || !decryptedWalletRows[0].privateKey) {
+    throw new Error("Decrypted wallet rows are not in the expected format or are empty");
+  }
+
+  // Create a dev wallet from the first row
+  const devWallet = Keypair.fromSecretKey(bs58.decode(decryptedWalletRows[0].privateKey));
+  console.log("🚀 [createToken.ts] Dev wallet:", devWallet);
+
+  const buyAmount = BigInt(decryptedWalletRows[0].buyAmount * LAMPORTS_PER_SOL);
+  console.log("🔍 [createToken.ts] Calculating buy amount...");
+  console.log(`Buy amount: ${buyAmount} lamports`);
+
   // Load environment variables from root .env file
   dotenv.config({ path: path.resolve(__dirname, "../../../../../.env") });
 
@@ -68,9 +86,11 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 
   // Generate or load existing keypairs
   console.log("🔑 [createToken.ts] Setting up test account and mint...");
-  // const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
-  // console.log("[createToken.ts] The test account is", testAccount)
-  const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
+  const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
+  console.log("[createToken.ts] The test account is", testAccount)
+  // const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
+  const mint = getOrCreateKeypair(KEYS_FOLDER, ""); // Create a new mint paire each time
+
   console.log("[createToken.ts] The mint is", mint)
   
   
@@ -81,12 +101,12 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 
   // Verify test account has sufficient SOL balance
   console.log("💰 [createToken.ts] Checking SOL balance...");
-  let currentSolBalance = await connection.getBalance(testAccount.publicKey);
+  let currentSolBalance = await connection.getBalance(devWallet.publicKey);
   console.log(`Current SOL balance: ${currentSolBalance / LAMPORTS_PER_SOL} SOL`);
   const MINIMUM_SOL_BALANCE = 0.01 * LAMPORTS_PER_SOL; // 0.05 SOL
   if (currentSolBalance < MINIMUM_SOL_BALANCE) {
     throw new Error(
-      `Insufficient SOL balance. Please send at least 0.01 SOL to: ${testAccount.publicKey.toBase58()}`
+      `Insufficient SOL balance. Please send at least 0.01 SOL to: ${devWallet.publicKey.toBase58()}`
     );
   }
 
@@ -109,13 +129,13 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
     console.log("🔍 [createToken.ts] Creating token metadata...");
     console.log(`Token metadata: ${JSON.stringify(tokenMetadata, null, 2)}`);
     // Calculate buy amount in lamports
-    const buyAmount = BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL);
-    console.log("🔍 [createToken.ts] Calculating buy amount...");
-    console.log(`Buy amount: ${buyAmount} lamports`);
+    // const buyAmount = BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL);
+    // console.log("🔍 [createToken.ts] Calculating buy amount...");
+    // console.log(`Buy amount: ${buyAmount} lamports`);
 
     // Create bonding curve with passed parameters
     let createResults = await sdk.createAndBuy(
-      testAccount,
+      devWallet,
       mint,
       tokenMetadata,
       buyAmount,
@@ -142,7 +162,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   } else {
     console.log("💰 [createToken.ts]  Executing buy transaction...");
     let buyResults = await sdk.buy(
-      testAccount,
+      devWallet,
       mint.publicKey,
       BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL),
       SLIPPAGE_BASIS_POINTS,
@@ -155,7 +175,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
     if (buyResults.success) {
       console.log("✅ Buy transaction successful!");
       console.log("Buy Results:", buyResults);
-      await printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
+      await printSPLBalance(connection, mint.publicKey, devWallet.publicKey);
       console.log("Bonding curve after buy", await sdk.getBondingCurveAccount(mint.publicKey));
       
       // Return the buy results

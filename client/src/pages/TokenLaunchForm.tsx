@@ -154,7 +154,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       const tokenParams = {
         name: formData.tokenName,
         symbol: formData.tokenSymbol,
-        description: `Created with ARAI AI Agents- ${formData.tokenDescription}`,
+        description: `${formData.tokenDescription}`,
         unitPrice: parseFloat(formData.solAmount) * LAMPORTS_PER_SOL,
         unitLimit: 1000000,
         initialBuyAmount: parseFloat(formData.solAmount),
