@@ -396,7 +396,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         {/* Header Section */}
         <div className="flex items-center gap-2 mb-4">
           <div className="w-6 h-6 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600" />
-          <h2 className="text-2xl font-bold text-white">Pump Launch and Buy</h2>
+          <h2 className="text-2xl font-bold text-white">Pump Launch and Buy - Must be Holding 100K ARAI</h2>
         </div>
 
         {/* Description */}
@@ -739,9 +739,12 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         {/* Submit Button */}
         <button 
           type="submit"
-          className="w-full bg-gradient-to-r from-cyan-600 to-orange-600 
-                    hover:from-cyan-700 hover:to-orange-700 text-white py-3 rounded-md 
-                    transition-colors"
+          className={`w-full py-3 rounded-md transition-colors ${
+            araiTokenBalance !== null && araiTokenBalance >= 100000
+              ? 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 text-white'
+              : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+          }`}
+          disabled={araiTokenBalance === null || araiTokenBalance < 100000}
         >
           Launch Pumpfun Token
         </button>

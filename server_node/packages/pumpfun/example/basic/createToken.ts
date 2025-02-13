@@ -133,6 +133,14 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
     // console.log("🔍 [createToken.ts] Calculating buy amount...");
     // console.log(`Buy amount: ${buyAmount} lamports`);
 
+    console.log("Creating the buy with the following parameters:")
+    console.log("Dev wallet:", devWallet)
+    console.log("Mint:", mint)
+    console.log("Token metadata:", tokenMetadata)
+    console.log("Buy amount:", buyAmount)
+    console.log("Slippage basis points:", SLIPPAGE_BASIS_POINTS)
+    
+
     // Create bonding curve with passed parameters
     let createResults = await sdk.createAndBuy(
       devWallet,
