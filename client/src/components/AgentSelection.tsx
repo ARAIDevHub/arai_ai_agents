@@ -4,13 +4,14 @@ import useCharacters from '../hooks/useCharacters';
 interface AgentSelectionProps {
   selectedCharacterIndex: number;
   handleSelectAgent: (index: number) => void;
+  className?: string;
 }
 
-const AgentSelection: React.FC<AgentSelectionProps> = ({ selectedCharacterIndex, handleSelectAgent }) => {
+const AgentSelection: React.FC<AgentSelectionProps> = ({ selectedCharacterIndex, handleSelectAgent, className }) => {
   const { characters } = useCharacters();
 
   return (
-    <div className="flex items-center">
+    <div className={`flex items-center ${className || ''}`}>
       <label className="text-lg font-semibold text-white mr-2">
         Select Agent:
       </label>

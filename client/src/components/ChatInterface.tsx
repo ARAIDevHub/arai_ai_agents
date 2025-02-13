@@ -53,13 +53,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ selectedAgent, chatHistor
     
     setIsLoading(true);
     try {
-      const agentName = selectedAgent.agent.agent_details.name;
-      const masterFilePath = selectedAgent.agent.master_file_path || 
-        `configs/${agentName.replace(" ", "_")}/${agentName.replace(" ", "_")}_master.json`;
+      const agentName = selectedAgent?.agent?.agent_details?.name;
+      const masterFilePath = selectedAgent?.agent?.master_file_path || 
+        `configs/${agentName?.replace(" ", "_")}/${agentName?.replace(" ", "_")}_master.json`;
 
       const response = await sendChatMessage(
         masterFilePath,
-        userMessage.message,
+        userMessage?.message || '',
         chatHistory
       );
       
