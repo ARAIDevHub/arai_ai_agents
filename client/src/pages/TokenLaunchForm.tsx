@@ -378,7 +378,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               Token image
               <span className="text-red-500 ml-1">*</span>
             </label>
-            <div className="flex gap-4">
+            <div className="flex gap-4 justify-center">
               {/* Agent Image Preview */}
               {agentImage && (
                 <div className="w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
@@ -409,7 +409,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 <span className="text-4xl text-orange-400">+</span>
               </div>
             </div>
-            <p className="text-gray-100 mb-1">Click to Upload</p>
+            <p className="text-gray-100 mb-1">Select Agent Image or Click to Upload</p>
             <p className="text-gray-400">Supported formats: PNG/GIF/JPG/WEBP and JPEG</p>
             <p className="text-gray-400">Recommended size: 1000×1000 pixels</p>
             <p className="text-gray-400 mt-4 text-center">
