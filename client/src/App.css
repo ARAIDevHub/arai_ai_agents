@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   text-align: center;
 }
 
@@ -80,3 +81,4 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(128, 90, 213, 0.5);
 }
+
