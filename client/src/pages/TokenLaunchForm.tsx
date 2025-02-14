@@ -26,6 +26,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   const [agentImage, setAgentImage] = useState<string | null>(null); // State for agent's image
   const { dispatch } = useAgent(); // Use the dispatch function from the context
   const [selectedImage, setSelectedImage] = useState<'agent' | 'uploaded' | null>(null); // Track selected image
+  const [tokenInfo, setTokenInfo] = useState<{
+    mintAddress: string;
+    url: string;
+    txSignature: string;
+  } | null>(null);
 
   const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL || "";
   console.log('[tokenLaunchForm] Helius RPC URL:', heliusRpcUrl);
@@ -134,6 +139,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         const url = response.data?.url || 'N/A';
         const txSignature = response.data?.transaction?.signature || 'N/A';
         
+        setTokenInfo({ mintAddress, url, txSignature });
+
         alert(
           `Token operation successful!\n\n` +
           `Mint Address: ${mintAddress}\n` +
@@ -725,6 +732,17 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
           Launch Pumpfun Token
         </button>
       </div>
+
+      {/* Conditionally render the token info div */}
+      {tokenInfo && (
+        <div className="token-info">
+          <h3>Token Creation Successful!</h3>
+          <p><strong>Mint Address:</strong> {tokenInfo.mintAddress}</p>
+          <p><strong>Transaction:</strong> {tokenInfo.txSignature}</p>
+          <p><strong>View Token:</strong> <a href={tokenInfo.url} target="_blank" rel="noopener noreferrer">{tokenInfo.url}</a></p>
+          <p><strong>View Transaction:</strong> <a href={`https://solscan.io/tx/${tokenInfo.txSignature}`} target="_blank" rel="noopener noreferrer">View on Solscan</a></p>
+        </div>
+      )}
     </form>
   );
 };
