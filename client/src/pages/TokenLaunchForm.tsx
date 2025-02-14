@@ -25,6 +25,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   const { characters } = useCharacters(); // Use the hook to get characters
   const [agentImage, setAgentImage] = useState<string | null>(null); // State for agent's image
   const { dispatch } = useAgent(); // Use the dispatch function from the context
+  const [selectedImage, setSelectedImage] = useState<'agent' | 'uploaded' | null>(null); // Track selected image
 
   const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL || "";
   console.log('[tokenLaunchForm] Helius RPC URL:', heliusRpcUrl);
@@ -180,46 +181,29 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }
   };
 
-  const handleImageSelect = async (url: string) => {
+  const handleImageSelect = (url: string) => {
     try {
       console.log('Starting image selection process for URL:', url);
 
-      // Validate the URL
-      if (!url || !url.startsWith('http')) {
-        throw new Error('Invalid URL');
+      // Check if the image is already set as a URL
+      if (typeof formData.image === 'string' && formData.image === url) {
+        console.log('Image is already set as URL, no need to fetch again');
+        setSelectedImage('agent');
+        setAgentImage(url);
+        return;
       }
-      console.log('URL is valid');
 
-      // Fetch the image
-      const response = await fetch(url);
-      console.log('Fetch response status:', response.status);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch image');
-      }
-      console.log('Image fetched successfully');
-
-      // Convert response to Blob
-      const blob = await response.blob();
-      console.log('Blob created from response:', blob);
-
-      // Create a File from the Blob
-      const fileName = url.split('/').pop() || 'downloaded_image.jpg';
-      const file = new File([blob], fileName, { type: blob.type, lastModified: new Date().getTime() });
-      console.log('File created from Blob:', file);
-
-      // Update form data with the File object
+      // If the image is not set or is a different file, update the form data with the URL
       setFormData(prev => ({
         ...prev,
-        image: file
+        image: url
       }));
-      console.log('Form data updated with File object');
-
+      setSelectedImage('agent');
       setAgentImage(url);
-      console.log('Agent image URL set:', url);
+      console.log('Form data updated with URL:', url);
     } catch (error) {
       console.error('Error during image selection:', error);
-      alert('Failed to download and set the image. Please try again.');
+      alert('Failed to set the image. Please try again.');
     }
   };
 
@@ -245,6 +229,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         ...prev,
         image: file
       }));
+      setSelectedImage('uploaded');
 
       // Show preview
       const reader = new FileReader();
@@ -440,7 +425,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     src={agentImage}
                   />
-                  {typeof formData.image === 'string' && formData.image === agentImage && (
+                  {selectedImage === 'agent' && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
                       <CheckCircle className="w-8 h-8 text-white" />
                     </div>
@@ -462,6 +447,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     src={URL.createObjectURL(formData.image)}
                     style={{ display: 'block' }}
                   />
+                )}
+                {selectedImage === 'uploaded' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
                 )}
                 <span className="text-4xl text-orange-400">+</span>
               </div>
