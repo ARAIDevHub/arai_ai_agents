@@ -35,10 +35,11 @@ router.post('/create-token', upload.single('file'), async (req, res) => {
 
   try {
     console.log('[tokenRoutes] === Starting Token Creation Process ===');
+    console.log("🔍 [tokenRoutes] Received file:", req);
     console.log('[tokenRoutes] Received file:', req.file);
     console.log('[tokenRoutes] Received body:', req.body);
 
-    const imagePath = req.file ? req.file.path : path.join(__dirname, 'packages/pumpfun/example/basic/random.png');
+    const imagePath = req.file ? req.file.path : req.body.image;
 
     // Prepare the token parameters
     const tokenParams = {

@@ -13,7 +13,7 @@ import {
 } from "../util";
 import CryptoJS from 'crypto-js';
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-
+import fetch from 'node-fetch';
 
 // Directory where keypair files will be stored
 const KEYS_FOLDER = __dirname + "/.keys";
@@ -34,16 +34,31 @@ interface TokenCreationParams {
   website?: string;
 }
 
+// Function to download image from URL and save it locally
+async function downloadImage(url: string, outputPath: string): Promise<void> {
+  console.log(`🔍 [downloadImage] Fetching image from URL: ${url}`);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image from URL: ${url}`);
+  }
+  console.log(`✅ [downloadImage] Image fetched successfully from URL: ${url}`);
+  const buffer = await response.buffer();
+  fs.writeFileSync(outputPath, buffer);
+  console.log(`📥 [downloadImage] Image downloaded and saved to ${outputPath}`);
+}
+
 // Modify the main function to accept parameters
 export async function createTokenWithParams(params: TokenCreationParams, encryptedWalletRows: string) {
   console.log("🚀 [createToken.ts] Starting PumpFun token creation with params:", params);
   console.log("🚀 [createToken.ts] Starting PumpFun token creation with encryptedWalletRows:", encryptedWalletRows);
+
   // Get the secret key from the environment variables
   const secretKey = process.env.SECRET_KEY;
   if (!secretKey) {
     throw new Error("Secret key is not set");
   }
   console.log("🚀 [createToken.ts] Secret key:", secretKey);
+
   // Decrypt the encryptedWalletRows
   const decryptedWalletRowsString = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
   console.log("🚀 [createToken.ts] Decrypted wallet rows string:", decryptedWalletRowsString);
@@ -93,8 +108,6 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 
   console.log("[createToken.ts] The mint is", mint)
   
-  
-
   // Initialize PumpFun SDK
   console.log("🛠 [createToken.ts] Initializing PumpFun SDK...");
   let sdk = new PumpFunSDK(provider);
@@ -114,8 +127,25 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   let boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
   console.log("🔍 [createToken.ts] Checking for existing bonding curve...");
   console.log(`Bounding curve account: ${boundingCurveAccount ? "exists" : "does not exist"}`);
+
+  let imagePath = params.imagePath;
+  if (imagePath && imagePath.startsWith('http')) {
+    const outputPath = path.join(__dirname, 'downloaded_image.jpg');
+    console.log(`🔍 [createToken.ts] Image path is a URL, downloading image...`);
+    await downloadImage(imagePath, outputPath);
+    imagePath = outputPath;
+  }
   
   if (!boundingCurveAccount) {
+    // Check if the imagePath is a URL and download it if necessary
+    // let imagePath = params.imagePath;
+    // if (imagePath && imagePath.startsWith('http')) {
+    //   const outputPath = path.join(__dirname, 'downloaded_image.jpg');
+    //   console.log(`🔍 [createToken.ts] Image path is a URL, downloading image...`);
+    //   await downloadImage(imagePath, outputPath);
+    //   imagePath = outputPath;
+    // }
+
     // Create token metadata using passed parameters
     let tokenMetadata = {
       name: params.name,
@@ -124,7 +154,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
       twitter: params.twitter || "",
       telegram: params.telegram || "",
       website: params.website || "",
-      file: await fs.openAsBlob(params.imagePath || path.join(__dirname, "random.png")),
+      file: await fs.openAsBlob(imagePath || path.join(__dirname, "random.png")),
     };
     console.log("🔍 [createToken.ts] Creating token metadata...");
     console.log(`Token metadata: ${JSON.stringify(tokenMetadata, null, 2)}`);
