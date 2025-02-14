@@ -13,6 +13,8 @@ import { TokenLaunchFormProps } from '../interfaces/TokenLaunchFormProps';
 import WalletConnectButton from '../components/WalletConnectButton';
 import AgentSelection from '../components/AgentSelection';
 import useCharacters from '../hooks/useCharacters'; // Import useCharacters
+import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
+import { CheckCircle } from 'lucide-react'; // Import the checkmark icon
 
 
 const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump"
@@ -22,6 +24,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   const [selectedAgentIndex, setSelectedAgentIndex] = useState<number>(-1);
   const { characters } = useCharacters(); // Use the hook to get characters
   const [agentImage, setAgentImage] = useState<string | null>(null); // State for agent's image
+  const { dispatch } = useAgent(); // Use the dispatch function from the context
 
   const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL || "";
   console.log('[tokenLaunchForm] Helius RPC URL:', heliusRpcUrl);
@@ -171,6 +174,52 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         image: selectedAgent.agent.profile_image.details.url // Assuming the agent object has an image property
       }));
       setAgentImage(selectedAgent.agent.profile_image.details.url); // Set agent's image
+
+      // Dispatch the selected agent to the global state
+      dispatch({ type: 'SET_AGENT', payload: selectedAgent.agent.agent_details.name });
+    }
+  };
+
+  const handleImageSelect = async (url: string) => {
+    try {
+      console.log('Starting image selection process for URL:', url);
+
+      // Validate the URL
+      if (!url || !url.startsWith('http')) {
+        throw new Error('Invalid URL');
+      }
+      console.log('URL is valid');
+
+      // Fetch the image
+      const response = await fetch(url);
+      console.log('Fetch response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
+      console.log('Image fetched successfully');
+
+      // Convert response to Blob
+      const blob = await response.blob();
+      console.log('Blob created from response:', blob);
+
+      // Create a File from the Blob
+      const fileName = url.split('/').pop() || 'downloaded_image.jpg';
+      const file = new File([blob], fileName, { type: blob.type, lastModified: new Date().getTime() });
+      console.log('File created from Blob:', file);
+
+      // Update form data with the File object
+      setFormData(prev => ({
+        ...prev,
+        image: file
+      }));
+      console.log('Form data updated with File object');
+
+      setAgentImage(url);
+      console.log('Agent image URL set:', url);
+    } catch (error) {
+      console.error('Error during image selection:', error);
+      alert('Failed to download and set the image. Please try again.');
     }
   };
 
@@ -381,13 +430,21 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
             <div className="flex gap-4 justify-center">
               {/* Agent Image Preview */}
               {agentImage && (
-                <div className="w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
-                              flex items-center justify-center mb-4 relative">
+                <div 
+                  className={`w-32 h-32 border-2 border-dashed border-orange-500/30 rounded-lg 
+                              flex items-center justify-center mb-4 relative cursor-pointer`}
+                  onClick={() => handleImageSelect(agentImage)}
+                >
                   <img 
                     alt="Agent image Preview"
                     className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     src={agentImage}
                   />
+                  {typeof formData.image === 'string' && formData.image === agentImage && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+                      <CheckCircle className="w-8 h-8 text-white" />
+                    </div>
+                  )}
                 </div>
               )}
 
