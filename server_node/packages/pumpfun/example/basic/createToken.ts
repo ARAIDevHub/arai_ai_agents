@@ -77,6 +77,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 
   // Create a dev wallet from the first row
   const devWallet = Keypair.fromSecretKey(bs58.decode(decryptedWalletRows[0].privateKey));
+  const initialBuyAmount = decryptedWalletRows[0].buyAmount;
   console.log("🚀 [createToken.ts] Dev wallet:", devWallet);
 
   const buyAmount = BigInt(decryptedWalletRows[0].buyAmount * LAMPORTS_PER_SOL);
@@ -104,9 +105,12 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
   console.log("[createToken.ts] The test account is", testAccount)
   // const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
-  const mint = getOrCreateKeypair(KEYS_FOLDER, ""); // Create a new mint paire each time
+  // const mint = getOrCreateKeypair(KEYS_FOLDER, ""); // Create a new mint paire each time
+  // Create a new keypair each time
+  const mint = Keypair.generate();
+  console.log("🔑 [createToken.ts] The mint keypair is", mint)
+  console.log("🔑 [createToken.ts] The mint address is", mint.publicKey.toBase58())
 
-  console.log("[createToken.ts] The mint is", mint)
   
   // Initialize PumpFun SDK
   console.log("🛠 [createToken.ts] Initializing PumpFun SDK...");
@@ -128,23 +132,16 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   console.log("🔍 [createToken.ts] Checking for existing bonding curve...");
   console.log(`Bounding curve account: ${boundingCurveAccount ? "exists" : "does not exist"}`);
 
-  let imagePath = params.imagePath;
-  if (imagePath && imagePath.startsWith('http')) {
-    const outputPath = path.join(__dirname, 'downloaded_image.jpg');
-    console.log(`🔍 [createToken.ts] Image path is a URL, downloading image...`);
-    await downloadImage(imagePath, outputPath);
-    imagePath = outputPath;
-  }
+
   
   if (!boundingCurveAccount) {
-    // Check if the imagePath is a URL and download it if necessary
-    // let imagePath = params.imagePath;
-    // if (imagePath && imagePath.startsWith('http')) {
-    //   const outputPath = path.join(__dirname, 'downloaded_image.jpg');
-    //   console.log(`🔍 [createToken.ts] Image path is a URL, downloading image...`);
-    //   await downloadImage(imagePath, outputPath);
-    //   imagePath = outputPath;
-    // }
+    let imagePath = params.imagePath;
+    if (imagePath && imagePath.startsWith('http')) {
+      const outputPath = path.join(__dirname, 'downloaded_image.jpg');
+      console.log(`🔍 [createToken.ts] Image path is a URL, downloading image...`);
+      await downloadImage(imagePath, outputPath);
+      imagePath = outputPath;
+    }
 
     // Create token metadata using passed parameters
     let tokenMetadata = {
@@ -202,7 +199,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
     let buyResults = await sdk.buy(
       devWallet,
       mint.publicKey,
-      BigInt(params.initialBuyAmount * LAMPORTS_PER_SOL),
+      BigInt(initialBuyAmount * LAMPORTS_PER_SOL),
       SLIPPAGE_BASIS_POINTS,
       {
         unitLimit: 250000,

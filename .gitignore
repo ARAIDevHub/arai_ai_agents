@@ -63,3 +63,6 @@ server_node/temp/
 
 # Add this line to ignore the .keys directory
 server_node/packages/pumpfun/example/basic/.keys/
+
+# Add this line to ignore the downloaded image
+server_node/packages/pumpfun/example/basic/downloaded_image.jpg
