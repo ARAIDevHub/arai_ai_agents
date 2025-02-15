@@ -5,7 +5,7 @@ export interface FormData {
   tokenSymbol: string;
   tokenDescription: string;
   solAmount: string;
-  image: File;
+  image: File | string;
   website?: string;
   twitter?: string;
   telegram?: string;

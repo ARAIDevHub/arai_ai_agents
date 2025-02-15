@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
@@ -103,7 +103,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
     console.log('Secret key:', secretKey);
 
-
     if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
       return;
@@ -112,6 +111,9 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     console.log('Form data being submitted:', formData);
 
     try {
+      // Ensure the image is a File or set it to null if it's a string
+      const imageFile = typeof formData.image === 'string' ? null : formData.image;
+
       const tokenParams = {
         name: formData.tokenName,
         symbol: formData.tokenSymbol,
@@ -122,12 +124,12 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         website: formData.website,
         twitter: formData.twitter,
         telegram: formData.telegram,
-        image: formData.image
+        image: imageFile // Ensure this is a File or null
       };
 
       // Encrypt the tokenParams before sending
       // Encrypt our wallet rows
-      const walletRows = formData.walletRows
+      const walletRows = formData.walletRows;
       console.log('[tokenLaunchForm] Wallet rows:', walletRows);
       const encryptedWalletRows = encryptData(walletRows);
       console.log('[tokenLaunchForm] Encrypted wallet rows:', encryptedWalletRows);
@@ -203,7 +205,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       // If the image is not set or is a different file, update the form data with the URL
       setFormData(prev => ({
         ...prev,
-        image: url
+        image: url // This is now valid as image can be a string
       }));
       setSelectedImage('agent');
       setAgentImage(url);
