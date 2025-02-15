@@ -486,8 +486,8 @@ const AgentCreator: React.FC = () => {
     // Dispatch the selected agent to the global state
     dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
 
-    const profileImageUrl = char.agent.profile_image?.details.url || "";
-    const profileImageOptions = char.agent.profile_image_options || [];
+    const profileImageUrl = char.agent?.profile_image?.details?.url || "";
+    const profileImageOptions = char.agent?.profile_image_options || [];
     const generatedImages = profileImageOptions[0]?.generations_by_pk?.generated_images || [];
 
     const imageIndex = generatedImages.findIndex(
