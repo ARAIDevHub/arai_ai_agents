@@ -6,7 +6,7 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { createToken } from '../api/tokenAPI';
-import CryptoJS from 'crypto-js';
+import { encryptData } from '../utils/encryptionUtils';
 import bs58 from 'bs58'; // Import bs58 for base58 decoding
 import WalletRow from '../components/tokenCreationComponents/WalletRow';
 import { TokenLaunchFormProps } from '../interfaces/TokenLaunchFormProps';
@@ -16,6 +16,7 @@ import useCharacters from '../hooks/useCharacters'; // Import useCharacters
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 import { CheckCircle } from 'lucide-react'; // Import the checkmark icon
 import { fetchAraiBalance } from '../utils/fetchAraiBalance';
+import { addWalletRow, removeWalletRow } from '../TokenLaunchUtils/walletRowUtils';
 
 
 
@@ -60,14 +61,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     fetchBalance();
   }, [heliusRpcUrl, connected, publicKey, signTransaction]);
 
-
-  const encryptData = (data: any) => {
-    console.log('Encrypting data...');
-    console.log('Data:', data);
-    const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), import.meta.env.VITE_SECRET_KEY || '').toString();
-    console.log('Ciphertext:', ciphertext);
-    return ciphertext;
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -234,29 +227,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     return new Intl.NumberFormat('en-US').format(number);
   };
 
-  const addWalletRow = () => {
-    if (formData.walletRows.length < 20) {
-      setFormData(prev => ({
-        ...prev,
-        walletRows: [...prev.walletRows, {
-          id: String(prev.walletRows.length + 1),
-          privateKey: '',
-          address: '',
-          solBalance: '-',
-          estVolume: '-',
-          buyAmount: ''
-        }]
-      }));
-    }
-  };
-
-  const removeWalletRow = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      walletRows: prev.walletRows.filter(row => row.id !== id)
-    }));
-  };
-
   const handleFormChange = (e: React.FormEvent<HTMLFormElement>) => {
     // Handle form-level changes if needed
   };
@@ -304,6 +274,10 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     );
     setFormData(prev => ({ ...prev, walletRows: updatedRows }));
   };
+
+  // Use the imported functions with the correct parameters
+  const handleAddWalletRow = () => addWalletRow(formData, setFormData);
+  const handleRemoveWalletRow = (id: string) => removeWalletRow(id, setFormData);
 
   return (
     <form 
@@ -488,8 +462,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     row={formData.walletRows[0]}
                     handlePrivateKeyChange={handlePrivateKeyChange}
                     handleBuyAmountChange={handleBuyAmountChange}
-                    removeWalletRow={removeWalletRow}
-                    addWalletRow={addWalletRow}
+                    removeWalletRow={handleRemoveWalletRow}
+                    addWalletRow={handleAddWalletRow}
                     isLastRow={true}
                     canRemoveRow={false}
                     showButtons={false}
@@ -597,8 +571,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                     row={row}
                     handlePrivateKeyChange={handlePrivateKeyChange}
                     handleBuyAmountChange={handleBuyAmountChange}
-                    removeWalletRow={removeWalletRow}
-                    addWalletRow={addWalletRow}
+                    removeWalletRow={handleRemoveWalletRow}
+                    addWalletRow={handleAddWalletRow}
                     isLastRow={index === formData.walletRows.length - 2}
                     canRemoveRow={formData.walletRows.length > 2}
                     showButtons={true}
