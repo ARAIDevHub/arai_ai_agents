@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
-import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
-import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
+import RandomAgentCard from '../components/RandomAgentCard'; 
+import LoadedAgentCard from '../components/LoadedAgentCard';
 import { inconsistentImageLambda } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
