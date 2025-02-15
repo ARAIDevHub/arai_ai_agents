@@ -15,9 +15,9 @@ import AgentSelection from '../components/AgentSelection';
 import useCharacters from '../hooks/useCharacters'; // Import useCharacters
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 import { CheckCircle } from 'lucide-react'; // Import the checkmark icon
+import { fetchAraiBalance } from '../utils/fetchAraiBalance';
 
 
-const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump"
 
 const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData }) => {
   const [araiTokenBalance, setAraiTokenBalance] = useState<number | null>(null);
@@ -49,38 +49,11 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   // Create a new connection to the Helius RPC URL
   useEffect(() => {
     const fetchBalance = async () => {
-      if (heliusRpcUrl) {
-        const connection = new Connection(heliusRpcUrl);
-        console.log('[tokenLaunchForm] Helius RPC connection:', connection);
-        if (connected && publicKey && signTransaction) {
-          console.log('[tokenLaunchForm] Wallet is connected and ready to sign transactions');
-          // Check the current wallet's balance of ARAI tokens
-          const balance = await connection.getBalance(publicKey);
-          console.log('[tokenLaunchForm] Current wallet balance:', balance);
-          // Convert the balance to SOL
-          const solBalance = balance / LAMPORTS_PER_SOL;
-          console.log('[tokenLaunchForm] Current wallet balance in SOL:', solBalance);
-
-          try {
-            const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-              publicKey,
-              { mint: new PublicKey(araiTokenAddress) }
-            );
-
-            if (tokenAccounts.value.length > 0) {
-              const tokenAccount = tokenAccounts.value[0];
-              const totalARAITokens = tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
-              console.log('Total ARAI tokens:', totalARAITokens);
-              setAraiTokenBalance(totalARAITokens);
-            } else {
-              console.warn('No token accounts found for the specified mint address.');
-              setAraiTokenBalance(null);
-            }
-          } catch (error) {
-            console.error('Error fetching token account balance:', error);
-            setAraiTokenBalance(null);
-          }
-        }
+      if (publicKey) { // Ensure publicKey is not null
+        const totalARAITokens = await fetchAraiBalance(heliusRpcUrl, connected, publicKey, signTransaction);
+        setAraiTokenBalance(totalARAITokens);
+      } else {
+        setAraiTokenBalance(null);
       }
     };
 
