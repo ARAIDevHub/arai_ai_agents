@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey } from '@solana/web3.js';
 import WalletConnectButton from './WalletConnectButton';
@@ -7,11 +7,11 @@ const araiTokenAddress = "ArCiFf7ismXqSgdWFddHhXe4AZyhn1JTfpZd3ft1pump";
 
 interface WalletConnectionProps {
   heliusRpcUrl: string;
-  setAraiTokenBalance: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-const WalletConnection: React.FC<WalletConnectionProps> = ({ heliusRpcUrl, setAraiTokenBalance }) => {
+const WalletConnection: React.FC<WalletConnectionProps> = ({ heliusRpcUrl }) => {
   const { connected, publicKey, signTransaction } = useWallet();
+  const [araiTokenBalance, setAraiTokenBalance] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -38,11 +38,11 @@ const WalletConnection: React.FC<WalletConnectionProps> = ({ heliusRpcUrl, setAr
     };
 
     fetchBalance();
-  }, [heliusRpcUrl, connected, publicKey, signTransaction, setAraiTokenBalance]);
+  }, [heliusRpcUrl, connected, publicKey, signTransaction]);
 
   return (
     <div>
-      <WalletConnectButton araiTokenBalance={setAraiTokenBalance} formatNumberWithCommas={formatNumberWithCommas} />
+      <WalletConnectButton araiTokenBalance={araiTokenBalance} formatNumberWithCommas={formatNumberWithCommas} />
     </div>
   );
 };
