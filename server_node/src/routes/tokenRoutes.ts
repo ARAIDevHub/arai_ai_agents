@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import { createTokenWithParams } from '../../packages/pumpfun/example/basic/createToken';
+import { createTokenWithParams } from '../../packages/pumpfun/createToken';
 import path from 'path';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';

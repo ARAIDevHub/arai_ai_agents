@@ -23,7 +23,7 @@
     "include": [
       "src/**/*",
       "packages/pumpfun/example/basic/**/*"
-    ],
+, "packages/pumpfun/createToken.ts"    ],
     "exclude": [
       "node_modules",
       "dist",

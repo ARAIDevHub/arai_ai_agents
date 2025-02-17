@@ -2,7 +2,7 @@ import path from "path";
 import dotenv from "dotenv";
 import fs from "fs";
 import { Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { DEFAULT_DECIMALS, PumpFunSDK } from "../../src";
+import { DEFAULT_DECIMALS, PumpFunSDK } from "./src";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import {
@@ -10,7 +10,7 @@ import {
   getSPLBalance,
   printSOLBalance,
   printSPLBalance,
-} from "../util";
+} from "./example/util";
 import CryptoJS from 'crypto-js';
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import fetch from 'node-fetch';
@@ -50,23 +50,19 @@ async function downloadImage(url: string, outputPath: string): Promise<void> {
 // Modify the main function to accept parameters
 export async function createTokenWithParams(params: TokenCreationParams, encryptedWalletRows: string) {
   console.log("🚀 [createToken.ts] Starting PumpFun token creation with params:", params);
-  console.log("🚀 [createToken.ts] Starting PumpFun token creation with encryptedWalletRows:", encryptedWalletRows);
 
   // Get the secret key from the environment variables
   const secretKey = process.env.SECRET_KEY;
   if (!secretKey) {
     throw new Error("Secret key is not set");
   }
-  console.log("🚀 [createToken.ts] Secret key:", secretKey);
 
   // Decrypt the encryptedWalletRows
   const decryptedWalletRowsString = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
-  console.log("🚀 [createToken.ts] Decrypted wallet rows string:", decryptedWalletRowsString);
 
   let decryptedWalletRows;
   try {
     decryptedWalletRows = JSON.parse(decryptedWalletRowsString);
-    console.log("🚀 [createToken.ts] Parsed decrypted wallet rows:", decryptedWalletRows);
   } catch (error: any) {
     throw new Error("Failed to parse decrypted wallet rows: " + error.message);
   }
@@ -78,11 +74,8 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   // Create a dev wallet from the first row
   const devWallet = Keypair.fromSecretKey(bs58.decode(decryptedWalletRows[0].privateKey));
   const initialBuyAmount = decryptedWalletRows[0].buyAmount;
-  console.log("🚀 [createToken.ts] Dev wallet:", devWallet);
 
   const buyAmount = BigInt(decryptedWalletRows[0].buyAmount * LAMPORTS_PER_SOL);
-  console.log("🔍 [createToken.ts] Calculating buy amount...");
-  console.log(`Buy amount: ${buyAmount} lamports`);
 
   // Load environment variables from root .env file
   dotenv.config({ path: path.resolve(__dirname, "../../../../../.env") });
@@ -100,15 +93,8 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
     commitment: "finalized",
   });
 
-  // Generate or load existing keypairs
-  console.log("🔑 [createToken.ts] Setting up test account and mint...");
-  const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
-  console.log("[createToken.ts] The test account is", testAccount)
-  // const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
-  // const mint = getOrCreateKeypair(KEYS_FOLDER, ""); // Create a new mint paire each time
   // Create a new keypair each time
   const mint = Keypair.generate();
-  console.log("🔑 [createToken.ts] The mint keypair is", mint)
   console.log("🔑 [createToken.ts] The mint address is", mint.publicKey.toBase58())
 
   
@@ -231,14 +217,6 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 const main = async () => {
   // Use default parameters when running directly
   console.log("🏁 Starting main execution...");
-//   await createTokenWithParams({
-//     name: "TST-7",
-//     symbol: "TST-7",
-//     description: "TST-7: This is a test token",
-//     unitLimit: 250000,
-//     unitPrice: 250000,
-//     initialBuyAmount: 0.0001
-//   });
 };
 
 // Only run main() directly if this file is being executed directly
