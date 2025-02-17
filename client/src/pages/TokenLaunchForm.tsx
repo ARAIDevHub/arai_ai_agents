@@ -31,7 +31,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
   } | null>(null);
 
   const heliusRpcUrl = import.meta.env.VITE_HELIUS_RPC_URL || "";
-  console.log('[tokenLaunchForm] Helius RPC URL:', heliusRpcUrl);
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
 
   // Add logging for wallet connection state changes
@@ -61,10 +60,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('handleSubmit function called');
-    const secretKey = import.meta.env.VITE_SECRET_KEY || '';
-
-    console.log('Secret key:', secretKey);
 
     if (!connected || !publicKey || !signTransaction) {
       alert('Please connect your wallet first');
@@ -93,11 +88,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       // Encrypt the tokenParams before sending
       // Encrypt our wallet rows
       const walletRows = formData.walletRows;
-      console.log('[tokenLaunchForm] Wallet rows:', walletRows);
       const encryptedWalletRows = encryptData(walletRows);
-      console.log('[tokenLaunchForm] Encrypted wallet rows:', encryptedWalletRows);
       const response = await createToken(tokenParams, encryptedWalletRows);
-      console.log('Token creation API response:', response);
 
       if (response.success) {
         const mintAddress = response.data?.mintAddress || 'N/A';
@@ -124,11 +116,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }
   };
 
-  // Log form data changes
-  useEffect(() => {
-    console.log('Form data updated:', formData);
-  }, [formData]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -146,7 +133,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         tokenName: selectedAgent.agent.agent_details.name,
         image: selectedAgent.agent.profile_image.details.url // Assuming the agent object has an image property
       }));
-      setAgentImage(selectedAgent.agent.profile_image.details.url); // Set agent's image
+      setAgentImage(selectedAgent.agent.profile_image.details.url || "null"); // Set agent's image
 
       // Dispatch the selected agent to the global state
       dispatch({ type: 'SET_AGENT', payload: selectedAgent.agent.agent_details.name });
@@ -155,11 +142,9 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
   const handleImageSelect = (url: string) => {
     try {
-      console.log('Starting image selection process for URL:', url);
 
       // Check if the image is already set as a URL
       if (typeof formData.image === 'string' && formData.image === url) {
-        console.log('Image is already set as URL, no need to fetch again');
         setSelectedImage('agent');
         setAgentImage(url);
         return;
@@ -172,7 +157,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
       }));
       setSelectedImage('agent');
       setAgentImage(url);
-      console.log('Form data updated with URL:', url);
     } catch (error) {
       console.error('Error during image selection:', error);
       alert('Failed to set the image. Please try again.');
@@ -238,18 +222,15 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     }));
 
     if (privateKey) {
-      console.log('[tokenLaunchForm] Private key:', privateKey);
       try {
         // Decode the base58 private key
         const secretKey = bs58.decode(privateKey);
         const keypair = Keypair.fromSecretKey(secretKey);
         const publicKey = keypair.publicKey.toString();
-        console.log('[tokenLaunchForm] Derived public key:', publicKey);
 
         const connection = new Connection(heliusRpcUrl);
         const balance = await connection.getBalance(keypair.publicKey);
         const solBalance = balance / LAMPORTS_PER_SOL;
-        console.log('[tokenLaunchForm] SOL balance:', solBalance);
 
         setFormData(prev => ({
           ...prev,
