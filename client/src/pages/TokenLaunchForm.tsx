@@ -69,8 +69,6 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     console.log('Form data being submitted:', formData);
 
     try {
-      // Ensure the image is a File or set it to null if it's a string
-      const imageFile = typeof formData.image === 'string' ? null : formData.image;
 
       const tokenParams = {
         name: formData.tokenName,
@@ -82,7 +80,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
         website: formData.website,
         twitter: formData.twitter,
         telegram: formData.telegram,
-        image: imageFile // Ensure this is a File or null
+        image: formData?.image as any  || null // Ensure this is a File or null
       };
 
       // Encrypt the tokenParams before sending
@@ -261,7 +259,7 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
     <form
       onSubmit={handleSubmit}
       onChange={handleFormChange}
-      className="w-full p-6 overflow-visible"
+      className="w-full p-6 overflow-visible bg-gray-800 rounded-lg shadow-md"
     >
       <AgentSelection
         selectedCharacterIndex={selectedAgentIndex}
@@ -300,8 +298,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <input
                 type="text"
                 name="tokenName"
-                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
-                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 
+                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Enter token name"
                 value={formData.tokenName}
                 onChange={handleChange}
@@ -316,8 +314,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <input
                 type="text"
                 name="tokenSymbol"
-                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
-                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 
+                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Enter token symbol"
                 value={formData.tokenSymbol}
                 onChange={handleChange}
@@ -331,8 +329,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               </label>
               <textarea
                 name="tokenDescription"
-                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
-                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 h-32"
+                className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 
+                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 h-32"
                 placeholder="Enter Token Description"
                 value={formData.tokenDescription}
                 onChange={handleChange}
@@ -423,8 +421,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 <input
                   type="text"
                   name="website"
-                  className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
-                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter Your Website URL"
                   value={formData.website}
                   onChange={handleChange}
@@ -438,8 +436,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
                 <input
                   type="text"
                   name="telegram"
-                  className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
-                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 
+                           text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter Your Telegram Link"
                   value={formData.telegram}
                   onChange={handleChange}
@@ -454,8 +452,8 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
               <input
                 type="text"
                 name="twitter"
-                className="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-orange-500/30 
-                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 
+                         text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Enter Your X Link"
                 value={formData.twitter}
                 onChange={handleChange}
@@ -617,12 +615,12 @@ const TokenLaunchForm: React.FC<TokenLaunchFormProps> = ({ formData, setFormData
 
       {/* Conditionally render the token info div */}
       {tokenInfo && (
-        <div className="token-info">
-          <h3>Token Creation Successful!</h3>
-          <p><strong>Mint Address:</strong> {tokenInfo.mintAddress}</p>
-          <p><strong>Transaction:</strong> {tokenInfo.txSignature}</p>
-          <p><strong>View Token:</strong> <a href={tokenInfo.url} target="_blank" rel="noopener noreferrer">{tokenInfo.url}</a></p>
-          <p><strong>View Transaction:</strong> <a href={`https://solscan.io/tx/${tokenInfo.txSignature}`} target="_blank" rel="noopener noreferrer">View on Solscan</a></p>
+        <div className="token-info mt-6 p-4 bg-gray-900 rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold text-white">Token Creation Successful!</h3>
+          <p className="text-gray-300"><strong>Mint Address:</strong> {tokenInfo.mintAddress}</p>
+          <p className="text-gray-300"><strong>Transaction:</strong> {tokenInfo.txSignature}</p>
+          <p className="text-gray-300"><strong>View Token:</strong> <a href={tokenInfo.url} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">{tokenInfo.url}</a></p>
+          <p className="text-gray-300"><strong>View Transaction:</strong> <a href={`https://solscan.io/tx/${tokenInfo.txSignature}`} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">View on Solscan</a></p>
         </div>
       )}
     </form>

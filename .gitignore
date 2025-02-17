@@ -66,3 +66,7 @@ server_node/packages/pumpfun/example/basic/.keys/
 
 # Add this line to ignore the downloaded image
 server_node/packages/pumpfun/example/basic/downloaded_image.jpg
+server_node/packages/pumpfun/downloaded_image.jpg
+
+# Ignore the downloaded image
+downloaded_image.jpg
