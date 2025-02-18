@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect, KeyboardEvent } from "react";
-import { Brain, Wand2, MessageSquare, Save, RefreshCcw } from "lucide-react";
+import { Brain, Wand2, MessageSquare, Save, RefreshCcw, Sparkles } from "lucide-react";
 import { createAgent, getCharacters } from "../api/agentsAPI";
 import {
   GeneratedImage,
@@ -29,8 +29,9 @@ const AgentCreator: React.FC = () => {
    * - basic: name, universe, expertise
    * - personality: personality traits, backstory
    * - style: communication style, hashtags, emojis
+   * - concept: concept description
    */
-  const [activeTab, setActiveTab] = useState<"basic" | "personality" | "style">(
+  const [activeTab, setActiveTab] = useState<"basic" | "personality" | "style" | "concept">(
     "basic"
   );
 
@@ -53,7 +54,7 @@ const AgentCreator: React.FC = () => {
       topic_expertise: string[];
       hashtags: string[];
       emojis: string[];
-      concept: string;
+      // concept: string;
     };
     profile_image: {
       details: {
@@ -65,6 +66,7 @@ const AgentCreator: React.FC = () => {
     profile_image_options: ProfileImageOption[];
     selectedImage: number | undefined;
     seasons: any[];
+    concept: string;
   }>({
     agent_details: {
       name: "",
@@ -75,7 +77,7 @@ const AgentCreator: React.FC = () => {
       topic_expertise: [],
       hashtags: [],
       emojis: [],
-      concept: "",
+      // concept: "",
     },
     profile_image: {
       details: {
@@ -87,6 +89,7 @@ const AgentCreator: React.FC = () => {
     profile_image_options: [],
     selectedImage: undefined,
     seasons: [],
+    concept: "",
   });
 
   // The fetched characters
@@ -102,6 +105,7 @@ const AgentCreator: React.FC = () => {
     universe: "",
     backstory: "",
     imageDescription: "",
+    concept: "",
   });
 
   /**
@@ -116,6 +120,7 @@ const AgentCreator: React.FC = () => {
       backstory: agent.agent_details.backstory || "",
       imageDescription:
         agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
+      concept: agent.concept || "",
     });
   }, [agent]);
 
@@ -340,36 +345,30 @@ const AgentCreator: React.FC = () => {
         name: draftFields.name || agent.agent_details.name,
         universe: draftFields.universe || agent.agent_details.universe,
         backstory: draftFields.backstory || agent.agent_details.backstory,
-        concept: agent.agent_details.concept,
-
         personality: draftTraits.personality
           ? draftTraits.personality
               .split(",")
               .map((item) => item.trim())
               .filter(Boolean)
           : agent.agent_details.personality,
-
         communication_style: draftTraits.communication_style
           ? draftTraits.communication_style
               .split(",")
               .map((item) => item.trim())
               .filter(Boolean)
           : agent.agent_details.communication_style,
-
         topic_expertise: draftTraits.topic_expertise
           ? draftTraits.topic_expertise
               .split(",")
               .map((item) => item.trim())
               .filter(Boolean)
           : agent.agent_details.topic_expertise,
-
         hashtags: draftTraits.hashtags
           ? draftTraits.hashtags
               .split(",")
               .map((item) => item.trim())
               .filter(Boolean)
           : agent.agent_details.hashtags,
-
         emojis: draftTraits.emojis
           ? draftTraits.emojis.split(" ").filter(Boolean)
           : agent.agent_details.emojis,
@@ -390,6 +389,7 @@ const AgentCreator: React.FC = () => {
       ),
       selectedImage: agent.selectedImage,
       seasons: agent.seasons,
+      concept: draftFields.concept || agent.concept,
     };
 
     try {
@@ -494,9 +494,6 @@ const AgentCreator: React.FC = () => {
       (img: { url: string }) => img.url === profileImageUrl
     ) || 0;
 
-
-    // Get the image index for the
-
     // Update local state
     setAgent({
       agent_details: {
@@ -508,8 +505,8 @@ const AgentCreator: React.FC = () => {
         topic_expertise: char.agent.agent_details.topic_expertise || [],
         hashtags: char.agent.agent_details.hashtags || [],
         emojis: char.agent.agent_details.emojis || [],
-        concept: char.agent.agent_details.concept || "",
       },
+      concept: char.agent.concept || "",
       profile_image: char.agent.profile_image_options || [],
       profile_image_options: char.agent.profile_image_options || [],
       selectedImage: char.agent.profile_image_options?.[0]?.generations_by_pk
@@ -526,6 +523,7 @@ const AgentCreator: React.FC = () => {
       backstory: char.agent.agent_details.backstory || "",
       imageDescription:
         char.agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
+      concept: char.agent.concept || "",
     });
 
     setDraftTraits({
@@ -779,6 +777,7 @@ const AgentCreator: React.FC = () => {
               { id: "basic" as const, icon: Brain, label: "Basic Info" },
               { id: "personality" as const, icon: Wand2, label: "Personality" },
               { id: "style" as const, icon: MessageSquare, label: "Style" },
+              { id: "concept" as const, icon: Sparkles, label: "Concept" },
             ].map(({ id, icon: Icon, label }) => (
               <button
                 key={id}
@@ -827,7 +826,7 @@ const AgentCreator: React.FC = () => {
                     onChange={handleDraftChange("universe")}
                     onKeyDown={handleDraftKeyDown("universe")}
                     placeholder="Enter universe (Press Enter to commit)"
-                    rows={2}
+                    rows={6}
                     className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />
                 </div>
@@ -950,6 +949,25 @@ const AgentCreator: React.FC = () => {
                     onChange={handleTraitDraftChange("emojis")}
                     onKeyDown={handleTraitDraftKeyDown("emojis")}
                     placeholder="Split by space (e.g. '✨ 🚀') (Press Enter to commit)"
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "concept" && (
+              <div className="space-y-6">
+                {/* Concept => local draft => commit on Enter */}
+                <div>
+                  <label className="text-sm text-gray-100 block mb-2">
+                    Concept
+                  </label>
+                  <textarea
+                    value={draftFields.concept}
+                    onChange={handleDraftChange("concept")}
+                    onKeyDown={handleDraftKeyDown("concept")}
+                    placeholder="Enter concept (Press Enter to commit)"
                     rows={2}
                     className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                   />

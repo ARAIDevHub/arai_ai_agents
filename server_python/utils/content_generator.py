@@ -367,6 +367,9 @@ class ContentGenerator:
         Example:
             >>> create_filepath("John Doe", "0", TemplateType.AGENT)
         """
+        # Fixing the space in the agent name and in the file paths
+        agent_name = agent_name.replace(" ", "_")
+
         # 1. create the filepath based on the template type
         if template_type == TemplateType.MASTER:            
             return os.path.join(self.agents_config_dir, agent_name, agent_name + "_master.json")

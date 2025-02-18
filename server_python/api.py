@@ -177,7 +177,6 @@ def create_agent():
 
     # Create the new character structure based on the incoming data structure
     new_character_data = {
-        "concept": data.get('concept', ''),
         "agent": {
             "agent_details": {
                 "name": character_name.replace('_', ' '),
@@ -187,9 +186,7 @@ def create_agent():
                 "universe": data.get('agent_details', {}).get('universe', ''),
                 "topic_expertise": data.get('agent_details', {}).get('topic_expertise', []),
                 "hashtags": data.get('agent_details', {}).get('hashtags', []),
-                "emojis": data.get('agent_details', {}).get('emojis', []),
-                "concept": data.get('concept', '')
-            },
+                "emojis": data.get('agent_details', {}).get('emojis', [])            },
             "ai_model": {
                 "model_type": "",
                 "model_name": "",
@@ -200,6 +197,7 @@ def create_agent():
                 "telegram": False,
                 "discord": False
             },
+            "concept": data.get('concept', ''),
             "profile_image": data.get('profile_image', []),
             "profile_image_options": data.get('profile_image_options', []),
             "tracker": {

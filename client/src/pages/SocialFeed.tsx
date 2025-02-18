@@ -16,7 +16,8 @@ const SocialFeed: React.FC = () => {
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
-
+  const [draftConcept, setDraftConcept] = useState<string>("");
+  const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -32,6 +33,12 @@ const SocialFeed: React.FC = () => {
       }
     }
   }, [state.selectedAgent, characters, selectedCharacterIndex]);
+
+  useEffect(() => {
+    if (selectedCharacter) {
+      setDraftConcept(selectedCharacter.agent.concept || "");
+    }
+  }, [selectedCharacter]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -250,6 +257,36 @@ const SocialFeed: React.FC = () => {
     postLoop(unpostedPosts, state.delayBetweenPosts);
   };
 
+  const handleConceptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDraftConcept(e.target.value);
+  };
+
+  const handleNumPostsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNumPostsToGenerate(Number(e.target.value));
+  };
+
+  const handleGenerateMultiplePosts = async () => {
+    if (!selectedCharacter || state.isGenerating) return;
+
+    dispatch({ type: 'SET_GENERATING', payload: true });
+    try {
+      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
+
+      for (let i = 0; i < numPostsToGenerate; i++) {
+        await createSeason(masterFilePath);
+        const updatedAgentWithPosts = await createEpisodePosts(masterFilePath);
+        setSelectedCharacter(updatedAgentWithPosts);
+        const posts = getCharacterPosts(updatedAgentWithPosts);
+        setCharacterPosts(posts);
+      }
+    } catch (error) {
+      console.error("Error generating content:", error);
+    } finally {
+      dispatch({ type: 'SET_GENERATING', payload: false });
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
@@ -327,15 +364,41 @@ const SocialFeed: React.FC = () => {
               </div>
             </div>
 
+            {/* Concept Section */}
+            <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
+              <h3 className="text-lg font-semibold text-white mb-2">Content Generation Concept</h3>
+              <textarea
+                value={draftConcept}
+                onChange={handleConceptChange}
+                className="w-full p-2 bg-slate-800 text-white rounded-lg border border-cyan-800"
+                rows={4}
+              />
+              <div className="flex items-center mt-2">
+                <input
+                  type="number"
+                  value={numPostsToGenerate}
+                  onChange={handleNumPostsChange}
+                  min="1"
+                  className="w-16 p-2 bg-slate-800 text-white rounded-lg border border-cyan-800 mr-2"
+                />
+                <Button
+                  onClick={handleGenerateMultiplePosts}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg p-2"
+                >
+                  Generate {numPostsToGenerate} Posts
+                </Button>
+              </div>
+            </div>
+
             {selectedCharacter && (
               <div className="flex gap-4 justify-center p-3">
-                <Button
+                {/* <Button
                   onClick={handleGenerateContent}
                   disabled={state.isGenerating}
                   className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {state.isGenerating ? "Generating..." : "Generate Posts Content"}
-                </Button>
+                </Button> */}
 
                 <Button
                   onClick={handleStartPostManager}
