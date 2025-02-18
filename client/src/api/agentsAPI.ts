@@ -190,3 +190,22 @@ export async function updateSeasons(agentName: string, seasons: any[]) {
   return await response.json();
 }
 
+// Function to delete a season
+export async function deleteSeason(masterFilePath: string, seasonNumber: number) {
+  const response = await fetch(`${BASE_URL}/agents/seasons`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      master_file_path: masterFilePath,
+      season_number: seasonNumber,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+

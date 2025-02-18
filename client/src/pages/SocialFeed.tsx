@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons, deleteSeason } from "../api/agentsAPI";
 import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
@@ -301,24 +301,48 @@ const SocialFeed: React.FC = () => {
     setCharacterPosts(posts);
   };
 
-  // Add this function to render season tabs
+  // Add this function to handle season deletion
+  const handleDeleteSeason = async (seasonNumber: number) => {
+    if (!selectedCharacter) return;
+
+    const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+    const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
+
+    try {
+      const updatedAgent = await deleteSeason(masterFilePath, seasonNumber);
+      setSelectedCharacter(updatedAgent);
+      setCharacterPosts(getCharacterPosts(updatedAgent));
+      setSelectedSeason(null); // Reset selected season
+    } catch (error) {
+      console.error("Error deleting season:", error);
+    }
+  };
+
+  // Add a button for deleting the season in the renderSeasonTabs function
   const renderSeasonTabs = () => {
     if (!selectedCharacter) return null;
 
     return (
       <div className="flex space-x-4 mb-4">
         {selectedCharacter.agent.seasons.map((season: Season) => (
-          <button
-            key={season.season_number}
-            onClick={() => handleSeasonSelect(season.season_number)}
-            className={`px-4 py-2 rounded-lg ${
-              selectedSeason === season.season_number
-                ? "bg-cyan-600 text-white"
-                : "bg-slate-800 text-gray-400"
-            }`}
-          >
-            Season {season.season_number}
-          </button>
+          <div key={season.season_number} className="flex items-center">
+            <button
+              onClick={() => handleSeasonSelect(season.season_number)}
+              className={`px-4 py-2 rounded-lg ${
+                selectedSeason === season.season_number
+                  ? "bg-cyan-600 text-white"
+                  : "bg-slate-800 text-gray-400"
+              }`}
+            >
+              Season {season.season_number}
+            </button>
+            <button
+              onClick={() => handleDeleteSeason(season.season_number)}
+              className="ml-2 px-2 py-1 bg-red-600 text-white rounded-lg"
+            >
+              Delete
+            </button>
+          </div>
         ))}
       </div>
     );

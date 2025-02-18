@@ -515,6 +515,50 @@ def update_seasons():
         print(f"Error updating seasons: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/agents/seasons', methods=['DELETE'])
+def delete_season():
+    """
+    Deletes a specific season and all its posts for an agent.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        season_number (int): The season number to delete
+        
+    Returns:
+        JSON: Updated agent data
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        season_number = data.get('season_number')
+
+        if not master_file_path or season_number is None:
+            return jsonify({"error": "Master file path and season number are required"}), 400
+
+        if not os.path.exists(master_file_path):
+            return jsonify({"error": "Agent master file not found"}), 404
+
+        # Load the existing agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            agent_data = json.load(f)
+
+        # Filter out the season to delete
+        agent_data['agent']['seasons'] = [
+            season for season in agent_data['agent']['seasons']
+            if season['season_number'] != season_number
+        ]
+
+        # Save the updated agent data back to the file
+        with open(master_file_path, 'w', encoding='utf-8') as f:
+            json.dump(agent_data, f, ensure_ascii=False, indent=4)
+
+        return jsonify(agent_data), 200
+
+    except Exception as e:
+        print(f"Error deleting season: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     print("API Server starting on port 8080...")
     app.run(debug=True, port=8080)
