@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
 import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
@@ -18,7 +18,7 @@ const SocialFeed: React.FC = () => {
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
   const [draftConcept, setDraftConcept] = useState<string>("");
   const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
-  const [activeSeasonIndex, setActiveSeasonIndex] = useState<number>(-1);
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -41,24 +41,25 @@ const SocialFeed: React.FC = () => {
     }
   }, [selectedCharacter]);
 
+  useEffect(() => {
+    if (selectedCharacter && selectedSeason !== null) {
+      const posts = getCharacterPosts(selectedCharacter).filter(post => post.seasonNumber === selectedSeason);
+      setCharacterPosts(posts);
+    }
+  }, [selectedCharacter, selectedSeason]);
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
-  const seasons = useMemo(() => {
-    return selectedCharacter?.agent?.seasons || [];
-  }, [selectedCharacter]);
-
-  const getCharacterPosts = (character: any, seasonIndex: number = -1) => {
+  const getCharacterPosts = (character: any) => {
     if (!character?.agent?.seasons) return [];
 
     const allPosts: Post[] = [];
 
-    character.agent.seasons.forEach((season: Season, index: number) => {
-      if (seasonIndex !== -1 && index !== seasonIndex) return;
-
+    character.agent.seasons.forEach((season: Season) => {
       season.episodes.forEach((episode: Episode) => {
         if (episode.posts && Array.isArray(episode.posts)) {
           const episodePosts = episode.posts.map((post: Post) => ({
@@ -101,7 +102,7 @@ const SocialFeed: React.FC = () => {
     setSelectedCharacterIndex(index);
     setSelectedCharacter(char);
     dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
-    const posts = getCharacterPosts(char, activeSeasonIndex);
+    const posts = getCharacterPosts(char);
     setCharacterPosts(posts);
 
     const unpostedPosts = posts.filter(post => !post.post_posted);
@@ -273,9 +274,9 @@ const SocialFeed: React.FC = () => {
   };
 
   const handleGenerateMultiplePosts = async () => {
-    if (!selectedCharacter || state.isGenerating) return;
+    if (!selectedCharacter || state.isGeneratingContent) return;
 
-    dispatch({ type: 'SET_GENERATING', payload: true });
+    dispatch({ type: 'SET_GENERATING_CONTENT', payload: true });
     try {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
@@ -290,8 +291,37 @@ const SocialFeed: React.FC = () => {
     } catch (error) {
       console.error("Error generating content:", error);
     } finally {
-      dispatch({ type: 'SET_GENERATING', payload: false });
+      dispatch({ type: 'SET_GENERATING_CONTENT', payload: false });
     }
+  };
+
+  const handleSeasonSelect = (seasonNumber: number) => {
+    setSelectedSeason(seasonNumber);
+    const posts = getCharacterPosts(selectedCharacter).filter(post => post.seasonNumber === seasonNumber);
+    setCharacterPosts(posts);
+  };
+
+  // Add this function to render season tabs
+  const renderSeasonTabs = () => {
+    if (!selectedCharacter) return null;
+
+    return (
+      <div className="flex space-x-4 mb-4">
+        {selectedCharacter.agent.seasons.map((season: Season) => (
+          <button
+            key={season.season_number}
+            onClick={() => handleSeasonSelect(season.season_number)}
+            className={`px-4 py-2 rounded-lg ${
+              selectedSeason === season.season_number
+                ? "bg-cyan-600 text-white"
+                : "bg-slate-800 text-gray-400"
+            }`}
+          >
+            Season {season.season_number}
+          </button>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -371,27 +401,6 @@ const SocialFeed: React.FC = () => {
               </div>
             </div>
 
-            {/* Season Tabs */}
-            <div className="flex space-x-4 mb-4">
-              {seasons.map((season, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setActiveSeasonIndex(index);
-                    const posts = getCharacterPosts(selectedCharacter, index);
-                    setCharacterPosts(posts);
-                  }}
-                  className={`px-4 py-2 rounded-lg ${
-                    activeSeasonIndex === index
-                      ? "bg-cyan-600 text-white"
-                      : "bg-slate-800 text-gray-400"
-                  }`}
-                >
-                  Season {season.season_number}
-                </button>
-              ))}
-            </div>
-
             {/* Concept Section */}
             <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
               <h3 className="text-lg font-semibold text-white mb-2">Content Generation Concept</h3>
@@ -411,9 +420,10 @@ const SocialFeed: React.FC = () => {
                 />
                 <Button
                   onClick={handleGenerateMultiplePosts}
-                  className="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg p-2"
+                  disabled={state.isGeneratingContent}
+                  className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Generate {numPostsToGenerate} Posts
+                  {state.isGeneratingContent ? "Generating..." : `Generate ${numPostsToGenerate} Posts`}
                 </Button>
               </div>
             </div>
@@ -451,8 +461,15 @@ const SocialFeed: React.FC = () => {
               </div>
             )}
 
+            {selectedCharacter && (
+              <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
+                <h3 className="text-lg font-semibold text-white mb-2">Select Season</h3>
+                {renderSeasonTabs()}
+              </div>
+            )}
+
             {/* Posts Feed */}
-            <div className="flex-grow overflow-y-auto space-y-4">
+            <div className="flex-grow overflow-y-auto space-y-4 ">
               {characterPosts.map((post) => (
                 <div
                   key={post.post_id}

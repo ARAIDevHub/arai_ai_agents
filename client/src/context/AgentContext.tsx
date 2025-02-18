@@ -10,6 +10,7 @@ interface AgentState {
   delayBetweenPosts: number; // Add delayBetweenPosts to the state
   timeLeft: number; // Add timeLeft to the state
   hasPosted: boolean; // Track if the first post has been made
+  isGeneratingContent: boolean; // Add this line
 }
 
 // Define the actions
@@ -21,7 +22,8 @@ type Action =
   | { type: 'SET_POSTING'; payload: boolean }
   | { type: 'SET_DELAY'; payload: number } // Action to set delayBetweenPosts
   | { type: 'SET_TIME_LEFT'; payload: number }
-  | { type: 'SET_HAS_POSTED'; payload: boolean }; // Action to set hasPosted
+  | { type: 'SET_HAS_POSTED'; payload: boolean }
+  | { type: 'SET_GENERATING_CONTENT'; payload: boolean }; // Add this line
 
 // Create the context
 const AgentContext = createContext<{
@@ -48,6 +50,8 @@ const agentReducer = (state: AgentState, action: Action): AgentState => {
       return { ...state, timeLeft: action.payload };
     case 'SET_HAS_POSTED':
       return { ...state, hasPosted: action.payload };
+    case 'SET_GENERATING_CONTENT':
+      return { ...state, isGeneratingContent: action.payload }; // Add this case
     default:
       throw new Error(`Unhandled action type: `);
   }
@@ -63,7 +67,8 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isPosting: false,
     delayBetweenPosts: 5, // Default delay of 5 minutes
     timeLeft: 300, // Default timeLeft in seconds (5 minutes)
-    hasPosted: false // Initialize hasPosted to false
+    hasPosted: false, // Initialize hasPosted to false
+    isGeneratingContent: false, // Initialize the new state
   });
 
   const intervalRef = useRef<number | null>(null);
