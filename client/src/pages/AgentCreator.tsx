@@ -56,7 +56,6 @@ const AgentCreator: React.FC = () => {
       topic_expertise: string[];
       hashtags: string[];
       emojis: string[];
-      concept: string;
     };
     profile_image: {
       details: {
@@ -68,6 +67,7 @@ const AgentCreator: React.FC = () => {
     profile_image_options: ProfileImageOption[];
     selectedImage: number | undefined;
     seasons: any[];
+    concept: string;
   }>({
     agent_details: {
       name: "",
@@ -77,8 +77,7 @@ const AgentCreator: React.FC = () => {
       universe: "",
       topic_expertise: [],
       hashtags: [],
-      emojis: [],
-      concept: "",
+      emojis: []
     },
     profile_image: {
       details: {
@@ -90,6 +89,7 @@ const AgentCreator: React.FC = () => {
     profile_image_options: [],
     selectedImage: undefined,
     seasons: [],
+    concept: "",
   });
 
   // The fetched characters
@@ -210,6 +210,12 @@ const AgentCreator: React.FC = () => {
 
   const [selectedCharacterIndex, setSelectedCharacterIndex] =
     useState<number>(-1);
+
+  // Define the type for draft fields
+  type DraftField = "concept" | "name" | "universe" | "backstory" | "imageDescription";
+
+  // Define the type for agent details fields
+  type AgentDetailsField = keyof typeof agent.agent_details;
 
   /**
    * Form Submission Handler
@@ -435,8 +441,13 @@ const AgentCreator: React.FC = () => {
   }, [state.selectedAgent, characters]);
 
   // Wrapper function to return the correct handler
-  const getDraftChangeHandler = (field: keyof typeof draftFields) => handleDraftChange(setDraftFields)(field);
-  const getDraftKeyDownHandler = (field: keyof typeof draftFields) => handleDraftKeyDown(setAgent, draftFields)(field);
+  const getDraftChangeHandler = (field: string) => handleDraftChange(setDraftFields)(field as DraftField);
+  const getDraftKeyDownHandler = (field: string) => handleDraftKeyDown(setAgent, draftFields)(field as DraftField);
+
+  // Ensure setActiveTab is used with the correct type
+  const handleTabChange = (tab: "concept" | "personality" | "basic" | "style") => {
+    setActiveTab(tab);
+  };
 
   //
   // ──────────────────────────────────────────────────────────────────────────────
@@ -676,14 +687,16 @@ const AgentCreator: React.FC = () => {
                 ...prev,
                 agent_details: {
                   ...prev.agent_details,
-                  [field]: prev.agent_details[field].filter(
-                    (trait: string) => trait !== value
-                  ),
+                  [field as AgentDetailsField]: Array.isArray(prev.agent_details[field as AgentDetailsField])
+                    ? (prev.agent_details[field as AgentDetailsField] as string[]).filter(
+                        (trait: string) => trait !== value
+                      )
+                    : prev.agent_details[field as AgentDetailsField], // If it's not an array, return as is
                 },
               }));
             }}
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={handleTabChange}
             agent={agent}
           />
 

@@ -40,6 +40,16 @@ export const handleDraftKeyDown = (setAgent: any, draftFields: any) => (field: s
             : [newImageOption],
         };
       });
+    } else if (field === "concept") {
+      setAgent((prev: any) => ({
+        ...prev,
+        concept: draftFields.concept,
+      }));
+
+      setDraftFields((prev: any) => ({
+        ...prev,
+        concept: "",
+      }));
     } else {
       setAgent((prev: any) => ({
         ...prev,
@@ -47,6 +57,11 @@ export const handleDraftKeyDown = (setAgent: any, draftFields: any) => (field: s
           ...prev.agent_details,
           [field]: draftFields[field],
         },
+      }));
+
+      setDraftFields((prev: any) => ({
+        ...prev,
+        [field]: "",
       }));
     }
   }
