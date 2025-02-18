@@ -396,7 +396,7 @@ def create_episode_content():
     try:
         data = request.get_json()
         master_file_path = data.get('master_file_path')
-        number_of_posts = data.get('number_of_posts', 6)  # Default to 6 posts
+        number_of_posts = data.get('number_of_posts')  # Default to 6 posts
 
         if not master_file_path:
             return jsonify({"error": "Master file path is required"}), 400

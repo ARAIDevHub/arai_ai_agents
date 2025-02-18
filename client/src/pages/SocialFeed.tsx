@@ -275,7 +275,7 @@ const SocialFeed: React.FC = () => {
 
       for (let i = 0; i < numPostsToGenerate; i++) {
         await createSeason(masterFilePath);
-        const updatedAgentWithPosts = await createEpisodePosts(masterFilePath);
+        const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPostsToGenerate);
         setSelectedCharacter(updatedAgentWithPosts);
         const posts = getCharacterPosts(updatedAgentWithPosts);
         setCharacterPosts(posts);
@@ -290,7 +290,7 @@ const SocialFeed: React.FC = () => {
   if (loading) {
     return (
       <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
-        Loading AI Network...
+        Loading ARAI AI Agents Network...
       </div>
     );
   }

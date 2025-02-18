@@ -119,7 +119,7 @@ export async function createSeason(
 // Function to create posts for episodes
 export async function createEpisodePosts(
   masterFilePath: string,
-  numberOfPosts: number = 6
+  numberOfPosts: number 
 ) {
   const response = await fetch(`${BASE_URL}/agents/episodes/posts`, {
     method: "POST",
