@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
 import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
@@ -18,6 +18,7 @@ const SocialFeed: React.FC = () => {
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
   const [draftConcept, setDraftConcept] = useState<string>("");
   const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
+  const [activeSeasonIndex, setActiveSeasonIndex] = useState<number>(-1);
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -46,12 +47,18 @@ const SocialFeed: React.FC = () => {
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
-  const getCharacterPosts = (character: any) => {
+  const seasons = useMemo(() => {
+    return selectedCharacter?.agent?.seasons || [];
+  }, [selectedCharacter]);
+
+  const getCharacterPosts = (character: any, seasonIndex: number = -1) => {
     if (!character?.agent?.seasons) return [];
 
     const allPosts: Post[] = [];
 
-    character.agent.seasons.forEach((season: Season) => {
+    character.agent.seasons.forEach((season: Season, index: number) => {
+      if (seasonIndex !== -1 && index !== seasonIndex) return;
+
       season.episodes.forEach((episode: Episode) => {
         if (episode.posts && Array.isArray(episode.posts)) {
           const episodePosts = episode.posts.map((post: Post) => ({
@@ -94,7 +101,7 @@ const SocialFeed: React.FC = () => {
     setSelectedCharacterIndex(index);
     setSelectedCharacter(char);
     dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
-    const posts = getCharacterPosts(char);
+    const posts = getCharacterPosts(char, activeSeasonIndex);
     setCharacterPosts(posts);
 
     const unpostedPosts = posts.filter(post => !post.post_posted);
@@ -364,6 +371,27 @@ const SocialFeed: React.FC = () => {
               </div>
             </div>
 
+            {/* Season Tabs */}
+            <div className="flex space-x-4 mb-4">
+              {seasons.map((season, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setActiveSeasonIndex(index);
+                    const posts = getCharacterPosts(selectedCharacter, index);
+                    setCharacterPosts(posts);
+                  }}
+                  className={`px-4 py-2 rounded-lg ${
+                    activeSeasonIndex === index
+                      ? "bg-cyan-600 text-white"
+                      : "bg-slate-800 text-gray-400"
+                  }`}
+                >
+                  Season {season.season_number}
+                </button>
+              ))}
+            </div>
+
             {/* Concept Section */}
             <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
               <h3 className="text-lg font-semibold text-white mb-2">Content Generation Concept</h3>
@@ -424,7 +452,7 @@ const SocialFeed: React.FC = () => {
             )}
 
             {/* Posts Feed */}
-            <div className="flex-grow overflow-y-auto space-y-4 ">
+            <div className="flex-grow overflow-y-auto space-y-4">
               {characterPosts.map((post) => (
                 <div
                   key={post.post_id}
