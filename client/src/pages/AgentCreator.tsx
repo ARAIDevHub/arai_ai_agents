@@ -56,8 +56,8 @@ const AgentCreator: React.FC = () => {
       topic_expertise: string[];
       hashtags: string[];
       emojis: string[];
+      concept: string;
     };
-    concept: string;
     profile_image: {
       details: {
         url: string;
@@ -78,8 +78,8 @@ const AgentCreator: React.FC = () => {
       topic_expertise: [],
       hashtags: [],
       emojis: [],
+      concept: "",
     },
-    concept: "",
     profile_image: {
       details: {
         url: "",
@@ -114,13 +114,14 @@ const AgentCreator: React.FC = () => {
    * Ensures drafts are updated when agent data changes
    */
   useEffect(() => {
+    console.log("Syncing draftFields with agent state", agent);
     setDraftFields({
       name: agent.agent_details.name || "",
       universe: agent.agent_details.universe || "",
       backstory: agent.agent_details.backstory || "",
       imageDescription:
         agent.profile_image_options?.[0]?.generations_by_pk?.prompt || "",
-      concept: agent.concept || "",
+      concept: agent?.concept || "",
     });
   }, [agent]);
 
@@ -433,6 +434,10 @@ const AgentCreator: React.FC = () => {
     }
   }, [state.selectedAgent, characters]);
 
+  // Wrapper function to return the correct handler
+  const getDraftChangeHandler = (field: keyof typeof draftFields) => handleDraftChange(setDraftFields)(field);
+  const getDraftKeyDownHandler = (field: keyof typeof draftFields) => handleDraftKeyDown(setAgent, draftFields)(field);
+
   //
   // ──────────────────────────────────────────────────────────────────────────────
   // 10) Render
@@ -638,8 +643,8 @@ const AgentCreator: React.FC = () => {
                 </div>
                 <textarea
                   value={draftFields.imageDescription || ""}
-                  onChange={handleDraftChange("imageDescription")}
-                  onKeyDown={handleDraftKeyDown(setAgent, draftFields)}
+                  onChange={getDraftChangeHandler("imageDescription")}
+                  onKeyDown={getDraftKeyDownHandler("imageDescription")}
                   placeholder="Enter image generation description (Press Enter to commit)"
                   rows={3}
                   className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
@@ -662,8 +667,8 @@ const AgentCreator: React.FC = () => {
           <AgentForm
             draftFields={draftFields}
             draftTraits={draftTraits}
-            handleDraftChange={handleDraftChange(setDraftFields)}
-            handleDraftKeyDown={handleDraftKeyDown(setAgent, draftFields)}
+            handleDraftChange={getDraftChangeHandler}
+            handleDraftKeyDown={getDraftKeyDownHandler}
             handleTraitDraftChange={handleTraitDraftChange(setDraftTraits)}
             handleTraitDraftKeyDown={handleTraitDraftKeyDown(setAgent, draftTraits)}
             handleDeleteTrait={(field: string, value: string) => {

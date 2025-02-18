@@ -78,6 +78,30 @@ const AgentForm: React.FC<AgentFormProps> = ({
               className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
             />
           </div>
+          {/* Image Description */}
+          <div>
+            <label className="text-sm text-gray-100 block mb-2">Image Generation Description</label>
+            <textarea
+              value={draftFields.imageDescription}
+              onChange={handleDraftChange("imageDescription")}
+              onKeyDown={handleDraftKeyDown("imageDescription")}
+              placeholder="Enter image generation description (Press Enter to commit)"
+              rows={3}
+              className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
+          {/* Backstory */}
+          <div>
+            <label className="text-sm text-gray-100 block mb-2">Backstory</label>
+            <textarea
+              value={draftFields.backstory}
+              onChange={handleDraftChange("backstory")}
+              onKeyDown={handleDraftKeyDown("backstory")}
+              placeholder="Enter backstory (Press Enter to commit)"
+              rows={3}
+              className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+          </div>
         </div>
       )}
 
@@ -97,18 +121,6 @@ const AgentForm: React.FC<AgentFormProps> = ({
               onKeyDown={handleTraitDraftKeyDown("personality")}
               placeholder="Comma-separated personality traits (Press Enter to commit)"
               rows={2}
-              className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
-          </div>
-          {/* Backstory */}
-          <div>
-            <label className="text-sm text-gray-100 block mb-2">Backstory</label>
-            <textarea
-              value={draftFields.backstory}
-              onChange={handleDraftChange("backstory")}
-              onKeyDown={handleDraftKeyDown("backstory")}
-              placeholder="Enter agent backstory (Press Enter to commit)"
-              rows={3}
               className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
             />
           </div>
