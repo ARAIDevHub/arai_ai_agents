@@ -208,4 +208,3 @@ export async function deleteSeason(masterFilePath: string, seasonNumber: number)
   }
   return await response.json();
 }
-

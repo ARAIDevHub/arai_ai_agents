@@ -25,7 +25,7 @@ from prompt_chaining.step_2_create_content import create_seasons_and_episodes
 from prompt_chaining.step_3_create_posts import create_episode_posts
 from utils.post_manager import PostManager
 from utils.scheduler import AgentScheduler
-
+from models.openai_model import OpenAIModel
 
 # Load environment variables
 load_dotenv()
@@ -45,7 +45,13 @@ CORS(app, resources={r"/api/*": {
 }})
 
 # Create global AI model instance
-ai_model = GeminiModel()
+try:
+    ai_model = OpenAIModel()
+    print(f"OpenAIModel created successfully: {ai_model}")
+except Exception as e:
+    print(f"Error creating OpenAIModel: {str(e)}")
+    print("Using GeminiModel instead")
+    ai_model = GeminiModel()
 
 # Post reques to create a random agent with no prompt
 @app.route('/api/agents/random', methods=['POST'])
@@ -558,6 +564,7 @@ def delete_season():
     except Exception as e:
         print(f"Error deleting season: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")

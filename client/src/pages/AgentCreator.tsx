@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { Brain,  Save, RefreshCcw } from "lucide-react";
-import { createAgent, getCharacters } from "../api/agentsAPI";
+import { createAgent, createRandomAgent } from "../api/agentsAPI";
 import {
   GeneratedImage,
   ProfileImageOption,
@@ -216,6 +216,12 @@ const AgentCreator: React.FC = () => {
   // Define the type for agent details fields
   type AgentDetailsField = keyof typeof agent.agent_details;
 
+  // Add state to manage the active submenu
+  const [activeSubmenu, setActiveSubmenu] = useState<'create' | 'generate'>('create');
+
+  // Add state to store the generated agent data
+  const [generatedAgent, setGeneratedAgent] = useState<any>(null);
+
   /**
    * Form Submission Handler
    * Processes the final agent data and sends it to the server
@@ -294,6 +300,7 @@ const AgentCreator: React.FC = () => {
       console.error("[AgentCreator] - Error creating agent:", error);
     }
   };
+
   /**
    * Character Selection Handler
    * Populates the form with data from an existing character
@@ -378,6 +385,138 @@ const AgentCreator: React.FC = () => {
     setActiveTab(tab);
   };
 
+  // Function to handle agent generation
+  const handleGenerateAgent = async () => {
+    try {
+      console.log("Generating agent with concept:", draftFields.concept);
+      let agent = await createRandomAgent(draftFields.concept);
+      agent = agent.agent;
+      setAgent({
+        agent_details: {
+          name: agent.agent_details.name || "",
+          personality: agent.agent_details.personality || [],
+          communication_style: agent.agent_details.communication_style || [],
+          backstory: agent.agent_details.backstory || "",
+          universe: agent.agent_details.universe || "",
+          topic_expertise: agent.agent_details.topic_expertise || [],
+          hashtags: agent.agent_details.hashtags || [],
+          emojis: agent.agent_details.emojis || [],
+        },
+        concept: agent.concept || "",
+        profile_image: agent.profile_image || {},
+        profile_image_options: agent.profile_image_options || [],
+        selectedImage: undefined,
+        seasons: agent.seasons || [],
+      });
+
+      // Sync local drafts with the generated agent data
+      setDraftFields({
+        name: agent.agent_details.name || "",
+        universe: agent.agent_details.universe || "",
+        backstory: agent.agent_details.backstory || "",
+        imageDescription: "",
+        concept: agent.concept || "",
+      });
+
+      setDraftTraits({
+        topic_expertise: (agent.agent_details.topic_expertise || []).join(", "),
+        personality: (agent.agent_details.personality || []).join(", "),
+        communication_style: (agent.agent_details.communication_style || []).join(", "),
+        hashtags: (agent.agent_details.hashtags || []).join(", "),
+        emojis: (agent.agent_details.emojis || []).join(" "),
+      });
+
+      setGeneratedAgent(agent);
+    } catch (error) {
+      console.error("Error generating agent:", error);
+    }
+  };
+
+  // Function to render the content based on the active submenu
+  const renderSubmenuContent = () => {
+    switch (activeSubmenu) {
+      case 'create':
+        return (
+          <>
+            {/* Existing content for Create Agent */}
+            <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
+              <label className="text-sm text-gray-100 block mb-2">
+                Select Existing Character
+              </label>
+              {loading ? (
+                <div className="text-gray-100">Loading characters...</div>
+              ) : error ? (
+                <div className="text-red-400">
+                  No Existing Agents - {error.message}
+                </div>
+              ) : (
+                <>
+                  <select
+                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border 
+                             border-orange-500/30 text-gray-100 focus:ring-2 
+                             focus:ring-orange-500/50 focus:outline-none"
+                    onChange={handleCharacterSelect}
+                    value={selectedCharacterIndex}
+                  >
+                    <option value={-1}>-- Select a Character --</option>
+                    {characters.map((char, index) => (
+                      <option key={index} value={index}>
+                        {char.agent?.agent_details?.name || "Unnamed Character"}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </div>
+          </>
+        );
+      case 'generate':
+        return (
+          <>
+            {/* Concept input and generate button */}
+            <div className="p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
+              <div className="mb-4">
+                <div className="text-lg font-semibold text-orange-400">
+                  Concept
+                </div>
+                <textarea
+                  value={draftFields.concept || ""}
+                  onChange={getDraftChangeHandler("concept")}
+                  placeholder="Enter concept description"
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerateAgent}
+                className="mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
+                             from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
+                             text-gray-100 transition-all duration-300 flex items-center justify-center"
+              >
+                Generate Agent
+              </button>
+            </div>
+
+            {/* Render the generated agent data if available */}
+            {generatedAgent && (
+              <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
+                <h2 className="text-lg font-semibold text-orange-400">Generated Agent Details</h2>
+                <div className="text-gray-100">
+                  <p>Name: {generatedAgent.agent_details.name}</p>
+                  <p>Universe: {generatedAgent.agent_details.universe}</p>
+                  <p>Backstory: {generatedAgent.agent_details.backstory}</p>
+                  {/* Add more fields as needed */}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
   //
   // ──────────────────────────────────────────────────────────────────────────────
   // 10) Render
@@ -386,6 +525,32 @@ const AgentCreator: React.FC = () => {
   return (
     
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
+      {/* Submenu for Create and Generate Agent */}
+      <div className="border-b border-orange-500/30">
+        <div className="flex p-4 gap-4">
+          <button
+            onClick={() => setActiveSubmenu('create')}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${
+              activeSubmenu === 'create'
+                ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
+                : 'text-gray-400 hover:text-cyan-400'
+            }`}
+          >
+            Create Agent
+          </button>
+          <button
+            onClick={() => setActiveSubmenu('generate')}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${
+              activeSubmenu === 'generate'
+                ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
+                : 'text-gray-400 hover:text-cyan-400'
+            }`}
+          >
+            Generate Agent
+          </button>
+        </div>
+      </div>
+
       {/* Success Message */}
       {showSuccessMessage && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -644,36 +809,8 @@ const AgentCreator: React.FC = () => {
             Save Agent
           </button>
 
-          {/* Character Selection */}
-          <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
-            <label className="text-sm text-gray-100 block mb-2">
-              Select Existing Character
-            </label>
-            {loading ? (
-              <div className="text-gray-100">Loading characters...</div>
-            ) : error ? (
-              <div className="text-red-400">
-                No Existing Agents - {error.message}
-              </div>
-            ) : (
-              <>
-                <select
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border 
-                           border-orange-500/30 text-gray-100 focus:ring-2 
-                           focus:ring-orange-500/50 focus:outline-none"
-                  onChange={handleCharacterSelect}
-                  value={selectedCharacterIndex}
-                >
-                  <option value={-1}>-- Select a Character --</option>
-                  {characters.map((char, index) => (
-                    <option key={index} value={index}>
-                      {char.agent?.agent_details?.name || "Unnamed Character"}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-          </div>
+          {/* Render content based on active submenu */}
+          {renderSubmenuContent()}
         </div>
       </div>
     </div>
