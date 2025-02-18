@@ -222,6 +222,9 @@ const AgentCreator: React.FC = () => {
   // Add state to store the generated agent data
   const [generatedAgent, setGeneratedAgent] = useState<any>(null);
 
+  // Add a new state for tracking agent generation
+  const [isGeneratingAgent, setIsGeneratingAgent] = useState(false);
+
   /**
    * Form Submission Handler
    * Processes the final agent data and sends it to the server
@@ -387,48 +390,84 @@ const AgentCreator: React.FC = () => {
 
   // Function to handle agent generation
   const handleGenerateAgent = async () => {
+    setIsGeneratingAgent(true); // Set loading state to true
     try {
       console.log("Generating agent with concept:", draftFields.concept);
-      let agent = await createRandomAgent(draftFields.concept);
-      agent = agent.agent;
+      const agentData = await createRandomAgent(draftFields.concept);
+      console.log("Received response from createRandomAgent:", agentData);
+
+      // Update the main agent state with the generated agent data
       setAgent({
         agent_details: {
-          name: agent.agent_details.name || "",
-          personality: agent.agent_details.personality || [],
-          communication_style: agent.agent_details.communication_style || [],
-          backstory: agent.agent_details.backstory || "",
-          universe: agent.agent_details.universe || "",
-          topic_expertise: agent.agent_details.topic_expertise || [],
-          hashtags: agent.agent_details.hashtags || [],
-          emojis: agent.agent_details.emojis || [],
+          name: agentData.agent.agent_details.name || "",
+          personality: agentData.agent.agent_details.personality || [],
+          communication_style: agentData.agent.agent_details.communication_style || [],
+          backstory: agentData.agent.agent_details.backstory || "",
+          universe: agentData.agent.agent_details.universe || "",
+          topic_expertise: agentData.agent.agent_details.topic_expertise || [],
+          hashtags: agentData.agent.agent_details.hashtags || [],
+          emojis: agentData.agent.agent_details.emojis || [],
         },
-        concept: agent.concept || "",
-        profile_image: agent.profile_image || {},
-        profile_image_options: agent.profile_image_options || [],
+        concept: agentData.agent.concept || "",
+        profile_image: agentData.agent.profile_image || {},
+        profile_image_options: agentData.agent.profile_image_options || [],
         selectedImage: undefined,
-        seasons: agent.seasons || [],
+        seasons: agentData.agent.seasons || [],
       });
 
       // Sync local drafts with the generated agent data
       setDraftFields({
-        name: agent.agent_details.name || "",
-        universe: agent.agent_details.universe || "",
-        backstory: agent.agent_details.backstory || "",
+        name: agentData.agent.agent_details.name || "",
+        universe: agentData.agent.agent_details.universe || "",
+        backstory: agentData.agent.agent_details.backstory || "",
         imageDescription: "",
-        concept: agent.concept || "",
+        concept: agentData.agent.concept || "",
       });
 
       setDraftTraits({
-        topic_expertise: (agent.agent_details.topic_expertise || []).join(", "),
-        personality: (agent.agent_details.personality || []).join(", "),
-        communication_style: (agent.agent_details.communication_style || []).join(", "),
-        hashtags: (agent.agent_details.hashtags || []).join(", "),
-        emojis: (agent.agent_details.emojis || []).join(" "),
+        topic_expertise: (agentData.agent.agent_details.topic_expertise || []).join(", "),
+        personality: (agentData.agent.agent_details.personality || []).join(", "),
+        communication_style: (agentData.agent.agent_details.communication_style || []).join(", "),
+        hashtags: (agentData.agent.agent_details.hashtags || []).join(", "),
+        emojis: (agentData.agent.agent_details.emojis || []).join(" "),
       });
 
-      setGeneratedAgent(agent);
+      setGeneratedAgent(agentData);
+
+      // Call Leonardo API to generate images using the concept
+      const payload = {
+        prompt: draftFields.concept,
+        modelId: LEONARDO_MODEL_ID,
+        styleUUID: LEONARDO_STYLE_UUID,
+        num_images: 4
+      };
+      const imageResponse = await inconsistentImageLambda(payload);
+
+      if (imageResponse?.generations_by_pk?.generated_images?.length) {
+        setAgent((prev) => ({
+          ...prev,
+          profile_image_options: [
+            {
+              generations_by_pk: {
+                ...imageResponse.generations_by_pk,
+                prompt: draftFields.concept,
+              },
+            },
+          ],
+          profile_image: {
+            details: {
+              url: imageResponse.generations_by_pk.generated_images[0].url,
+              image_id: imageResponse.generations_by_pk.generated_images[0].id,
+              generationId: imageResponse.generations_by_pk.id,
+            },
+          },
+          selectedImage: 0,
+        }));
+      }
     } catch (error) {
-      console.error("Error generating agent:", error);
+      console.error("Error generating agent or images:", error);
+    } finally {
+      setIsGeneratingAgent(false); // Reset loading state
     }
   };
 
@@ -476,40 +515,19 @@ const AgentCreator: React.FC = () => {
             {/* Concept input and generate button */}
             <div className="p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
               <div className="mb-4">
-                <div className="text-lg font-semibold text-orange-400">
-                  Concept
-                </div>
-                <textarea
-                  value={draftFields.concept || ""}
-                  onChange={getDraftChangeHandler("concept")}
-                  placeholder="Enter concept description"
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                />
               </div>
               <button
                 type="button"
                 onClick={handleGenerateAgent}
-                className="mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
+                className={`mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                              from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                             text-gray-100 transition-all duration-300 flex items-center justify-center"
+                             text-gray-100 transition-all duration-300 flex items-center justify-center
+                             ${isGeneratingAgent ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={isGeneratingAgent}
               >
-                Generate Agent
+                {isGeneratingAgent ? "Generating..." : "Generate Agent"}
               </button>
             </div>
-
-            {/* Render the generated agent data if available */}
-            {generatedAgent && (
-              <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
-                <h2 className="text-lg font-semibold text-orange-400">Generated Agent Details</h2>
-                <div className="text-gray-100">
-                  <p>Name: {generatedAgent.agent_details.name}</p>
-                  <p>Universe: {generatedAgent.agent_details.universe}</p>
-                  <p>Backstory: {generatedAgent.agent_details.backstory}</p>
-                  {/* Add more fields as needed */}
-                </div>
-              </div>
-            )}
           </>
         );
       default:
