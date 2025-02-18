@@ -4,6 +4,7 @@ import { createAgent, createRandomAgent } from "../api/agentsAPI";
 import {
   GeneratedImage,
   ProfileImageOption,
+  Agent
 } from "../interfaces/AgentInterfaces";
 import useCharacters from "../hooks/useCharacters";
 import { inconsistentImageLambda } from "../api/leonardoApi";
@@ -11,6 +12,7 @@ import LoadingBar from "../components/LoadingBar";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 import AgentForm from "../components/AgentCreatorComponents/AgentForm";
 import { handleDraftChange, handleDraftKeyDown, handleTraitDraftChange, handleTraitDraftKeyDown } from "../utils/AgentCreatorUtils/agentUtils";
+import GenerateAgentSection from '../components/GenerateAgentSection';
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
@@ -217,13 +219,17 @@ const AgentCreator: React.FC = () => {
   type AgentDetailsField = keyof typeof agent.agent_details;
 
   // Add state to manage the active submenu
-  const [activeSubmenu, setActiveSubmenu] = useState<'create' | 'generate'>('create');
+  const [activeSubmenu, setActiveSubmenu] = useState<'create' | 'generate'>('generate');
 
   // Add state to store the generated agent data
   const [generatedAgent, setGeneratedAgent] = useState<any>(null);
 
-  // Add a new state for tracking agent generation
-  const [isGeneratingAgent, setIsGeneratingAgent] = useState(false);
+  // Add state to store the list of agents
+  const [agents, setAgents] = useState<Agent[]>([]);
+
+  useEffect(() => {
+    console.log("Agent state initialized:", agent);
+  }, []);
 
   /**
    * Form Submission Handler
@@ -299,6 +305,7 @@ const AgentCreator: React.FC = () => {
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
       setAgent(updatedAgent);
+      setAgents((prevAgents) => [...prevAgents, updatedAgent as Agent]);
     } catch (error) {
       console.error("[AgentCreator] - Error creating agent:", error);
     }
@@ -388,86 +395,22 @@ const AgentCreator: React.FC = () => {
     setActiveTab(tab);
   };
 
-  // Function to handle agent generation
-  const handleGenerateAgent = async () => {
-    setIsGeneratingAgent(true); // Set loading state to true
+  const handleGenerateAgent = async (concept: string) => {
+    console.log("Generating agent with concept:", concept);
     try {
-      console.log("Generating agent with concept:", draftFields.concept);
-      const agentData = await createRandomAgent(draftFields.concept);
+      const agentData = await createRandomAgent(concept);
       console.log("Received response from createRandomAgent:", agentData);
+      
 
-      // Update the main agent state with the generated agent data
-      setAgent({
-        agent_details: {
-          name: agentData.agent.agent_details.name || "",
-          personality: agentData.agent.agent_details.personality || [],
-          communication_style: agentData.agent.agent_details.communication_style || [],
-          backstory: agentData.agent.agent_details.backstory || "",
-          universe: agentData.agent.agent_details.universe || "",
-          topic_expertise: agentData.agent.agent_details.topic_expertise || [],
-          hashtags: agentData.agent.agent_details.hashtags || [],
-          emojis: agentData.agent.agent_details.emojis || [],
-        },
-        concept: agentData.agent.concept || "",
-        profile_image: agentData.agent.profile_image || {},
-        profile_image_options: agentData.agent.profile_image_options || [],
-        selectedImage: undefined,
-        seasons: agentData.agent.seasons || [],
-      });
-
-      // Sync local drafts with the generated agent data
-      setDraftFields({
-        name: agentData.agent.agent_details.name || "",
-        universe: agentData.agent.agent_details.universe || "",
-        backstory: agentData.agent.agent_details.backstory || "",
-        imageDescription: "",
-        concept: agentData.agent.concept || "",
-      });
-
-      setDraftTraits({
-        topic_expertise: (agentData.agent.agent_details.topic_expertise || []).join(", "),
-        personality: (agentData.agent.agent_details.personality || []).join(", "),
-        communication_style: (agentData.agent.agent_details.communication_style || []).join(", "),
-        hashtags: (agentData.agent.agent_details.hashtags || []).join(", "),
-        emojis: (agentData.agent.agent_details.emojis || []).join(" "),
-      });
-
-      setGeneratedAgent(agentData);
-
-      // Call Leonardo API to generate images using the concept
-      const payload = {
-        prompt: draftFields.concept,
-        modelId: LEONARDO_MODEL_ID,
-        styleUUID: LEONARDO_STYLE_UUID,
-        num_images: 4
-      };
-      const imageResponse = await inconsistentImageLambda(payload);
-
-      if (imageResponse?.generations_by_pk?.generated_images?.length) {
-        setAgent((prev) => ({
-          ...prev,
-          profile_image_options: [
-            {
-              generations_by_pk: {
-                ...imageResponse.generations_by_pk,
-                prompt: draftFields.concept,
-              },
-            },
-          ],
-          profile_image: {
-            details: {
-              url: imageResponse.generations_by_pk.generated_images[0].url,
-              image_id: imageResponse.generations_by_pk.generated_images[0].id,
-              generationId: imageResponse.generations_by_pk.id,
-            },
-          },
-          selectedImage: 0,
-        }));
+      if (!agentData || !agentData.agent || !agentData.agent.agent_details) {
+        console.error("Unexpected agentData structure:", agentData);
+        return;
       }
+
+      setAgent(agentData.agent);
+      setActiveSubmenu('create'); // Switch to 'create' to show the rest of the page
     } catch (error) {
-      console.error("Error generating agent or images:", error);
-    } finally {
-      setIsGeneratingAgent(false); // Reset loading state
+      console.error("Error generating agent:", error);
     }
   };
 
@@ -510,6 +453,12 @@ const AgentCreator: React.FC = () => {
           </>
         );
       case 'generate':
+        if (isGenerating) {
+          return (
+            <div className="text-gray-100">Generating agent...</div>
+          );
+        }
+        
         return (
           <>
             {/* Concept input and generate button */}
@@ -518,14 +467,12 @@ const AgentCreator: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={handleGenerateAgent}
-                className={`mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
+                onClick={() => handleGenerateAgent(draftFields.concept)}
+                className="mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                              from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                             text-gray-100 transition-all duration-300 flex items-center justify-center
-                             ${isGeneratingAgent ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={isGeneratingAgent}
+                             text-gray-100 transition-all duration-300 flex items-center justify-center"
               >
-                {isGeneratingAgent ? "Generating..." : "Generate Agent"}
+                Generate Agent
               </button>
             </div>
           </>
@@ -540,8 +487,9 @@ const AgentCreator: React.FC = () => {
   // 10) Render
   // ──────────────────────────────────────────────────────────────────────────────
   //
+
+  // Render function 
   return (
-    
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
       {/* Submenu for Create and Generate Agent */}
       <div className="border-b border-orange-500/30">
@@ -579,257 +527,267 @@ const AgentCreator: React.FC = () => {
       )}
 
       <div className="flex-grow flex">
-        {/* Left Panel */}
-        <div className="w-1/2 p-6 border-r border-orange-500/20">
-          <div className="h-full flex flex-col space-y-6">
-            {/* Main Character Image */}
-            <div
-              className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                          via-cyan-900/20 to-orange-900/20 border border-orange-500/20 
-                          flex items-center justify-center"
-              style={{
-                backgroundImage:
-                  agent.selectedImage !== undefined &&
-                  agent.profile_image?.details?.url &&
-                  loadingProgress === 0
-                    ? `url(${agent.profile_image.details.url})`
-                    : "none",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {loadingProgress > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
-                  <div className="w-3/4">
-                    <LoadingBar progress={loadingProgress} />
-                  </div>
-                </div>
-              )}
-              {agent.selectedImage === undefined && loadingProgress === 0 && (
-                <Brain className="w-32 h-32 text-cyan-400" />
-              )}
-              <button
-                className={`absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
-                           from-orange-600 to-red-600 text-white flex items-center
-                           ${
-                             isGenerating
-                               ? "opacity-50 cursor-not-allowed"
-                               : "hover:from-orange-700 hover:to-red-700"
-                           }`}
-                onClick={async () => {
-                  if (isGenerating) return; // Prevent multiple clicks while generating
-
-                  try {
-                    setIsGenerating(true);
-                    let prompt =
-                      agent.profile_image_options?.[0]?.generations_by_pk
-                        ?.prompt ||
-                      draftFields.imageDescription ||
-                      "";
-
-                    setLoadingProgress(10);
-
-                    const payload = {
-                      prompt: prompt,
-                      modelId: LEONARDO_MODEL_ID,
-                      styleUUID: LEONARDO_STYLE_UUID,
-                      num_images: 4
-                    };
-                    const imageResponse = await inconsistentImageLambda(
-                      payload
-                    );
-
-                    if (
-                      !imageResponse?.generations_by_pk?.generated_images?.[0]
-                        ?.url
-                    ) {
-                      throw new Error("No image URL received");
-                    }
-
-                    setLoadingProgress(50);
-                    const imageUrl =
-                      imageResponse.generations_by_pk.generated_images[0].url;
-
-                    setLoadingProgress(90);
-                    setAgent((prev) => ({
-                      ...prev,
-                      profile_image: {
-                        details: {
-                          url: imageUrl,
-                          image_id:
-                            imageResponse.generations_by_pk.generated_images[0]
-                              .id,
-                          generationId: imageResponse.generations_by_pk.id,
-                        },
-                      },
-                      profile_image_options: [
-                        {
-                          generations_by_pk: {
-                            ...imageResponse.generations_by_pk,
-                            prompt,
-                          },
-                        },
-                      ],
-                    }));
-
-                    setLoadingProgress(100);
-                    setTimeout(() => setLoadingProgress(0), 500);
-                  } catch (error) {
-                    console.error("[AgentCreator] - Error generating new image:", error);
-                    setLoadingProgress(0);
-                  } finally {
-                    setIsGenerating(false);
-                  }
-                }}
-                disabled={isGenerating}
-              >
-                <RefreshCcw
-                  className={`w-4 h-4 mr-2 ${isGenerating ? "animate-spin" : ""}`}
-                />
-                {isGenerating ? "Generating..." : "Regenerate All"}
-              </button>
-            </div>
-
-            {/* Image Selection Grid */}
-            <div className="grid grid-cols-4 gap-4">
-              {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map(
-                (image: GeneratedImage, index: number) => (
-                  <div
-                    key={index}
-                    className={`relative aspect-square bg-gradient-to-br from-slate-900/80 
-                              via-cyan-900/20 to-orange-900/20 rounded-lg cursor-pointer 
-                              ${
-                                agent.selectedImage === index
-                                  ? "ring-2 ring-orange-500"
-                                  : ""
-                              }`}
+        {/* Conditionally render the Create Agent section */}
+        {activeSubmenu === 'create' && (
+          <>
+            {/* Left Panel */}
+            <div className="w-1/2 p-6 border-r border-orange-500/20">
+              <div className="h-full flex flex-col space-y-6">
+                {/* Main Character Image */}
+                <div
+                  className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
+                              via-cyan-900/20 to-orange-900/20 border border-orange-500/20 
+                              flex items-center justify-center"
+                  style={{
+                    backgroundImage:
+                      agent.selectedImage !== undefined &&
+                      agent.profile_image?.details?.url &&
+                      loadingProgress === 0
+                        ? `url(${agent.profile_image.details.url})`
+                        : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                >
+                  {loadingProgress > 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
+                      <div className="w-3/4">
+                        <LoadingBar progress={loadingProgress} />
+                      </div>
+                    </div>
+                  )}
+                  {agent.selectedImage === undefined && loadingProgress === 0 && (
+                    <Brain className="w-32 h-32 text-cyan-400" />
+                  )}
+                  <button
+                    className={`absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
+                               from-orange-600 to-red-600 text-white flex items-center
+                               ${
+                                 isGenerating
+                                   ? "opacity-50 cursor-not-allowed"
+                                   : "hover:from-orange-700 hover:to-red-700"
+                               }`}
                     onClick={async () => {
+                      if (isGenerating) return; // Prevent multiple clicks while generating
 
                       try {
-                        setLoadingProgress(30);
+                        setIsGenerating(true);
+                        let prompt =
+                          agent.profile_image_options?.[0]?.generations_by_pk
+                            ?.prompt ||
+                          draftFields.imageDescription ||
+                          "";
 
-                        setLoadingProgress(70);
+                        setLoadingProgress(10);
 
+                        const payload = {
+                          prompt: prompt,
+                          modelId: LEONARDO_MODEL_ID,
+                          styleUUID: LEONARDO_STYLE_UUID,
+                          num_images: 4
+                        };
+                        const imageResponse = await inconsistentImageLambda(
+                          payload
+                        );
+
+                        if (
+                          !imageResponse?.generations_by_pk?.generated_images?.[0]
+                            ?.url
+                        ) {
+                          throw new Error("No image URL received");
+                        }
+
+                        setLoadingProgress(50);
+                        const imageUrl =
+                          imageResponse.generations_by_pk.generated_images[0].url;
+
+                        setLoadingProgress(90);
                         setAgent((prev) => ({
                           ...prev,
-                          selectedImage: index,
                           profile_image: {
                             details: {
-                              url: image?.url || "",
-                              image_id: image?.id || "",
-                              generationId: image?.generationId || "",
+                              url: imageUrl,
+                              image_id:
+                                imageResponse.generations_by_pk.generated_images[0]
+                                  .id,
+                              generationId: imageResponse.generations_by_pk.id,
                             },
                           },
+                          profile_image_options: [
+                            {
+                              generations_by_pk: {
+                                ...imageResponse.generations_by_pk,
+                                prompt,
+                              },
+                            },
+                          ],
                         }));
 
                         setLoadingProgress(100);
                         setTimeout(() => setLoadingProgress(0), 500);
                       } catch (error) {
-                        console.error("[AgentCreator] - Error loading image:", error);
+                        console.error("[AgentCreator] - Error generating new image:", error);
                         setLoadingProgress(0);
+                      } finally {
+                        setIsGenerating(false);
                       }
                     }}
-                    style={{
-                      backgroundImage: image?.url ? `url(${image.url})` : "none",
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
+                    disabled={isGenerating}
                   >
-                    {agent.selectedImage === index && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-                        <svg
-                          className="w-8 h-8 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                    <RefreshCcw
+                      className={`w-4 h-4 mr-2 ${isGenerating ? "animate-spin" : ""}`}
+                    />
+                    {isGenerating ? "Generating..." : "Regenerate All"}
+                  </button>
+                </div>
+
+                {/* Image Selection Grid */}
+                <div className="grid grid-cols-4 gap-4">
+                  {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map(
+                    (image: GeneratedImage, index: number) => (
+                      <div
+                        key={index}
+                        className={`relative aspect-square bg-gradient-to-br from-slate-900/80 
+                                  via-cyan-900/20 to-orange-900/20 rounded-lg cursor-pointer 
+                                  ${
+                                    agent.selectedImage === index
+                                      ? "ring-2 ring-orange-500"
+                                      : ""
+                                  }`}
+                        onClick={async () => {
+
+                          try {
+                            setLoadingProgress(30);
+
+                            setLoadingProgress(70);
+
+                            setAgent((prev) => ({
+                              ...prev,
+                              selectedImage: index,
+                              profile_image: {
+                                details: {
+                                  url: image?.url || "",
+                                  image_id: image?.id || "",
+                                  generationId: image?.generationId || "",
+                                },
+                              },
+                            }));
+
+                            setLoadingProgress(100);
+                            setTimeout(() => setLoadingProgress(0), 500);
+                          } catch (error) {
+                            console.error("[AgentCreator] - Error loading image:", error);
+                            setLoadingProgress(0);
+                          }
+                        }}
+                        style={{
+                          backgroundImage: image?.url ? `url(${image.url})` : "none",
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }}
+                      >
+                        {agent.selectedImage === index && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+                            <svg
+                              className="w-8 h-8 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    )
+                  )}
+                </div>
+
+                {/* Character Info Card */}
+                <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
+                  <div className="mb-4">
+                    <div className="text-lg font-semibold text-orange-400">
+                      Image Generation Description
+                    </div>
+                    <textarea
+                      value={draftFields.imageDescription || ""}
+                      onChange={getDraftChangeHandler("imageDescription")}
+                      onKeyDown={getDraftKeyDownHandler("imageDescription")}
+                      placeholder="Enter image generation description (Press Enter to commit)"
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    />
                   </div>
-                )
-              )}
-            </div>
-
-            {/* Character Info Card */}
-            <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
-              <div className="mb-4">
-                <div className="text-lg font-semibold text-orange-400">
-                  Image Generation Description
                 </div>
-                <textarea
-                  value={draftFields.imageDescription || ""}
-                  onChange={getDraftChangeHandler("imageDescription")}
-                  onKeyDown={getDraftKeyDownHandler("imageDescription")}
-                  placeholder="Enter image generation description (Press Enter to commit)"
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                />
+                <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
+                  <div className="mb-4">
+                    <div className="text-lg font-semibold text-orange-400">
+                      Agent Name
+                    </div>
+                    <div className="text-gray-100">{agent.agent_details.name}</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
-              <div className="mb-4">
-                <div className="text-lg font-semibold text-orange-400">
-                  Agent Name
-                </div>
-                <div className="text-gray-100">{agent.agent_details.name}</div>
-              </div>
+
+            {/* Right Panel */}
+            <div className="w-1/2 p-6">
+              <AgentForm
+                draftFields={draftFields}
+                draftTraits={draftTraits}
+                handleDraftChange={getDraftChangeHandler}
+                handleDraftKeyDown={getDraftKeyDownHandler}
+                handleTraitDraftChange={handleTraitDraftChange(setDraftTraits)}
+                handleTraitDraftKeyDown={handleTraitDraftKeyDown(setAgent, draftTraits)}
+                handleDeleteTrait={(field: string, value: string) => {
+                  setAgent((prev) => ({
+                    ...prev,
+                    agent_details: {
+                      ...prev.agent_details,
+                      [field as AgentDetailsField]: Array.isArray(prev.agent_details[field as AgentDetailsField])
+                        ? (prev.agent_details[field as AgentDetailsField] as string[]).filter(
+                            (trait: string) => trait !== value
+                          )
+                        : prev.agent_details[field as AgentDetailsField], // If it's not an array, return as is
+                    },
+                  }));
+                }}
+                activeTab={activeTab}
+                setActiveTab={handleTabChange}
+                agent={agent}
+              />
+
+              <button
+                type="button"
+                onClick={(e) =>
+                  handleSubmitCreateAgent(
+                    e as unknown as React.FormEvent<HTMLFormElement>
+                  )
+                }
+                className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
+                             from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
+                             text-gray-100 transition-all duration-300 flex items-center justify-center"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Agent
+              </button>
+
+              {/* Render content based on active submenu */}
+              {renderSubmenuContent()}
             </div>
-          </div>
-        </div>
+          </>
+        )}
 
-        {/* Right Panel */}
-        <div className="w-1/2 p-6">
-          <AgentForm
-            draftFields={draftFields}
-            draftTraits={draftTraits}
-            handleDraftChange={getDraftChangeHandler}
-            handleDraftKeyDown={getDraftKeyDownHandler}
-            handleTraitDraftChange={handleTraitDraftChange(setDraftTraits)}
-            handleTraitDraftKeyDown={handleTraitDraftKeyDown(setAgent, draftTraits)}
-            handleDeleteTrait={(field: string, value: string) => {
-              setAgent((prev) => ({
-                ...prev,
-                agent_details: {
-                  ...prev.agent_details,
-                  [field as AgentDetailsField]: Array.isArray(prev.agent_details[field as AgentDetailsField])
-                    ? (prev.agent_details[field as AgentDetailsField] as string[]).filter(
-                        (trait: string) => trait !== value
-                      )
-                    : prev.agent_details[field as AgentDetailsField], // If it's not an array, return as is
-                },
-              }));
-            }}
-            activeTab={activeTab}
-            setActiveTab={handleTabChange}
-            agent={agent}
-          />
-
-          <button
-            type="button"
-            onClick={(e) =>
-              handleSubmitCreateAgent(
-                e as unknown as React.FormEvent<HTMLFormElement>
-              )
-            }
-            className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
-                         from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                         text-gray-100 transition-all duration-300 flex items-center justify-center"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Save Agent
-          </button>
-
-          {/* Render content based on active submenu */}
-          {renderSubmenuContent()}
-        </div>
+        {/* Conditionally render the Generate Agent section */}
+        {activeSubmenu === 'generate' && (
+          <GenerateAgentSection onGenerate={handleGenerateAgent} />
+        )}
       </div>
     </div>
   );
