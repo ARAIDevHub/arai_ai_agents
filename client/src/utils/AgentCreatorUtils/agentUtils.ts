@@ -1,4 +1,5 @@
 import { ChangeEvent, KeyboardEvent } from "react";
+import { ProfileImageOption } from "../../interfaces/AgentInterfaces";
 
 export const handleDraftChange = (setDraftFields: any) => (field: string) => (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
   console.log(`handleDraftChange - field: ${field}, value: ${e.target.value}`);
@@ -8,7 +9,7 @@ export const handleDraftChange = (setDraftFields: any) => (field: string) => (e:
   }));
 };
 
-export const handleDraftKeyDown = (setAgent: any, draftFields: any) => (field: string) => (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+export const handleDraftKeyDown = (setAgent: any, draftFields: any, setDraftFields: any) => (field: string) => (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
   console.log(`handleDraftKeyDown - field: ${field}, value: ${draftFields[field]}`);
   if (e.key === "Enter") {
     e.preventDefault();
@@ -26,7 +27,7 @@ export const handleDraftKeyDown = (setAgent: any, draftFields: any) => (field: s
         return {
           ...prev,
           profile_image_options: prev.profile_image_options?.length
-            ? prev.profile_image_options.map((option, index) =>
+            ? prev.profile_image_options.map((option: any, index: number) =>
                 index === 0
                   ? {
                       ...option,

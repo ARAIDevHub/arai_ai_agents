@@ -9,8 +9,8 @@ interface AgentFormProps {
   handleTraitDraftChange: (field: string) => (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleTraitDraftKeyDown: (field: string) => (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   handleDeleteTrait: (field: string, value: string) => void;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: "concept" | "personality" | "basic" | "style";
+  setActiveTab: (tab: "concept" | "personality" | "basic" | "style") => void;
   agent: any;
 }
 
@@ -38,7 +38,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
         ].map(({ id, label }) => (
           <button
             key={id}
-            onClick={() => setActiveTab(id)}
+            onClick={() => setActiveTab(id as "concept" | "personality" | "basic" | "style")}
             className={`flex-1 flex items-center justify-center px-4 py-2 
                         rounded-md text-gray-100 ${
                           activeTab === id

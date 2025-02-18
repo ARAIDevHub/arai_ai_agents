@@ -1,11 +1,10 @@
-import React, { useState, ChangeEvent, useEffect, KeyboardEvent } from "react";
-import { Brain, Wand2, MessageSquare, Save, RefreshCcw, Sparkles } from "lucide-react";
+import React, { useState, ChangeEvent, useEffect } from "react";
+import { Brain,  Save, RefreshCcw } from "lucide-react";
 import { createAgent, getCharacters } from "../api/agentsAPI";
 import {
   GeneratedImage,
   ProfileImageOption,
 } from "../interfaces/AgentInterfaces";
-import TraitButtons from "../components/TraitButtons"; // We'll still use your TraitButtons
 import useCharacters from "../hooks/useCharacters";
 import { inconsistentImageLambda } from "../api/leonardoApi";
 import LoadingBar from "../components/LoadingBar";
@@ -442,7 +441,7 @@ const AgentCreator: React.FC = () => {
 
   // Wrapper function to return the correct handler
   const getDraftChangeHandler = (field: string) => handleDraftChange(setDraftFields)(field as DraftField);
-  const getDraftKeyDownHandler = (field: string) => handleDraftKeyDown(setAgent, draftFields)(field as DraftField);
+  const getDraftKeyDownHandler = (field: string) => handleDraftKeyDown(setAgent, draftFields, setDraftFields)(field);
 
   // Ensure setActiveTab is used with the correct type
   const handleTabChange = (tab: "concept" | "personality" | "basic" | "style") => {
