@@ -109,36 +109,6 @@ const SocialFeed: React.FC = () => {
     setUnpostedCount(unpostedPosts.length);
   };
 
-  const handleGenerateContent = async () => {
-    if (!selectedCharacter || state.isGenerating) return;
-
-    dispatch({ type: 'SET_GENERATING', payload: true });
-    try {
-      // Adding back the _ to the name to search the file name in the configs folder
-      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
-      // Extract the master file path from the character
-      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
-
-      // First create new season
-      await createSeason(masterFilePath);
-
-      // Then create posts for episodes
-      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath);
-
-      // Update the selected character with final data
-      setSelectedCharacter(updatedAgentWithPosts);
-
-      // Update posts
-      const posts = getCharacterPosts(updatedAgentWithPosts);
-      setCharacterPosts(posts);
-    } catch (error) {
-      console.error("Error generating content:", error);
-      // Handle error (show notification, etc.)
-    } finally {
-      dispatch({ type: 'SET_GENERATING', payload: false });
-    }
-  };
-
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
 
@@ -281,13 +251,14 @@ const SocialFeed: React.FC = () => {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
-      for (let i = 0; i < numPostsToGenerate; i++) {
+      // for (let i = 0; i < numPostsToGenerate; i++) {
+      console.log(`Creating Number of Posts: ${numPostsToGenerate}`);
         await createSeason(masterFilePath);
         const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPostsToGenerate);
         setSelectedCharacter(updatedAgentWithPosts);
         const posts = getCharacterPosts(updatedAgentWithPosts);
         setCharacterPosts(posts);
-      }
+      // }
     } catch (error) {
       console.error("Error generating content:", error);
     } finally {
