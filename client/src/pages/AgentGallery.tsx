@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
-import RandomAgentCard from '../components/RandomAgentCard'; // Import the new component
-import LoadedAgentCard from '../components/LoadedAgentCard'; // Import the new component
+import RandomAgentCard from '../components/RandomAgentCard'; 
+import LoadedAgentCard from '../components/LoadedAgentCard';
 import { inconsistentImageLambda } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
@@ -70,8 +70,8 @@ const generateCharacterConcept = (): string => {
     Make sure to use their name as part of their agent name. It is best to make a variation of their name. For example, if the person is Elon Musk, then the agent name could be Elon Musk Jr., Elon Gate, Trump Bot, Trump Tron, etc. Make something unique and memorable that could go viral within the first 24 hours of being posted.`
   ];
 
-  // 80% chance of conceptFormat1, 20% chance of conceptFormat2
-  return Math.random() < 0.25 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
+  // 80% chance of conceptFormats, 20% chance of conceptFormat2
+  return Math.random() < 0.8 ? getRandomTrait(conceptFormats) : getRandomTrait(conceptFormat2);
 };
 
 // Add this helper function near other utility functions

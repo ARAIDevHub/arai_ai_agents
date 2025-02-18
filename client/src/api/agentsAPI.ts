@@ -1,5 +1,4 @@
 const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
-const BASE_URL_COOKIE_FUN = `${import.meta.env.VITE_API_BASE_URL}/cookie-fun`;
 
 // Function to get all agents
 export async function getAgents() {
@@ -190,3 +189,4 @@ export async function updateSeasons(agentName: string, seasons: any[]) {
   }
   return await response.json();
 }
+

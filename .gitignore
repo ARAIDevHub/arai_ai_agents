@@ -57,3 +57,16 @@ data/allAgents.json
 
 # Ignore everything inside the data/ directory
 data/*
+
+# Ignore temp files created by multer
+server_node/temp/
+
+# Add this line to ignore the .keys directory
+server_node/packages/pumpfun/example/basic/.keys/
+
+# Add this line to ignore the downloaded image
+server_node/packages/pumpfun/example/basic/downloaded_image.jpg
+server_node/packages/pumpfun/downloaded_image.jpg
+
+# Ignore the downloaded image
+downloaded_image.jpg

@@ -5,6 +5,7 @@ import { createSeason, createEpisodePosts, postToTwitter, startPostManager, upda
 import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
+import AgentSelection from '../components/AgentSelection';
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
@@ -26,7 +27,7 @@ const SocialFeed: React.FC = () => {
       if (index !== -1 && index !== selectedCharacterIndex) {
         const char = characters[index];
         if (char) {
-          handleCharacterSelect(char, index);
+          handleCharacterSelect(index);
         }
       }
     }
@@ -74,14 +75,21 @@ const SocialFeed: React.FC = () => {
     });
   };
 
-  const handleCharacterSelect = (char: any, index: number) => {
+  const handleCharacterSelect = (index: number) => {
+    const char = characters[index];
+    console.log("Selected character:", char); // Debugging log
+
+    if (!char || !char.agent || !char.agent.agent_details) {
+      console.error("Character or agent details are undefined");
+      return;
+    }
+
     setSelectedCharacterIndex(index);
     setSelectedCharacter(char);
     dispatch({ type: 'SET_AGENT', payload: char.agent.agent_details.name });
     const posts = getCharacterPosts(char);
     setCharacterPosts(posts);
 
-    // Log the current selected agent
     const unpostedPosts = posts.filter(post => !post.post_posted);
     setUnpostedCount(unpostedPosts.length);
   };
@@ -259,7 +267,7 @@ const SocialFeed: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto  max-w-4xl">
+    <div className="container mx-auto max-w-4xl">
       {notification && (
         <Notification
           message={notification.message}
@@ -267,31 +275,11 @@ const SocialFeed: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      {/* Agent Selection Row */}
-      <div className=" flex p-3 items-center justify-center gap-4">
-        <div className="flex items-center">
-          <label className="text-lg font-semibold text-white mr-2">
-            Select Agent:
-          </label>
-          <select
-            className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 "
-            onChange={(e) => {
-              const index = parseInt(e.target.value);
-              const char = characters[index];
-              if (char) handleCharacterSelect(char, index);
-            }}
-            value={selectedCharacterIndex}
-          >
-            <option value={-1} className="text-white font-semibold">
-              Select an Agent
-            </option>
-            {characters.map((char, index) => (
-              <option key={index} value={index}>
-                {char.agent.agent_details.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex p-3 items-center justify-center gap-4">
+        <AgentSelection 
+          selectedCharacterIndex={selectedCharacterIndex} 
+          handleSelectAgent={handleCharacterSelect} 
+        />
         <div className="flex items-center">
           <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
             Post Delay (min):
@@ -306,141 +294,140 @@ const SocialFeed: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* Chat Interface */}
-      <div
-        className="flex flex-col h-[70vh] relative"
-        style={{
-          backgroundImage: selectedCharacter?.agent?.profile_image?.details?.url
-            ? `url(${selectedCharacter.agent.profile_image.details.url})`
-            : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        {/* Add an overlay div for opacity */}
-        <div className="absolute inset-0 bg-slate-900/80" />
-
-        {/* Wrap content in relative div to appear above overlay */}
-        <div className="relative z-10 flex flex-col h-full justify-center items-center">
-          {/* Feed Header */}
-          <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
-            <div className="flex flex-col items-center w-full text-center">
-              <h2 className="text-2xl font-bold text-white font-semibold">
-                {selectedCharacter
-                  ? `${selectedCharacter.agent.agent_details.name}'s Feed`
-                  : "Select an Agent"}
-              </h2>
-              <p className="text-gray-400 mb-2 font-semibold">
-                {unpostedCount} Posts Remaining
-              </p>
+      {selectedCharacter && (
+        <div
+          className="flex flex-col h-[70vh] relative"
+          style={{
+            backgroundImage: selectedCharacter.agent.profile_image?.details?.url
+              ? `url(${selectedCharacter.agent.profile_image.details.url})`
+              : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          {/* Add an overlay div for opacity */}
+          <div className="absolute inset-0 bg-slate-900/80" />
+          {/* Wrap content in relative div to appear above overlay */}
+          <div className="relative z-10 flex flex-col h-full justify-center items-center">
+            {/* Feed Header */}
+            <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
+              <div className="flex flex-col items-center w-full text-center">
+                <h2 className="text-2xl font-bold text-white font-semibold">
+                  {selectedCharacter
+                    ? `${selectedCharacter.agent.agent_details.name}'s Feed`
+                    : "Select an Agent"}
+                </h2>
+                <p className="text-gray-400 mb-2 font-semibold">
+                  {unpostedCount} Posts Remaining
+                </p>
+              </div>
+              <div className="absolute right-0 text-white text-lg p-3 font-semibold">
+                Next post in: {formatTime(state.timeLeft)}
+              </div>
             </div>
-            <div className="absolute right-0 text-white text-lg p-3 font-semibold">
-              Next post in: {formatTime(state.timeLeft)}
-            </div>
-          </div>
 
-          {selectedCharacter && (
-            <div className="flex gap-4 justify-center p-3">
-              <Button
-                onClick={handleGenerateContent}
-                disabled={state.isGenerating}
-                className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {state.isGenerating ? "Generating..." : "Generate Posts Content"}
-              </Button>
+            {selectedCharacter && (
+              <div className="flex gap-4 justify-center p-3">
+                <Button
+                  onClick={handleGenerateContent}
+                  disabled={state.isGenerating}
+                  className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {state.isGenerating ? "Generating..." : "Generate Posts Content"}
+                </Button>
 
-              <Button
-                onClick={handleStartPostManager}
-                className={`${
-                  state.isLoggedIn
-                    ? "bg-green-400 hover:bg-green-500"
-                    : "bg-orange-400 hover:bg-orange-500"
-                }`}
-              >
-                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
-              </Button>
-
-              <Button
-                onClick={handlePostToTwitter}
-                className={`${
-                  state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
-                }`}
-              >
-                {state.isPosting ? "Posting..." : "Post to Twitter"}
-              </Button>
-
-            </div>
-          )}
-
-          {/* Posts Feed */}
-          <div className="flex-grow overflow-y-auto space-y-4 ">
-            {characterPosts.map((post) => (
-              <div
-                key={post.post_id}
-                className="relative max-w-2xl mx-auto slate-800/30 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30"
-              >
-                {/* Post Status Label */}
-                <div
-                  className={`absolute top-4 right-4 px-2 py-1 rounded text-sm font-semibold ${
-                    post.post_posted
-                      ? "bg-green-500 text-white"
-                      : "bg-red-500 text-white"
+                <Button
+                  onClick={handleStartPostManager}
+                  className={`${
+                    state.isLoggedIn
+                      ? "bg-green-400 hover:bg-green-500"
+                      : "bg-orange-400 hover:bg-orange-500"
                   }`}
                 >
-                  {post.post_posted ? "Posted" : "Not Posted"}
-                </div>
+                  {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
+                </Button>
 
-                <div className="flex items-center mb-4">
+                <Button
+                  onClick={handlePostToTwitter}
+                  className={`${
+                    state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                  }`}
+                >
+                  {state.isPosting ? "Posting..." : "Post to Twitter"}
+                </Button>
+
+              </div>
+            )}
+
+            {/* Posts Feed */}
+            <div className="flex-grow overflow-y-auto space-y-4 ">
+              {characterPosts.map((post) => (
+                <div
+                  key={post.post_id}
+                  className="relative max-w-2xl mx-auto slate-800/30 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30"
+                >
+                  {/* Post Status Label */}
                   <div
-                    className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600"
-                    style={{
-                      backgroundImage: selectedCharacter?.agent.profile_image
-                        ?.details?.url
-                        ? `url(${selectedCharacter.agent.profile_image.details.url})`
-                        : undefined,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-cyan-400 text-left">
-                      {selectedCharacter?.agent.agent_details.name}
-                    </h3>
-                    <div className="text-sm text-gray-500">
-                      <span>
-                        Season {post.seasonNumber || 0}, Episode{" "}
-                        {post.episodeNumber || 0}
-                      </span>
-                      <span className="mx-2">•</span>
-                      <span>Post {post.post_number}</span>
+                    className={`absolute top-4 right-4 px-2 py-1 rounded text-sm font-semibold ${
+                      post.post_posted
+                        ? "bg-green-500 text-white"
+                        : "bg-red-500 text-white"
+                    }`}
+                  >
+                    {post.post_posted ? "Posted" : "Not Posted"}
+                  </div>
+
+                  <div className="flex items-center mb-4">
+                    <div
+                      className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600"
+                      style={{
+                        backgroundImage: selectedCharacter?.agent.profile_image
+                          ?.details?.url
+                          ? `url(${selectedCharacter.agent.profile_image.details.url})`
+                          : undefined,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-cyan-400 text-left">
+                        {selectedCharacter?.agent.agent_details.name}
+                      </h3>
+                      <div className="text-sm text-gray-500">
+                        <span>
+                          Season {post.seasonNumber || 0}, Episode{" "}
+                          {post.episodeNumber || 0}
+                        </span>
+                        <span className="mx-2">•</span>
+                        <span>Post {post.post_number}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Post Highlights */}
-                {post.post_highlights && (
-                  <div className="mt-4 mb-4 bg-slate-900/50 rounded-lg p-4 border-l-2 border-orange-500/30">
-                    <p className="text-gray-400 text-sm italic">
-                      {post.post_highlights}
-                    </p>
+                  {/* Post Highlights */}
+                  {post.post_highlights && (
+                    <div className="mt-4 mb-4 bg-slate-900/50 rounded-lg p-4 border-l-2 border-orange-500/30">
+                      <p className="text-gray-400 text-sm italic">
+                        {post.post_highlights}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Post Content */}
+                  <p className="text-gray-300 mb-2 whitespace-pre-wrap bg-slate-900/50 p-4 rounded-lg">
+                    {post.post_content}
+                  </p>
+
+                  {/* Post Actions */}
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
                   </div>
-                )}
-
-                {/* Post Content */}
-                <p className="text-gray-300 mb-2 whitespace-pre-wrap bg-slate-900/50 p-4 rounded-lg">
-                  {post.post_content}
-                </p>
-
-                {/* Post Actions */}
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

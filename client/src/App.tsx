@@ -7,7 +7,7 @@ import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
 import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
-import SocialDashboard from "./pages/SocialDashboard";
+// import SocialDashboard from "./pages/SocialDashboard";
 import CookieDotFunDataTesting from "./pages/cookieDotFunDataTesting";
 
 // Components
@@ -94,7 +94,7 @@ function App() {
                 Chat to Agent
               </Link>
 
-              {/* <Link
+              <Link
                 to="/token-launch"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
                   ${
@@ -104,7 +104,7 @@ function App() {
                   }`}
               >
                 Token Launch
-              </Link> */}
+              </Link>
               {/*           <Link
             to="/social-dashboard"
             className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
@@ -139,7 +139,7 @@ function App() {
             <Route path="/social-feed" element={<SocialFeed />} />
             <Route path="/chat-to-agent" element={<ChatToAgent />} />
             <Route path="/token-launch" element={<TokenLaunch />} />
-            <Route path="/social-dashboard" element={<SocialDashboard />} />
+            {/* <Route path="/social-dashboard" element={<SocialDashboard />} /> */}
             <Route path="/cookie-fun-testing" element={<CookieDotFunDataTesting />} />
           </Routes>
         </div>
