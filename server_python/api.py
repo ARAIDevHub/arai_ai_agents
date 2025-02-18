@@ -519,4 +519,5 @@ def update_seasons():
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")
-    app.run(debug=True, port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8080)  # Correct
+    # INCORRECT: app.run(debug=True, port=8080)  # Defaults to 127.0.0.1
