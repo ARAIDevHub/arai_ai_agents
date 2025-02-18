@@ -10,6 +10,8 @@ import useCharacters from "../hooks/useCharacters";
 import { inconsistentImageLambda } from "../api/leonardoApi";
 import LoadingBar from "../components/LoadingBar";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
+import AgentForm from "../components/AgentCreatorComponents/AgentForm";
+import { handleDraftChange, handleDraftKeyDown, handleTraitDraftChange, handleTraitDraftKeyDown } from "../utils/AgentCreatorUtils/agentUtils";
 
 const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
 const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
@@ -54,8 +56,8 @@ const AgentCreator: React.FC = () => {
       topic_expertise: string[];
       hashtags: string[];
       emojis: string[];
-      // concept: string;
     };
+    concept: string;
     profile_image: {
       details: {
         url: string;
@@ -66,7 +68,6 @@ const AgentCreator: React.FC = () => {
     profile_image_options: ProfileImageOption[];
     selectedImage: number | undefined;
     seasons: any[];
-    concept: string;
   }>({
     agent_details: {
       name: "",
@@ -77,8 +78,8 @@ const AgentCreator: React.FC = () => {
       topic_expertise: [],
       hashtags: [],
       emojis: [],
-      // concept: "",
     },
+    concept: "",
     profile_image: {
       details: {
         url: "",
@@ -89,7 +90,6 @@ const AgentCreator: React.FC = () => {
     profile_image_options: [],
     selectedImage: undefined,
     seasons: [],
-    concept: "",
   });
 
   // The fetched characters
@@ -198,120 +198,6 @@ const AgentCreator: React.FC = () => {
     }
   }, [agent.profile_image_options, agent.selectedImage]);
 
-  /**
-   * Field Update Handlers
-   * Manages updates to regular text fields (name, universe, backstory)
-   * Commits changes when Enter is pressed
-   */
-  const handleDraftChange =
-    (field: keyof typeof draftFields) =>
-    (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-      setDraftFields((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-    };
-
-  const handleDraftKeyDown =
-    (field: keyof typeof draftFields) =>
-    (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-
-        if (field === "imageDescription") {
-          setAgent((prev) => {
-            const newImageOption: ProfileImageOption = {
-              generations_by_pk: {
-                prompt: draftFields[field],
-                generated_images: [],
-              },
-            };
-
-            return {
-              ...prev,
-              profile_image_options: prev.profile_image_options?.length
-                ? prev.profile_image_options.map((option, index) =>
-                    index === 0
-                      ? {
-                          ...option,
-                          generations_by_pk: {
-                            ...option.generations_by_pk,
-                            prompt: draftFields[field],
-                          },
-                        }
-                      : option
-                  )
-                : [newImageOption],
-            };
-          });
-        } else {
-          setAgent((prev) => ({
-            ...prev,
-            agent_details: {
-              ...prev.agent_details,
-              [field]: draftFields[field],
-            },
-          }));
-        }
-      }
-    };
-
-  /**
-   * Trait Field Handlers
-   * Manages updates to array-based fields (personality, hashtags, etc.)
-   * Splits input by commas (or spaces for emojis) and commits on Enter
-   */
-  const handleTraitDraftChange =
-    (field: keyof typeof draftTraits) =>
-    (e: ChangeEvent<HTMLTextAreaElement>) => {
-      setDraftTraits((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-    };
-
-  const handleTraitDraftKeyDown =
-    (field: keyof typeof draftTraits) =>
-    (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        // If field is "emojis", we split by space; otherwise, by comma
-        const separator = field === "emojis" ? " " : ",";
-        const arrayValue = draftTraits[field]
-          .split(separator)
-          .map((item) => item.trim())
-          .filter(Boolean);
-
-        setAgent((prev) => ({
-          ...prev,
-          agent_details: {
-            ...prev.agent_details,
-            [field]: arrayValue,
-          },
-        }));
-      }
-    };
-
-  // Deleting a single trait
-  type TraitField =
-    | "personality"
-    | "communication_style"
-    | "topic_expertise"
-    | "hashtags"
-    | "emojis";
-
-  const handleDeleteTrait = (field: TraitField, value: string) => {
-    setAgent((prev) => ({
-      ...prev,
-      agent_details: {
-        ...prev.agent_details,
-        [field]: prev.agent_details[field].filter(
-          (trait: string) => trait !== value
-        ),
-      },
-    }));
-  };
-
   // State to manage the visibility of the success message
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -373,6 +259,7 @@ const AgentCreator: React.FC = () => {
           ? draftTraits.emojis.split(" ").filter(Boolean)
           : agent.agent_details.emojis,
       },
+      concept: draftFields.concept || agent.concept,
       profile_image: agent.profile_image,
       profile_image_options: agent.profile_image_options.map((option, index) =>
         index === 0
@@ -389,7 +276,6 @@ const AgentCreator: React.FC = () => {
       ),
       selectedImage: agent.selectedImage,
       seasons: agent.seasons,
-      concept: draftFields.concept || agent.concept,
     };
 
     try {
@@ -553,6 +439,7 @@ const AgentCreator: React.FC = () => {
   // ──────────────────────────────────────────────────────────────────────────────
   //
   return (
+    
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
       {/* Success Message */}
       {showSuccessMessage && (
@@ -752,7 +639,7 @@ const AgentCreator: React.FC = () => {
                 <textarea
                   value={draftFields.imageDescription || ""}
                   onChange={handleDraftChange("imageDescription")}
-                  onKeyDown={handleDraftKeyDown("imageDescription")}
+                  onKeyDown={handleDraftKeyDown(setAgent, draftFields)}
                   placeholder="Enter image generation description (Press Enter to commit)"
                   rows={3}
                   className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
@@ -772,209 +659,28 @@ const AgentCreator: React.FC = () => {
 
         {/* Right Panel */}
         <div className="w-1/2 p-6">
-          <div className="flex gap-4 mb-6 bg-slate-900/80 p-2 rounded-lg">
-            {[
-              { id: "basic" as const, icon: Brain, label: "Basic Info" },
-              { id: "personality" as const, icon: Wand2, label: "Personality" },
-              { id: "style" as const, icon: MessageSquare, label: "Style" },
-              { id: "concept" as const, icon: Sparkles, label: "Concept" },
-            ].map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => {
-                  setActiveTab(id);
-                }}
-                className={`flex-1 flex items-center justify-center px-4 py-2 
-                            rounded-md text-gray-100 ${
-                              activeTab === id
-                                ? "bg-gradient-to-r from-cyan-600 to-orange-600"
-                                : ""
-                            }`}
-              >
-                <Icon className="w-4 h-4 mr-2" />
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Form */}
-          <div className="space-y-6">
-            {activeTab === "basic" && (
-              <div className="space-y-6">
-                {/* Agent Name => local draft */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Agent Name
-                  </label>
-                  <textarea
-                    value={draftFields.name}
-                    onChange={handleDraftChange("name")}
-                    onKeyDown={handleDraftKeyDown("name")}
-                    placeholder="Enter agent name (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-
-                {/* Universe => local draft */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Universe
-                  </label>
-                  <textarea
-                    value={draftFields.universe}
-                    onChange={handleDraftChange("universe")}
-                    onKeyDown={handleDraftKeyDown("universe")}
-                    placeholder="Enter universe (Press Enter to commit)"
-                    rows={6}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-
-                {/* Topic Expertise => local draft => commit on Enter */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Topic Expertise
-                  </label>
-                  <TraitButtons
-                    field="topic_expertise"
-                    options={agent.agent_details.topic_expertise}
-                    onTraitButtonClick={handleDeleteTrait}
-                  />
-                  <textarea
-                    value={draftTraits.topic_expertise}
-                    onChange={handleTraitDraftChange("topic_expertise")}
-                    onKeyDown={handleTraitDraftKeyDown("topic_expertise")}
-                    placeholder="Comma-separated (e.g. 'AI, Robotics, Music') (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === "personality" && (
-              <div className="space-y-6">
-                {/* Personality => local draft => commit on Enter */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Personality
-                  </label>
-                  <TraitButtons
-                    field="personality"
-                    options={agent.agent_details.personality}
-                    onTraitButtonClick={handleDeleteTrait}
-                  />
-                  <textarea
-                    value={draftTraits.personality}
-                    onChange={handleTraitDraftChange("personality")}
-                    onKeyDown={handleTraitDraftKeyDown("personality")}
-                    placeholder="Comma-separated personality traits (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-
-                {/* Backstory => local draft */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Backstory
-                  </label>
-                  <textarea
-                    value={draftFields.backstory}
-                    onChange={handleDraftChange("backstory")}
-                    onKeyDown={handleDraftKeyDown("backstory")}
-                    placeholder="Enter agent backstory (Press Enter to commit)"
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === "style" && (
-              <div className="space-y-6">
-                {/* Communication Style => local draft => commit on Enter */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Communication Style
-                  </label>
-                  <TraitButtons
-                    field="communication_style"
-                    options={agent.agent_details.communication_style}
-                    onTraitButtonClick={handleDeleteTrait}
-                  />
-                  <textarea
-                    value={draftTraits.communication_style}
-                    onChange={handleTraitDraftChange("communication_style")}
-                    onKeyDown={handleTraitDraftKeyDown("communication_style")}
-                    placeholder="Comma-separated (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-
-                {/* Hashtags => local draft => commit on Enter */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Hashtags
-                  </label>
-                  <TraitButtons
-                    field="hashtags"
-                    options={agent.agent_details.hashtags}
-                    onTraitButtonClick={handleDeleteTrait}
-                  />
-                  <textarea
-                    value={draftTraits.hashtags}
-                    onChange={handleTraitDraftChange("hashtags")}
-                    onKeyDown={handleTraitDraftKeyDown("hashtags")}
-                    placeholder="Comma-separated #tags (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-
-                {/* Emojis => local draft => commit on Enter => splitted by space */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Emojis
-                  </label>
-                  <TraitButtons
-                    field="emojis"
-                    options={agent.agent_details.emojis}
-                    onTraitButtonClick={handleDeleteTrait}
-                  />
-                  <textarea
-                    value={draftTraits.emojis}
-                    onChange={handleTraitDraftChange("emojis")}
-                    onKeyDown={handleTraitDraftKeyDown("emojis")}
-                    placeholder="Split by space (e.g. '✨ 🚀') (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === "concept" && (
-              <div className="space-y-6">
-                {/* Concept => local draft => commit on Enter */}
-                <div>
-                  <label className="text-sm text-gray-100 block mb-2">
-                    Concept
-                  </label>
-                  <textarea
-                    value={draftFields.concept}
-                    onChange={handleDraftChange("concept")}
-                    onKeyDown={handleDraftKeyDown("concept")}
-                    placeholder="Enter concept (Press Enter to commit)"
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          <AgentForm
+            draftFields={draftFields}
+            draftTraits={draftTraits}
+            handleDraftChange={handleDraftChange(setDraftFields)}
+            handleDraftKeyDown={handleDraftKeyDown(setAgent, draftFields)}
+            handleTraitDraftChange={handleTraitDraftChange(setDraftTraits)}
+            handleTraitDraftKeyDown={handleTraitDraftKeyDown(setAgent, draftTraits)}
+            handleDeleteTrait={(field: string, value: string) => {
+              setAgent((prev) => ({
+                ...prev,
+                agent_details: {
+                  ...prev.agent_details,
+                  [field]: prev.agent_details[field].filter(
+                    (trait: string) => trait !== value
+                  ),
+                },
+              }));
+            }}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            agent={agent}
+          />
 
           <button
             type="button"
