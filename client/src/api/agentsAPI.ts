@@ -210,6 +210,8 @@ export async function deleteSeason(masterFilePath: string, seasonNumber: number)
 }
 
 export async function updateBackstory(masterFilePath: string, backstory: string) {
+  console.log("Sending request to update backstory:", { masterFilePath, backstory }); // Log the request data
+
   const response = await fetch(`${BASE_URL}/agents/update-backstory`, {
     method: "PUT",
     headers: {
@@ -222,7 +224,11 @@ export async function updateBackstory(masterFilePath: string, backstory: string)
   });
 
   if (!response.ok) {
+    console.error("Failed to update backstory. HTTP status:", response.status); // Log the error status
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-  return await response.json();
+
+  const data = await response.json();
+  console.log("Backstory updated successfully. Response data:", data); // Log the response data
+  return data;
 }

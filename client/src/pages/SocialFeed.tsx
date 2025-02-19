@@ -6,6 +6,7 @@ import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 import AgentSelection from '../components/AgentSelection';
+import BackstoryEditor from '../components/socialFeedComponents/BackstoryEditor';
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
@@ -236,20 +237,29 @@ const SocialFeed: React.FC = () => {
   };
 
   const handleBackstoryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log("Backstory change detected:", e.target.value); // Log the new backstory value
     setDraftBackstory(e.target.value);
   };
 
   const handleUpdateBackstory = async () => {
-    if (!selectedCharacter) return;
+    if (!selectedCharacter) {
+      console.warn("No character selected, cannot update backstory."); // Warn if no character is selected
+      return;
+    }
 
     try {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
+      console.log("Updating backstory for:", tempName); // Log the character name
+      console.log("Backstory content:", draftBackstory); // Log the backstory content
+
       const updatedAgent = await updateBackstory(masterFilePath, draftBackstory);
+      console.log("Backstory updated successfully:", updatedAgent); // Log the updated agent
+
       setSelectedCharacter(updatedAgent);
     } catch (error) {
-      console.error("Error updating backstory:", error);
+      console.error("Error updating backstory:", error); // Log any errors
     }
   };
 
@@ -409,21 +419,11 @@ const SocialFeed: React.FC = () => {
             </div>
 
             {/* Backstory Section */}
-            <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
-              <h3 className="text-lg font-semibold text-white mb-2">Backstory</h3>
-              <textarea
-                value={draftBackstory}
-                onChange={handleBackstoryChange}
-                className="w-full p-2 bg-slate-800 text-white rounded-lg border border-cyan-800"
-                rows={4}
-              />
-              <Button
-                onClick={handleUpdateBackstory}
-                className="bg-cyan-600 hover:bg-cyan-500"
-              >
-                Update Backstory
-              </Button>
-            </div>
+            <BackstoryEditor
+              draftBackstory={draftBackstory}
+              onBackstoryChange={handleBackstoryChange}
+              onUpdateBackstory={handleUpdateBackstory}
+            />
 
             {selectedCharacter && (
               <div className="flex gap-4 justify-center p-3">

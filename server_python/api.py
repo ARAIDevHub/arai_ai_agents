@@ -583,10 +583,14 @@ def update_backstory():
         master_file_path = data.get('master_file_path')
         new_backstory = data.get('backstory')
 
+        print(f"Received request to update backstory. Master file path: {master_file_path}, New backstory: {new_backstory}") # Log the request data
+
         if not master_file_path or new_backstory is None:
+            print("Error: Master file path and backstory are required") # Log missing data
             return jsonify({"error": "Master file path and backstory are required"}), 400
 
         if not os.path.exists(master_file_path):
+            print("Error: Agent master file not found") # Log file not found
             return jsonify({"error": "Agent master file not found"}), 404
 
         # Load the existing agent data
@@ -600,10 +604,11 @@ def update_backstory():
         with open(master_file_path, 'w', encoding='utf-8') as f:
             json.dump(agent_data, f, ensure_ascii=False, indent=4)
 
+        print("Backstory updated successfully") # Log success
         return jsonify(agent_data), 200
 
     except Exception as e:
-        print(f"Error updating backstory: {str(e)}")
+        print(f"Error updating backstory: {str(e)}") # Log any exceptions
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
