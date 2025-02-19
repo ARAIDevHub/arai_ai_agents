@@ -14,6 +14,7 @@ import {
 import CryptoJS from 'crypto-js';
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import fetch from 'node-fetch';
+import { runAntiSniper } from './antiSniper';
 
 // Directory where keypair files will be stored
 const KEYS_FOLDER = __dirname + "/.keys";
@@ -198,6 +199,12 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
       console.log("Buy Results:", buyResults);
       await printSPLBalance(connection, mint.publicKey, devWallet.publicKey);
       console.log("Bonding curve after buy", await sdk.getBondingCurveAccount(mint.publicKey));
+
+      // Option to run the anti-sniper script
+      if (process.env.RUN_ANTI_SNIPER === "true") {
+        console.log("🔍 [createToken.ts] Running anti-sniper script...");
+        await runAntiSniper(mint, devWallet, decryptedWalletRows, connection, sdk, SLIPPAGE_BASIS_POINTS, initialBuyAmount);
+      }
       
       // Return the buy results
       return {
