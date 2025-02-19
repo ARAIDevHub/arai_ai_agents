@@ -66,7 +66,7 @@ export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [state, dispatch] = useReducer(agentReducer, { 
     selectedAgent: null,
     isButtonActive: false, // Initialize the button state
-    isGenerating: false,
+    isGenerating: false, // Initialize the generating state
     isLoggedIn: false,
     isPosting: false,
     delayBetweenPosts: 5, // Default delay of 5 minutes

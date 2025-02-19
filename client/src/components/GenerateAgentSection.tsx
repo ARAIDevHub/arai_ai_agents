@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAgent } from '../context/AgentContext';
 
 interface GenerateAgentSectionProps {
   onGenerate: (concept: string) => void;
@@ -6,12 +7,14 @@ interface GenerateAgentSectionProps {
 
 const GenerateAgentSection: React.FC<GenerateAgentSectionProps> = ({ onGenerate }) => {
   const [concept, setConcept] = useState('');
+  const { state, dispatch } = useAgent();
 
   const handleGenerateClick = () => {
     if (!concept) {
       console.warn("Concept is empty, cannot generate agent");
       return;
     }
+    dispatch({ type: 'SET_GENERATING', payload: true });
     onGenerate(concept);
   };
 
@@ -32,11 +35,13 @@ const GenerateAgentSection: React.FC<GenerateAgentSectionProps> = ({ onGenerate 
       <button
         type="button"
         onClick={handleGenerateClick}
-        className="mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
+        className={`mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                    from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                   text-gray-100 transition-all duration-300 flex items-center justify-center"
+                   text-gray-100 transition-all duration-300 flex items-center justify-center
+                   ${state.isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={state.isGenerating}
       >
-        Generate Agent
+        {state.isGenerating ? 'Generating...' : 'Generate Agent'}
       </button>
     </div>
   );
