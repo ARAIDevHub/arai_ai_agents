@@ -565,6 +565,46 @@ def delete_season():
         print(f"Error deleting season: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/agents/update-backstory', methods=['PUT'])
+def update_backstory():
+    """
+    Updates the backstory for a specific agent.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        backstory (str): New backstory to update
+        
+    Returns:
+        JSON: Updated agent data
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        new_backstory = data.get('backstory')
+
+        if not master_file_path or new_backstory is None:
+            return jsonify({"error": "Master file path and backstory are required"}), 400
+
+        if not os.path.exists(master_file_path):
+            return jsonify({"error": "Agent master file not found"}), 404
+
+        # Load the existing agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            agent_data = json.load(f)
+
+        # Update the backstory
+        agent_data['agent']['agent_details']['backstory'] = new_backstory
+
+        # Save the updated agent data back to the file
+        with open(master_file_path, 'w', encoding='utf-8') as f:
+            json.dump(agent_data, f, ensure_ascii=False, indent=4)
+
+        return jsonify(agent_data), 200
+
+    except Exception as e:
+        print(f"Error updating backstory: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     print("API Server starting on port 8080...")

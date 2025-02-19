@@ -208,3 +208,21 @@ export async function deleteSeason(masterFilePath: string, seasonNumber: number)
   }
   return await response.json();
 }
+
+export async function updateBackstory(masterFilePath: string, backstory: string) {
+  const response = await fetch(`${BASE_URL}/agents/update-backstory`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      master_file_path: masterFilePath,
+      backstory: backstory,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}

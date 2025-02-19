@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons, deleteSeason } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons, deleteSeason, updateBackstory } from "../api/agentsAPI";
 import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
@@ -16,7 +16,7 @@ const SocialFeed: React.FC = () => {
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
-  const [draftConcept, setDraftConcept] = useState<string>("");
+  const [draftBackstory, setDraftBackstory] = useState<string>("");
   const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
 
@@ -37,7 +37,7 @@ const SocialFeed: React.FC = () => {
 
   useEffect(() => {
     if (selectedCharacter) {
-      setDraftConcept(selectedCharacter.agent.concept || "");
+      setDraftBackstory(selectedCharacter.agent.agent_details.backstory || "");
     }
   }, [selectedCharacter]);
 
@@ -235,8 +235,22 @@ const SocialFeed: React.FC = () => {
     postLoop(unpostedPosts, state.delayBetweenPosts);
   };
 
-  const handleConceptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDraftConcept(e.target.value);
+  const handleBackstoryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDraftBackstory(e.target.value);
+  };
+
+  const handleUpdateBackstory = async () => {
+    if (!selectedCharacter) return;
+
+    try {
+      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
+
+      const updatedAgent = await updateBackstory(masterFilePath, draftBackstory);
+      setSelectedCharacter(updatedAgent);
+    } catch (error) {
+      console.error("Error updating backstory:", error);
+    }
   };
 
   const handleNumPostsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -251,14 +265,12 @@ const SocialFeed: React.FC = () => {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
-      // for (let i = 0; i < numPostsToGenerate; i++) {
       console.log(`Creating Number of Posts: ${numPostsToGenerate}`);
-        await createSeason(masterFilePath);
-        const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPostsToGenerate);
-        setSelectedCharacter(updatedAgentWithPosts);
-        const posts = getCharacterPosts(updatedAgentWithPosts);
-        setCharacterPosts(posts);
-      // }
+      await createSeason(masterFilePath);
+      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPostsToGenerate);
+      setSelectedCharacter(updatedAgentWithPosts);
+      const posts = getCharacterPosts(updatedAgentWithPosts);
+      setCharacterPosts(posts);
     } catch (error) {
       console.error("Error generating content:", error);
     } finally {
@@ -396,42 +408,41 @@ const SocialFeed: React.FC = () => {
               </div>
             </div>
 
-            {/* Concept Section */}
+            {/* Backstory Section */}
             <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
-              <h3 className="text-lg font-semibold text-white mb-2">Content Generation Concept</h3>
+              <h3 className="text-lg font-semibold text-white mb-2">Backstory</h3>
               <textarea
-                value={draftConcept}
-                onChange={handleConceptChange}
+                value={draftBackstory}
+                onChange={handleBackstoryChange}
                 className="w-full p-2 bg-slate-800 text-white rounded-lg border border-cyan-800"
                 rows={4}
               />
-              <div className="flex items-center mt-2">
-                <input
-                  type="number"
-                  value={numPostsToGenerate}
-                  onChange={handleNumPostsChange}
-                  min="1"
-                  className="w-16 p-2 bg-slate-800 text-white rounded-lg border border-cyan-800 mr-2"
-                />
-                <Button
-                  onClick={handleGenerateMultiplePosts}
-                  disabled={state.isGeneratingContent}
-                  className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {state.isGeneratingContent ? "Generating..." : `Generate ${numPostsToGenerate} Posts`}
-                </Button>
-              </div>
+              <Button
+                onClick={handleUpdateBackstory}
+                className="bg-cyan-600 hover:bg-cyan-500"
+              >
+                Update Backstory
+              </Button>
             </div>
 
             {selectedCharacter && (
               <div className="flex gap-4 justify-center p-3">
-                {/* <Button
-                  onClick={handleGenerateContent}
-                  disabled={state.isGenerating}
-                  className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {state.isGenerating ? "Generating..." : "Generate Posts Content"}
-                </Button> */}
+                <div className="flex items-center">
+                  <input
+                    type="number"
+                    value={numPostsToGenerate}
+                    onChange={handleNumPostsChange}
+                    min="1"
+                    className="w-16 p-2 bg-slate-800 text-white rounded-lg border border-cyan-800 mr-2"
+                  />
+                  <Button
+                    onClick={handleGenerateMultiplePosts}
+                    disabled={state.isGeneratingContent}
+                    className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {state.isGeneratingContent ? "Generating..." : `Generate ${numPostsToGenerate} Posts`}
+                  </Button>
+                </div>
 
                 <Button
                   onClick={handleStartPostManager}
@@ -452,7 +463,6 @@ const SocialFeed: React.FC = () => {
                 >
                   {state.isPosting ? "Posting..." : "Post to Twitter"}
                 </Button>
-
               </div>
             )}
 
