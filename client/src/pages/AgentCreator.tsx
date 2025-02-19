@@ -681,8 +681,7 @@ const AgentCreator: React.FC = () => {
     const content = activeSubmenu === 'generate' 
       ? (
         <>
-          <GenerateAgentSection onGenerate={handleGenerateAgent} />
-          {isAgentCreated && renderFullAgentCreationContent()}
+          {isAgentCreated ? renderFullAgentCreationContent() : <GenerateAgentSection onGenerate={handleGenerateAgent} />}
         </>
       )
       : renderFullAgentCreationContent();
