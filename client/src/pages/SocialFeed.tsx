@@ -22,6 +22,7 @@ const SocialFeed: React.FC = () => {
   const [draftBackstory, setDraftBackstory] = useState<string>("");
   const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('generate');
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -268,6 +269,40 @@ const SocialFeed: React.FC = () => {
     }
   };
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'generate':
+        return (
+          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+            TEST
+          </div>
+        );
+      case 'placeholder1':
+        return (
+          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-white">Placeholder 1</h3>
+            <p className="text-gray-400">Content for Placeholder 1...</p>
+          </div>
+        );
+      case 'placeholder2':
+        return (
+          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-white">Placeholder 2</h3>
+            <p className="text-gray-400">Content for Placeholder 2...</p>
+          </div>
+        );
+      case 'placeholder3':
+        return (
+          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-white">Placeholder 3</h3>
+            <p className="text-gray-400">Content for Placeholder 3...</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
@@ -293,6 +328,20 @@ const SocialFeed: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
+      <div className="flex justify-center gap-4 mb-4">
+        <Button onClick={() => setActiveTab('generate')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'generate' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          Generate
+        </Button>
+        <Button onClick={() => setActiveTab('placeholder1')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'placeholder1' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          Placeholder 1
+        </Button>
+        <Button onClick={() => setActiveTab('placeholder2')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'placeholder2' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          Placeholder 2
+        </Button>
+        <Button onClick={() => setActiveTab('placeholder3')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'placeholder3' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          Placeholder 3
+        </Button>
+      </div>
       <div className="flex p-3 items-center justify-center gap-4">
         <AgentSelection 
           selectedCharacterIndex={selectedCharacterIndex} 
@@ -312,6 +361,7 @@ const SocialFeed: React.FC = () => {
           />
         </div>
       </div>
+      {renderTabContent()}
       {selectedCharacter && (
         <div
           className="flex flex-col h-[70vh] relative"
@@ -348,58 +398,37 @@ const SocialFeed: React.FC = () => {
               onUpdateBackstory={handleUpdateBackstory}
             />
 
-            {selectedCharacter && (
-              <div className="flex gap-4 justify-center p-3">
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={numPostsToGenerate}
-                    onChange={handleNumPostsChange}
-                    min="1"
-                    className="w-16 p-2 bg-slate-800 text-white rounded-lg border border-cyan-800 mr-2"
-                  />
-                  <Button
-                    onClick={handleGenerateMultiplePosts}
-                    disabled={state.isGeneratingContent}
-                    className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {state.isGeneratingContent ? "Generating..." : `Generate ${numPostsToGenerate} Posts`}
-                  </Button>
-                </div>
+            <div className="flex gap-4 justify-center p-3">
+              <Button
+                onClick={handleStartPostManager}
+                className={`${
+                  state.isLoggedIn
+                    ? "bg-green-400 hover:bg-green-500"
+                    : "bg-orange-400 hover:bg-orange-500"
+                }`}
+              >
+                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
+              </Button>
 
-                <Button
-                  onClick={handleStartPostManager}
-                  className={`${
-                    state.isLoggedIn
-                      ? "bg-green-400 hover:bg-green-500"
-                      : "bg-orange-400 hover:bg-orange-500"
-                  }`}
-                >
-                  {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
-                </Button>
+              <Button
+                onClick={handlePostToTwitter}
+                className={`${
+                  state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                }`}
+              >
+                {state.isPosting ? "Posting..." : "Post to Twitter"}
+              </Button>
+            </div>
 
-                <Button
-                  onClick={handlePostToTwitter}
-                  className={`${
-                    state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
-                  }`}
-                >
-                  {state.isPosting ? "Posting..." : "Post to Twitter"}
-                </Button>
-              </div>
-            )}
-
-            {selectedCharacter && (
-              <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
-                <h3 className="text-lg font-semibold text-white mb-2">Select Season</h3>
-                <SeasonTabs
-                  selectedCharacter={selectedCharacter}
-                  selectedSeason={selectedSeason}
-                  handleSeasonSelect={handleSeasonSelect}
-                  handleDeleteSeason={handleDeleteSeason}
-                />
-              </div>
-            )}
+            <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
+              <h3 className="text-lg font-semibold text-white mb-2">Select Season</h3>
+              <SeasonTabs
+                selectedCharacter={selectedCharacter}
+                selectedSeason={selectedSeason}
+                handleSeasonSelect={handleSeasonSelect}
+                handleDeleteSeason={handleDeleteSeason}
+              />
+            </div>
 
             <CharacterPosts
               characterPosts={characterPosts}

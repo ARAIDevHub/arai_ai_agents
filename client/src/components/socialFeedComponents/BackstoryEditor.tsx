@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '../../components/button';
 import { useAgent } from '../../context/AgentContext';
 
@@ -10,6 +10,20 @@ interface BackstoryEditorProps {
 
 const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBackstoryChange, onUpdateBackstory }) => {
   const { state } = useAgent();
+  
+  // Add state for numPostsToGenerate
+  const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
+
+  // Function to handle changes in the number input
+  const handleNumPostsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNumPostsToGenerate(Number(e.target.value));
+  };
+
+  // Function to handle generating multiple posts
+  const handleGenerateMultiplePosts = () => {
+    // Logic to generate multiple posts
+    console.log(`Generating ${numPostsToGenerate} posts...`);
+  };
 
   console.log("Rendering BackstoryEditor with draftBackstory:", draftBackstory);
 
@@ -29,6 +43,20 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBac
         disabled={state.isUpdatingBackstory}
       >
         {state.isUpdatingBackstory ? "Updating..." : "Update Content Description"}
+      </Button>
+      <input
+        type="number"
+        value={numPostsToGenerate}
+        onChange={handleNumPostsChange}
+        min="1"
+        className="w-16 p-2 bg-slate-800 text-white rounded-lg border border-cyan-800 mr-2"
+      />
+      <Button
+        onClick={handleGenerateMultiplePosts}
+        disabled={state.isGeneratingContent}
+        className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {state.isGeneratingContent ? "Generating..." : `Generate ${numPostsToGenerate} Posts`}
       </Button>
     </div>
   );
