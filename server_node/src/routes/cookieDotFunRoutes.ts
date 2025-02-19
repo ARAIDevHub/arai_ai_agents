@@ -3,12 +3,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-const envPath = path.resolve(__dirname, '../../../.env');
-const COOKIE_FUN_API_KEY = dotenv.config({ path: envPath }).parsed?.COOKIE_FUN_API_KEY || '';
-if (!COOKIE_FUN_API_KEY) {
-    throw new Error('Missing required environment variable: COOKIE_FUN_API_KEY');
-}
-console.log('COOKIE_FUN_API_KEY:', COOKIE_FUN_API_KEY);
+import csv from 'csv-parser';
+// const envPath = path.resolve(__dirname, '../../../.env'); // REMOVE THIS
+// const COOKIE_FUN_API_KEY = dotenv.config({ path: envPath }).parsed?.COOKIE_FUN_API_KEY || ''; // REMOVE THIS
+// if (!COOKIE_FUN_API_KEY) { // REMOVE THIS
+//     throw new Error('Missing required environment variable: COOKIE_FUN_API_KEY'); // REMOVE THIS
+// }
+// console.log('COOKIE_FUN_API_KEY:', COOKIE_FUN_API_KEY); // REMOVE THIS
 // Create router
 const router = express.Router();
 
@@ -38,7 +39,8 @@ if (!process.env.COOKIE_FUN_API_KEY) {
 const api = axios.create({
     baseURL: BASE_URL,
     headers: {
-        'x-api-key': `${COOKIE_FUN_API_KEY}`,
+        //'x-api-key': `${COOKIE_FUN_API_KEY}`,
+        'x-api-key': process.env.COOKIE_FUN_API_KEY,  // Changed from COOKIE_FUN_API_KEY to process.env.COOKIE_FUN_API_KEY
         'Content-Type': 'application/json'
     }
 });
