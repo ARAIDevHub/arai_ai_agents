@@ -116,17 +116,6 @@ function App() {
           >
             Social Dashboard
           </Link>
-              {/* <Link
-                to="/cookie-fun-testing"
-                className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/cookie-fun-testing")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
-                  }`}
-              >
-                API Testing
-              </Link> */}
             </div>
           </nav>
 

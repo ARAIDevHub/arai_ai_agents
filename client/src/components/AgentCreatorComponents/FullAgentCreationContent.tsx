@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Brain, RefreshCcw, Save } from "lucide-react";
 import LoadingBar from "../LoadingBar";
 import AgentForm from "./AgentForm";
@@ -55,6 +55,14 @@ const FullAgentCreationContent: React.FC<FullAgentCreationContentProps> = ({
   setIsGenerating,
   activeTab
 }) => {
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleSaveClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    await handleSubmitCreateAgent(e);
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
+  };
+
   return (
     <div className="flex">
       {/* Left Panel */}
@@ -320,17 +328,15 @@ const FullAgentCreationContent: React.FC<FullAgentCreationContentProps> = ({
 
         <button
           type="button"
-          onClick={(e) =>
-            handleSubmitCreateAgent(
-              e as unknown as React.FormEvent<HTMLFormElement>
-            )
-          }
-          className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
-                       from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                       text-gray-100 transition-all duration-300 flex items-center justify-center"
+          onClick={handleSaveClick}
+          className={`mt-6 w-full px-4 py-2 rounded-md transition-all duration-300 flex items-center justify-center ${
+            isSaved
+              ? 'bg-green-600 hover:bg-green-700'
+              : 'bg-gradient-to-r from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700'
+          } text-gray-100`}
         >
           <Save className="w-4 h-4 mr-2" />
-          Save Agent
+          {isSaved ? 'Saved' : 'Save Agent'}
         </button>
       </div>
     </div>

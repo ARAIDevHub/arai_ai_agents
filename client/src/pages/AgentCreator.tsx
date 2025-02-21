@@ -2,13 +2,12 @@ import React, { useState, ChangeEvent, useEffect } from "react";
 import { createAgent, createRandomAgent } from "../api/agentsAPI";
 import {
   GeneratedImage,
-  ProfileImageOption,
-  Agent
+  ProfileImageOption
 } from "../interfaces/AgentInterfaces";
 import useCharacters from "../hooks/useCharacters";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 import { handleDraftChange, handleDraftKeyDown, handleTraitDraftChange, handleTraitDraftKeyDown } from "../utils/AgentCreatorUtils/agentUtils";
-import GenerateAgentSection from '../components/GenerateAgentSection';
+import GenerateAgentSection from '../components/AgentCreatorComponents/GenerateAgentSection';
 import FullAgentCreationContent from '../components/AgentCreatorComponents/FullAgentCreationContent'; // Import the new component
 
 
@@ -217,10 +216,6 @@ const AgentCreator: React.FC = () => {
   // Add state to manage the active submenu
   const [activeSubmenu, setActiveSubmenu] = useState<'create' | 'generate'>('generate');
 
-
-  // Add state to store the list of agents
-  const [agents, setAgents] = useState<Agent[]>([]);
-
   useEffect(() => {
     console.log("Agent state initialized:", agent);
   }, []);
@@ -297,7 +292,6 @@ const AgentCreator: React.FC = () => {
       await createAgent(updatedAgent);
 
       setAgent(updatedAgent);
-      setAgents((prevAgents) => [...prevAgents, updatedAgent as Agent]);
       console.log("Submit create agent", agent)
     } catch (error) {
       console.error("[AgentCreator] - Error creating agent:", error);
@@ -449,7 +443,7 @@ const AgentCreator: React.FC = () => {
   };
 
   return (
-    <div className="border-b border-orange-500/30">
+    <div className="border-orange-500/30">
       <div className="flex p-4 gap-4">
         {subMenuTabs.map(submenuTab => (
           <button
