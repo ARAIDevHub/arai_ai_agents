@@ -6,9 +6,10 @@ interface BackstoryEditorProps {
   draftBackstory: string;
   onBackstoryChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onUpdateBackstory: () => void;
+  onGenerateMultiplePosts: (numPosts: number) => void;
 }
 
-const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBackstoryChange, onUpdateBackstory }) => {
+const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBackstoryChange, onUpdateBackstory, onGenerateMultiplePosts }) => {
   const { state } = useAgent();
   
   // Add state for numPostsToGenerate
@@ -17,12 +18,6 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBac
   // Function to handle changes in the number input
   const handleNumPostsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNumPostsToGenerate(Number(e.target.value));
-  };
-
-  // Function to handle generating multiple posts
-  const handleGenerateMultiplePosts = () => {
-    // Logic to generate multiple posts
-    console.log(`Generating ${numPostsToGenerate} posts...`);
   };
 
   console.log("Rendering BackstoryEditor with draftBackstory:", draftBackstory);
@@ -35,11 +30,11 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBac
         onChange={onBackstoryChange}
         className="w-full p-2 bg-slate-800 text-white rounded-lg border border-cyan-800"
         placeholder="Enter your backstory here..."
-        rows={4}
+        rows={8}
       />
       <Button
         onClick={onUpdateBackstory}
-        className="bg-cyan-600 hover:bg-cyan-500"
+        className="bg-cyan-600 hover:bg-cyan-500 p-2 "
         disabled={state.isUpdatingBackstory}
       >
         {state.isUpdatingBackstory ? "Updating..." : "Update Content Description"}
@@ -52,7 +47,7 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ draftBackstory, onBac
         className="w-16 p-2 bg-slate-800 text-white rounded-lg border border-cyan-800 mr-2"
       />
       <Button
-        onClick={handleGenerateMultiplePosts}
+        onClick={() => onGenerateMultiplePosts(numPostsToGenerate)}
         disabled={state.isGeneratingContent}
         className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >

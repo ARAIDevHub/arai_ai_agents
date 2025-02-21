@@ -6,9 +6,9 @@ import {
   CheckCircle,
   RefreshCcw,
 } from 'lucide-react';
-import { Agent } from '../interfaces/AgentInterfaces';
-import LoadingBar from './LoadingBar';
-import { useAgent } from '../context/AgentContext';
+import { Agent } from '../../interfaces/AgentInterfaces';
+import LoadingBar from '../LoadingBar';
+import { useAgent } from '../../context/AgentContext';
 
 // Define the props for AgentCard
 interface RandomAgentCardProps {

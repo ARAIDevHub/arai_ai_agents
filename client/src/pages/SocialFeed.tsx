@@ -22,7 +22,19 @@ const SocialFeed: React.FC = () => {
   const [draftBackstory, setDraftBackstory] = useState<string>("");
   const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('generate');
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>('generate');
+  const [activeSubmenu, setActiveSubmenu] = useState<'sub1' | 'sub2'>('sub1');
+
+  // Define the type for main tabs
+  type MainTab = 'generate' | 'placeholder1' | 'placeholder2' | 'placeholder3';
+
+  // Define the type for submenu tabs
+  type SubmenuTab = { id: 'sub1' | 'sub2'; label: string };
+
+  const subMenuTabs: SubmenuTab[] = [
+    { id: 'sub1', label: 'Submenu 1' },
+    { id: 'sub2', label: 'Submenu 2' }
+  ];
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -226,7 +238,7 @@ const SocialFeed: React.FC = () => {
     setNumPostsToGenerate(Number(e.target.value));
   };
 
-  const handleGenerateMultiplePosts = async () => {
+  const handleGenerateMultiplePosts = async (numPosts: number) => {
     if (!selectedCharacter || state.isGeneratingContent) return;
 
     dispatch({ type: 'SET_GENERATING_CONTENT', payload: true });
@@ -234,9 +246,9 @@ const SocialFeed: React.FC = () => {
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
-      console.log(`Creating Number of Posts: ${numPostsToGenerate}`);
+      console.log(`Creating Number of Posts: ${numPosts}`);
       await createSeason(masterFilePath);
-      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPostsToGenerate);
+      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPosts);
       setSelectedCharacter(updatedAgentWithPosts);
       const posts = getCharacterPosts(updatedAgentWithPosts);
       setCharacterPosts(posts);
@@ -269,29 +281,21 @@ const SocialFeed: React.FC = () => {
     }
   };
 
+  // Update renderTabContent to render based on activeMainTab
   const renderTabContent = () => {
-    switch (activeTab) {
+    switch (activeMainTab) {
       case 'generate':
         return (
           <div className="p-4 bg-slate-900 rounded-lg shadow-md">
             <div className="flex flex-col items-center">
-              <label htmlFor="numPosts" className="text-lg font-semibold text-white mb-2">
-                Number of Posts to Generate:
-              </label>
-              <input
-                id="numPosts"
-                type="number"
-                value={numPostsToGenerate}
-                onChange={handleNumPostsChange}
-                min="1"
-                className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 font-semibold mb-4"
-              />
-              <Button
-                onClick={handleGenerateMultiplePosts}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-              >
-                Generate {numPostsToGenerate} Posts
-              </Button>
+
+              <BackstoryEditor
+              draftBackstory={draftBackstory}
+              onBackstoryChange={handleBackstoryChange}
+              onUpdateBackstory={handleUpdateBackstory}
+              onGenerateMultiplePosts={handleGenerateMultiplePosts}
+            />
+
             </div>
           </div>
         );
@@ -321,21 +325,17 @@ const SocialFeed: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
-        Loading ARAI AI Agents Network...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-red-800 text-center mt-8">
-        No Existing Agents - {error.message}
-      </div>
-    );
-  }
+  // Function to render the content based on the active submenu
+  const renderSubmenuContent = () => {
+    switch (activeSubmenu) {
+      case 'sub1':
+        return <div>Content for Submenu 1</div>;
+      case 'sub2':
+        return <div>Content for Submenu 2</div>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-4xl">
@@ -347,19 +347,32 @@ const SocialFeed: React.FC = () => {
         />
       )}
       <div className="flex justify-center gap-4 mb-4">
-        <Button onClick={() => setActiveTab('generate')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'generate' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+        <Button onClick={() => setActiveMainTab('generate')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'generate' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
           Generate
         </Button>
-        <Button onClick={() => setActiveTab('placeholder1')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'placeholder1' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+        <Button onClick={() => setActiveMainTab('placeholder1')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'placeholder1' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
           Placeholder 1
         </Button>
-        <Button onClick={() => setActiveTab('placeholder2')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'placeholder2' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+        <Button onClick={() => setActiveMainTab('placeholder2')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'placeholder2' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
           Placeholder 2
         </Button>
-        <Button onClick={() => setActiveTab('placeholder3')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeTab === 'placeholder3' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+        <Button onClick={() => setActiveMainTab('placeholder3')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'placeholder3' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
           Placeholder 3
         </Button>
       </div>
+      <div className="flex justify-center gap-4 mb-4">
+        {subMenuTabs.map(submenuTab => (
+          <Button
+            key={submenuTab.id}
+            onClick={() => setActiveSubmenu(submenuTab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${activeSubmenu === submenuTab.id ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}
+          >
+            {submenuTab.label}
+          </Button>
+        ))}
+      </div>
+      {renderTabContent()}
+      {renderSubmenuContent()}
       <div className="flex p-3 items-center justify-center gap-4">
         <AgentSelection 
           selectedCharacterIndex={selectedCharacterIndex} 
@@ -379,7 +392,6 @@ const SocialFeed: React.FC = () => {
           />
         </div>
       </div>
-      {renderTabContent()}
       {selectedCharacter && (
         <div
           className="flex flex-col h-[70vh] relative"
@@ -410,11 +422,7 @@ const SocialFeed: React.FC = () => {
               </div>
             </div>
 
-            <BackstoryEditor
-              draftBackstory={draftBackstory}
-              onBackstoryChange={handleBackstoryChange}
-              onUpdateBackstory={handleUpdateBackstory}
-            />
+
 
             <div className="flex gap-4 justify-center p-3">
               <Button

@@ -7,8 +7,8 @@ import {
 import useCharacters from "../hooks/useCharacters";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
 import { handleDraftChange, handleDraftKeyDown, handleTraitDraftChange, handleTraitDraftKeyDown } from "../utils/AgentCreatorUtils/agentUtils";
-import GenerateAgentSection from '../components/AgentCreatorComponents/GenerateAgentSection';
-import FullAgentCreationContent from '../components/AgentCreatorComponents/FullAgentCreationContent'; // Import the new component
+import GenerateAgentSection from '../components/agent-creator-components/GenerateAgentSection';
+import FullAgentCreationContent from '../components/agent-creator-components/FullAgentCreationContent'; // Import the new component
 
 
 /**
