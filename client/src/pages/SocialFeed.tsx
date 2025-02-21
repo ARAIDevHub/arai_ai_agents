@@ -10,6 +10,7 @@ import BackstoryEditor from '../components/socialFeedComponents/BackstoryEditor'
 import CharacterPosts from '../components/socialFeedComponents/CharacterPosts';
 import SeasonTabs from '../components/socialFeedComponents/SeasonTabs';
 import { formatTime, getCharacterPosts } from '../utils/SocialFeedUtils/SocialFeedUtils.ts';
+import { Edit, Eye, Send } from 'lucide-react';
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
@@ -61,6 +62,10 @@ const SocialFeed: React.FC = () => {
       setCharacterPosts(posts);
     }
   }, [selectedCharacter, selectedSeason]);
+
+  useEffect(() => {
+    setUnpostedCount(characterPosts.filter(post => !post.post_posted).length);
+  }, [characterPosts]);
 
   const handleCharacterSelect = (index: number) => {
     const char = characters[index];
@@ -147,8 +152,9 @@ const SocialFeed: React.FC = () => {
           }
         });
 
-        setCharacterPosts([...characterPosts]);
-        setUnpostedCount(prevCount => prevCount - 1);
+        const updatedPosts = getCharacterPosts(selectedCharacter);
+        setCharacterPosts(updatedPosts);
+        setUnpostedCount(updatedPosts.filter(post => !post.post_posted).length);
 
         let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
         await updateSeasons(agentName, updatedSeasons);
@@ -299,61 +305,89 @@ const SocialFeed: React.FC = () => {
     );
   };
 
+  // Define a reusable component for the background
+  const TabContentWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div
+      className="flex flex-col h-[70vh] relative"
+      style={{
+        backgroundImage: selectedCharacter?.agent.profile_image?.details?.url
+          ? `url(${selectedCharacter.agent.profile_image.details.url})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="absolute inset-0 bg-slate-900/80" />
+      <div className="relative z-10 flex flex-col h-full justify-center items-center">
+        {children}
+      </div>
+    </div>
+  );
+
   // Update renderTabContent to render based on activeMainTab
   const renderTabContent = () => {
     switch (activeMainTab) {
       case 'generate':
         return (
-          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
-            <div className="flex flex-col items-center">
-              <BackstoryEditor
-                selectedCharacter={selectedCharacter}
-                setSelectedCharacter={setSelectedCharacter}
-              />
+          <TabContentWrapper>
+            <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+              <div className="flex flex-col items-center">
+                <BackstoryEditor
+                  selectedCharacter={selectedCharacter}
+                  setSelectedCharacter={setSelectedCharacter}
+                  handleGenerateMultiplePosts={handleGenerateMultiplePosts}
+                />
+              </div>
             </div>
-          </div>
+          </TabContentWrapper>
         );
       case 'displayContent':
-        return renderAgentContent();
+        return (
+          <TabContentWrapper>
+            {renderAgentContent()}
+          </TabContentWrapper>
+        );
       case 'postContent':
         return (
-          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
-            
-            <p className="text-gray-400 mb-2 font-semibold">
-              {unpostedCount} Posts Remaining
-            </p>
-            <div className=" text-white text-lg p-3 font-semibold">
-              Next post in: {formatTime(state.timeLeft)}
-            </div>
-            <div className="flex gap-4 justify-center p-3">
-
-              <Button
-                onClick={handleStartPostManager}
-                className={`${state.isLoggedIn
+          <TabContentWrapper>
+            <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+              <p className="text-gray-400 mb-2 font-semibold">
+                {unpostedCount} Posts Remaining
+              </p>
+              <div className="text-white text-lg p-3 font-semibold">
+                Next post in: {formatTime(state.timeLeft)}
+              </div>
+              <div className="flex gap-4 justify-center p-3">
+                <Button
+                  onClick={handleStartPostManager}
+                  className={`${state.isLoggedIn
                     ? "bg-green-400 hover:bg-green-500"
                     : "bg-orange-400 hover:bg-orange-500"
                   }`}
-              >
-                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
-              </Button>
+                >
+                  {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
+                </Button>
 
-              <Button
-                onClick={handlePostToTwitter}
-                className={`${state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                <Button
+                  onClick={handlePostToTwitter}
+                  className={`${state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
                   }`}
-              >
-                {state.isPosting ? "Posting..." : "Post to Twitter"}
-              </Button>
+                >
+                  {state.isPosting ? "Posting..." : "Post to Twitter"}
+                </Button>
+              </div>
             </div>
-
-          </div>
+          </TabContentWrapper>
         );
       case 'placeholder3':
         return (
-          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-white">Placeholder 3</h3>
-            <p className="text-gray-400">Content for Placeholder 3...</p>
-          </div>
+          <TabContentWrapper>
+            <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+              <h3 className="text-lg font-bold text-white">Placeholder 3</h3>
+              <p className="text-gray-400">Content for Placeholder 3...</p>
+            </div>
+          </TabContentWrapper>
         );
       default:
         return null;
@@ -384,14 +418,17 @@ const SocialFeed: React.FC = () => {
         />
       )}
 
-      <div className="flex justify-center gap-4 mb-4 p-4 ">
+      <div className="flex justify-left gap-4 mb-4 p-4 ">
         <Button onClick={() => setActiveMainTab('generate')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'generate' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          <Edit size={20} />
           Generate
         </Button>
         <Button onClick={() => setActiveMainTab('displayContent')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'displayContent' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          <Eye size={20} />
           Display Content
         </Button>
         <Button onClick={() => setActiveMainTab('postContent')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'postContent' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          <Send size={20} />
           Post Content
         </Button>
 

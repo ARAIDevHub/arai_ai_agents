@@ -27,7 +27,8 @@ type Action =
   | { type: 'SET_HAS_POSTED'; payload: boolean }
   | { type: 'SET_GENERATING_CONTENT'; payload: boolean }
   | { type: 'SET_UPDATING_BACKSTORY'; payload: boolean }
-  | { type: 'SET_GENERATING_AGENT'; payload: boolean }; // Add this line
+  | { type: 'SET_GENERATING_AGENT'; payload: boolean }
+  | { type: 'TOGGLE_BUTTON_STATE'; payload: boolean }; // Add this line
 
 // Create the context
 const AgentContext = createContext<{
@@ -60,6 +61,8 @@ const agentReducer = (state: AgentState, action: Action): AgentState => {
       return { ...state, isUpdatingBackstory: action.payload }; // Add this case
     case 'SET_GENERATING_AGENT':
       return { ...state, isGeneratingAgent: action.payload }; // Add this case
+    case 'TOGGLE_BUTTON_STATE':
+      return { ...state, isButtonActive: action.payload }; // Handle button state
     default:
       throw new Error(`Unhandled action type: ${action}`);
   }
