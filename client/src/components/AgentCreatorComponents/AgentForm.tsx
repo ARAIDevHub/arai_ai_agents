@@ -74,7 +74,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
               onChange={handleDraftChange("universe")}
               onKeyDown={handleDraftKeyDown("universe")}
               placeholder="Enter universe (Press Enter to commit)"
-              rows={2}
+              rows={6}
               className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
             />
           </div>
@@ -108,7 +108,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
               onChange={handleDraftChange("backstory")}
               onKeyDown={handleDraftKeyDown("backstory")}
               placeholder="Enter agent backstory (Press Enter to commit)"
-              rows={3}
+              rows={6}
               className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
             />
           </div>
@@ -181,7 +181,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
               onChange={handleDraftChange("concept")}
               onKeyDown={handleDraftKeyDown("concept")}
               placeholder="Enter concept (Press Enter to commit)"
-              rows={2}
+              rows={6}
               className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
             />
           </div>

@@ -14,7 +14,7 @@ const GenerateAgentSection: React.FC<GenerateAgentSectionProps> = ({ onGenerate 
       console.warn("Concept is empty, cannot generate agent");
       return;
     }
-    dispatch({ type: 'SET_GENERATING', payload: true });
+    dispatch({ type: 'SET_GENERATING_AGENT', payload: true });
     onGenerate(concept);
   };
 
@@ -35,13 +35,12 @@ const GenerateAgentSection: React.FC<GenerateAgentSectionProps> = ({ onGenerate 
       <button
         type="button"
         onClick={handleGenerateClick}
-        className={`mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
+        className="mt-4 w-full px-4 py-2 rounded-md bg-gradient-to-r 
                    from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                   text-gray-100 transition-all duration-300 flex items-center justify-center
-                   ${state.isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
-        disabled={state.isGenerating}
+                   text-gray-100 transition-all duration-300 flex items-center justify-center"
+        disabled={state.isGeneratingAgent}
       >
-        {state.isGenerating ? 'Generating...' : 'Generate Agent'}
+        {state.isGeneratingAgent ? "Generating..." : "Generate Agent"}
       </button>
     </div>
   );

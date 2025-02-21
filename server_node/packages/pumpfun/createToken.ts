@@ -18,8 +18,8 @@ import { runAntiSniper } from './antiSniper';
 
 // Directory where keypair files will be stored
 const KEYS_FOLDER = __dirname + "/.keys";
-// Defines acceptable price slippage of 1% (100 basis points)
-const SLIPPAGE_BASIS_POINTS = 100n;
+// Defines acceptable price slippage of 5% (500 basis points)
+const SLIPPAGE_BASIS_POINTS = 500n;
 
 // Define an interface for the token creation parameters
 interface TokenCreationParams {
@@ -60,7 +60,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
 
   // Decrypt the encryptedWalletRows
   const decryptedWalletRowsString = CryptoJS.AES.decrypt(encryptedWalletRows, secretKey).toString(CryptoJS.enc.Utf8);
-
+  console.log("🔍 [createToken.ts] Decrypted wallet rows:", decryptedWalletRowsString);
   let decryptedWalletRows;
   try {
     decryptedWalletRows = JSON.parse(decryptedWalletRowsString);
@@ -98,7 +98,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   const mint = Keypair.generate();
   console.log("🔑 [createToken.ts] The mint address is", mint.publicKey.toBase58())
 
-  
+
   // Initialize PumpFun SDK
   console.log("🛠 [createToken.ts] Initializing PumpFun SDK...");
   let sdk = new PumpFunSDK(provider);
@@ -120,7 +120,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
   console.log(`Bounding curve account: ${boundingCurveAccount ? "exists" : "does not exist"}`);
 
 
-  
+
   if (!boundingCurveAccount) {
     let imagePath = params.imagePath;
     if (imagePath && imagePath.startsWith('http')) {
@@ -153,7 +153,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
     console.log("Token metadata:", tokenMetadata)
     console.log("Buy amount:", buyAmount)
     console.log("Slippage basis points:", SLIPPAGE_BASIS_POINTS)
-    
+
 
     // Create bonding curve with passed parameters
     let createResults = await sdk.createAndBuy(
@@ -167,6 +167,16 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
         unitPrice: params.unitPrice,
       },
     );
+
+    console.log("[createToken.ts] - Running anti-sniper script =", process.env.RUN_ANTI_SNIPER);
+    // Declare sniperResults outside the if block
+    let sniperResults;
+    // Option to run the anti-sniper script
+    if (process.env.RUN_ANTI_SNIPER === "True") {
+      console.log("🔍 [createToken.ts] Running anti-sniper script...");
+      sniperResults = await runAntiSniper(mint, devWallet, decryptedWalletRows, connection, sdk, SLIPPAGE_BASIS_POINTS, initialBuyAmount);
+    }
+    console.log("🔍 [createToken.ts] Anti-sniper script completed", sniperResults);
 
     if (createResults.success) {
 
@@ -182,7 +192,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
       throw new Error("Token creation failed");
     }
   } else {
-    console.log("💰 [createToken.ts]  Executing buy transaction...");
+    console.log("💰 [createToken.ts]  Executing buy transaction without sniper...");
     let buyResults = await sdk.buy(
       devWallet,
       mint.publicKey,
@@ -200,12 +210,8 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
       await printSPLBalance(connection, mint.publicKey, devWallet.publicKey);
       console.log("Bonding curve after buy", await sdk.getBondingCurveAccount(mint.publicKey));
 
-      // Option to run the anti-sniper script
-      if (process.env.RUN_ANTI_SNIPER === "true") {
-        console.log("🔍 [createToken.ts] Running anti-sniper script...");
-        await runAntiSniper(mint, devWallet, decryptedWalletRows, connection, sdk, SLIPPAGE_BASIS_POINTS, initialBuyAmount);
-      }
-      
+
+
       // Return the buy results
       return {
         success: true,

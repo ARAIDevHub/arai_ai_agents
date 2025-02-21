@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { Brain,  Save, RefreshCcw } from "lucide-react";
+import { Brain, Save, RefreshCcw } from "lucide-react";
 import { createAgent, createRandomAgent } from "../api/agentsAPI";
 import {
   GeneratedImage,
@@ -37,6 +37,14 @@ const AgentCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"basic" | "personality" | "style" | "concept">(
     "basic"
   );
+
+  // Define the type for submenu tabs
+  type SubmenuTab = { id: "create" | "generate"; label: string };
+
+  const subMenuTabs: SubmenuTab[] = [
+    { id: 'generate', label: 'Generate Agent' },
+    { id: 'create', label: 'Create Agent' }
+  ];
 
   /**
    * Core agent state
@@ -227,9 +235,6 @@ const AgentCreator: React.FC = () => {
   // Add state to store the list of agents
   const [agents, setAgents] = useState<Agent[]>([]);
 
-  // Add a state to track if the agent creation is complete
-  const [isAgentCreated, setIsAgentCreated] = useState(false);
-
   useEffect(() => {
     console.log("Agent state initialized:", agent);
   }, []);
@@ -257,27 +262,27 @@ const AgentCreator: React.FC = () => {
         backstory: draftFields.backstory || agent.agent_details.backstory,
         personality: draftTraits.personality
           ? draftTraits.personality
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
           : agent.agent_details.personality,
         communication_style: draftTraits.communication_style
           ? draftTraits.communication_style
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
           : agent.agent_details.communication_style,
         topic_expertise: draftTraits.topic_expertise
           ? draftTraits.topic_expertise
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
           : agent.agent_details.topic_expertise,
         hashtags: draftTraits.hashtags
           ? draftTraits.hashtags
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
           : agent.agent_details.hashtags,
         emojis: draftTraits.emojis
           ? draftTraits.emojis.split(" ").filter(Boolean)
@@ -288,14 +293,14 @@ const AgentCreator: React.FC = () => {
       profile_image_options: agent.profile_image_options.map((option, index) =>
         index === 0
           ? {
-              ...option,
-              generations_by_pk: {
-                ...option.generations_by_pk,
-                prompt:
-                  draftFields.imageDescription ||
-                  option.generations_by_pk?.prompt,
-              },
-            }
+            ...option,
+            generations_by_pk: {
+              ...option.generations_by_pk,
+              prompt:
+                draftFields.imageDescription ||
+                option.generations_by_pk?.prompt,
+            },
+          }
           : option
       ),
       selectedImage: agent.selectedImage,
@@ -309,7 +314,6 @@ const AgentCreator: React.FC = () => {
       setTimeout(() => setShowSuccessMessage(false), 3000);
       setAgent(updatedAgent);
       setAgents((prevAgents) => [...prevAgents, updatedAgent as Agent]);
-      setIsAgentCreated(true); // Set the state to true once the agent is created
     } catch (error) {
       console.error("[AgentCreator] - Error creating agent:", error);
     }
@@ -385,7 +389,8 @@ const AgentCreator: React.FC = () => {
       );
       if (index !== -1 && index !== selectedCharacterIndex) {
         setSelectedCharacterIndex(index);
-        handleCharacterSelect({ target: { value: index.toString() } } as ChangeEvent<HTMLSelectElement>);
+        // Avoid calling handleCharacterSelect if it causes state updates
+        // handleCharacterSelect({ target: { value: index.toString() } } as ChangeEvent<HTMLSelectElement>);
       }
     }
   }, [state.selectedAgent, characters]);
@@ -411,9 +416,28 @@ const AgentCreator: React.FC = () => {
       }
 
       setAgent(agentData.agent);
-      setIsAgentCreated(true); // Set the state to true once the agent is created
+      setActiveSubmenu('create'); // Switch to 'create' to show the rest of the page
     } catch (error) {
       console.error("Error generating agent:", error);
+    } finally {
+      dispatch({ type: 'SET_GENERATING_AGENT', payload: false }); // Reset generating state
+    }
+  };
+
+  // Function to render the content based on the active submenu
+  const renderSubmenuContent = () => {
+    console.log("Rendering submenu content");
+    console.log("Active submenu:", activeSubmenu);
+    switch (activeSubmenu) {
+      case 'generate':
+        console.log("Case Rendering generate content");
+        return <GenerateAgentSection onGenerate={handleGenerateAgent} />
+      case 'create':
+        console.log("Case Rendering create content");
+        return renderFullAgentCreationContent();
+
+
+
     }
   };
 
@@ -421,7 +445,7 @@ const AgentCreator: React.FC = () => {
   const renderFullAgentCreationContent = () => {
     console.log("Rendering full agent creation content");
     return (
-      <>
+      <div className="flex">
         {/* Left Panel */}
         <div className="w-1/2 p-6 border-r border-orange-500/20">
           <div className="h-full flex flex-col space-y-6">
@@ -433,8 +457,8 @@ const AgentCreator: React.FC = () => {
               style={{
                 backgroundImage:
                   agent.selectedImage !== undefined &&
-                  agent.profile_image?.details?.url &&
-                  loadingProgress === 0
+                    agent.profile_image?.details?.url &&
+                    loadingProgress === 0
                     ? `url(${agent.profile_image.details.url})`
                     : "none",
                 backgroundSize: "cover",
@@ -454,11 +478,10 @@ const AgentCreator: React.FC = () => {
               <button
                 className={`absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
                            from-orange-600 to-red-600 text-white flex items-center
-                           ${
-                             isGenerating
-                               ? "opacity-50 cursor-not-allowed"
-                               : "hover:from-orange-700 hover:to-red-700"
-                           }`}
+                           ${isGenerating
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:from-orange-700 hover:to-red-700"
+                  }`}
                 onClick={async () => {
                   if (isGenerating) return; // Prevent multiple clicks while generating
 
@@ -541,11 +564,10 @@ const AgentCreator: React.FC = () => {
                     key={index}
                     className={`relative aspect-square bg-gradient-to-br from-slate-900/80 
                               via-cyan-900/20 to-orange-900/20 rounded-lg cursor-pointer 
-                              ${
-                                agent.selectedImage === index
-                                  ? "ring-2 ring-orange-500"
-                                  : ""
-                              }`}
+                              ${agent.selectedImage === index
+                        ? "ring-2 ring-orange-500"
+                        : ""
+                      }`}
                     onClick={async () => {
 
                       try {
@@ -644,8 +666,8 @@ const AgentCreator: React.FC = () => {
                   ...prev.agent_details,
                   [field as AgentDetailsField]: Array.isArray(prev.agent_details[field as AgentDetailsField])
                     ? (prev.agent_details[field as AgentDetailsField] as string[]).filter(
-                        (trait: string) => trait !== value
-                      )
+                      (trait: string) => trait !== value
+                    )
                     : prev.agent_details[field as AgentDetailsField], // If it's not an array, return as is
                 },
               }));
@@ -654,6 +676,36 @@ const AgentCreator: React.FC = () => {
             setActiveTab={handleTabChange}
             agent={agent}
           />
+
+          <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
+            <label className="text-sm text-gray-100 block mb-2">
+              Select Existing Character
+            </label>
+            {loading ? (
+              <div className="text-gray-100">Loading characters...</div>
+            ) : error ? (
+              <div className="text-red-400">
+                No Existing Agents - {error.message}
+              </div>
+            ) : (
+              <>
+                <select
+                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border 
+                             border-orange-500/30 text-gray-100 focus:ring-2 
+                             focus:ring-orange-500/50 focus:outline-none"
+                  onChange={handleCharacterSelect}
+                  value={selectedCharacterIndex}
+                >
+                  <option value={-1}>-- Select a Character --</option>
+                  {characters.map((char, index) => (
+                    <option key={index} value={index}>
+                      {char.agent?.agent_details?.name || "Unnamed Character"}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+          </div>
 
           <button
             type="button"
@@ -670,68 +722,29 @@ const AgentCreator: React.FC = () => {
             Save Agent
           </button>
         </div>
-      </>
-    );
-  };
-
-  // Main render function
-  const renderGenerateContent = () => {
-    console.log("Rendering generate content");
-    // Determine which content to render based on the active submenu
-    const content = activeSubmenu === 'generate' 
-      ? (
-        <>
-          {isAgentCreated ? renderFullAgentCreationContent() : <GenerateAgentSection onGenerate={handleGenerateAgent} />}
-        </>
-      )
-      : renderFullAgentCreationContent();
-
-    return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-cyan-950/50">
-        {/* Submenu for Create and Generate Agent */}
-        <div className="border-b border-orange-500/30">
-          <div className="flex p-4 gap-4">
-            <button
-              onClick={() => setActiveSubmenu('create')}
-              className={`flex items-center gap-2 px-4 py-2 rounded ${
-                activeSubmenu === 'create'
-                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
-                  : 'text-gray-400 hover:text-cyan-400'
-              }`}
-            >
-              Create Agent
-            </button>
-            <button
-              onClick={() => setActiveSubmenu('generate')}
-              className={`flex items-center gap-2 px-4 py-2 rounded ${
-                activeSubmenu === 'generate'
-                  ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
-                  : 'text-gray-400 hover:text-cyan-400'
-              }`}
-            >
-              Generate Agent
-            </button>
-          </div>
-        </div>
-
-        {/* Success Message */}
-        {showSuccessMessage && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3 rounded-md shadow-lg">
-              Agent successfully saved!
-            </div>
-          </div>
-        )}
-
-        <div className="flex-grow flex">
-          {/* Render the determined content */}
-          {content}
-        </div>
       </div>
     );
   };
 
-  return renderGenerateContent();
+  return (
+    <div className="border-b border-orange-500/30">
+      <div className="flex p-4 gap-4">
+        {subMenuTabs.map(submenuTab => (
+          <button
+            key={submenuTab.id}
+            onClick={() => setActiveSubmenu(submenuTab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${activeSubmenu === submenuTab.id
+                ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
+                : 'text-gray-400 hover:text-cyan-400'
+              }`}
+          >
+            {submenuTab.label}
+          </button>
+        ))}
+      </div>
+      {renderSubmenuContent()}
+    </div>
+  );
 };
 
 export default AgentCreator;

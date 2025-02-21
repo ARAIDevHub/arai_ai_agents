@@ -274,7 +274,25 @@ const SocialFeed: React.FC = () => {
       case 'generate':
         return (
           <div className="p-4 bg-slate-900 rounded-lg shadow-md">
-            TEST
+            <div className="flex flex-col items-center">
+              <label htmlFor="numPosts" className="text-lg font-semibold text-white mb-2">
+                Number of Posts to Generate:
+              </label>
+              <input
+                id="numPosts"
+                type="number"
+                value={numPostsToGenerate}
+                onChange={handleNumPostsChange}
+                min="1"
+                className="bg-slate-800 text-white rounded-lg p-2 border border-cyan-800 font-semibold mb-4"
+              />
+              <Button
+                onClick={handleGenerateMultiplePosts}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+              >
+                Generate {numPostsToGenerate} Posts
+              </Button>
+            </div>
           </div>
         );
       case 'placeholder1':
