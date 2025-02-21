@@ -24,7 +24,7 @@ const SocialFeed: React.FC = () => {
   const [activeSubmenu, setActiveSubmenu] = useState<'sub1' | 'sub2'>('sub1');
 
   // Define the type for main tabs
-  type MainTab = 'generate' | 'placeholder1' | 'placeholder2' | 'placeholder3';
+  type MainTab = 'generate' | 'displayContent' | 'postContent' | 'placeholder3';
 
   // Define the type for submenu tabs
   type SubmenuTab = { id: 'sub1' | 'sub2'; label: string };
@@ -244,6 +244,61 @@ const SocialFeed: React.FC = () => {
     }
   };
 
+  const renderAgentContent = () => {
+    if (!selectedCharacter) {
+      return (
+        <div className="flex flex-col h-[70vh] justify-center items-center">
+          <h2 className="text-2xl font-bold text-white">Select an Agent</h2>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className="flex flex-col h-[70vh] relative"
+        style={{
+          backgroundImage: selectedCharacter.agent.profile_image?.details?.url
+            ? `url(${selectedCharacter.agent.profile_image.details.url})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="absolute inset-0 bg-slate-900/80" />
+        <div className="relative z-10 flex flex-col h-full justify-center items-center">
+          <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
+            <div className="flex flex-col items-center w-full text-center">
+              <h2 className="text-2xl font-bold text-white font-semibold">
+                {`${selectedCharacter.agent.agent_details.name}'s Feed`}
+              </h2>
+              <p className="text-gray-400 mb-2 font-semibold">
+                {unpostedCount} Posts Remaining
+              </p>
+            </div>
+
+          </div>
+
+
+          <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
+            <h3 className="text-lg font-semibold text-white mb-2">Select Season</h3>
+            <SeasonTabs
+              selectedCharacter={selectedCharacter}
+              selectedSeason={selectedSeason}
+              handleSeasonSelect={handleSeasonSelect}
+              handleDeleteSeason={handleDeleteSeason}
+            />
+          </div>
+
+          <CharacterPosts
+            characterPosts={characterPosts}
+            selectedCharacter={selectedCharacter}
+          />
+        </div>
+      </div>
+    );
+  };
+
   // Update renderTabContent to render based on activeMainTab
   const renderTabContent = () => {
     switch (activeMainTab) {
@@ -258,18 +313,39 @@ const SocialFeed: React.FC = () => {
             </div>
           </div>
         );
-      case 'placeholder1':
+      case 'displayContent':
+        return renderAgentContent();
+      case 'postContent':
         return (
           <div className="p-4 bg-slate-900 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-white">Placeholder 1</h3>
-            <p className="text-gray-400">Content for Placeholder 1...</p>
-          </div>
-        );
-      case 'placeholder2':
-        return (
-          <div className="p-4 bg-slate-900 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-white">Placeholder 2</h3>
-            <p className="text-gray-400">Content for Placeholder 2...</p>
+            
+            <p className="text-gray-400 mb-2 font-semibold">
+              {unpostedCount} Posts Remaining
+            </p>
+            <div className=" text-white text-lg p-3 font-semibold">
+              Next post in: {formatTime(state.timeLeft)}
+            </div>
+            <div className="flex gap-4 justify-center p-3">
+
+              <Button
+                onClick={handleStartPostManager}
+                className={`${state.isLoggedIn
+                    ? "bg-green-400 hover:bg-green-500"
+                    : "bg-orange-400 hover:bg-orange-500"
+                  }`}
+              >
+                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
+              </Button>
+
+              <Button
+                onClick={handlePostToTwitter}
+                className={`${state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                  }`}
+              >
+                {state.isPosting ? "Posting..." : "Post to Twitter"}
+              </Button>
+            </div>
+
           </div>
         );
       case 'placeholder3':
@@ -296,6 +372,8 @@ const SocialFeed: React.FC = () => {
     }
   };
 
+
+
   return (
     <div className="container mx-auto max-w-4xl">
       {notification && (
@@ -305,35 +383,23 @@ const SocialFeed: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      <div className="flex justify-center gap-4 mb-4">
+
+      <div className="flex justify-center gap-4 mb-4 p-4 ">
         <Button onClick={() => setActiveMainTab('generate')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'generate' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
           Generate
         </Button>
-        <Button onClick={() => setActiveMainTab('placeholder1')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'placeholder1' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
-          Placeholder 1
+        <Button onClick={() => setActiveMainTab('displayContent')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'displayContent' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          Display Content
         </Button>
-        <Button onClick={() => setActiveMainTab('placeholder2')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'placeholder2' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
-          Placeholder 2
+        <Button onClick={() => setActiveMainTab('postContent')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'postContent' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          Post Content
         </Button>
-        <Button onClick={() => setActiveMainTab('placeholder3')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'placeholder3' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
-          Placeholder 3
-        </Button>
-      </div>
-      <div className="flex justify-center gap-4 mb-4">
-        {subMenuTabs.map(submenuTab => (
-          <Button
-            key={submenuTab.id}
-            onClick={() => setActiveSubmenu(submenuTab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded ${activeSubmenu === submenuTab.id ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}
-          >
-            {submenuTab.label}
-          </Button>
-        ))}
+
       </div>
       <div className="flex p-3 items-center justify-center gap-4">
-        <AgentSelection 
-          selectedCharacterIndex={selectedCharacterIndex} 
-          handleSelectAgent={handleCharacterSelect} 
+        <AgentSelection
+          selectedCharacterIndex={selectedCharacterIndex}
+          handleSelectAgent={handleCharacterSelect}
         />
         <div className="flex items-center">
           <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
@@ -349,77 +415,10 @@ const SocialFeed: React.FC = () => {
           />
         </div>
       </div>
+
       {renderTabContent()}
       {renderSubmenuContent()}
-      {selectedCharacter && (
-        <div
-          className="flex flex-col h-[70vh] relative"
-          style={{
-            backgroundImage: selectedCharacter.agent.profile_image?.details?.url
-              ? `url(${selectedCharacter.agent.profile_image.details.url})`
-              : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <div className="absolute inset-0 bg-slate-900/80" />
-          <div className="relative z-10 flex flex-col h-full justify-center items-center">
-            <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
-              <div className="flex flex-col items-center w-full text-center">
-                <h2 className="text-2xl font-bold text-white font-semibold">
-                  {selectedCharacter
-                    ? `${selectedCharacter.agent.agent_details.name}'s Feed`
-                    : "Select an Agent"}
-                </h2>
-                <p className="text-gray-400 mb-2 font-semibold">
-                  {unpostedCount} Posts Remaining
-                </p>
-              </div>
-              <div className="absolute right-0 text-white text-lg p-3 font-semibold">
-                Next post in: {formatTime(state.timeLeft)}
-              </div>
-            </div>
 
-            <div className="flex gap-4 justify-center p-3">
-              <Button
-                onClick={handleStartPostManager}
-                className={`${
-                  state.isLoggedIn
-                    ? "bg-green-400 hover:bg-green-500"
-                    : "bg-orange-400 hover:bg-orange-500"
-                }`}
-              >
-                {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
-              </Button>
-
-              <Button
-                onClick={handlePostToTwitter}
-                className={`${
-                  state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
-                }`}
-              >
-                {state.isPosting ? "Posting..." : "Post to Twitter"}
-              </Button>
-            </div>
-
-            <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
-              <h3 className="text-lg font-semibold text-white mb-2">Select Season</h3>
-              <SeasonTabs
-                selectedCharacter={selectedCharacter}
-                selectedSeason={selectedSeason}
-                handleSeasonSelect={handleSeasonSelect}
-                handleDeleteSeason={handleDeleteSeason}
-              />
-            </div>
-
-            <CharacterPosts
-              characterPosts={characterPosts}
-              selectedCharacter={selectedCharacter}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

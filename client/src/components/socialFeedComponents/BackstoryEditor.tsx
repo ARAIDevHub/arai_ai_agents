@@ -14,37 +14,38 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ selectedCharacter, se
   const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
 
   useEffect(() => {
-    if (selectedCharacter) {
+    if (selectedCharacter && draftBackstory !== selectedCharacter.agent.agent_details.backstory) {
       setDraftBackstory(selectedCharacter.agent.agent_details.backstory || "");
     }
   }, [selectedCharacter]);
 
   const handleBackstoryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log("Backstory change detected:", e.target.value);
+    console.log("[BackstoryEditor] - Backstory change detected:", e.target.value);
     setDraftBackstory(e.target.value);
   };
 
   const handleUpdateBackstory = async () => {
     if (!selectedCharacter) {
-      console.warn("No character selected, cannot update backstory.");
+      console.warn("[BackstoryEditor] - No character selected, cannot update backstory.");
       return;
     }
 
     dispatch({ type: 'SET_UPDATING_BACKSTORY', payload: true });
 
     try {
+
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
-      console.log("Updating backstory for:", tempName);
-      console.log("Backstory content:", draftBackstory);
+      console.log("[BackstoryEditor] - Updating backstory for:", tempName);
+      console.log("[BackstoryEditor] - Backstory content:", draftBackstory);
 
       const updatedAgent = await updateBackstory(masterFilePath, draftBackstory);
-      console.log("Backstory updated successfully:", updatedAgent);
+      console.log("[BackstoryEditor] - Backstory updated successfully:", updatedAgent);
 
       setSelectedCharacter(updatedAgent);
     } catch (error) {
-      console.error("Error updating backstory:", error);
+      console.error("[BackstoryEditor] - Error updating backstory:", error);
     } finally {
       dispatch({ type: 'SET_UPDATING_BACKSTORY', payload: false });
     }
