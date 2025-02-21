@@ -1,5 +1,4 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { Brain, Save, RefreshCcw } from "lucide-react";
 import { createAgent, createRandomAgent } from "../api/agentsAPI";
 import {
   GeneratedImage,
@@ -7,15 +6,10 @@ import {
   Agent
 } from "../interfaces/AgentInterfaces";
 import useCharacters from "../hooks/useCharacters";
-import { inconsistentImageLambda } from "../api/leonardoApi";
-import LoadingBar from "../components/LoadingBar";
 import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
-import AgentForm from "../components/AgentCreatorComponents/AgentForm";
 import { handleDraftChange, handleDraftKeyDown, handleTraitDraftChange, handleTraitDraftKeyDown } from "../utils/AgentCreatorUtils/agentUtils";
 import GenerateAgentSection from '../components/GenerateAgentSection';
-
-const LEONARDO_MODEL_ID = "e71a1c2f-4f80-4800-934f-2c68979d8cc8";
-const LEONARDO_STYLE_UUID = "b2a54a51-230b-4d4f-ad4e-8409bf58645f";
+import FullAgentCreationContent from '../components/AgentCreatorComponents/FullAgentCreationContent'; // Import the new component
 
 
 /**
@@ -209,7 +203,7 @@ const AgentCreator: React.FC = () => {
   }, [agent.profile_image_options, agent.selectedImage]);
 
   // State to manage the visibility of the success message
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [ setShowSuccessMessage] = useState(false);
 
   // Add state for loading progress near other state declarations
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -223,17 +217,13 @@ const AgentCreator: React.FC = () => {
   // Define the type for draft fields
   type DraftField = "concept" | "name" | "universe" | "backstory" | "imageDescription";
 
-  // Define the type for agent details fields
-  type AgentDetailsField = keyof typeof agent.agent_details;
 
   // Add state to manage the active submenu
   const [activeSubmenu, setActiveSubmenu] = useState<'create' | 'generate'>('generate');
 
-  // Add state to store the generated agent data
-  const [generatedAgent, setGeneratedAgent] = useState<any>(null);
 
   // Add state to store the list of agents
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [ setAgents] = useState<Agent[]>([]);
 
   useEffect(() => {
     console.log("Agent state initialized:", agent);
@@ -434,296 +424,33 @@ const AgentCreator: React.FC = () => {
         return <GenerateAgentSection onGenerate={handleGenerateAgent} />
       case 'create':
         console.log("Case Rendering create content");
-        return renderFullAgentCreationContent();
-
-
-
-    }
-  };
-
-  // Define renderFullAgentCreationContent function outside of JSX
-  const renderFullAgentCreationContent = () => {
-    console.log("Rendering full agent creation content");
-    return (
-      <div className="flex">
-        {/* Left Panel */}
-        <div className="w-1/2 p-6 border-r border-orange-500/20">
-          <div className="h-full flex flex-col space-y-6">
-            {/* Main Character Image */}
-            <div
-              className="relative aspect-square rounded-lg bg-gradient-to-br from-slate-900/80 
-                          via-cyan-900/20 to-orange-900/20 border border-orange-500/20 
-                          flex items-center justify-center"
-              style={{
-                backgroundImage:
-                  agent.selectedImage !== undefined &&
-                    agent.profile_image?.details?.url &&
-                    loadingProgress === 0
-                    ? `url(${agent.profile_image.details.url})`
-                    : "none",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {loadingProgress > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
-                  <div className="w-3/4">
-                    <LoadingBar progress={loadingProgress} />
-                  </div>
-                </div>
-              )}
-              {agent.selectedImage === undefined && loadingProgress === 0 && (
-                <Brain className="w-32 h-32 text-cyan-400" />
-              )}
-              <button
-                className={`absolute bottom-4 right-4 px-4 py-2 rounded-md bg-gradient-to-r 
-                           from-orange-600 to-red-600 text-white flex items-center
-                           ${isGenerating
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:from-orange-700 hover:to-red-700"
-                  }`}
-                onClick={async () => {
-                  if (isGenerating) return; // Prevent multiple clicks while generating
-
-                  try {
-                    setIsGenerating(true);
-                    let prompt =
-                      agent.profile_image_options?.[0]?.generations_by_pk
-                        ?.prompt ||
-                      draftFields.imageDescription ||
-                      "";
-
-                    setLoadingProgress(10);
-
-                    const payload = {
-                      prompt: prompt,
-                      modelId: LEONARDO_MODEL_ID,
-                      styleUUID: LEONARDO_STYLE_UUID,
-                      num_images: 4
-                    };
-                    const imageResponse = await inconsistentImageLambda(
-                      payload
-                    );
-
-                    if (
-                      !imageResponse?.generations_by_pk?.generated_images?.[0]
-                        ?.url
-                    ) {
-                      throw new Error("No image URL received");
-                    }
-
-                    setLoadingProgress(50);
-                    const imageUrl =
-                      imageResponse.generations_by_pk.generated_images[0].url;
-
-                    setLoadingProgress(90);
-                    setAgent((prev) => ({
-                      ...prev,
-                      profile_image: {
-                        details: {
-                          url: imageUrl,
-                          image_id:
-                            imageResponse.generations_by_pk.generated_images[0]
-                              .id,
-                          generationId: imageResponse.generations_by_pk.id,
-                        },
-                      },
-                      profile_image_options: [
-                        {
-                          generations_by_pk: {
-                            ...imageResponse.generations_by_pk,
-                            prompt,
-                          },
-                        },
-                      ],
-                    }));
-
-                    setLoadingProgress(100);
-                    setTimeout(() => setLoadingProgress(0), 500);
-                  } catch (error) {
-                    console.error("[AgentCreator] - Error generating new image:", error);
-                    setLoadingProgress(0);
-                  } finally {
-                    setIsGenerating(false);
-                  }
-                }}
-                disabled={isGenerating}
-              >
-                <RefreshCcw
-                  className={`w-4 h-4 mr-2 ${isGenerating ? "animate-spin" : ""}`}
-                />
-                {isGenerating ? "Generating..." : "Regenerate All"}
-              </button>
-            </div>
-
-            {/* Image Selection Grid */}
-            <div className="grid grid-cols-4 gap-4">
-              {agent.profile_image_options?.[0]?.generations_by_pk?.generated_images?.map(
-                (image: GeneratedImage, index: number) => (
-                  <div
-                    key={index}
-                    className={`relative aspect-square bg-gradient-to-br from-slate-900/80 
-                              via-cyan-900/20 to-orange-900/20 rounded-lg cursor-pointer 
-                              ${agent.selectedImage === index
-                        ? "ring-2 ring-orange-500"
-                        : ""
-                      }`}
-                    onClick={async () => {
-
-                      try {
-                        setLoadingProgress(30);
-
-                        setLoadingProgress(70);
-
-                        setAgent((prev) => ({
-                          ...prev,
-                          selectedImage: index,
-                          profile_image: {
-                            details: {
-                              url: image?.url || "",
-                              image_id: image?.id || "",
-                              generationId: image?.generationId || "",
-                            },
-                          },
-                        }));
-
-                        setLoadingProgress(100);
-                        setTimeout(() => setLoadingProgress(0), 500);
-                      } catch (error) {
-                        console.error("[AgentCreator] - Error loading image:", error);
-                        setLoadingProgress(0);
-                      }
-                    }}
-                    style={{
-                      backgroundImage: image?.url ? `url(${image.url})` : "none",
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  >
-                    {agent.selectedImage === index && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-                        <svg
-                          className="w-8 h-8 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* Character Info Card */}
-            <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
-              <div className="mb-4">
-                <div className="text-lg font-semibold text-orange-400">
-                  Image Generation Description
-                </div>
-                <textarea
-                  value={draftFields.imageDescription || ""}
-                  onChange={getDraftChangeHandler("imageDescription")}
-                  onKeyDown={getDraftKeyDownHandler("imageDescription")}
-                  placeholder="Enter image generation description (Press Enter to commit)"
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border border-orange-500/30 text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                />
-              </div>
-            </div>
-            <div className="p-4 rounded-lg bg-slate-900/80 border border-orange-500/30">
-              <div className="mb-4">
-                <div className="text-lg font-semibold text-orange-400">
-                  Agent Name
-                </div>
-                <div className="text-gray-100">{agent.agent_details.name}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Panel */}
-        <div className="w-1/2 p-6">
-          <AgentForm
+        return (
+          <FullAgentCreationContent
+            agent={agent}
             draftFields={draftFields}
             draftTraits={draftTraits}
+            loadingProgress={loadingProgress}
+            isGenerating={isGenerating}
             handleDraftChange={getDraftChangeHandler}
             handleDraftKeyDown={getDraftKeyDownHandler}
             handleTraitDraftChange={handleTraitDraftChange(setDraftTraits)}
             handleTraitDraftKeyDown={handleTraitDraftKeyDown(setAgent, draftTraits)}
-            handleDeleteTrait={(field: string, value: string) => {
-              setAgent((prev) => ({
-                ...prev,
-                agent_details: {
-                  ...prev.agent_details,
-                  [field as AgentDetailsField]: Array.isArray(prev.agent_details[field as AgentDetailsField])
-                    ? (prev.agent_details[field as AgentDetailsField] as string[]).filter(
-                      (trait: string) => trait !== value
-                    )
-                    : prev.agent_details[field as AgentDetailsField], // If it's not an array, return as is
-                },
-              }));
-            }}
+            handleSubmitCreateAgent={handleSubmitCreateAgent}
+            handleTabChange={handleTabChange}
+            handleCharacterSelect={handleCharacterSelect}
+            characters={characters}
+            loading={loading}
+            error={error}
+            selectedCharacterIndex={selectedCharacterIndex}
+            setAgent={setAgent}
+            setLoadingProgress={setLoadingProgress}
+            setIsGenerating={setIsGenerating}
+            setDraftFields={setDraftFields}
+            setDraftTraits={setDraftTraits}
             activeTab={activeTab}
-            setActiveTab={handleTabChange}
-            agent={agent}
           />
-
-          <div className="mt-6 p-4 bg-slate-900/80 rounded-lg border border-orange-500/30">
-            <label className="text-sm text-gray-100 block mb-2">
-              Select Existing Character
-            </label>
-            {loading ? (
-              <div className="text-gray-100">Loading characters...</div>
-            ) : error ? (
-              <div className="text-red-400">
-                No Existing Agents - {error.message}
-              </div>
-            ) : (
-              <>
-                <select
-                  className="w-full px-3 py-2 rounded-md bg-slate-900/80 border 
-                             border-orange-500/30 text-gray-100 focus:ring-2 
-                             focus:ring-orange-500/50 focus:outline-none"
-                  onChange={handleCharacterSelect}
-                  value={selectedCharacterIndex}
-                >
-                  <option value={-1}>-- Select a Character --</option>
-                  {characters.map((char, index) => (
-                    <option key={index} value={index}>
-                      {char.agent?.agent_details?.name || "Unnamed Character"}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) =>
-              handleSubmitCreateAgent(
-                e as unknown as React.FormEvent<HTMLFormElement>
-              )
-            }
-            className="mt-6 w-full px-4 py-2 rounded-md bg-gradient-to-r 
-                         from-cyan-600 to-orange-600 hover:from-cyan-700 hover:to-orange-700 
-                         text-gray-100 transition-all duration-300 flex items-center justify-center"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Save Agent
-          </button>
-        </div>
-      </div>
-    );
+        );
+    }
   };
 
   return (
@@ -734,8 +461,8 @@ const AgentCreator: React.FC = () => {
             key={submenuTab.id}
             onClick={() => setActiveSubmenu(submenuTab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded ${activeSubmenu === submenuTab.id
-                ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
-                : 'text-gray-400 hover:text-cyan-400'
+              ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white'
+              : 'text-gray-400 hover:text-cyan-400'
               }`}
           >
             {submenuTab.label}
