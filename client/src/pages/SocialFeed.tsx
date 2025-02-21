@@ -19,8 +19,6 @@ const SocialFeed: React.FC = () => {
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
-  const [draftBackstory, setDraftBackstory] = useState<string>("");
-  const [numPostsToGenerate, setNumPostsToGenerate] = useState<number>(1);
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('generate');
   const [activeSubmenu, setActiveSubmenu] = useState<'sub1' | 'sub2'>('sub1');
@@ -53,7 +51,7 @@ const SocialFeed: React.FC = () => {
 
   useEffect(() => {
     if (selectedCharacter) {
-      setDraftBackstory(selectedCharacter.agent.agent_details.backstory || "");
+      setSelectedCharacter(selectedCharacter);
     }
   }, [selectedCharacter]);
 
@@ -203,41 +201,6 @@ const SocialFeed: React.FC = () => {
     postLoop(unpostedPosts, state.delayBetweenPosts);
   };
 
-  const handleBackstoryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log("Backstory change detected:", e.target.value);
-    setDraftBackstory(e.target.value);
-  };
-
-  const handleUpdateBackstory = async () => {
-    if (!selectedCharacter) {
-      console.warn("No character selected, cannot update backstory.");
-      return;
-    }
-
-    dispatch({ type: 'SET_UPDATING_BACKSTORY', payload: true });
-
-    try {
-      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
-      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
-
-      console.log("Updating backstory for:", tempName);
-      console.log("Backstory content:", draftBackstory);
-
-      const updatedAgent = await updateBackstory(masterFilePath, draftBackstory);
-      console.log("Backstory updated successfully:", updatedAgent);
-
-      setSelectedCharacter(updatedAgent);
-    } catch (error) {
-      console.error("Error updating backstory:", error);
-    } finally {
-      dispatch({ type: 'SET_UPDATING_BACKSTORY', payload: false });
-    }
-  };
-
-  const handleNumPostsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNumPostsToGenerate(Number(e.target.value));
-  };
-
   const handleGenerateMultiplePosts = async (numPosts: number) => {
     if (!selectedCharacter || state.isGeneratingContent) return;
 
@@ -288,14 +251,10 @@ const SocialFeed: React.FC = () => {
         return (
           <div className="p-4 bg-slate-900 rounded-lg shadow-md">
             <div className="flex flex-col items-center">
-
               <BackstoryEditor
-              draftBackstory={draftBackstory}
-              onBackstoryChange={handleBackstoryChange}
-              onUpdateBackstory={handleUpdateBackstory}
-              onGenerateMultiplePosts={handleGenerateMultiplePosts}
-            />
-
+                selectedCharacter={selectedCharacter}
+                setSelectedCharacter={setSelectedCharacter}
+              />
             </div>
           </div>
         );
@@ -371,8 +330,6 @@ const SocialFeed: React.FC = () => {
           </Button>
         ))}
       </div>
-      {renderTabContent()}
-      {renderSubmenuContent()}
       <div className="flex p-3 items-center justify-center gap-4">
         <AgentSelection 
           selectedCharacterIndex={selectedCharacterIndex} 
@@ -392,6 +349,8 @@ const SocialFeed: React.FC = () => {
           />
         </div>
       </div>
+      {renderTabContent()}
+      {renderSubmenuContent()}
       {selectedCharacter && (
         <div
           className="flex flex-col h-[70vh] relative"
@@ -421,8 +380,6 @@ const SocialFeed: React.FC = () => {
                 Next post in: {formatTime(state.timeLeft)}
               </div>
             </div>
-
-
 
             <div className="flex gap-4 justify-center p-3">
               <Button
