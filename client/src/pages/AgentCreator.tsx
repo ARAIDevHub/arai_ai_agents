@@ -202,9 +202,6 @@ const AgentCreator: React.FC = () => {
     }
   }, [agent.profile_image_options, agent.selectedImage]);
 
-  // State to manage the visibility of the success message
-  const [ setShowSuccessMessage] = useState(false);
-
   // Add state for loading progress near other state declarations
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -217,13 +214,12 @@ const AgentCreator: React.FC = () => {
   // Define the type for draft fields
   type DraftField = "concept" | "name" | "universe" | "backstory" | "imageDescription";
 
-
   // Add state to manage the active submenu
   const [activeSubmenu, setActiveSubmenu] = useState<'create' | 'generate'>('generate');
 
 
   // Add state to store the list of agents
-  const [ setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
 
   useEffect(() => {
     console.log("Agent state initialized:", agent);
@@ -300,10 +296,9 @@ const AgentCreator: React.FC = () => {
     try {
       await createAgent(updatedAgent);
 
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
       setAgent(updatedAgent);
       setAgents((prevAgents) => [...prevAgents, updatedAgent as Agent]);
+      console.log("Submit create agent", agent)
     } catch (error) {
       console.error("[AgentCreator] - Error creating agent:", error);
     }
