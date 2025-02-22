@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^6.1.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/mongoose": "^5.11.96"
+  }
+}
