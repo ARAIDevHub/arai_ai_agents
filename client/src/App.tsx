@@ -9,6 +9,11 @@ import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
 // import SocialDashboard from "./pages/SocialDashboard";
 import CookieDotFunDataTesting from "./pages/cookieDotFunDataTesting";
+import TwitterTrade from "./pages/TwitterTrade/AISocialManager";
+import Login from "./pages/Account/Login";
+import SignUp from './pages/Account/SignUp';
+import ForgotPassword from './pages/Account/ForgotPassword';
+
 
 // Components
 // import Header from './components/Header';
@@ -127,6 +132,29 @@ function App() {
               >
                 API Testing
               </Link> */}
+
+<Link
+                to="/twitter-trade"
+                className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+                  ${isActive("/twitter-trade")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
+                  }`}
+              >
+                Twitter Trade
+              </Link>
+
+              <Link
+                to="/login"
+                className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
+                  ${isActive("/login")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
+                  }`}
+              >
+                Login
+              </Link>
+
             </div>
           </nav>
 
@@ -141,6 +169,10 @@ function App() {
             <Route path="/token-launch" element={<TokenLaunch />} />
             {/* <Route path="/social-dashboard" element={<SocialDashboard />} /> */}
             <Route path="/cookie-fun-testing" element={<CookieDotFunDataTesting />} />
+            <Route path="/twitter-trade" element={<TwitterTrade />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Routes>
         </div>
       </main>

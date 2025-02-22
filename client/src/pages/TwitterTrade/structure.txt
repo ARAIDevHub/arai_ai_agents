@@ -1,0 +1,19 @@
+client/
+└── src/
+    └── pages/
+        └── TwitterTrade/
+            ├── components/
+            │   ├── CryptoTwitterDashboard.tsx
+            │   ├── TweetCardInsights.tsx
+            │   └── TwitterStockStream.tsx
+            └── CryptoTwitterCombined.tsx
+
+
+CryptoTwitterCombined
+└── Fetches & parses tweet data
+    └── CryptoTwitterDashboard
+        ├── Sidebar navigation
+        ├── Watchlist panel
+        ├── Feed columns
+        ├── Twitter stock stream
+        └── Tweet insights

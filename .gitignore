@@ -70,3 +70,6 @@ server_node/packages/pumpfun/downloaded_image.jpg
 
 # Ignore the downloaded image
 downloaded_image.jpg
+
+# Ignore mongodb logs
+mongodb_logs/
