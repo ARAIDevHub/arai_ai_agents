@@ -168,13 +168,14 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
       },
     );
 
-    console.log("[createToken.ts] - Running anti-sniper script =", process.env.RUN_ANTI_SNIPER);
+    const antiSniper = process.env.RUN_ANTI_SNIPER === "True" || "False";
+    console.log("[createToken.ts] - Running anti-sniper script =", antiSniper);
     // Declare sniperResults outside the if block
     let sniperResults;
     // Option to run the anti-sniper script
-    if (process.env.RUN_ANTI_SNIPER === "True") {
+    if (antiSniper) {
       console.log("🔍 [createToken.ts] Running anti-sniper script...");
-      sniperResults = await runAntiSniper(mint, devWallet, decryptedWalletRows, connection, sdk, SLIPPAGE_BASIS_POINTS, initialBuyAmount);
+      sniperResults = await runAntiSniper();
     }
     console.log("🔍 [createToken.ts] Anti-sniper script completed", sniperResults);
 
