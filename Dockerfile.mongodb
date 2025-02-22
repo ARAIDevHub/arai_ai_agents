@@ -1,2 +1,17 @@
 FROM mongo:latest
-LABEL maintainer="ARAI" 
+LABEL maintainer="ARAI"
+
+# Create log directory
+RUN mkdir -p /var/log/mongodb && \
+    chown -R mongodb:mongodb /var/log/mongodb
+
+# Add custom mongod.conf
+COPY mongod.conf /etc/mongod.conf
+
+# Set proper permissions
+RUN chown mongodb:mongodb /etc/mongod.conf
+
+# Switch to mongodb user
+USER mongodb
+
+CMD ["mongod", "--config", "/etc/mongod.conf"] 
