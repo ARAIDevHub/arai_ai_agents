@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: arai-mongodb:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.mongodb
+    container_name: arai-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  mongo-express:
+    image: arai-mongo-express:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo-express
+    container_name: arai-mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@arai-mongodb:27017/
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  python_api:
+    build:
+      context: ./server_python
+      dockerfile: Dockerfile
+    image: arai-python-api
+    container_name: arai-python-api
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env  # Load variables from .env
+    environment:
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@arai-mongodb:27017
+      - OPENAI_API_KEY=${OPENAI_API_KEY} # Still good to have explicitly
+    depends_on:
+      - mongodb
+    volumes:
+      - ./server_python:/app/server_python
+      - ./configs:/app/server_python/configs
+    networks:
+      - app-network
+
+  node_server:
+    build:
+      context: ./server_node
+      dockerfile: Dockerfile
+    image: arai-node-server
+    container_name: arai-node-server
+    restart: always
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env  # Load variables from .env
+    environment:
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@arai-mongodb:27017
+      - NODE_ENV=development  # Good practice
+      # - COOKIE_FUN_API_KEY=${COOKIE_FUN_API_KEY}  # No longer strictly needed, but doesn't hurt
+    depends_on:
+      - mongodb
+    volumes:
+      - ./server_node:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  react_client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: arai-react-client
+    container_name: arai-react-client
+    restart: always
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env  # Load variables from .env
+    environment:
+      - NODE_ENV=development
+      - VITE_PYTHON_API_URL=http://localhost:8080
+      - VITE_NODE_API_URL=http://localhost:3001
+    depends_on:
+      - node_server
+      - python_api
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+    name: arai-mongodb-data
+
+networks:
+  app-network:
+    driver: bridge

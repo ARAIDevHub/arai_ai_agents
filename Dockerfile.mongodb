@@ -1,0 +1,2 @@
+FROM mongo:latest
+LABEL maintainer="ARAI" 

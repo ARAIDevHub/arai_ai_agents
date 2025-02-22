@@ -138,7 +138,7 @@ export async function createTokenWithParams(params: TokenCreationParams, encrypt
       twitter: params.twitter || "",
       telegram: params.telegram || "",
       website: params.website || "",
-      file: await fs.openAsBlob(imagePath || path.join(__dirname, "random.png")),
+      file: new Blob([fs.readFileSync(params.imagePath || path.join(__dirname, "random.png"))]),
     };
     console.log("🔍 [createToken.ts] Creating token metadata...");
     console.log(`Token metadata: ${JSON.stringify(tokenMetadata, null, 2)}`);

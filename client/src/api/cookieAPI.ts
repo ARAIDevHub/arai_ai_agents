@@ -1,7 +1,7 @@
 import { CookieFunResponse, PaginationParams } from '../interfaces/cookie.FunInterfaces';
 
-const BASE_URL_COOKIE_FUN = `http://localhost:3001/api/cookie-fun`;
-
+//const BASE_URL_COOKIE_FUN = `http://localhost:3001/api/cookie-fun`;
+const BASE_URL_COOKIE_FUN = import.meta.env.VITE_NODE_API_URL + "/api/cookie-fun";
 
 // Add these new functions
 export async function getCookieFunAgentsPaged(params: PaginationParams = {}): Promise<CookieFunResponse> {

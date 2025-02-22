@@ -1,0 +1,2 @@
+FROM mongo-express:latest
+LABEL maintainer="ARAI" 

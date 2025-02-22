@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
+//const BASE_URL = "http://localhost:8080/api"; // Your Flask API base URL
+const BASE_URL = import.meta.env.VITE_PYTHON_API_URL + "/api";
 
 // Function to get all agents
 export async function getAgents() {
