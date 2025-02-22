@@ -25,7 +25,7 @@ from prompt_chaining.step_2_create_content import create_seasons_and_episodes
 from prompt_chaining.step_3_create_posts import create_episode_posts
 from utils.post_manager import PostManager
 from utils.scheduler import AgentScheduler
-
+from models.openai_model import OpenAIModel
 
 # Load environment variables
 load_dotenv()
@@ -45,7 +45,13 @@ CORS(app, resources={r"/api/*": {
 }})
 
 # Create global AI model instance
-ai_model = GeminiModel()
+try:
+    ai_model = OpenAIModel()
+    print(f"OpenAIModel created successfully: {ai_model}")
+except Exception as e:
+    print(f"Error creating OpenAIModel: {str(e)}")
+    print("Using GeminiModel instead")
+    ai_model = GeminiModel()
 
 # Post reques to create a random agent with no prompt
 @app.route('/api/agents/random', methods=['POST'])
@@ -177,7 +183,6 @@ def create_agent():
 
     # Create the new character structure based on the incoming data structure
     new_character_data = {
-        "concept": data.get('concept', ''),
         "agent": {
             "agent_details": {
                 "name": character_name.replace('_', ' '),
@@ -187,9 +192,7 @@ def create_agent():
                 "universe": data.get('agent_details', {}).get('universe', ''),
                 "topic_expertise": data.get('agent_details', {}).get('topic_expertise', []),
                 "hashtags": data.get('agent_details', {}).get('hashtags', []),
-                "emojis": data.get('agent_details', {}).get('emojis', []),
-                "concept": data.get('concept', '')
-            },
+                "emojis": data.get('agent_details', {}).get('emojis', [])            },
             "ai_model": {
                 "model_type": "",
                 "model_name": "",
@@ -200,6 +203,7 @@ def create_agent():
                 "telegram": False,
                 "discord": False
             },
+            "concept": data.get('concept', ''),
             "profile_image": data.get('profile_image', []),
             "profile_image_options": data.get('profile_image_options', []),
             "tracker": {
@@ -398,7 +402,7 @@ def create_episode_content():
     try:
         data = request.get_json()
         master_file_path = data.get('master_file_path')
-        number_of_posts = data.get('number_of_posts', 6)  # Default to 6 posts
+        number_of_posts = data.get('number_of_posts')  # Default to 6 posts
 
         if not master_file_path:
             return jsonify({"error": "Master file path is required"}), 400
@@ -515,6 +519,96 @@ def update_seasons():
 
     except Exception as e:
         print(f"Error updating seasons: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/seasons', methods=['DELETE'])
+def delete_season():
+    """
+    Deletes a specific season and all its posts for an agent.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        season_number (int): The season number to delete
+        
+    Returns:
+        JSON: Updated agent data
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        season_number = data.get('season_number')
+
+        if not master_file_path or season_number is None:
+            return jsonify({"error": "Master file path and season number are required"}), 400
+
+        if not os.path.exists(master_file_path):
+            return jsonify({"error": "Agent master file not found"}), 404
+
+        # Load the existing agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            agent_data = json.load(f)
+
+        # Filter out the season to delete
+        agent_data['agent']['seasons'] = [
+            season for season in agent_data['agent']['seasons']
+            if season['season_number'] != season_number
+        ]
+
+        # Save the updated agent data back to the file
+        with open(master_file_path, 'w', encoding='utf-8') as f:
+            json.dump(agent_data, f, ensure_ascii=False, indent=4)
+
+        return jsonify(agent_data), 200
+
+    except Exception as e:
+        print(f"Error deleting season: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agents/update-backstory', methods=['PUT'])
+def update_backstory():
+    """
+    Updates the backstory for a specific agent.
+    
+    Request Body:
+        master_file_path (str): Path to agent's master configuration file
+        backstory (str): New backstory to update
+        
+    Returns:
+        JSON: Updated agent data
+        int: HTTP status code
+    """
+    try:
+        data = request.get_json()
+        master_file_path = data.get('master_file_path')
+        new_backstory = data.get('backstory')
+
+        print(f"Received request to update backstory. Master file path: {master_file_path}, New backstory: {new_backstory}") # Log the request data
+
+        if not master_file_path or new_backstory is None:
+            print("Error: Master file path and backstory are required") # Log missing data
+            return jsonify({"error": "Master file path and backstory are required"}), 400
+
+        if not os.path.exists(master_file_path):
+            print("Error: Agent master file not found") # Log file not found
+            return jsonify({"error": "Agent master file not found"}), 404
+
+        # Load the existing agent data
+        with open(master_file_path, 'r', encoding='utf-8') as f:
+            agent_data = json.load(f)
+
+        # Update the backstory
+        agent_data['agent']['agent_details']['backstory'] = new_backstory
+
+        # Save the updated agent data back to the file
+        with open(master_file_path, 'w', encoding='utf-8') as f:
+            json.dump(agent_data, f, ensure_ascii=False, indent=4)
+
+        print("Backstory updated successfully") # Log success
+        return jsonify(agent_data), 200
+
+    except Exception as e:
+        print(f"Error updating backstory: {str(e)}") # Log any exceptions
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

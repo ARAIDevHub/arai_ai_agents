@@ -417,7 +417,6 @@ export class PumpFunSDK {
             body: formData,
             credentials: 'same-origin'
         });
-        console.log("[pumpfun.ts - ipfs request] request", request)
 
         if (request.status === 500) {
             // Try to get more error details
@@ -428,7 +427,6 @@ export class PumpFunSDK {
         if (!request.ok) {
             throw new Error(`HTTP error! status: ${request.status}`);
         }
-        console.log("[pumpfun.ts - ipfs request] response", request)
 
 
         const responseText = await request.text();

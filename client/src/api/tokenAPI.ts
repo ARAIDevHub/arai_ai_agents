@@ -17,8 +17,6 @@ interface TokenCreationParams {
   }
   
   export async function createToken(params: TokenCreationParams, encryptedWalletRows: string) {
-    console.group('[tokenAPI] - Token Creation');
-    console.log('[tokenAPI] - Starting token creation with params:', params);
     
     try {
       const formData = new FormData();
@@ -32,11 +30,8 @@ interface TokenCreationParams {
           }
         }
       });
-      console.log("[tokenAPI] - Form Data:", formData);
       formData.append('encryptedWalletRows', encryptedWalletRows);
       //Full formData:
-      console.log('[tokenAPI] - Full formData:', formData);
-      console.log('Making API request...');
       const response = await fetch(`${BASE_URL_TOKENS}/create-token`, {
         method: "POST",
         body: formData,
@@ -47,7 +42,6 @@ interface TokenCreationParams {
       
       let data;
       const textResponse = await response.text();
-      console.log('[tokenAPI] - Response text:', textResponse);
   
       try {
         data = JSON.parse(textResponse);
@@ -56,7 +50,6 @@ interface TokenCreationParams {
         throw new Error('Invalid response from server');
       }
   
-      console.log('[tokenAPI] - Parsed response data:', data);
   
       if (!response.ok) {
         throw new Error(data?.message || data?.error || `HTTP error! status: ${response.status}`);
