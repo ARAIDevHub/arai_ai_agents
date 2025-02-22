@@ -116,7 +116,6 @@ const AgentCreator: React.FC = () => {
    * Ensures drafts are updated when agent data changes
    */
   useEffect(() => {
-    console.log("Syncing draftFields with agent state", agent);
     setDraftFields({
       name: agent.agent_details.name || "",
       universe: agent.agent_details.universe || "",
@@ -405,14 +404,11 @@ const AgentCreator: React.FC = () => {
 
   // Function to render the content based on the active submenu
   const renderSubmenuContent = () => {
-    console.log("Rendering submenu content");
-    console.log("Active submenu:", activeSubmenu);
+
     switch (activeSubmenu) {
       case 'generate':
-        console.log("Case Rendering generate content");
         return <GenerateAgentSection onGenerate={handleGenerateAgent} />
       case 'create':
-        console.log("Case Rendering create content");
         return (
           <FullAgentCreationContent
             agent={agent}

@@ -210,7 +210,6 @@ export async function deleteSeason(masterFilePath: string, seasonNumber: number)
 }
 
 export async function updateBackstory(masterFilePath: string, backstory: string) {
-  console.log("Sending request to update backstory:", { masterFilePath, backstory }); // Log the request data
 
   const response = await fetch(`${BASE_URL}/agents/update-backstory`, {
     method: "PUT",

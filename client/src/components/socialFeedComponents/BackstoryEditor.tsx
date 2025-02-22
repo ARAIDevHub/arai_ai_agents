@@ -21,7 +21,6 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ selectedCharacter, se
   }, [selectedCharacter]);
 
   const handleBackstoryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log("[BackstoryEditor] - Backstory change detected:", e.target.value);
     setDraftBackstory(e.target.value);
   };
 
@@ -37,11 +36,8 @@ const BackstoryEditor: React.FC<BackstoryEditorProps> = ({ selectedCharacter, se
       const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
       const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
 
-      console.log("[BackstoryEditor] - Updating backstory for:", tempName);
-      console.log("[BackstoryEditor] - Backstory content:", draftBackstory);
 
       const updatedAgent = await updateBackstory(masterFilePath, draftBackstory);
-      console.log("[BackstoryEditor] - Backstory updated successfully:", updatedAgent);
 
       setSelectedCharacter(updatedAgent);
     } catch (error) {
