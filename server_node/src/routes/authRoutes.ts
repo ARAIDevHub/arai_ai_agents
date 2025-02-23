@@ -7,4 +7,4 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 
-export default router; 
+export default router;

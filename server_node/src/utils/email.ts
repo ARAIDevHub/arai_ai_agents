@@ -25,4 +25,4 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   };
 
   await transporter.sendMail(mailOptions);
-}; 
+};
