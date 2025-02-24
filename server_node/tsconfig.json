@@ -17,7 +17,7 @@
       "noUnusedParameters": false,
       "noImplicitReturns": true,
       "noFallthroughCasesInSwitch": true,
-      "types": ["node"],
+      "types": ["node", "jest"],
       "typeRoots": ["./node_modules/@types", "./types"]
     },
     "include": [

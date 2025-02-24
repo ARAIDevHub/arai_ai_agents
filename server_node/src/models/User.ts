@@ -1,11 +1,13 @@
-import { Schema, model } from 'mongoose';
-import bcrypt from 'bcrypt';
+import mongoose, { Document, Schema } from 'mongoose';
+// After switching to the pure JS version:
+import bcrypt from 'bcryptjs';
 
-interface IUser {
+export interface IUser extends Document {
   email: string;
   password: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>({
@@ -42,4 +44,4 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-export const User = model<IUser>('User', userSchema); 
+export const User = mongoose.model<IUser>('User', userSchema); 

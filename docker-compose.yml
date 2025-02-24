@@ -86,9 +86,6 @@ services:
       # - COOKIE_FUN_API_KEY=${COOKIE_FUN_API_KEY}  # No longer strictly needed, but doesn't hurt
     depends_on:
       - mongodb
-    volumes:
-      - ./server_node:/app
-      - /app/node_modules
     networks:
       - app-network
 
@@ -115,6 +112,37 @@ services:
       - /app/node_modules
     stdin_open: true
     tty: true
+    networks:
+      - app-network
+
+  node_server_tests:
+    build:
+      context: ./server_node
+      dockerfile: Dockerfile
+    image: arai-node-server-tests
+    command: npm test
+    env_file:
+      - .env  # Load variables from .env
+    environment:
+      - NODE_ENV=test
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@arai-mongodb:27017
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  react_client_tests:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: arai-react-client-tests
+    command: npm test
+    env_file:
+      - .env  # Load variables from .env
+    environment:
+      - NODE_ENV=test
+      - VITE_PYTHON_API_URL=http://localhost:8080
+      - VITE_NODE_API_URL=http://localhost:3001
     networks:
       - app-network
 
