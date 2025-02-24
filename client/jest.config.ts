@@ -3,6 +3,7 @@ import type { Config } from '@jest/types';
 const config: Config.InitialOptions = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'jsdom',
+  rootDir: '.',
   setupFilesAfterEnv: ['<rootDir>/src/tests/setupTests.ts'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
@@ -12,7 +13,7 @@ const config: Config.InitialOptions = {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tsconfig.test.json',
+        tsconfig: '<rootDir>/tsconfig.spec.json',
         useESM: true
       }
     ]

@@ -1,9 +1,0 @@
-{
-  "extends": "./client/tsconfig.app.json",
-  "compilerOptions": {
-    "module": "esnext"
-  },
-  "include": [
-    "client/src/tests/**/*"
-  ]
-}
