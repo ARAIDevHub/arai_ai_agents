@@ -1,6 +1,6 @@
 import { LambdaPayload } from "../interfaces/LeonardoInterfaces"; 
 
-const getInconsistentImageLambdaUrl = "https://46i9cnowhh.execute-api.us-east-1.amazonaws.com/getImageInconsistent"
+const getInconsistentImageLambdaUrl = `${(import.meta as any).env.VITE_PYTHON_API_URL}/getImageInconsistent`
 
 // Function to call the AWS Lambda
 export async function inconsistentImageLambda(payload: LambdaPayload): Promise<any> {

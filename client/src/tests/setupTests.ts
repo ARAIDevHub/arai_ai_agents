@@ -1,7 +1,8 @@
+// client/src/tests/setupTests.ts
 import '@testing-library/jest-dom';
 
-// Mock Vite's import.meta.env with actual URLs from .env
-global.import = {
+// Mock Vite's import.meta.env with URLs from your .env (or hard-coded for tests)
+(global as any).import = {
   meta: {
     env: {
       VITE_PYTHON_API_URL: 'http://localhost:8080',
@@ -9,4 +10,4 @@ global.import = {
       VITE_CLIENT_URL: 'http://localhost:5173'
     }
   }
-} as any; 
+};

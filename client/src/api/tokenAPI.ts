@@ -1,4 +1,5 @@
-const BASE_URL_TOKENS = `http://localhost:3001/api/token`;
+// const BASE_URL_TOKENS = `http://localhost:3001/api/token`;
+const BASE_URL_TOKENS = `${(import.meta as any).env.VITE_NODE_API_URL}/api/token`;
 
 // PumpFun API
 

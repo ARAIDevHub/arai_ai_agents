@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { getAgentByTwitter, getAgentByContract, getAgentsPaged, getAllAgentsPaged } from '../src/routes/cookieDotFunRoutes';
+import { getAgentByTwitter, getAgentByContract, getAgentsPaged, getAllAgentsPaged } from '../routes/cookieDotFunRoutes';
 
 // Add at the top of the file
 console.log('Current directory:', process.cwd());

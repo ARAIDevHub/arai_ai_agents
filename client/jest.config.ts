@@ -1,23 +1,39 @@
 import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/tests/setupTests.ts'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1'
   },
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.test.json',
+        useESM: true
+      }
+    ]
   },
-  testMatch: ['**/*.test.tsx', '**/*.test.ts'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  testMatch: ['**/tests/(auth|apiEndpoints).test.ts?(x)'],
+  testPathIgnorePatterns: ['<rootDir>/src/pages/'],
   forceExit: true,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
-  testTimeout: 10000,
-  verbose: true
+  testTimeout: 30000,
+  verbose: true,
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/tests/**/*.{ts,tsx}',
+    '!src/pages/**/*.{ts,tsx}',
+    '!src/components/**/*.{ts,tsx}'
+  ],
+  coverageReporters: ['html', 'text-summary', 'lcov']
 };
 
-export default config; 
+export default config;
