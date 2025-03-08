@@ -7,7 +7,7 @@ import SocialFeed from "./pages/SocialFeed";
 import AgentGallery from "./pages/AgentGallery";
 import TokenLaunch from './pages/TokenLaunch';
 import "./App.css";
-// import SocialDashboard from "./pages/SocialDashboard";
+import SocialDashboard from "./pages/SocialDashboard";
 import CookieDotFunDataTesting from "./pages/cookieDotFunDataTesting";
 import TwitterTrade from "./pages/TwitterTrade/AISocialManager";
 import Login from "./pages/Account/Login";
@@ -45,10 +45,9 @@ function App() {
               <Link
                 to="/"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+                  ${isActive("/")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
                 Home
@@ -56,10 +55,9 @@ function App() {
               <Link
                 to="/agent-creator"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/agent-creator")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+                  ${isActive("/agent-creator")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
                 Create Agent
@@ -68,10 +66,9 @@ function App() {
               <Link
                 to="/agent-gallery"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/agent-gallery")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+                  ${isActive("/agent-gallery")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
                 Agent Gallery
@@ -79,10 +76,9 @@ function App() {
               <Link
                 to="/social-feed"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/social-feed")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+                  ${isActive("/social-feed")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
                 Social Feed
@@ -90,10 +86,9 @@ function App() {
               <Link
                 to="/chat-to-agent"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/chat-to-agent")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+                  ${isActive("/chat-to-agent")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
                 Chat to Agent
@@ -102,35 +97,22 @@ function App() {
               <Link
                 to="/token-launch"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/token-launch")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+                  ${isActive("/token-launch")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
                 Token Launch
               </Link>
-              {/*           <Link
-            to="/social-dashboard"
-            className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-              ${
-                isActive("/social-dashboard")
-                  ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                  : "text-gray-300 hover:text-cyan-400"
-              }`}
-          >
-            Social Dashboard
-          </Link> */}
               {/* <Link
-                to="/cookie-fun-testing"
+                to="/social-dashboard"
                 className={`text-lg font-semibold transition duration-300 px-4 py-2 rounded-lg
-                  ${
-                    isActive("/cookie-fun-testing")
-                      ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
-                      : "text-gray-300 hover:text-cyan-400"
+              ${isActive("/social-dashboard")
+                    ? "bg-gradient-to-r from-cyan-600 to-orange-600 text-white"
+                    : "text-gray-300 hover:text-cyan-400"
                   }`}
               >
-                API Testing
+                Social Dashboard
               </Link> */}
 
 <Link
@@ -167,7 +149,7 @@ function App() {
             <Route path="/social-feed" element={<SocialFeed />} />
             <Route path="/chat-to-agent" element={<ChatToAgent />} />
             <Route path="/token-launch" element={<TokenLaunch />} />
-            {/* <Route path="/social-dashboard" element={<SocialDashboard />} /> */}
+            <Route path="/social-dashboard" element={<SocialDashboard />} />
             <Route path="/cookie-fun-testing" element={<CookieDotFunDataTesting />} />
             <Route path="/twitter-trade" element={<TwitterTrade />} />
             <Route path="/login" element={<Login />} />

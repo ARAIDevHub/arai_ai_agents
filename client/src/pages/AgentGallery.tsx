@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Agent, GenerationsByPk } from '../interfaces/AgentInterfaces';
+import { Agent } from '../interfaces/AgentInterfaces';
 import useCharacters from '../hooks/useCharacters';
-import RandomAgentCard from '../components/RandomAgentCard'; 
-import LoadedAgentCard from '../components/LoadedAgentCard';
+import RandomAgentCard from '../components/agentGalleryComponents/RandomAgentCard'; 
+import LoadedAgentCard from '../components/agentGalleryComponents/LoadedAgentCard';
 import { inconsistentImageLambda } from '../api/leonardoApi';
 import { createBlankAgent } from '../utils/agentUtils';
 import { createAgent } from '../api/agentsAPI';
@@ -189,7 +189,12 @@ const AgentGallery: React.FC = () => {
         newAgent.agent.profile_image_options = [];
       }
       if (newAgent.agent.profile_image_options.length === 0) {
-        newAgent.agent.profile_image_options.push({ generations_by_pk: {} as GenerationsByPk });
+        newAgent.agent.profile_image_options.push({
+          generations_by_pk: {
+            prompt: "",
+            generated_images: []
+          }
+        });
       }
 
       // Ensure profile_image exists and has details

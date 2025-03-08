@@ -120,7 +120,7 @@ export async function createSeason(
 // Function to create posts for episodes
 export async function createEpisodePosts(
   masterFilePath: string,
-  numberOfPosts: number = 6
+  numberOfPosts: number 
 ) {
   const response = await fetch(`${BASE_URL}/agents/episodes/posts`, {
     method: "POST",
@@ -191,3 +191,44 @@ export async function updateSeasons(agentName: string, seasons: any[]) {
   return await response.json();
 }
 
+// Function to delete a season
+export async function deleteSeason(masterFilePath: string, seasonNumber: number) {
+  const response = await fetch(`${BASE_URL}/agents/seasons`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      master_file_path: masterFilePath,
+      season_number: seasonNumber,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+export async function updateBackstory(masterFilePath: string, backstory: string) {
+
+  const response = await fetch(`${BASE_URL}/agents/update-backstory`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      master_file_path: masterFilePath,
+      backstory: backstory,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Failed to update backstory. HTTP status:", response.status); // Log the error status
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log("Backstory updated successfully. Response data:", data); // Log the response data
+  return data;
+}
