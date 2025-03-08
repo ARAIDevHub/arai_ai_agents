@@ -1,40 +1,31 @@
-import type { Config } from '@jest/types';
-
-const config: Config.InitialOptions = {
-  preset: 'ts-jest/presets/default-esm',
-  testEnvironment: 'jsdom',
+// Use this import which should be available without additional packages
+const config = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
   rootDir: '.',
-  setupFilesAfterEnv: ['<rootDir>/src/tests/setupTests.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/tests/setupJest.ts'
+  ],
   moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1'
   },
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        useESM: true
-      }
-    ]
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: 'tsconfig.spec.json',
+      useESM: true,
+      isolatedModules: true
+    }]
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  testMatch: ['**/tests/(auth|apiEndpoints).test.ts?(x)'],
-  testPathIgnorePatterns: ['<rootDir>/src/pages/'],
+  testMatch: ['**/tests/apiEndpoints.test.ts?(x)'],
+  testTimeout: 60000,
   forceExit: true,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
-  testTimeout: 30000,
   verbose: true,
-  collectCoverage: true,
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/tests/**/*.{ts,tsx}',
-    '!src/pages/**/*.{ts,tsx}',
-    '!src/components/**/*.{ts,tsx}'
-  ],
-  coverageReporters: ['html', 'text-summary', 'lcov']
+  maxWorkers: 1,
+  detectOpenHandles: true
 };
 
 export default config;

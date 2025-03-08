@@ -136,13 +136,19 @@ services:
       context: ./client
       dockerfile: Dockerfile
     image: arai-react-client-tests
-    command: npm test
+    command: >
+      sh -c "
+        npm test
+      "
     env_file:
       - .env  # Load variables from .env
     environment:
       - NODE_ENV=test
-      - VITE_PYTHON_API_URL=http://localhost:8080
-      - VITE_NODE_API_URL=http://localhost:3001
+      - VITE_PYTHON_API_URL=http://python_api:8080
+      - VITE_NODE_API_URL=http://node_server:3001
+    depends_on:
+      - node_server
+      - python_api
     networks:
       - app-network
 

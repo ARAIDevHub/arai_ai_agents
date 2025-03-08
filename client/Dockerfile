@@ -12,8 +12,13 @@ RUN npm install
 # Copy all source files
 COPY . .
 
+# Fix line ending issues for shell scripts
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix wait-for-it.sh && \
+    chmod +x wait-for-it.sh
+
 # Run tests before starting the application
-# At build time, the environment isn’t automatically populated with values from your 
+# At build time, the environment isn't automatically populated with values from your 
 # .env file specified in your docker-compose service.
 # The env_file property in your docker-compose.yml applies to the container at runtime. 
 # When Docker builds the image (i.e. during the RUN npm test step), those environment variables are not available unless explicitly passed as build arguments.
