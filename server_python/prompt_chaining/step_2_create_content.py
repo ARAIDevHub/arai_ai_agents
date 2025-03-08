@@ -57,7 +57,7 @@ def create_seasons_and_episodes(ai_model, master_file_path, number_of_episodes):
     season_template = manager.create_new_template_json(TemplateType.SEASON)
 
     # step 2.2: load the agent json file
-    print(f"Loading agent master json file")
+    print(f"Loading agent master json file", master_file_path)
     agent_master_json = None    
     with open(master_file_path, 'r', encoding='utf-8') as file:
         agent_master_json = json.load(file)  

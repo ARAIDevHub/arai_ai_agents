@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Sparkles, CheckCircle } from 'lucide-react';
-import { Agent } from '../interfaces/AgentInterfaces';
+import { Agent } from '../../interfaces/AgentInterfaces';
 
 // Define the props for AgentCard
 interface AgentCardProps {

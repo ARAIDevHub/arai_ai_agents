@@ -37,15 +37,6 @@ const Home = () => {
               <Brain className="w-5 h-5 mr-2" />
               Create Agent
             </Link>
-            {/* <Link
-              to="/node-creator"
-              className="inline-flex items-center justify-center rounded-lg bg-slate-900/50 
-                        px-6 py-3 text-lg font-semibold text-white border border-orange-500/20 
-                        hover:bg-slate-900/70 transition-all duration-300"
-            >
-              <Sparkles className="w-5 h-5 mr-2" />
-              Node Creator
-            </Link> */}
           </div>
         </div>
       </section>

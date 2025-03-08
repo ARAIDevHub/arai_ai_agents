@@ -32,7 +32,10 @@ export interface GenerationsByPk {
 }
 
 export interface ProfileImageOption {
-  generations_by_pk: GenerationsByPk;
+  generations_by_pk: {
+    prompt: string;
+    generated_images: any[];
+  };
 }
 
 export interface Agent {
@@ -141,4 +144,5 @@ export interface RandomAgentCardProps {
   isLoadedAgent: boolean;
   onRegenerate: (agentId: string) => Promise<void>;
   isLoading?: boolean;
-} 
+}
+

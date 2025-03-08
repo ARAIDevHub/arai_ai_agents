@@ -1,22 +1,39 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import useCharacters from "../hooks/useCharacters";
 import { Post, Episode, Season } from "../interfaces/PostsInterface";
-import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons } from "../api/agentsAPI";
+import { createSeason, createEpisodePosts, postToTwitter, startPostManager, updateSeasons, deleteSeason, updateBackstory } from "../api/agentsAPI";
 import { Button } from "../components/button";
 import Notification from "../components/Notification.tsx";
-import { useAgent } from '../context/AgentContext'; // Import the useAgent hook
+import { useAgent } from '../context/AgentContext';
 import AgentSelection from '../components/AgentSelection';
+import BackstoryEditor from '../components/socialFeedComponents/BackstoryEditor';
+import CharacterPosts from '../components/socialFeedComponents/CharacterPosts';
+import SeasonTabs from '../components/socialFeedComponents/SeasonTabs';
+import { formatTime, getCharacterPosts } from '../utils/SocialFeedUtils/SocialFeedUtils.ts';
+import { Edit, Eye, Send } from 'lucide-react';
 
 const SocialFeed: React.FC = () => {
   const { characters, loading, error } = useCharacters();
   const { state, dispatch } = useAgent();
-  const [selectedCharacterIndex, setSelectedCharacterIndex] =
-    useState<number>(-1);
+  const [selectedCharacterIndex, setSelectedCharacterIndex] = useState<number>(-1);
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPosts, setCharacterPosts] = useState<Post[]>([]);
   const [unpostedCount, setUnpostedCount] = useState<number>(0);
   const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>('generate');
+  const [activeSubmenu, setActiveSubmenu] = useState<'sub1' | 'sub2'>('sub1');
 
+  // Define the type for main tabs
+  type MainTab = 'generate' | 'displayContent' | 'postContent' | 'placeholder3';
+
+  // Define the type for submenu tabs
+  type SubmenuTab = { id: 'sub1' | 'sub2'; label: string };
+
+  const subMenuTabs: SubmenuTab[] = [
+    { id: 'sub1', label: 'Submenu 1' },
+    { id: 'sub2', label: 'Submenu 2' }
+  ];
 
   useEffect(() => {
     if (state.selectedAgent) {
@@ -33,51 +50,26 @@ const SocialFeed: React.FC = () => {
     }
   }, [state.selectedAgent, characters, selectedCharacterIndex]);
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
+  useEffect(() => {
+    if (selectedCharacter) {
+      setSelectedCharacter(selectedCharacter);
+    }
+  }, [selectedCharacter]);
 
-  const getCharacterPosts = (character: any) => {
-    if (!character?.agent?.seasons) return [];
+  useEffect(() => {
+    if (selectedCharacter && selectedSeason !== null) {
+      const posts = getCharacterPosts(selectedCharacter).filter(post => post.seasonNumber === selectedSeason);
+      setCharacterPosts(posts);
+    }
+  }, [selectedCharacter, selectedSeason]);
 
-    const allPosts: Post[] = [];
-
-    character.agent.seasons.forEach((season: Season) => {
-      season.episodes.forEach((episode: Episode) => {
-        if (episode.posts && Array.isArray(episode.posts)) {
-          const episodePosts = episode.posts.map((post: Post) => ({
-            ...post,
-            seasonNumber: season.season_number,
-            episodeNumber: episode.episode_number,
-            episodeName: episode.episode_name,
-          }));
-          allPosts.push(...episodePosts);
-        }
-      });
-    });
-
-    // Sort posts by season number, episode number, and post number
-    return allPosts.sort((a, b) => {
-      const aSeasonNum = a.seasonNumber ?? 0;
-      const bSeasonNum = b.seasonNumber ?? 0;
-      const aEpisodeNum = a.episodeNumber ?? 0;
-      const bEpisodeNum = b.episodeNumber ?? 0;
-
-      if (aSeasonNum !== bSeasonNum) {
-        return aSeasonNum - bSeasonNum;
-      }
-      if (aEpisodeNum !== bEpisodeNum) {
-        return aEpisodeNum - bEpisodeNum;
-      }
-      return a.post_number - b.post_number;
-    });
-  };
+  useEffect(() => {
+    setUnpostedCount(characterPosts.filter(post => !post.post_posted).length);
+  }, [characterPosts]);
 
   const handleCharacterSelect = (index: number) => {
     const char = characters[index];
-    console.log("Selected character:", char); // Debugging log
+    console.log("Selected character:", char);
 
     if (!char || !char.agent || !char.agent.agent_details) {
       console.error("Character or agent details are undefined");
@@ -94,47 +86,17 @@ const SocialFeed: React.FC = () => {
     setUnpostedCount(unpostedPosts.length);
   };
 
-  const handleGenerateContent = async () => {
-    if (!selectedCharacter || state.isGenerating) return;
-
-    dispatch({ type: 'SET_GENERATING', payload: true });
-    try {
-      // Adding back the _ to the name to search the file name in the configs folder
-      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
-      // Extract the master file path from the character
-      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
-
-      // First create new season
-      await createSeason(masterFilePath);
-
-      // Then create posts for episodes
-      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath);
-
-      // Update the selected character with final data
-      setSelectedCharacter(updatedAgentWithPosts);
-
-      // Update posts
-      const posts = getCharacterPosts(updatedAgentWithPosts);
-      setCharacterPosts(posts);
-    } catch (error) {
-      console.error("Error generating content:", error);
-      // Handle error (show notification, etc.)
-    } finally {
-      dispatch({ type: 'SET_GENERATING', payload: false });
-    }
-  };
-
   const handleStartPostManager = async () => {
     if (!selectedCharacter) return;
 
-    dispatch({ type: 'SET_LOGGED_IN', payload: false }); // Ensure initial state is not logged in
-    dispatch({ type: 'SET_GENERATING', payload: true }); // Set logging in state to true
+    dispatch({ type: 'SET_LOGGED_IN', payload: false });
+    dispatch({ type: 'SET_GENERATING', payload: true });
 
     try {
       const response = await startPostManager(selectedCharacter.agent.agent_details.name.replace(" ", "_"));
 
       if (response) {
-        dispatch({ type: 'SET_LOGGED_IN', payload: true }); // Set logged in state to true
+        dispatch({ type: 'SET_LOGGED_IN', payload: true });
         setNotification({ message: "Logged in successfully!", type: 'success' });
       } else {
         setNotification({ message: "Please check your .env Twitter configuration.", type: 'error' });
@@ -142,14 +104,13 @@ const SocialFeed: React.FC = () => {
     } catch (error) {
       console.error("Error starting post manager:", error);
 
-      // Check for specific error conditions
       if (error instanceof Error && error.message.includes("credentials")) {
         setNotification({ message: "Error: Missing or incorrect credentials. Please check your .env file.", type: 'error' });
       } else {
         setNotification({ message: "Please check your .env Twitter configuration", type: 'error' });
       }
     } finally {
-      dispatch({ type: 'SET_GENERATING', payload: false }); // Reset logging in state
+      dispatch({ type: 'SET_GENERATING', payload: false });
     }
   };
 
@@ -164,8 +125,8 @@ const SocialFeed: React.FC = () => {
     const postContentToTwitter = async (post: Post) => {
       try {
         const response = await postToTwitter(selectedCharacter.agent.agent_details.name.replace(" ", "_"), post.post_content);
+        console.log("Post content to Twitter:", response);
 
-        // Update the post status in the selectedCharacter
         const updatedSeasons = selectedCharacter.agent.seasons.map((season: Season) => {
           return {
             ...season,
@@ -191,14 +152,13 @@ const SocialFeed: React.FC = () => {
           }
         });
 
-        setCharacterPosts([...characterPosts]);
-        setUnpostedCount(prevCount => prevCount - 1);
+        const updatedPosts = getCharacterPosts(selectedCharacter);
+        setCharacterPosts(updatedPosts);
+        setUnpostedCount(updatedPosts.filter(post => !post.post_posted).length);
 
-        // Update the JSON file to mark the post as posted
         let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
         await updateSeasons(agentName, updatedSeasons);
 
-        // Set hasPosted to true after the first post
         if (!state.hasPosted) {
           dispatch({ type: 'SET_HAS_POSTED', payload: true });
           dispatch({ type: 'SET_TIME_LEFT', payload: state.delayBetweenPosts * 60 });
@@ -211,11 +171,9 @@ const SocialFeed: React.FC = () => {
     const postLoop = async (posts: Post[], delayInMinutes: number) => {
       const delayInMilliseconds = delayInMinutes * 60 * 1000;
 
-            // Create a map of all posts in the fullSeasonsArray
       const fullSeasonsArray = selectedCharacter.agent.seasons;
       const allPostsMap = new Map<string, Post>();
 
-      // Create a map of all posts in the fullSeasonsArray
       fullSeasonsArray.forEach((season: Season) => {
         season.episodes.forEach((episode: Episode) => {
           episode.posts.forEach((p: Post) => {
@@ -232,7 +190,6 @@ const SocialFeed: React.FC = () => {
         try {
           let agentName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
 
-          // Update the post_posted status using the allPostsMap
           if (allPostsMap.has(post.post_id)) {
             allPostsMap.get(post.post_id)!.post_posted = true;
           }
@@ -250,21 +207,206 @@ const SocialFeed: React.FC = () => {
     postLoop(unpostedPosts, state.delayBetweenPosts);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-cyan-800 text-center mt-8">
-        Loading AI Network...
-      </div>
-    );
-  }
+  const handleGenerateMultiplePosts = async (numPosts: number) => {
+    if (!selectedCharacter || state.isGeneratingContent) return;
 
-  if (error) {
+    dispatch({ type: 'SET_GENERATING_CONTENT', payload: true });
+    try {
+      const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+      const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
+
+      console.log(`Creating Number of Posts: ${numPosts}`);
+      await createSeason(masterFilePath);
+      const updatedAgentWithPosts = await createEpisodePosts(masterFilePath, numPosts);
+      setSelectedCharacter(updatedAgentWithPosts);
+      const posts = getCharacterPosts(updatedAgentWithPosts);
+      setCharacterPosts(posts);
+    } catch (error) {
+      console.error("Error generating content:", error);
+    } finally {
+      dispatch({ type: 'SET_GENERATING_CONTENT', payload: false });
+    }
+  };
+
+  const handleSeasonSelect = (seasonNumber: number) => {
+    setSelectedSeason(seasonNumber);
+    const posts = getCharacterPosts(selectedCharacter).filter(post => post.seasonNumber === seasonNumber);
+    setCharacterPosts(posts);
+  };
+
+  const handleDeleteSeason = async (seasonNumber: number) => {
+    if (!selectedCharacter) return;
+
+    const tempName = selectedCharacter.agent.agent_details.name.replace(" ", "_");
+    const masterFilePath = `configs/${tempName}/${tempName}_master.json`;
+
+    try {
+      const updatedAgent = await deleteSeason(masterFilePath, seasonNumber);
+      setSelectedCharacter(updatedAgent);
+      setCharacterPosts(getCharacterPosts(updatedAgent));
+      setSelectedSeason(null);
+    } catch (error) {
+      console.error("Error deleting season:", error);
+    }
+  };
+
+  const renderAgentContent = () => {
+    if (!selectedCharacter) {
+      return (
+        <div className="flex flex-col h-[70vh] justify-center items-center">
+          <h2 className="text-2xl font-bold text-white">Select an Agent</h2>
+        </div>
+      );
+    }
+
     return (
-      <div className="bg-slate-800 text-gray-300 rounded-lg p-4 border border-red-800 text-center mt-8">
-        No Existing Agents - {error.message}
+      <div
+        className="flex flex-col h-[70vh] relative"
+        style={{
+          backgroundImage: selectedCharacter.agent.profile_image?.details?.url
+            ? `url(${selectedCharacter.agent.profile_image.details.url})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="absolute inset-0 bg-slate-900/80" />
+        <div className="relative z-10 flex flex-col h-full justify-center items-center">
+          <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
+            <div className="flex flex-col items-center w-full text-center">
+              <h2 className="text-2xl font-bold text-white font-semibold">
+                {`${selectedCharacter.agent.agent_details.name}'s Feed`}
+              </h2>
+              <p className="text-gray-400 mb-2 font-semibold">
+                {unpostedCount} Posts Remaining
+              </p>
+            </div>
+
+          </div>
+
+
+          <div className="mb-4 p-4 bg-slate-900/50 rounded-lg w-full max-w-2xl">
+            <h3 className="text-lg font-semibold text-white mb-2">Select Season</h3>
+            <SeasonTabs
+              selectedCharacter={selectedCharacter}
+              selectedSeason={selectedSeason}
+              handleSeasonSelect={handleSeasonSelect}
+              handleDeleteSeason={handleDeleteSeason}
+            />
+          </div>
+
+          <CharacterPosts
+            characterPosts={characterPosts}
+            selectedCharacter={selectedCharacter}
+          />
+        </div>
       </div>
     );
-  }
+  };
+
+  // Define a reusable component for the background
+  const TabContentWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div
+      className="flex flex-col h-[70vh] relative"
+      style={{
+        backgroundImage: selectedCharacter?.agent.profile_image?.details?.url
+          ? `url(${selectedCharacter.agent.profile_image.details.url})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="absolute inset-0 bg-slate-900/80" />
+      <div className="relative z-10 flex flex-col h-full justify-center items-center">
+        {children}
+      </div>
+    </div>
+  );
+
+  // Update renderTabContent to render based on activeMainTab
+  const renderTabContent = () => {
+    switch (activeMainTab) {
+      case 'generate':
+        return (
+          <TabContentWrapper>
+            <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+              <div className="flex flex-col items-center">
+                <BackstoryEditor
+                  selectedCharacter={selectedCharacter}
+                  setSelectedCharacter={setSelectedCharacter}
+                  handleGenerateMultiplePosts={handleGenerateMultiplePosts}
+                />
+              </div>
+            </div>
+          </TabContentWrapper>
+        );
+      case 'displayContent':
+        return (
+          <TabContentWrapper>
+            {renderAgentContent()}
+          </TabContentWrapper>
+        );
+      case 'postContent':
+        return (
+          <TabContentWrapper>
+            <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+              <p className="text-gray-400 mb-2 font-semibold">
+                {unpostedCount} Posts Remaining
+              </p>
+              <div className="text-white text-lg p-3 font-semibold">
+                Next post in: {formatTime(state.timeLeft)}
+              </div>
+              <div className="flex gap-4 justify-center p-3">
+                <Button
+                  onClick={handleStartPostManager}
+                  className={`${state.isLoggedIn
+                    ? "bg-green-400 hover:bg-green-500"
+                    : "bg-orange-400 hover:bg-orange-500"
+                  }`}
+                >
+                  {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
+                </Button>
+
+                <Button
+                  onClick={handlePostToTwitter}
+                  className={`${state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
+                  }`}
+                >
+                  {state.isPosting ? "Posting..." : "Post to Twitter"}
+                </Button>
+              </div>
+            </div>
+          </TabContentWrapper>
+        );
+      case 'placeholder3':
+        return (
+          <TabContentWrapper>
+            <div className="p-4 bg-slate-900 rounded-lg shadow-md">
+              <h3 className="text-lg font-bold text-white">Placeholder 3</h3>
+              <p className="text-gray-400">Content for Placeholder 3...</p>
+            </div>
+          </TabContentWrapper>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Function to render the content based on the active submenu
+  const renderSubmenuContent = () => {
+    switch (activeSubmenu) {
+      case 'sub1':
+        return <div>Content for Submenu 1</div>;
+      case 'sub2':
+        return <div>Content for Submenu 2</div>;
+      default:
+        return null;
+    }
+  };
+
+
 
   return (
     <div className="container mx-auto max-w-4xl">
@@ -275,10 +417,26 @@ const SocialFeed: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
+
+      <div className="flex justify-left gap-4 mb-4 p-4 ">
+        <Button onClick={() => setActiveMainTab('generate')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'generate' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          <Edit size={20} />
+          Generate
+        </Button>
+        <Button onClick={() => setActiveMainTab('displayContent')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'displayContent' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          <Eye size={20} />
+          Display Content
+        </Button>
+        <Button onClick={() => setActiveMainTab('postContent')} className={`flex items-center gap-2 px-4 py-2 rounded ${activeMainTab === 'postContent' ? 'bg-gradient-to-r from-cyan-600 to-orange-600 text-white' : 'text-gray-400 hover:text-cyan-400'}`}>
+          <Send size={20} />
+          Post Content
+        </Button>
+
+      </div>
       <div className="flex p-3 items-center justify-center gap-4">
-        <AgentSelection 
-          selectedCharacterIndex={selectedCharacterIndex} 
-          handleSelectAgent={handleCharacterSelect} 
+        <AgentSelection
+          selectedCharacterIndex={selectedCharacterIndex}
+          handleSelectAgent={handleCharacterSelect}
         />
         <div className="flex items-center">
           <label htmlFor="delayInput" className="text-lg font-semibold text-white mr-2">
@@ -294,140 +452,10 @@ const SocialFeed: React.FC = () => {
           />
         </div>
       </div>
-      {selectedCharacter && (
-        <div
-          className="flex flex-col h-[70vh] relative"
-          style={{
-            backgroundImage: selectedCharacter.agent.profile_image?.details?.url
-              ? `url(${selectedCharacter.agent.profile_image.details.url})`
-              : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          {/* Add an overlay div for opacity */}
-          <div className="absolute inset-0 bg-slate-900/80" />
-          {/* Wrap content in relative div to appear above overlay */}
-          <div className="relative z-10 flex flex-col h-full justify-center items-center">
-            {/* Feed Header */}
-            <div className="mb-4 pt-4 px-4 flex items-center relative w-full">
-              <div className="flex flex-col items-center w-full text-center">
-                <h2 className="text-2xl font-bold text-white font-semibold">
-                  {selectedCharacter
-                    ? `${selectedCharacter.agent.agent_details.name}'s Feed`
-                    : "Select an Agent"}
-                </h2>
-                <p className="text-gray-400 mb-2 font-semibold">
-                  {unpostedCount} Posts Remaining
-                </p>
-              </div>
-              <div className="absolute right-0 text-white text-lg p-3 font-semibold">
-                Next post in: {formatTime(state.timeLeft)}
-              </div>
-            </div>
 
-            {selectedCharacter && (
-              <div className="flex gap-4 justify-center p-3">
-                <Button
-                  onClick={handleGenerateContent}
-                  disabled={state.isGenerating}
-                  className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {state.isGenerating ? "Generating..." : "Generate Posts Content"}
-                </Button>
+      {renderTabContent()}
+      {renderSubmenuContent()}
 
-                <Button
-                  onClick={handleStartPostManager}
-                  className={`${
-                    state.isLoggedIn
-                      ? "bg-green-400 hover:bg-green-500"
-                      : "bg-orange-400 hover:bg-orange-500"
-                  }`}
-                >
-                  {state.isLoggedIn ? "Logged in" : "Login to Twitter"}
-                </Button>
-
-                <Button
-                  onClick={handlePostToTwitter}
-                  className={`${
-                    state.isPosting ? "bg-green-500 hover:bg-green-400" : "bg-orange-500 hover:bg-orange-600"
-                  }`}
-                >
-                  {state.isPosting ? "Posting..." : "Post to Twitter"}
-                </Button>
-
-              </div>
-            )}
-
-            {/* Posts Feed */}
-            <div className="flex-grow overflow-y-auto space-y-4 ">
-              {characterPosts.map((post) => (
-                <div
-                  key={post.post_id}
-                  className="relative max-w-2xl mx-auto slate-800/30 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30"
-                >
-                  {/* Post Status Label */}
-                  <div
-                    className={`absolute top-4 right-4 px-2 py-1 rounded text-sm font-semibold ${
-                      post.post_posted
-                        ? "bg-green-500 text-white"
-                        : "bg-red-500 text-white"
-                    }`}
-                  >
-                    {post.post_posted ? "Posted" : "Not Posted"}
-                  </div>
-
-                  <div className="flex items-center mb-4">
-                    <div
-                      className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-600 to-orange-600"
-                      style={{
-                        backgroundImage: selectedCharacter?.agent.profile_image
-                          ?.details?.url
-                          ? `url(${selectedCharacter.agent.profile_image.details.url})`
-                          : undefined,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                    />
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-cyan-400 text-left">
-                        {selectedCharacter?.agent.agent_details.name}
-                      </h3>
-                      <div className="text-sm text-gray-500">
-                        <span>
-                          Season {post.seasonNumber || 0}, Episode{" "}
-                          {post.episodeNumber || 0}
-                        </span>
-                        <span className="mx-2">•</span>
-                        <span>Post {post.post_number}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Post Highlights */}
-                  {post.post_highlights && (
-                    <div className="mt-4 mb-4 bg-slate-900/50 rounded-lg p-4 border-l-2 border-orange-500/30">
-                      <p className="text-gray-400 text-sm italic">
-                        {post.post_highlights}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Post Content */}
-                  <p className="text-gray-300 mb-2 whitespace-pre-wrap bg-slate-900/50 p-4 rounded-lg">
-                    {post.post_content}
-                  </p>
-
-                  {/* Post Actions */}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

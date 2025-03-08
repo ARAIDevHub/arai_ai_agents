@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-
-interface TraitButtonsProps {
-  field: 'personality' | 'communication_style' | 'topic_expertise' | 'hashtags' | 'emojis';
-  options: string[];
-  onTraitButtonClick: (field: 'personality' | 'communication_style' | 'topic_expertise' | 'hashtags' | 'emojis', value: string) => void;
-}
+import { TraitButtonsProps } from '../interfaces/TraitButtonsProps';
 
 // Component to render suggestion chips for a given field with provided options
-const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options, onTraitButtonClick }) => {
+const TraitButtons: React.FC<TraitButtonsProps> = ({ field, options = [], onTraitButtonClick }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null); // Track selected option
 
   const handleDeleteTrait = (option: string) => {
