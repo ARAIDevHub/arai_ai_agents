@@ -77,13 +77,12 @@ services:
     container_name: arai-node-server
     restart: always
     ports:
-      - "3001:3001"
+      - "3001:3001"  # In production, this might be 80:3001 or handled by a reverse proxy
     env_file:
-      - .env  # Load variables from .env
+      - .env  # In production, use production.env or environment variables
     environment:
       - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@arai-mongodb:27017
-      - NODE_ENV=development  # Good practice
-      # - COOKIE_FUN_API_KEY=${COOKIE_FUN_API_KEY}  # No longer strictly needed, but doesn't hurt
+      - NODE_ENV=development  # Change to production in prod environment
     depends_on:
       - mongodb
     networks:
@@ -92,23 +91,24 @@ services:
   react_client:
     build:
       context: ./client
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile  # In production, use Dockerfile.prod
     image: arai-react-client
     container_name: arai-react-client
     restart: always
     ports:
-      - "5173:5173"
+      - "5173:5173"  # In production, this might be 80:80 or handled by a reverse proxy
     env_file:
-      - .env  # Load variables from .env
+      - .env  # In production, use production.env or environment variables
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=development  # Change to production in prod environment
+      # For local development, use localhost since browser is outside Docker
       - VITE_PYTHON_API_URL=http://localhost:8080
       - VITE_NODE_API_URL=http://localhost:3001
-    depends_on:
-      - node_server
-      - python_api
+      # In production, use your domain:
+      # - VITE_NODE_API_URL=https://api.yourdomain.com
+      # - VITE_PYTHON_API_URL=https://python-api.yourdomain.com
     volumes:
-      - ./client:/app
+      - ./client:/app  # Remove in production
       - /app/node_modules
     stdin_open: true
     tty: true

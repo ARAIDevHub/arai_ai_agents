@@ -8,11 +8,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Signup request received:', {
+      body: req.body,
+      headers: req.headers,
+      path: req.path
+    });
+    
     const { email, password } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('Signup failed: Email already exists:', email);
       res.status(400).json({ message: 'Email already registered' });
       return;
     }
@@ -20,9 +27,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     // Create new user
     const user = new User({ email, password });
     await user.save();
+    console.log('User created successfully:', email);
 
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
+    console.error('Signup error:', error);
     res.status(500).json({ message: 'Error creating user' });
   }
 };
